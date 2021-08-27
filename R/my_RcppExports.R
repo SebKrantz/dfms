@@ -24,3 +24,8 @@ KalmanFilter <- function(y, H, Q, R, F, x0, P0) {
 KalmanSmoother <- function(F, H, R, xfT, xpT, PfT_v, PpT_v) {
   .Call(Cpp_KalmanSmoother, F, H, R, xfT, xpT, PfT_v, PpT_v)
 }
+
+
+Estep <- function(y, H, Q, R, F, x0, P0) {
+  .Call(Cpp_Estep, y, H, Q, R, F, x0, P0)
+}

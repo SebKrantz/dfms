@@ -64,6 +64,8 @@ DFM <- function(X, r, p = 1L,
                 miss.threshold = 0.8) {
 
   rp = r * p
+  sr <- 1:r
+  srp <- 1:rp
   X = fscale(qM(X))
   T = dim(X)[1L]
   n = dim(X)[2L]
@@ -78,37 +80,103 @@ DFM <- function(X, r, p = 1L,
 
   # Run PCA to get initial factor estimates:
   v = svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v
-  F_ini = X_imp %*% v
+  F_pc = X_imp %*% v
 
   # Observation equation -------------------------------
-  # Static predictions (all.equal(unattrib(HDB(X_imp, F_ini)), unattrib(F_ini %*% t(v))))
-  C_ini <- cbind(v, matrix(0, n, rp-r))
-  res = X_imp - F_ini %*% t(v) # residuals from static predictions
+  # Static predictions (all.equal(unattrib(HDB(X_imp, F_pc)), unattrib(F_pc %*% t(v))))
+  C <- cbind(v, matrix(0, n, rp-r))
+  res = X_imp - F_pc %*% t(v) # residuals from static predictions
   if(anymiss) res[W] = NA
-  R_ini = diag(fvar(res)) # Covariance (assumed idiosynchratic)
-  # R_ini = cov(res) # unrestricted covariance estimate
+  R = diag(fvar(res)) # Covariance (assumed idiosynchratic)
+  # R = cov(res) # unrestricted covariance estimate
 
   # Transition equation -------------------------------
-  var = VAR(F_ini, p)
-  A_ini = rbind(t(var$A), diag(1, rp-r, rp)) # var$A is rp x r matrix
-  Q_ini = matrix(0, rp, rp)
-  Q_ini[1:r, 1:r] = cov(var$res) # unrestricted covariance estimate
+  var = VAR(F_pc, p)
+  A = rbind(t(var$A), diag(1, rp-r, rp)) # var$A is rp x r matrix
+  Q = matrix(0, rp, rp)
+  Q[sr, sr] = cov(var$res) # unrestricted covariance estimate
 
   # Initial state and state covariance (P) ------------
   x0 = var$X[1L, ] # rep(0, rp) # This should better be called f0, the factors are the state
   # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  P0 = matrix(ginv(kronecker(A_ini, A_ini)) %*% unattrib(Q_ini), rp, rp)
+  P0 = matrix(ginv(kronecker(A, A)) %*% unattrib(Q), rp, rp)
   # BM2014:
-  # P0 = matrix(solve(diag(rp^2) - kronecker(A_ini, A_ini)) %*% unattrib(Q_ini), rp, rp)
+  # P0 = matrix(solve(diag(rp^2) - kronecker(A, A)) %*% unattrib(Q), rp, rp)
 
-  # FKF::fkf(x0, P0, x0, rep(0, n), A_ini, C_ini, Q_ini, R_ini, X)
+  # FKF::fkf(x0, P0, x0, rep(0, n), A, C, Q, R, X)
 
   ## Run standartized data through Kalman filter and smoother once
-  kf_res <- KalmanFilter(X, C_ini, Q_ini, R_ini, A_ini, x0, P0)
-  ks_res <- with(kf_res, KalmanSmoother(A_ini, C_ini, R_ini, xF, xP, Pf, Pp))
+  kf_res <- KalmanFilter(X, C, Q, R, A, x0, P0)
+  ks_res <- with(kf_res, KalmanSmoother(A, C, R, xF, xP, Pf, Pp))
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- ks_res$xS
-  return(F_kal[, 1:r])
+  # return(F_kal[, sr])
 
+  previous_loglik <- -.Machine$double.xmax
+  num_iter <- 0L
+  converged <- FALSE
+
+  xx <- if(anymiss) na_omit(X) else X
+  while ((num_iter < max.iter) & !converged) {
+
+    ## E-step will return a list of sufficient statistics, namely second
+    ## (cross)-moments for latent and observed data. This is then plugged back
+    ## into M-step.
+    em_res <- Estep(X, C, Q, R, A, x0, P0)
+    beta <- em_res$beta_t
+    gamma <- em_res$gamma_t
+    delta <- em_res$delta_t
+    gamma1 <- em_res$gamma1_t
+    gamma2 <- em_res$gamma2_t
+    P1sum <- em_res$V1 + tcrossprod(em_res$x1)
+    x1sum <- em_res$x1
+    loglik <- em_res$loglik_t
+
+    num_iter <- num_iter + 1L
+
+    ## M-step computes model parameters as a function of the sufficient
+    ## statistics that were computed with the E-step. Iterate the procedure
+    ## until convergence. Due to the model specification, likelihood maximiation
+    ## in the M-step is just an OLS estimation. In particular, X_t = C*F_t and
+    ## F_t = A*F_(t-1).
+
+    C[, sr] <- delta[, sr] %*% ginv(gamma[sr, sr])
+
+    A_update <- beta[sr, srp, drop = FALSE] %*% solve(gamma1[srp, srp])
+    A[sr, srp] <- A_update
+    Q[sr, sr] <- (gamma2[sr, sr] - tcrossprod(A_update, beta[sr, srp, drop = FALSE])) / (T-1)
+
+    R <- (crossprod(xx) - tcrossprod(C, delta)) / T
+    RR <- diag(R); RR[RR < 1e-7] <- 1e-7; R <- diag(RR)
+    R <- diag(diag(R))
+
+    ## Assign new initial values for next EM-algorithm step
+    x0 <- x1sum
+    P0 <- P1sum - tcrossprod(x0)
+
+    converged <- em_converged(loglik, previous_loglik, threshold = tol)
+    previous_loglik <- loglik
+
+    ## Iterate at least 25 times
+    if(num_iter < 25L) converged <- FALSE
+  }
+
+  if(converged) message("Converged after ", num_iter, " iterations.")
+  else warning("Maximum number of iterations reached.")
+
+  ## Run the Kalman filtering and smoothing step for the last time
+  ## with optimal estimates
+  kf <- KalmanFilter(X, C, Q, R, A, x0, P0)
+  F_hat <- KalmanSmoother(A, C, R, kf$xF, kf$xP, kf$Pf, kf$Pp)$xS
+  final_object <- list(pca = F_pc,
+                       twostep = F_kal[, sr],
+                       qml = F_hat[, sr],
+                       A = A[sr, ],
+                       C = C[, sr],
+                       Q = Q[sr, sr],
+                       R = R)
+
+  class(final_object) <- "dfm"
+  final_object
 }

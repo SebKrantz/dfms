@@ -11,6 +11,23 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// Estep
+Rcpp::List Estep(arma::mat y, arma::mat H, arma::mat Q, arma::mat R, arma::mat F, arma::colvec x0, arma::mat P0);
+RcppExport SEXP _DFM_Estep(SEXP ySEXP, SEXP HSEXP, SEXP QSEXP, SEXP RSEXP, SEXP FSEXP, SEXP x0SEXP, SEXP P0SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type R(RSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type F(FSEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type x0(x0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type P0(P0SEXP);
+    rcpp_result_gen = Rcpp::wrap(Estep(y, H, Q, R, F, x0, P0));
+    return rcpp_result_gen;
+END_RCPP
+}
 // KalmanFilter
 Rcpp::List KalmanFilter(arma::mat y, arma::mat H, arma::mat Q, arma::mat R, arma::mat F, arma::colvec x0, arma::mat P0);
 RcppExport SEXP _DFM_KalmanFilter(SEXP ySEXP, SEXP HSEXP, SEXP QSEXP, SEXP RSEXP, SEXP FSEXP, SEXP x0SEXP, SEXP P0SEXP) {
