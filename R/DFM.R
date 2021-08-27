@@ -1,32 +1,58 @@
 #' Estimate a Dynamic Factor Model
 #'
-#' Estimate a Dynamic Factor Model with arbitrary patterns of missing data
-#' on stationary data of a single frequency, with time-invariant system matrices
-#' and idiosynchratic measurement (observation) errors.
+#' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data of a single frequency,
+#' with time-invariant system matrices and classical assumptions, while permitting arbitrary patterns of missing data.
 #'
 #' @param X data matrix or frame.
 #' @param r number of factors.
 #' @param p number of lags in factor VAR.
+#' @param rQ restrictions on the state (transition) covariance matrix (Q).
+#' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param max.inter maximum number of EM iterations.
 #' @param tol EM convergence tolerance.
-#' @param miss.threshold proportions of variables missing for a case to be removed.
+#' @param miss.threshold proportions of series missing for a case to be removed.
 #'
 #' @details
+#' This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:
+#' \enumerate{
+#' \item Linearity
+#' \item Idiosynchratic measurement (observation) errors
+#' \item No relationship between series and lagged factors (\emph{ceteris paribus})
+#' \item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation)
+#' }
+#' Factors are allowed to evolve in a \eqn{VAR(p)} process, and data is standardized (scaled and centered) before estimation (removing the need of intercept terms).
+#' By assumptions 1-4, this translates into the following dynamic form:
 #'
-#' The State-Space Model estimated is:
+#' \deqn{\textbf{x}_t = \textbf{C}_0 \textbf{f}_t + \textbf{e}_t \tilde N(\textbf{0}, \textbf{R})}{xt = C0 ft + et ~ N(0, R)}
+#' \deqn{\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \tilde N(0, \textbf{Q}_0)}{ft = A1 ft-1 + \dots + Ap ft-p + ut ~ N(0, Q0)}
 #'
-#' Xt = C Ft + et ~ N(0, R)\cr
-#' Ft = A Ft-1 + ut ~ N(0, Q)
+#' where the first equation is called the measurement or observation equation and the second equation is called transition, state or process equation, and
 #'
-#' Where
-#' \itemize{
-#' \item{n}{Number of variables}
-#' \item{T}{Number of observations}
-#' \item{F}{Factor vector (stacked, starting with all factors at time t, followed by t-1 etc., rp x 1)}
-#' \item{C}{Observation matrix (n x rp, only the first n x r terms are non-zero (no relationship with lagged factors))}
-#' \item{A}{State transition matrix (rp x rp, lower parts are known (identity matrix))}
-#' \item{Q}{State covariance matrix (rp x rp, top r x r part is contemporaneous, rest is 0 (we assume all relationship between lagged factors is captured in A))}
-#' \item{R}{Observation covariance matrix (n x n, diagonal by assumption)}
+#' \tabular{llll}{
+#'  \eqn{n} \tab\tab number of series in \eqn{\textbf{x}_t}{xt} (\eqn{r} and \eqn{p} as the arguments to \code{DFM}).\cr\cr
+#'  \eqn{\textbf{x}_t}{xt} \tab\tab \eqn{n \times 1}{n x 1} vector of observed series at time \eqn{t}{t}: \eqn{(x_{1t}, \dots, x_{nt})'}{(x1t, \dots, xnt)'}. Some observations can be missing.  \cr\cr
+#'  \eqn{\textbf{f}_t}{ft} \tab\tab \eqn{r \times 1}{r x 1} vector of factors at time \eqn{t}{t}: \eqn{(f_{1t}, \dots, f_{rt})'}{(f1t, \dots, frt)'}.\cr\cr
+#'  \eqn{\textbf{C}_0}{C0} \tab\tab \eqn{n \times r}{n x r} measurement (observation) matrix.\cr\cr
+#'  \eqn{\textbf{A}_j}{Aj} \tab\tab \eqn{r \times r}{r x r} state transition matrix at lag \eqn{j}{j}. \cr\cr
+#'  \eqn{\textbf{Q}_0}{Q0} \tab\tab \eqn{r \times r}{r x r} state covariance matrix.\cr\cr
+#'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} measurement (observation) covariance matrix. It is diagonal by assumption 2 that \eqn{E[\textbf{x}_{it}|\textbf{x}_{-i,t},\textbf{x}_{i,t-1}, \dots, \textbf{f}_t, \textbf{f}_{t-1}, \dots] = \textbf{Cf}_t \forall i}{E[xit|x(-i)t, xt-1, \dots, ft, ft-1, \dots] = C ft}. This assumption is also referred to as 'Exact DFM' by Stock & Watson (2016), where all correlation between the series is accounted for by the latent factors.\cr\cr
+#' }
+#'
+#'
+#' This model can be estimated using a classical form of the Kalman Filter and the Expectation Maximization (EM) algorithm, after transforming it to State-Space (stacked, VAR(1)) form:
+#'
+#' \deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \tilde N(\textbf{0}, \textbf{R})}{xt = C Ft + et ~ N(0, R)}
+#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \tilde N(0, \textbf{Q})}{Ft = A Ft-1 + ut ~ N(0, Q)}
+#'
+#' where
+#' \tabular{llll}{
+#'  \eqn{n} \tab\tab number of series in \eqn{\textbf{x}_t}{xt} (\eqn{r} and \eqn{p} as the arguments to \code{DFM}).\cr\cr
+#'  \eqn{\textbf{x}_t}{xt} \tab\tab \eqn{n \times 1}{n x 1} vector of observed series at time \eqn{t}{t}: \eqn{(x_{1t}, \dots, x_{nt})'}{(x1t, \dots, xnt)'}. Some observations can be missing.  \cr\cr
+#'  \eqn{\textbf{F}_t}{Ft} \tab\tab \eqn{rp \times 1}{rp x 1} vector of stacked factors at time \eqn{t}{t}: \eqn{(f_{1t}, \dots, f_{rt}, f_{1,t-1}, \dots, f_{r,t-1}, \dots, f_{1,t-p}, \dots, f_{r,t-p})'}{(f1t, \dots, frt, f1t-1, \dots, frt-1, \dots, f1t-p, \dots, frt-p)'}.\cr\cr
+#'  \eqn{\textbf{C}}{C} \tab\tab \eqn{n \times rp}{n x rp} observation matrix. Only the first \eqn{n \times r}{n x r} terms are non-zero, by assumption 3 that \eqn{E[\textbf{x}_t|\textbf{F}_t] = E[\textbf{x}_t|\textbf{f}_t]}{E[Xt|Ft] = E[Xt|ft]} (no relationship of observed series with lagged factors given contemporaneous factors).\cr\cr
+#'  \eqn{\textbf{A}}{A} \tab\tab stacked \eqn{rp \times rp}{rp x rp} state transition matrix consisting of 3 parts: the top \eqn{r \times rp}{r x rp} part provides the dynamic relationships captured by \eqn{(\textbf{A}_1, \dots, \textbf{A}_p)}{(A1, \dots, Ap)} in the dynamic form, the terms \code{A[(r+1):rp, 1:(rp-r)]} constitute an \eqn{(rp-r) \times (rp-r)}{(rp-r) x (rp-r)} identity matrix mapping all lagged factors to their known values at times t. The remining part \code{A[(rp-r+1):rp, (rp-r+1):rp]} is an \eqn{r \times r}{r x r} matrix of zeros. \cr\cr
+#'  \eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr % that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[ft|Ft-1] = E[ft|ft-1] = A1 ft-1} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
+#'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 #' }
 #' @useDynLib DFM, .registration = TRUE
 #' @export
@@ -34,7 +60,7 @@
 DFM <- function(X, r, p = 1L,
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity"),
-                max.iter = 100, tol = 1e-4,
+                max.iter = 100L, tol = 1e-4,
                 miss.threshold = 0.8) {
 
   rp = r * p
@@ -56,7 +82,7 @@ DFM <- function(X, r, p = 1L,
 
   # Observation equation -------------------------------
   # Static predictions (all.equal(unattrib(HDB(X_imp, F_ini)), unattrib(F_ini %*% t(v))))
-  C_ini <- cbind(v, matrix(0, n, rp - r))
+  C_ini <- cbind(v, matrix(0, n, rp-r))
   res = X_imp - F_ini %*% t(v) # residuals from static predictions
   if(anymiss) res[W] = NA
   R_ini = diag(fvar(res)) # Covariance (assumed idiosynchratic)
