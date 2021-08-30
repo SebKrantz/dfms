@@ -5,6 +5,10 @@
 # Session Data files
 .RData
 
+# Compiled code
+*.dll
+*.o
+
 # User-specific files
 .Ruserdata
 

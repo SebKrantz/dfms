@@ -18,6 +18,7 @@ Imports:
     collapse
 LinkingTo: Rcpp, RcppArmadillo
 License: GPL-3
+Encoding: UTF-8
 LazyData: true
 Suggests:
     xts,

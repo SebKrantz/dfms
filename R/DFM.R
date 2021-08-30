@@ -16,8 +16,8 @@
 #' This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:
 #' \enumerate{
 #' \item Linearity
-#' \item Idiosynchratic measurement (observation) errors
-#' \item No relationship between series and lagged factors (\emph{ceteris paribus})
+#' \item Idiosynchratic measurement (observation) errors (no cross-sectional correlation)
+#' \item No direct relationship between series and lagged factors (\emph{ceteris paribus})
 #' \item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation)
 #' }
 #' Factors are allowed to evolve in a \eqn{VAR(p)} process, and data is standardized (scaled and centered) before estimation (removing the need of intercept terms).
@@ -55,6 +55,7 @@
 #'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 #' }
 #' @useDynLib DFM, .registration = TRUE
+#' @importFrom collapse fscale fvar fmedian qM unattrib na_omit
 #' @export
 
 DFM <- function(X, r, p = 1L,
@@ -106,8 +107,8 @@ DFM <- function(X, r, p = 1L,
   # FKF::fkf(x0, P0, x0, rep(0, n), A, C, Q, R, X)
 
   ## Run standartized data through Kalman filter and smoother once
-  kf_res <- KalmanFilter(X, C, Q, R, A, x0, P0)
-  ks_res <- with(kf_res, KalmanSmoother(A, C, R, xF, xP, Pf, Pp))
+  ks_res <- KalmanFilterSmoother(X, C, Q, R, A, x0, P0)
+  # ks_res <- with(kf_res, KalmanSmoother(A, C, R, xF, xP, Pf, Pp))
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- ks_res$xS
@@ -124,13 +125,13 @@ DFM <- function(X, r, p = 1L,
     ## (cross)-moments for latent and observed data. This is then plugged back
     ## into M-step.
     em_res <- Estep(X, C, Q, R, A, x0, P0)
-    beta <- em_res$beta_t
+    betasr <- em_res$beta_t[sr, , drop = FALSE]
     gamma <- em_res$gamma_t
     delta <- em_res$delta_t
     gamma1 <- em_res$gamma1_t
     gamma2 <- em_res$gamma2_t
     P1sum <- em_res$V1 + tcrossprod(em_res$x1)
-    x1sum <- em_res$x1
+    x0 <- em_res$x1 # x1sum
     loglik <- em_res$loglik_t
 
     num_iter <- num_iter + 1L
@@ -142,17 +143,15 @@ DFM <- function(X, r, p = 1L,
     ## F_t = A*F_(t-1).
 
     C[, sr] <- delta[, sr] %*% ginv(gamma[sr, sr])
-
-    A_update <- beta[sr, srp, drop = FALSE] %*% solve(gamma1[srp, srp])
-    A[sr, srp] <- A_update
-    Q[sr, sr] <- (gamma2[sr, sr] - tcrossprod(A_update, beta[sr, srp, drop = FALSE])) / (T-1)
+    A_update <- betasr %*% solve(gamma1)
+    A[sr, ] <- A_update
+    Q[sr, sr] <- (gamma2[sr, sr] - tcrossprod(A_update, betasr)) / (T-1L)
 
     R <- (crossprod(xx) - tcrossprod(C, delta)) / T
     RR <- diag(R); RR[RR < 1e-7] <- 1e-7; R <- diag(RR)
-    R <- diag(diag(R))
 
     ## Assign new initial values for next EM-algorithm step
-    x0 <- x1sum
+    # x0 <- x1sum
     P0 <- P1sum - tcrossprod(x0)
 
     converged <- em_converged(loglik, previous_loglik, threshold = tol)
@@ -167,8 +166,8 @@ DFM <- function(X, r, p = 1L,
 
   ## Run the Kalman filtering and smoothing step for the last time
   ## with optimal estimates
-  kf <- KalmanFilter(X, C, Q, R, A, x0, P0)
-  F_hat <- KalmanSmoother(A, C, R, kf$xF, kf$xP, kf$Pf, kf$Pp)$xS
+  # kf <- KalmanFilter(X, C, Q, R, A, x0, P0)
+  F_hat <- KalmanFilterSmoother(X, C, Q, R, A, x0, P0)$xS
   final_object <- list(pca = F_pc,
                        twostep = F_kal[, sr],
                        qml = F_hat[, sr],
