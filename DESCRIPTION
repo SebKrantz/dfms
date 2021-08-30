@@ -1,28 +1,22 @@
 Package: DFM
 Version: 0.1
 Date: 2017-01-31
-Title: Dynamic Factor Model Estimation for Nowcasting
-Authors@R: person("Rytis", "Bagdziunas", , "rytis.bagdziunas@uclouvain.be", role = c("aut", "cre"))
+Title: Dynamic Factor Models
+Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"), 
+                    email = "sebastian.krantz@graduateinstitute.ch"),
+             person("Rytis", "Bagdziunas", role = "aut"))
 Description: Dynamic factor models constitute a subset of more general state space
     models. Dynamic factor models are commonly used in economics for short-term
     forecasting due to possibility to summarize information from large datasets in
     a small number of factors. This package provides an implementation for dynamic
     factor models allowing for state variable to follow a vector autoregressive
     process or for the model coefficients to exhibit a Markov-switching pattern.
-Depends:
-    R (>= 3.0.0)
-Imports:
-    Rcpp,
-    MASS,
-    optimx, 
-    collapse
+Depends: R (>= 3.0.0)
+Imports: Rcpp, optimx, collapse
 LinkingTo: Rcpp, RcppArmadillo
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Suggests:
-    xts,
-    testthat,
-    knitr
+Suggests: xts, testthat, knitr
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
