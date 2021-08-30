@@ -4,12 +4,7 @@
 \alias{em_converged}
 \title{Convergence test for EM-algorithm.}
 \usage{
-em_converged(
-  loglik,
-  previous_loglik,
-  threshold = 1e-04,
-  check_increased = TRUE
-)
+em_converged(loglik, previous_loglik, threshold = 1e-04)
 }
 \arguments{
 \item{loglik}{Current value of the log-likelihood function}
@@ -18,8 +13,6 @@ em_converged(
 
 \item{threshold}{If difference is less than threshold, then algorithm has
 converged}
-
-\item{check_increased}{TO DOCUMENT}
 }
 \value{
 A logical statement indicating whether EM algorithm has converged

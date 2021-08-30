@@ -67,3 +67,14 @@ arma::field<arma::cube> array2field2cube( Rcpp::NumericVector myArray) {
   return fieldedArray;
 }
 
+
+// [[Rcpp::export]]
+arma::mat ainv(arma::mat x) {
+  return arma::inv(x);
+}
+
+// [[Rcpp::export]]
+arma::mat apinv(arma::mat x) {
+  return arma::pinv(x);
+}
+

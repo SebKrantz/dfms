@@ -4,12 +4,16 @@ RcppExport SEXP _DFM_KalmanFilter(SEXP ySEXP, SEXP HSEXP, SEXP QSEXP, SEXP RSEXP
 RcppExport SEXP _DFM_KalmanSmoother(SEXP FSEXP, SEXP HSEXP, SEXP RSEXP, SEXP xfTSEXP, SEXP xpTSEXP, SEXP PfT_vSEXP, SEXP PpT_vSEXP);
 RcppExport SEXP _DFM_KalmanFilterSmoother(SEXP ySEXP, SEXP HSEXP, SEXP QSEXP, SEXP RSEXP, SEXP FSEXP, SEXP x0SEXP, SEXP P0SEXP);
 RcppExport SEXP _DFM_Estep(SEXP ySEXP, SEXP HSEXP, SEXP QSEXP, SEXP RSEXP, SEXP FSEXP, SEXP x0SEXP, SEXP P0SEXP);
+RcppExport SEXP _DFM_ainv(SEXP xSEXP);
+RcppExport SEXP _DFM_apinv(SEXP xSEXP);
 
 static const R_CallMethodDef CallEntries[] = {
   {"Cpp_KalmanFilter",   (DL_FUNC) &_DFM_KalmanFilter,   7},
   {"Cpp_KalmanSmoother", (DL_FUNC) &_DFM_KalmanSmoother, 7},
   {"Cpp_KalmanFilterSmoother", (DL_FUNC) &_DFM_KalmanFilterSmoother, 7},
   {"Cpp_Estep",          (DL_FUNC) &_DFM_Estep,          7},
+  {"Cpp_ainv",        (DL_FUNC) &_DFM_ainv,        1},
+  {"Cpp_apinv",       (DL_FUNC) &_DFM_apinv,       1},
   {NULL, NULL, 0}
 };
 

@@ -79,3 +79,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ainv
+arma::mat ainv(arma::mat x);
+RcppExport SEXP _DFM_ainv(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(ainv(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// apinv
+arma::mat apinv(arma::mat x);
+RcppExport SEXP _DFM_apinv(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(apinv(x));
+    return rcpp_result_gen;
+END_RCPP
+}

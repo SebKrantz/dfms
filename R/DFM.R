@@ -6,11 +6,21 @@
 #' @param X data matrix or frame.
 #' @param r number of factors.
 #' @param p number of lags in factor VAR.
+#' @param \dots further arguments to be added here in the future, such as further estimation methods or block-structures.
 #' @param rQ restrictions on the state (transition) covariance matrix (Q).
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param max.inter maximum number of EM iterations.
 #' @param tol EM convergence tolerance.
-#' @param miss.threshold proportions of series missing for a case to be removed.
+#' @param max.missing proportion of series missing for a case to be considered missing.
+#' @param na.rm.method method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
+#' @param na.impute method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
+#' \tabular{llll}{
+#' \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
+#' \code{"rnrom"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
+#' \code{"med_MA"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
+#' \code{"med_MA_spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
+#' }
+#' @param na.impute.MA the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"med_MA"} and \code{"med_MA_spline"}.
 #'
 #' @details
 #' This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:
@@ -58,53 +68,59 @@
 #' @importFrom collapse fscale fvar fmedian qM unattrib na_omit
 #' @export
 
-DFM <- function(X, r, p = 1L,
+DFM <- function(X, r, p = 1L, ...,
                 rQ = c("none", "diagonal", "identity"),
-                rR = c("diagonal", "identity"),
+                rR = c("diagonal", "identity", "none"),
                 max.iter = 100L, tol = 1e-4,
-                miss.threshold = 0.8) {
+                max.missing = 0.5,
+                na.rm.method = c("LE", "all"),
+                na.impute = c("median", "rnrom", "med_MA", "med_MA_spline"),
+                na.impute.MA = 3L) {
 
-  rp = r * p
+  rRi <- switch(rR[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
+  rQi <- switch(rQ[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
+
+  rp <- r * p
   sr <- 1:r
-  srp <- 1:rp
-  X = fscale(qM(X))
-  T = dim(X)[1L]
-  n = dim(X)[2L]
+  # srp <- 1:rp
+  X <- fscale(qM(X))
+  T <- dim(X)[1L]
+  n <- dim(X)[2L]
 
   # Missing values
-  X_imp = X
-  anymiss = anyNA(X)
-  if(anymiss) { # Simple median imputation
-    W = is.na(X)
-    X_imp[W] = fmedian(X, TRA = 1L)[W]
+  X_imp <- X
+  na.rm <- NULL
+  anymiss <- anyNA(X)
+  if(anymiss) { # Missing value removal / imputation
+    W <- NULL
+    list2env(tsremimpNA(X, max.missing, na.rm.method, na.impute, na.impute.MA),
+             envir = environment())
   }
 
   # Run PCA to get initial factor estimates:
-  v = svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v
-  F_pc = X_imp %*% v
+  v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v
+  F_pc <- X_imp %*% v
 
   # Observation equation -------------------------------
   # Static predictions (all.equal(unattrib(HDB(X_imp, F_pc)), unattrib(F_pc %*% t(v))))
   C <- cbind(v, matrix(0, n, rp-r))
-  res = X_imp - F_pc %*% t(v) # residuals from static predictions
-  if(anymiss) res[W] = NA
-  R = diag(fvar(res)) # Covariance (assumed idiosynchratic)
-  # R = cov(res) # unrestricted covariance estimate
+  if(rRi) {
+    res <- X_imp - F_pc %*% t(v) # residuals from static predictions
+    if(anymiss) res[W] <- NA # Good???
+    R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
+  } else R <- diag(n)
 
   # Transition equation -------------------------------
-  var = VAR(F_pc, p)
-  A = rbind(t(var$A), diag(1, rp-r, rp)) # var$A is rp x r matrix
-  Q = matrix(0, rp, rp)
-  Q[sr, sr] = cov(var$res) # unrestricted covariance estimate
+  var <- fVAR(F_pc, p)
+  A <- rbind(t(var$A), diag(1, rp-r, rp)) # var$A is rp x r matrix
+  Q <- matrix(0, rp, rp)
+  Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
 
   # Initial state and state covariance (P) ------------
-  x0 = var$X[1L, ] # rep(0, rp) # This should better be called f0, the factors are the state
+  x0 <- var$X[1L, ] # rep(0, rp) # This should better be called f0, the factors are the state
   # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  P0 = matrix(ginv(kronecker(A, A)) %*% unattrib(Q), rp, rp)
-  # BM2014:
-  # P0 = matrix(solve(diag(rp^2) - kronecker(A, A)) %*% unattrib(Q), rp, rp)
-
-  # FKF::fkf(x0, P0, x0, rep(0, n), A, C, Q, R, X)
+  P0 <- matrix(apinv(kronecker(A, A)) %*% unattrib(Q), rp, rp)
+  # BM2014: P0 <- matrix(solve(diag(rp^2) - kronecker(A, A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
   ks_res <- KalmanFilterSmoother(X, C, Q, R, A, x0, P0)
@@ -112,14 +128,14 @@ DFM <- function(X, r, p = 1L,
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- ks_res$xS
-  # return(F_kal[, sr])
 
   previous_loglik <- -.Machine$double.xmax
   num_iter <- 0L
   converged <- FALSE
 
-  xx <- if(anymiss) na_omit(X) else X
-  while ((num_iter < max.iter) & !converged) {
+  # TODO: What is the good solution with missing values here???
+  cpX <- crossprod(X_imp) # <- crossprod(if(anymiss) na_omit(X) else X)
+  while(num_iter < max.iter && !converged) {
 
     ## E-step will return a list of sufficient statistics, namely second
     ## (cross)-moments for latent and observed data. This is then plugged back
@@ -130,11 +146,10 @@ DFM <- function(X, r, p = 1L,
     delta <- em_res$delta_t
     gamma1 <- em_res$gamma1_t
     gamma2 <- em_res$gamma2_t
-    P1sum <- em_res$V1 + tcrossprod(em_res$x1)
-    x0 <- em_res$x1 # x1sum
     loglik <- em_res$loglik_t
-
-    num_iter <- num_iter + 1L
+    ## Assign new initial values for next EM-algorithm step
+    x0 <- em_res$x1
+    P0 <- em_res$V1
 
     ## M-step computes model parameters as a function of the sufficient
     ## statistics that were computed with the E-step. Iterate the procedure
@@ -142,20 +157,26 @@ DFM <- function(X, r, p = 1L,
     ## in the M-step is just an OLS estimation. In particular, X_t = C*F_t and
     ## F_t = A*F_(t-1).
 
-    C[, sr] <- delta[, sr] %*% ginv(gamma[sr, sr])
-    A_update <- betasr %*% solve(gamma1)
+    C[, sr] <- delta[, sr] %*% apinv(gamma[sr, sr, drop = FALSE])
+    A_update <- betasr %*% ainv(gamma1)
     A[sr, ] <- A_update
-    Q[sr, sr] <- (gamma2[sr, sr] - tcrossprod(A_update, betasr)) / (T-1L)
+    if(rQi) {
+      Qsr <- (gamma2[sr, sr] - tcrossprod(A_update, betasr)) / (T-1L)
+      Q[sr, sr] <- if(rQi == 2L) Qsr else diag(diag(Qsr))
+    } else Q[sr, sr] <- diag(r)
 
-    R <- (crossprod(xx) - tcrossprod(C, delta)) / T
-    RR <- diag(R); RR[RR < 1e-7] <- 1e-7; R <- diag(RR)
+    if(rRi) {
+      R <- (cpX - tcrossprod(C, delta)) / T
+      if(rRi == 2L) R[R < 1e-7] <- 1e-7 else {
+        RR <- diag(R)
+        RR[RR < 1e-7] <- 1e-7
+        R <- diag(RR)
+      }
+    } else R <- diag(n)
 
-    ## Assign new initial values for next EM-algorithm step
-    # x0 <- x1sum
-    P0 <- P1sum - tcrossprod(x0)
-
-    converged <- em_converged(loglik, previous_loglik, threshold = tol)
+    converged <- em_converged(loglik, previous_loglik, tol)
     previous_loglik <- loglik
+    num_iter <- num_iter + 1L
 
     ## Iterate at least 25 times
     if(num_iter < 25L) converged <- FALSE
@@ -169,13 +190,16 @@ DFM <- function(X, r, p = 1L,
   # kf <- KalmanFilter(X, C, Q, R, A, x0, P0)
   F_hat <- KalmanFilterSmoother(X, C, Q, R, A, x0, P0)$xS
   final_object <- list(pca = F_pc,
-                       twostep = F_kal[, sr],
-                       qml = F_hat[, sr],
-                       A = A[sr, ],
-                       C = C[, sr],
-                       Q = Q[sr, sr],
-                       R = R)
+                       twostep = F_kal[, sr, drop = FALSE],
+                       qml = F_hat[, sr, drop = FALSE],
+                       A = A[sr, , drop = FALSE],
+                       C = C[, sr, drop = FALSE],
+                       Q = Q[sr, sr, drop = FALSE],
+                       R = R,
+                       na.rm = na.rm)
 
   class(final_object) <- "dfm"
-  final_object
+  return(final_object)
 }
+
+

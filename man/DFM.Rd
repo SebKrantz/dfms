@@ -8,11 +8,15 @@ DFM(
   X,
   r,
   p = 1L,
+  ...,
   rQ = c("none", "diagonal", "identity"),
-  rR = c("diagonal", "identity"),
+  rR = c("diagonal", "identity", "none"),
   max.iter = 100L,
   tol = 1e-04,
-  miss.threshold = 0.8
+  max.missing = 0.5,
+  na.rm.method = c("LE", "all"),
+  na.impute = c("median", "rnrom", "med_MA", "med_MA_spline"),
+  na.impute.MA = 3L
 )
 }
 \arguments{
@@ -22,13 +26,27 @@ DFM(
 
 \item{p}{number of lags in factor VAR.}
 
+\item{\dots}{further arguments to be added here in the future, such as further estimation methods or block-structures.}
+
 \item{rQ}{restrictions on the state (transition) covariance matrix (Q).}
 
 \item{rR}{restrictions on the observation (measurement) covariance matrix (R).}
 
 \item{tol}{EM convergence tolerance.}
 
-\item{miss.threshold}{proportions of series missing for a case to be removed.}
+\item{max.missing}{proportion of series missing for a case to be considered missing.}
+
+\item{na.rm.method}{method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.}
+
+\item{na.impute}{method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
+\tabular{llll}{
+\code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
+\code{"rnrom"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
+\code{"med_MA"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
+\code{"med_MA_spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
+}}
+
+\item{na.impute.MA}{the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"med_MA"} and \code{"med_MA_spline"}.}
 
 \item{max.inter}{maximum number of EM iterations.}
 }
@@ -40,8 +58,8 @@ with time-invariant system matrices and classical assumptions, while permitting 
 This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:
 \enumerate{
 \item Linearity
-\item Idiosynchratic measurement (observation) errors
-\item No relationship between series and lagged factors (\emph{ceteris paribus})
+\item Idiosynchratic measurement (observation) errors (no cross-sectional correlation)
+\item No direct relationship between series and lagged factors (\emph{ceteris paribus})
 \item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation)
 }
 Factors are allowed to evolve in a \eqn{VAR(p)} process, and data is standardized (scaled and centered) before estimation (removing the need of intercept terms).

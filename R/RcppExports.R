@@ -42,3 +42,11 @@ KalmanFilterSmoother <- function(y, C, Q, R, A, x0, P0) {
     .Call(`_DFM_KalmanFilterSmoother`, y, C, Q, R, A, x0, P0)
 }
 
+ainv <- function(x) {
+    .Call(`_DFM_ainv`, x)
+}
+
+apinv <- function(x) {
+    .Call(`_DFM_apinv`, x)
+}
+

@@ -33,3 +33,30 @@ KalmanFilterSmoother <- function(y, H, Q, R, F, x0, P0) {
 Estep <- function(y, H, Q, R, F, x0, P0) {
   .Call(Cpp_Estep, y, H, Q, R, F, x0, P0)
 }
+
+
+#' @title Armadillo's Inverse Functions
+#' @name ainv
+#' @aliases ainv
+#' @aliases apinv
+#'
+#' @description Matrix inverse and pseudo-inverse by the Armadillo C++ library.
+#'
+#' @param x a numeric matrix, must be square for \code{ainv}.
+#'
+#' @returns The matrix-inverse or pseudo-inverse.
+#' @export
+ainv <- function(x) {
+  dn <- dimnames(x)
+  if(is.null(dn)) return(.Call(Cpp_ainv, x))
+  `dimnames<-`(.Call(Cpp_ainv, x), dn)
+}
+
+#'
+#' @rdname ainv
+#' @export
+apinv <- function(x) {
+  dn <- dimnames(x)
+  if(is.null(dn)) return(.Call(Cpp_apinv, x))
+  `dimnames<-`(.Call(Cpp_apinv, x), dn)
+}

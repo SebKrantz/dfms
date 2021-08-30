@@ -21,6 +21,10 @@ KalmanSmoother(F, H, R, xfT, xpT, PfT_v, PpT_v)
 
 \item{PpT_v}{Predicted variance estimates}
 
+\item{A}{transition matrix}
+
+\item{C}{observation matrix}
+
 \item{xpTm}{State predicted estimates}
 }
 \value{

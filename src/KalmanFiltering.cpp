@@ -117,7 +117,7 @@ Rcpp::List KalmanSmoother(arma::mat A, arma::mat C, arma::mat R,
 
   // Smoothed state mean and covariance
   mat xsT(T, rp, fill::zeros);
-  cube PsT(rp,rp,T, fill::zeros);
+  cube PsT(rp, rp, T, fill::zeros);
   // Initialize smoothed data with last observation of filtered data
   xsT.row(T-1) = xfT.row(T-1);
   PsT.slice(T-1) = PfT.slice(T-1);

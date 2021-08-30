@@ -22,6 +22,10 @@ KalmanFilter(y, H, Q, R, F, x0, P0)
 \item{x0}{Initial state vector}
 
 \item{P0}{Initial state covariance}
+
+\item{C}{Observation matrix}
+
+\item{A}{Transition matrix}
 }
 \description{
 Implementation of a Kalman filter
