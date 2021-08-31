@@ -95,6 +95,7 @@ DFM <- function(X, r, p = 1L, ...,
     W <- NULL
     list2env(tsremimpNA(X, max.missing, na.rm.method, na.impute, na.impute.MA),
              envir = environment())
+    if(length(na.rm)) X <- X[-na.rm, ]
   }
 
   # Run PCA to get initial factor estimates:
@@ -130,6 +131,7 @@ DFM <- function(X, r, p = 1L, ...,
   F_kal <- ks_res$xS
 
   previous_loglik <- -.Machine$double.xmax
+  loglik_all <- NULL
   num_iter <- 0L
   converged <- FALSE
 
@@ -176,6 +178,7 @@ DFM <- function(X, r, p = 1L, ...,
 
     converged <- em_converged(loglik, previous_loglik, tol)
     previous_loglik <- loglik
+    loglik_all <- c(loglik_all, loglik)
     num_iter <- num_iter + 1L
 
     ## Iterate at least 25 times
@@ -189,14 +192,20 @@ DFM <- function(X, r, p = 1L, ...,
   ## with optimal estimates
   # kf <- KalmanFilter(X, C, Q, R, A, x0, P0)
   F_hat <- KalmanFilterSmoother(X, C, Q, R, A, x0, P0)$xS
-  final_object <- list(pca = F_pc,
+  final_object <- list(X_imp = X_imp,
+                       pca = F_pc,
                        twostep = F_kal[, sr, drop = FALSE],
                        qml = F_hat[, sr, drop = FALSE],
                        A = A[sr, , drop = FALSE],
                        C = C[, sr, drop = FALSE],
                        Q = Q[sr, sr, drop = FALSE],
                        R = R,
-                       na.rm = na.rm)
+                       loglik = loglik_all,
+                       tol = tol,
+                       converged = converged,
+                       anyNA = anymiss,
+                       na.rm = na.rm,
+                       call = match.call())
 
   class(final_object) <- "dfm"
   return(final_object)
