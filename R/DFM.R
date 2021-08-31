@@ -9,6 +9,7 @@
 #' @param \dots further arguments to be added here in the future, such as further estimation methods or block-structures.
 #' @param rQ restrictions on the state (transition) covariance matrix (Q).
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
+#' @param min.inter minimum number of EM iterations (to ensure a convergence path).
 #' @param max.inter maximum number of EM iterations.
 #' @param tol EM convergence tolerance.
 #' @param max.missing proportion of series missing for a case to be considered missing.
@@ -71,7 +72,7 @@
 DFM <- function(X, r, p = 1L, ...,
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
-                max.iter = 100L, tol = 1e-4,
+                min.iter = 25L, max.iter = 100L, tol = 1e-4,
                 max.missing = 0.5,
                 na.rm.method = c("LE", "all"),
                 na.impute = c("median", "rnrom", "med_MA", "med_MA_spline"),
@@ -181,8 +182,8 @@ DFM <- function(X, r, p = 1L, ...,
     loglik_all <- c(loglik_all, loglik)
     num_iter <- num_iter + 1L
 
-    ## Iterate at least 25 times
-    if(num_iter < 25L) converged <- FALSE
+    ## Iterate at least min.iter times
+    if(num_iter < min.iter) converged <- FALSE
   }
 
   if(converged) message("Converged after ", num_iter, " iterations.")

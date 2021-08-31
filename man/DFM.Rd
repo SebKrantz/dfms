@@ -11,6 +11,7 @@ DFM(
   ...,
   rQ = c("none", "diagonal", "identity"),
   rR = c("diagonal", "identity", "none"),
+  min.iter = 25L,
   max.iter = 100L,
   tol = 1e-04,
   max.missing = 0.5,
@@ -47,6 +48,8 @@ DFM(
 }}
 
 \item{na.impute.MA}{the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"med_MA"} and \code{"med_MA_spline"}.}
+
+\item{min.inter}{minimum number of EM iterations (to ensure a convergence path).}
 
 \item{max.inter}{maximum number of EM iterations.}
 }
