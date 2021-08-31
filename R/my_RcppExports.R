@@ -46,17 +46,19 @@ Estep <- function(y, H, Q, R, F, x0, P0) {
 #'
 #' @returns The matrix-inverse or pseudo-inverse.
 #' @export
-ainv <- function(x) {
-  dn <- dimnames(x)
-  if(is.null(dn)) return(.Call(Cpp_ainv, x))
-  `dimnames<-`(.Call(Cpp_ainv, x), dn)
-}
+ainv <- function(x) .Call(Cpp_ainv, x)
+# {
+#   dn <- dimnames(x)
+#   if(is.null(dn)) return(.Call(Cpp_ainv, x))
+#   `dimnames<-`(.Call(Cpp_ainv, x), dn)
+# }
 
 #'
 #' @rdname ainv
 #' @export
-apinv <- function(x) {
-  dn <- dimnames(x)
-  if(is.null(dn)) return(.Call(Cpp_apinv, x))
-  `dimnames<-`(.Call(Cpp_apinv, x), dn)
-}
+apinv <- function(x) .Call(Cpp_apinv, x)
+# {
+#   dn <- dimnames(x)
+#   if(is.null(dn)) return(.Call(Cpp_apinv, x))
+#   `dimnames<-`(.Call(Cpp_apinv, x), dn)
+# }

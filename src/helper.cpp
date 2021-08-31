@@ -69,12 +69,16 @@ arma::field<arma::cube> array2field2cube( Rcpp::NumericVector myArray) {
 
 
 // [[Rcpp::export]]
-arma::mat ainv(arma::mat x) {
-  return arma::inv(x);
+SEXP ainv(SEXP x) {
+  SEXP res = Rcpp::wrap(arma::inv(Rcpp::as<arma::mat>(x)));
+  DUPLICATE_ATTRIB(res, x);
+  return res;
 }
 
 // [[Rcpp::export]]
-arma::mat apinv(arma::mat x) {
-  return arma::pinv(x);
+SEXP apinv(SEXP x) {
+  SEXP res = Rcpp::wrap(arma::pinv(Rcpp::as<arma::mat>(x)));
+  DUPLICATE_ATTRIB(res, x);
+  return res;
 }
 
