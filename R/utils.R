@@ -132,7 +132,7 @@ tsremimpNA <- function(X,
       W <- W[-na.rm, ]
     }
   }
-  list(X_imp = switch(impute[1L],
+  list(X_imp = switch(na.impute[1L],
                   median = replace(X, W, fmedian(X, TRA = 1L)[W]),
                   rnrom = replace(X, W, rnorm(sum(W))),
                   med_MA = impNA_MA(X, W, na.impute.MA),
