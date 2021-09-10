@@ -151,13 +151,12 @@ DFM <- function(X, r, p = 1L, ...,
     em_res <- eval(expr, em_res, encl)
     loglik <- em_res$loglik
 
-    converged <- em_converged(loglik, previous_loglik, tol)
+    ## Iterate at least min.iter times
+    converged <- if(num_iter < min.iter) FALSE else
+        em_converged(loglik, previous_loglik, tol)
     previous_loglik <- loglik
     loglik_all <- c(loglik_all, loglik)
     num_iter <- num_iter + 1L
-
-    ## Iterate at least min.iter times
-    if(num_iter < min.iter) converged <- FALSE
   }
 
   if(converged) message("Converged after ", num_iter, " iterations.")
