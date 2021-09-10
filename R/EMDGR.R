@@ -1,19 +1,11 @@
 
-EMstepDGR <- function(X, A, C, Q, R, x0, P0, cpX, n, r, sr, T, rQi, rRi) {
+EMstepDGR <- function(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi) {
 
   ## E-step will return a list of sufficient statistics, namely second
   ## (cross)-moments for latent and observed data. This is then plugged back
   ## into M-step.
-  e_res <- Estep(X, C, Q, R, A, x0, P0)
-  betasr <- e_res$beta_t[sr, , drop = FALSE]
-  gamma <- e_res$gamma_t
-  delta <- e_res$delta_t
-  gamma1 <- e_res$gamma1_t
-  gamma2 <- e_res$gamma2_t
-  loglik <- e_res$loglik_t
-  ## Assign new initial values for next EM-algorithm step
-  x0 <- e_res$x1
-  P0 <- e_res$V1
+  list2env(Estep(X, C, Q, R, A, F0, P0), envir = environment())
+  betasr <- beta[sr, , drop = FALSE]
 
   ## M-step computes model parameters as a function of the sufficient
   ## statistics that were computed with the E-step. Iterate the procedure
@@ -38,6 +30,6 @@ EMstepDGR <- function(X, A, C, Q, R, x0, P0, cpX, n, r, sr, T, rQi, rRi) {
     }
   } else R <- diag(n)
 
-  return(list(A = A, C = C, Q = Q, R = R, x0 = x0, P0 = P0, loglik = loglik))
+  return(list(A = A, C = C, Q = Q, R = R, F0 = F0, P0 = P0, loglik = loglik))
 
 }

@@ -6,30 +6,30 @@ using namespace arma;
 
 
 //' Implementation of a Kalman filter
-//' @param y Data matrix (T x n)
+//' @param X Data matrix (T x n)
 //' @param C Observation matrix
 //' @param Q State covariance
 //' @param R Observation covariance
 //' @param A Transition matrix
-//' @param x0 Initial state vector
+//' @param F0 Initial state vector
 //' @param P0 Initial state covariance
 // [[Rcpp::export]]
-Rcpp::List KalmanFilter(arma::mat y, arma::mat C, arma::mat Q, arma::mat R,
-                        arma::mat A, arma::colvec x0, arma::mat P0) {
+Rcpp::List KalmanFilter(arma::mat X, arma::mat C, arma::mat Q, arma::mat R,
+                        arma::mat A, arma::colvec F0, arma::mat P0) {
 
-  const int T = y.n_rows;
-  const int n = y.n_cols;
+  const int T = X.n_rows;
+  const int n = X.n_cols;
   const int rp = A.n_rows;
 
   double loglik = 0;
   mat K, Pf, Pp;
-  colvec xf, xp, xe;
+  colvec ff, fp, xe;
   // Predicted state mean and covariance
-  mat xpT(T+1, rp, fill::zeros);
+  mat PT(T+1, rp, fill::zeros);
   cube PpT(rp, rp, T+1, fill::zeros);
 
   // Filtered state mean and covariance
-  mat xfT(T, rp, fill::zeros);
+  mat FT(T, rp, fill::zeros);
   cube PfT(rp, rp, T, fill::zeros);
 
   mat tC = C;
@@ -39,14 +39,14 @@ Rcpp::List KalmanFilter(arma::mat y, arma::mat C, arma::mat Q, arma::mat R,
   uvec nmiss = find_finite(A.row(0));
   uvec a(1);
 
-  xp = x0;
+  fp = F0;
   Pp = P0;
 
   for (int t=0; t < T; ++t) {
 
     // If missing observations are present at some timepoints, exclude the
     // appropriate matrix slices from the filtering procedure.
-    miss = find_finite(y.row(t));
+    miss = find_finite(X.row(t));
     C = tC.submat(miss, nmiss);
     R = tR.submat(miss, miss);
     a[0] = t;
@@ -54,11 +54,11 @@ Rcpp::List KalmanFilter(arma::mat y, arma::mat C, arma::mat Q, arma::mat R,
     S = (C * Pp * C.t() + R).i();
 
     // Prediction error
-    xe = y.submat(a, miss).t() - C * xp;
+    xe = X.submat(a, miss).t() - C * fp;
     // Kalman gain
     K = Pp * C.t() * S;
     // Updated state estimate
-    xf = xp + K * xe;
+    ff = fp + K * xe;
     // Updated state covariance estimate
     Pf = Pp - K * C * Pp;
 
@@ -69,20 +69,20 @@ Rcpp::List KalmanFilter(arma::mat y, arma::mat C, arma::mat Q, arma::mat R,
     }
 
     // Store predicted and filtered data needed for smoothing
-    xpT.row(t) = xp.t();
+    PT.row(t) = fp.t();
     PpT.slice(t) = Pp;
-    xfT.row(t) = xf.t();
+    FT.row(t) = ff.t();
     PfT.slice(t) = Pf;
 
     // Run a prediction
-    xp = A * xfT.row(t).t();
+    fp = A * FT.row(t).t();
     Pp = A * PfT.slice(t) * A.t() + Q;
 
   }
 
-  return Rcpp::List::create(Rcpp::Named("xF") = xfT,
+  return Rcpp::List::create(Rcpp::Named("F") = FT,
                             Rcpp::Named("Pf") = PfT,
-                            Rcpp::Named("xP") = xpT,
+                            Rcpp::Named("P") = PT,
                             Rcpp::Named("Pp") = PpT,
                             Rcpp::Named("loglik") = loglik);
 }
@@ -92,17 +92,17 @@ Rcpp::List KalmanFilter(arma::mat y, arma::mat C, arma::mat Q, arma::mat R,
 //' @param A transition matrix
 //' @param C observation matrix
 //' @param R Observation covariance
-//' @param xfT State estimates
-//' @param xpTm State predicted estimates
+//' @param FT State estimates
+//' @param PTm State predicted estimates
 //' @param PfT_v Variance estimates
 //' @param PpT_v Predicted variance estimates
 //' @return List of smoothed estimates
 // [[Rcpp::export]]
 Rcpp::List KalmanSmoother(arma::mat A, arma::mat C, arma::mat R,
-                          arma::mat xfT, arma::mat xpT,
+                          arma::mat FT, arma::mat PT,
                           Rcpp::NumericVector PfT_v, Rcpp::NumericVector PpT_v) {
 
-  const int T = xfT.n_rows;
+  const int T = FT.n_rows;
   const int rp = A.n_rows;
   const int n = C.n_rows;
 
@@ -116,10 +116,10 @@ Rcpp::List KalmanSmoother(arma::mat A, arma::mat C, arma::mat R,
   cube PsTm(rp, rp, T, fill::zeros);
 
   // Smoothed state mean and covariance
-  mat xsT(T, rp, fill::zeros);
+  mat FsT(T, rp, fill::zeros);
   cube PsT(rp, rp, T, fill::zeros);
   // Initialize smoothed data with last observation of filtered data
-  xsT.row(T-1) = xfT.row(T-1);
+  FsT.row(T-1) = FT.row(T-1);
   PsT.slice(T-1) = PfT.slice(T-1);
 
   // cube PsTm(rp,rp,T, fill::zeros);
@@ -130,8 +130,8 @@ Rcpp::List KalmanSmoother(arma::mat A, arma::mat C, arma::mat R,
   // Smoothed state variable and covariance
   for (int j=2; j < T+1; ++j) {
 
-    xsT.row(T-j) = xfT.row(T-j) +
-      (J.slice(T-j) * (xsT.row(T-j+1) - xpT.row(T-j+1)).t()).t();
+    FsT.row(T-j) = FT.row(T-j) +
+      (J.slice(T-j) * (FsT.row(T-j+1) - PT.row(T-j+1)).t()).t();
 
     PsT.slice(T-j) = PfT.slice(T-j) +
       J.slice(T-j) * (PsT.slice(T-j+1) - PpT.slice(T-j+1)) * J.slice(T-j).t();
@@ -152,7 +152,7 @@ Rcpp::List KalmanSmoother(arma::mat A, arma::mat C, arma::mat R,
     * J.slice(T-j-1).t();
   }
 
-  return Rcpp::List::create(Rcpp::Named("xS") = xsT,
+  return Rcpp::List::create(Rcpp::Named("Fs") = FsT,
                             Rcpp::Named("Ps") = PsT,
                             Rcpp::Named("PsTm") = PsTm);
 }
@@ -160,30 +160,30 @@ Rcpp::List KalmanSmoother(arma::mat A, arma::mat C, arma::mat R,
 
 
 //' Kalman Filter and Smoother
-//' @param y Data matrix (T x n)
+//' @param X Data matrix (T x n)
 //' @param C Observation matrix
 //' @param Q State covariance
 //' @param R Observation covariance
 //' @param A Transition matrix
-//' @param x0 Initial state vector
+//' @param F0 Initial state vector
 //' @param P0 Initial state covariance
 // [[Rcpp::export]]
-Rcpp::List KalmanFilterSmoother(arma::mat y, arma::mat C, arma::mat Q, arma::mat R,
-                                arma::mat A, arma::colvec x0, arma::mat P0) {
+Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat C, arma::mat Q, arma::mat R,
+                                arma::mat A, arma::colvec F0, arma::mat P0) {
 
-  const int T = y.n_rows;
-  const int n = y.n_cols;
+  const int T = X.n_rows;
+  const int n = X.n_cols;
   const int rp = A.n_rows;
 
   double loglik = 0;
   mat K, Pf, Pp;
-  colvec xf, xp, xe;
+  colvec ff, fp, xe;
   // Predicted state mean and covariance
-  mat xpT(T+1, rp, fill::zeros);
+  mat PT(T+1, rp, fill::zeros);
   cube PpT(rp, rp, T+1, fill::zeros);
 
   // Filtered state mean and covariance
-  mat xfT(T, rp, fill::zeros);
+  mat FT(T, rp, fill::zeros);
   cube PfT(rp, rp, T, fill::zeros);
 
   mat tC = C;
@@ -193,14 +193,14 @@ Rcpp::List KalmanFilterSmoother(arma::mat y, arma::mat C, arma::mat Q, arma::mat
   uvec nmiss = find_finite(A.row(0));
   uvec a(1);
 
-  xp = x0;
+  fp = F0;
   Pp = P0;
 
   for (int t=0; t < T; ++t) {
 
     // If missing observations are present at some timepoints, exclude the
     // appropriate matrix slices from the filtering procedure.
-    miss = find_finite(y.row(t));
+    miss = find_finite(X.row(t));
     C = tC.submat(miss, nmiss);
     R = tR.submat(miss, miss);
     a[0] = t;
@@ -208,11 +208,11 @@ Rcpp::List KalmanFilterSmoother(arma::mat y, arma::mat C, arma::mat Q, arma::mat
     S = (C * Pp * C.t() + R).i();
 
     // Prediction error
-    xe = y.submat(a, miss).t() - C * xp;
+    xe = X.submat(a, miss).t() - C * fp;
     // Kalman gain
     K = Pp * C.t() * S;
     // Updated state estimate
-    xf = xp + K * xe;
+    ff = fp + K * xe;
     // Updated state covariance estimate
     Pf = Pp - K * C * Pp;
 
@@ -223,13 +223,13 @@ Rcpp::List KalmanFilterSmoother(arma::mat y, arma::mat C, arma::mat Q, arma::mat
     }
 
     // Store predicted and filtered data needed for smoothing
-    xpT.row(t) = xp.t();
+    PT.row(t) = fp.t();
     PpT.slice(t) = Pp;
-    xfT.row(t) = xf.t();
+    FT.row(t) = ff.t();
     PfT.slice(t) = Pf;
 
     // Run a prediction
-    xp = A * xfT.row(t).t();
+    fp = A * FT.row(t).t();
     Pp = A * PfT.slice(t) * A.t() + Q;
   }
 
@@ -240,10 +240,10 @@ Rcpp::List KalmanFilterSmoother(arma::mat y, arma::mat C, arma::mat Q, arma::mat
   cube PsTm(rp, rp, T, fill::zeros);
 
   // Smoothed state mean and covariance
-  mat xsT(T, rp, fill::zeros);
+  mat FsT(T, rp, fill::zeros);
   cube PsT(rp, rp, T, fill::zeros);
   // Initialize smoothed data with last observation of filtered data
-  xsT.row(T-1) = xfT.row(T-1);
+  FsT.row(T-1) = FT.row(T-1);
   PsT.slice(T-1) = PfT.slice(T-1);
 
   // cube PsTm(rp,rp,T, fill::zeros);
@@ -254,8 +254,8 @@ Rcpp::List KalmanFilterSmoother(arma::mat y, arma::mat C, arma::mat Q, arma::mat
   // Smoothed state variable and covariance
   for (int j=2; j < T+1; ++j) {
 
-    xsT.row(T-j) = xfT.row(T-j) +
-      (J.slice(T-j) * (xsT.row(T-j+1) - xpT.row(T-j+1)).t()).t();
+    FsT.row(T-j) = FT.row(T-j) +
+      (J.slice(T-j) * (FsT.row(T-j+1) - PT.row(T-j+1)).t()).t();
 
     PsT.slice(T-j) = PfT.slice(T-j) +
       J.slice(T-j) * (PsT.slice(T-j+1) - PpT.slice(T-j+1)) * J.slice(T-j).t();
@@ -276,7 +276,7 @@ Rcpp::List KalmanFilterSmoother(arma::mat y, arma::mat C, arma::mat Q, arma::mat
     * J.slice(T-j-1).t();
   }
 
-  return Rcpp::List::create(Rcpp::Named("xS") = xsT,
+  return Rcpp::List::create(Rcpp::Named("Fs") = FsT,
                             Rcpp::Named("Ps") = PsT,
                             Rcpp::Named("PsTm") = PsTm,
                             Rcpp::Named("loglik") = loglik);

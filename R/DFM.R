@@ -1,6 +1,7 @@
 # Quoting some functions that need to be evaluated iteratively
-.EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, x0, P0, cpX, n, r, sr, T, rQi, rRi))
-.KFS <- quote(KalmanFilterSmoother(X, C, Q, R, A, x0, P0))
+.EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi))
+.EM_BM <- quote(EMstepBM(X, A, C, Q, R, F0, P0))
+.KFs <- quote(KalmanFilterSmoother(X, C, Q, R, A, F0, P0))
 
 
 #' Estimate a Dynamic Factor Model
@@ -77,6 +78,7 @@
 DFM <- function(X, r, p = 1L, ...,
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
+                EM.method = c("DGR", "BM"),
                 min.iter = 25L, max.iter = 100L, tol = 1e-4,
                 max.missing = 0.5,
                 na.rm.method = c("LE", "all"),
@@ -85,6 +87,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   rRi <- switch(rR[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(rQ[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
+  BMl <- switch(EM.method[1L], DGR = FALSE, BM = TRUE, stop("Unknown EM option:", EM.method[1L]))
 
   rp <- r * p
   sr <- 1:r
@@ -124,17 +127,16 @@ DFM <- function(X, r, p = 1L, ...,
   Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
 
   # Initial state and state covariance (P) ------------
-  x0 <- var$X[1L, ] # rep(0, rp) # This should better be called f0, the factors are the state
+  F0 <- var$X[1L, ] # rep(0, rp)
   # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
   P0 <- matrix(apinv(kronecker(A, A)) %*% unattrib(Q), rp, rp)
   # BM2014: P0 <- matrix(solve(diag(rp^2) - kronecker(A, A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
-  ks_res <- KalmanFilterSmoother(X, C, Q, R, A, x0, P0)
-  # ks_res <- with(kf_res, KalmanSmoother(A, C, R, xF, xP, Pf, Pp))
+  ks_res <- KalmanFilterSmoother(X, C, Q, R, A, F0, P0)
 
   ## Two-step solution is state mean from the Kalman smoother
-  F_kal <- ks_res$xS
+  F_kal <- ks_res$Fs
 
   previous_loglik <- -.Machine$double.xmax
   loglik_all <- NULL
@@ -144,7 +146,7 @@ DFM <- function(X, r, p = 1L, ...,
   # TODO: What is the good solution with missing values here???
   cpX <- crossprod(X_imp) # <- crossprod(if(anymiss) na_omit(X) else X)
   em_res <- list()
-  expr <- .EM_DGR
+  expr <- if(BMl) .EM_BM else .EM_DGR
   encl <- environment()
   while(num_iter < max.iter && !converged) {
 
@@ -164,8 +166,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   ## Run the Kalman filtering and smoothing step for the last time
   ## with optimal estimates
-  # kf <- KalmanFilter(X, C, Q, R, A, x0, P0)
-  F_hat <- eval(.KFS, em_res, encl)$xS
+  F_hat <- eval(.KFs, em_res, encl)$Fs
   final_object <- list(X_imp = X_imp,
                        pca = F_pc,
                        twostep = F_kal[, sr, drop = FALSE],

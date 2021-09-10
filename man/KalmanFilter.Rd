@@ -4,12 +4,12 @@
 \alias{KalmanFilter}
 \title{Implementation of a Kalman filter}
 \usage{
-KalmanFilter(y, H, Q, R, F, x0, P0)
+KalmanFilter(X, H, Q, R, F, F0, P0)
 
-KalmanFilter(y, H, Q, R, F, x0, P0)
+KalmanFilter(X, H, Q, R, F, F0, P0)
 }
 \arguments{
-\item{y}{Data matrix (T x n)}
+\item{X}{Data matrix (T x n)}
 
 \item{H}{Observation matrix}
 
@@ -19,7 +19,7 @@ KalmanFilter(y, H, Q, R, F, x0, P0)
 
 \item{F}{Transition matrix}
 
-\item{x0}{Initial state vector}
+\item{F0}{Initial state vector}
 
 \item{P0}{Initial state covariance}
 
