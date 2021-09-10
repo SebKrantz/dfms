@@ -1,3 +1,8 @@
+# Quoting some functions that need to be evaluated iteratively
+.EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, x0, P0, cpX, n, r, sr, T, rQi, rRi))
+.KFS <- quote(KalmanFilterSmoother(X, C, Q, R, A, x0, P0))
+
+
 #' Estimate a Dynamic Factor Model
 #'
 #' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data of a single frequency,
@@ -108,7 +113,7 @@ DFM <- function(X, r, p = 1L, ...,
   C <- cbind(v, matrix(0, n, rp-r))
   if(rRi) {
     res <- X_imp - F_pc %*% t(v) # residuals from static predictions
-    if(anymiss) res[W] <- NA # Good???
+    if(anymiss) res[W] <- NA # Good??? -> Yes, BM do the same...
     R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
   } else R <- diag(n)
 
@@ -138,44 +143,13 @@ DFM <- function(X, r, p = 1L, ...,
 
   # TODO: What is the good solution with missing values here???
   cpX <- crossprod(X_imp) # <- crossprod(if(anymiss) na_omit(X) else X)
+  em_res <- list()
+  expr <- .EM_DGR
+  encl <- environment()
   while(num_iter < max.iter && !converged) {
 
-    ## E-step will return a list of sufficient statistics, namely second
-    ## (cross)-moments for latent and observed data. This is then plugged back
-    ## into M-step.
-    em_res <- Estep(X, C, Q, R, A, x0, P0)
-    betasr <- em_res$beta_t[sr, , drop = FALSE]
-    gamma <- em_res$gamma_t
-    delta <- em_res$delta_t
-    gamma1 <- em_res$gamma1_t
-    gamma2 <- em_res$gamma2_t
-    loglik <- em_res$loglik_t
-    ## Assign new initial values for next EM-algorithm step
-    x0 <- em_res$x1
-    P0 <- em_res$V1
-
-    ## M-step computes model parameters as a function of the sufficient
-    ## statistics that were computed with the E-step. Iterate the procedure
-    ## until convergence. Due to the model specification, likelihood maximiation
-    ## in the M-step is just an OLS estimation. In particular, X_t = C*F_t and
-    ## F_t = A*F_(t-1).
-
-    C[, sr] <- delta[, sr] %*% apinv(gamma[sr, sr, drop = FALSE])
-    A_update <- betasr %*% ainv(gamma1)
-    A[sr, ] <- A_update
-    if(rQi) {
-      Qsr <- (gamma2[sr, sr] - tcrossprod(A_update, betasr)) / (T-1L)
-      Q[sr, sr] <- if(rQi == 2L) Qsr else diag(diag(Qsr))
-    } else Q[sr, sr] <- diag(r)
-
-    if(rRi) {
-      R <- (cpX - tcrossprod(C, delta)) / T
-      if(rRi == 2L) R[R < 1e-7] <- 1e-7 else {
-        RR <- diag(R)
-        RR[RR < 1e-7] <- 1e-7
-        R <- diag(RR)
-      }
-    } else R <- diag(n)
+    em_res <- eval(expr, em_res, encl)
+    loglik <- em_res$loglik
 
     converged <- em_converged(loglik, previous_loglik, tol)
     previous_loglik <- loglik
@@ -192,15 +166,15 @@ DFM <- function(X, r, p = 1L, ...,
   ## Run the Kalman filtering and smoothing step for the last time
   ## with optimal estimates
   # kf <- KalmanFilter(X, C, Q, R, A, x0, P0)
-  F_hat <- KalmanFilterSmoother(X, C, Q, R, A, x0, P0)$xS
+  F_hat <- eval(.KFS, em_res, encl)$xS
   final_object <- list(X_imp = X_imp,
                        pca = F_pc,
                        twostep = F_kal[, sr, drop = FALSE],
                        qml = F_hat[, sr, drop = FALSE],
-                       A = A[sr, , drop = FALSE],
-                       C = C[, sr, drop = FALSE],
-                       Q = Q[sr, sr, drop = FALSE],
-                       R = R,
+                       A = em_res$A[sr, , drop = FALSE],
+                       C = em_res$C[, sr, drop = FALSE],
+                       Q = em_res$Q[sr, sr, drop = FALSE],
+                       R = em_res$R,
                        loglik = loglik_all,
                        tol = tol,
                        converged = converged,
@@ -211,5 +185,4 @@ DFM <- function(X, r, p = 1L, ...,
   class(final_object) <- "dfm"
   return(final_object)
 }
-
 
