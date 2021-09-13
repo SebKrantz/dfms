@@ -1,7 +1,7 @@
 # Quoting some functions that need to be evaluated iteratively
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi))
 .EM_BM <- quote(EMstepBM(X, A, C, Q, R, F0, P0))
-.KFs <- quote(KalmanFilterSmoother(X, C, Q, R, A, F0, P0))
+.KFS <- quote(KalmanFilterSmoother(X, C, Q, R, A, F0, P0))
 
 
 #' Estimate a Dynamic Factor Model
@@ -72,13 +72,13 @@
 #'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 #' }
 #' @useDynLib DFM, .registration = TRUE
-#' @importFrom collapse fscale fvar fmedian qM unattrib na_omit
+#' @importFrom collapse fscale qsu fvar fmedian qM unattrib na_omit
 #' @export
 
 DFM <- function(X, r, p = 1L, ...,
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
-                EM.method = c("DGR", "BM"),
+                EM.method = c("DGR", "BM", "none"),
                 min.iter = 25L, max.iter = 100L, tol = 1e-4,
                 max.missing = 0.5,
                 na.rm.method = c("LE", "all"),
@@ -87,11 +87,14 @@ DFM <- function(X, r, p = 1L, ...,
 
   rRi <- switch(rR[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(rQ[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
-  BMl <- switch(EM.method[1L], DGR = FALSE, BM = TRUE, stop("Unknown EM option:", EM.method[1L]))
+  BMl <- switch(EM.method[1L], DGR = FALSE, BM = TRUE, none = NA, stop("Unknown EM option:", EM.method[1L]))
 
   rp <- r * p
   sr <- 1:r
   # srp <- 1:rp
+  ax <- attributes(X)
+  ilX <- is.list(X)
+  Xstat <- qsu(X)
   X <- fscale(qM(X))
   T <- dim(X)[1L]
   n <- dim(X)[2L]
@@ -138,6 +141,32 @@ DFM <- function(X, r, p = 1L, ...,
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- ks_res$Fs
 
+  # Results object for the two-step case
+  object_init <- list(X_imp = structure(X_imp,
+                                        stats = Xstat,
+                                        missing = if(anymiss) W else NULL,
+                                        attributes = ax,
+                                        is.list = ilX),
+                       pca = F_pc,
+                       twostep = F_kal[, sr, drop = FALSE],
+                       anyNA = anymiss,
+                       na.rm = na.rm,
+                       EM.method = EM.method[1L],
+                       call = match.call())
+
+  # We only report two-step solution
+  if(is.na(BMl)) {
+  # TODO: Better solution for system matrix estimation after Kalman Filtering and Smoothing?
+    final_object <- c(object_init[1:3],
+                      list(A = A[sr, , drop = FALSE],
+                           C = C[, sr, drop = FALSE],
+                           Q = Q[sr, sr, drop = FALSE],
+                           R = R),
+                      object_init[-(1:3)])
+    class(final_object) <- "dfm"
+    return(final_object)
+  }
+
   previous_loglik <- -.Machine$double.xmax
   loglik_all <- NULL
   num_iter <- 0L
@@ -166,21 +195,17 @@ DFM <- function(X, r, p = 1L, ...,
 
   ## Run the Kalman filtering and smoothing step for the last time
   ## with optimal estimates
-  F_hat <- eval(.KFs, em_res, encl)$Fs
-  final_object <- list(X_imp = X_imp,
-                       pca = F_pc,
-                       twostep = F_kal[, sr, drop = FALSE],
-                       qml = F_hat[, sr, drop = FALSE],
-                       A = em_res$A[sr, , drop = FALSE],
-                       C = em_res$C[, sr, drop = FALSE],
-                       Q = em_res$Q[sr, sr, drop = FALSE],
-                       R = em_res$R,
-                       loglik = loglik_all,
-                       tol = tol,
-                       converged = converged,
-                       anyNA = anymiss,
-                       na.rm = na.rm,
-                       call = match.call())
+  F_hat <- eval(.KFS, em_res, encl)$Fs
+  final_object <- c(object_init[1:3],
+               list(qml = F_hat[, sr, drop = FALSE],
+                    A = em_res$A[sr, , drop = FALSE],
+                    C = em_res$C[, sr, drop = FALSE],
+                    Q = em_res$Q[sr, sr, drop = FALSE],
+                    R = em_res$R,
+                    loglik = loglik_all,
+                    tol = tol,
+                    converged = converged),
+                    object_init[-(1:3)])
 
   class(final_object) <- "dfm"
   return(final_object)
