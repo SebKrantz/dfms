@@ -264,9 +264,11 @@ plot.dfm_fc <- function(x, ...) { # , type = c("joint", "individual", "residual"
   X_fcst <- rbind(matrix(NA_real_, T, n), x$X_fcst)
   ts.plot(X, col = "grey85")
   for (i in seq_len(n)) lines(X_fcst[, i], col = "grey40", lty = 3)
-  for (i in seq_len(r)) lines(F[, i], col = cols[i])
-  for (i in seq_len(r)) lines(F_fcst[, i], col = cols[i], lty = 3)
-  legend("topleft", paste("Factor", seq_len(nf)), col = cols, lty = 1, bty = "n")
+  for (i in seq_len(r)) {
+    lines(F[, i], col = cols[i])
+    lines(F_fcst[, i], col = cols[i], lty = 3)
+  }
+  legend("topleft", paste("Factor", seq_len(r)), col = cols, lty = 1, bty = "n")
 }
 
 # interpolate.dfm <- function(x, method = "qml", interpolate = TRUE) {
