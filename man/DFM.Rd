@@ -11,7 +11,7 @@ DFM(
   ...,
   rQ = c("none", "diagonal", "identity"),
   rR = c("diagonal", "identity", "none"),
-  EM.method = c("DGR", "BM"),
+  EM.method = c("DGR", "BM", "none"),
   min.iter = 25L,
   max.iter = 100L,
   tol = 1e-04,

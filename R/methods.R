@@ -1,12 +1,15 @@
 
-
+#' Print DFM
+#' @importFrom collapse qsu
+#' @export
 print.dfm <- function(x, digits = 4, ...) {
-  X <- object$X_imp
-  A <- object$A
+
+  X <- x$X_imp
+  A <- x$A
   r <- dim(A)[1L]
   p <- dim(A)[2L]/r
   cat("Dynamic Factor Model: n = ", dim(X)[2L], ", T = ", dim(X)[1L], ", r = ", r, ", p = ", p, ", %NA = ",
-      if(object$anyNA) round(sum(attr(X, "missing"))/prod(dim(X))*100, digits) else 0,"\n", sep = "")
+      if(x$anyNA) round(sum(attr(X, "missing"))/prod(dim(X))*100, digits) else 0,"\n", sep = "")
   fnam <- paste0("f", seq_len(r))
   dimnames(A) <- list(fnam, as.vector(t(outer(paste0("L", seq_len(p)), fnam, paste, sep = "."))))
   cat("\nFactor Transition Matrix [A]\n")
@@ -28,6 +31,7 @@ msum <- function(x) {
 #' @return Prints out a summary information following a dynamic factor
 #' model estimation. Also can return summary plots.
 #' @importFrom stats cov
+#' @importFrom collapse pwcov
 #' @export
 summary.dfm <- function(object, method = "qml", ...) {
   # TODO: Compact summary option: Don't print C and R
@@ -69,7 +73,8 @@ summary.dfm <- function(object, method = "qml", ...) {
   return(summ)
 }
 
-print.dfm_summary <- function(x, digits = 4L, compact = sum(x$info[1L] > 15L, x$info[1L] > 40L), ...) {
+#' @export
+print.dfm_summary <- function(x, digits = 4L, compact = sum(x$info["n"] > 15, x$info["n"] > 40), ...) {
 
   inf <- as.integer(x$info[1:4])
   cat("Dynamic Factor Model: n = ", inf[1L], ", T = ", inf[2L], ", r = ", inf[3L], ", p = ", inf[4L],
@@ -140,7 +145,7 @@ plot.dfm <- function(x, method = "qml", type = c("joint", "individual", "residua
 unscale <- function(x, stats) TRA.matrix(TRA.matrix(x, stats[, "SD"], "*"), stats[, "Mean"], "+")
 
 #' Residuals from DFM
-#' @param object object of class 'dfm'
+#' @param object object of class 'dfm'.
 #' @param method character. \code{"qml"}, \code{"twostep"} or \code{"pca"}.
 #' @param orig.format logical. \code{TRUE} returns residuals in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals on the original data scale.
@@ -181,7 +186,15 @@ fitted.dfm <- function(object, method = "qml", orig.format = FALSE, standardized
   return(qM(res))
 }
 
+ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 
+#' DFM Forecasts
+#' @param object object of class 'dfm'.
+#' @param h forecast horizon.
+#' @param method character. \code{"qml"}, \code{"twostep"} or \code{"pca"}.
+#' @param resid.fc.FUN function to forecast residuals.
+#' @export
+# TODO: univariate forecast and non-standardized forecast...
 predict.dfm <- function(object, h = 10L, method = "qml", resid.fc.FUN = NULL, ...) {
 
   F <- object[[method]]
@@ -194,25 +207,67 @@ predict.dfm <- function(object, h = 10L, method = "qml", resid.fc.FUN = NULL, ..
 
   F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
   X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
-  factor_last <- matrix(NA_real_, nrow = p, ncol = nf)
+  F_last <- ftail(F, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
+  spi <- p:1
 
-  factor_last <- tail(F, p)
-
-  for (i in 1:h) {
-
-    reg_factor <- tail(factor_last, p)
-    F_fc[i,] <- A %*% matrix(t(reg_factor[rev(1:nrow(reg_factor)), ]))
-    X_fc[i,] <- C %*% F_fc[i]
-
-    factor_last <- rbind(factor_last, F_fc[i, ])
+  for (i in seq_len(h)) {
+    F_reg <- ftail(F_last, p)
+    F_fc[i, ] <- A %*% `dim<-`(t(F_reg)[, spi, drop = FALSE], NULL)
+    X_fc[i, ] <- C %*% F_fc[i, ]
+    F_last <- rbind(F_last, F_fc[i, ])
   }
 
-  return(list(X_fcst = X_fc,
-              F_fcst = F_fc))
+  dimnames(X_fc)[[2L]] <- dimnames(object$X_imp)[[2L]]
+
+  # model = object, # Better only save essential objects ??
+  res <- list(X_fcst = X_fc,
+              F_fcst = F_fc,
+              X_imp = object$X_imp,
+              F = F,
+              method = method,
+              h = h,
+              resid.fc = !is.null(resid.fc.FUN),
+              call = match.call())
+  class(res) <- "dfm_fc"
+  return(res)
 }
 
 forecast.dfm <- predict.dfm
 
+#' @export
+print.dfm_fc <- function(x, digits = 4L, ...) {
+  h <- x$h
+  cat(h, "Step Ahead Forecast from Dynamic Factor Model\n\n")
+  cat("Factor Forecasts\n")
+  F_fcst <- x$F_fcst
+  dimnames(F_fcst) <- list(seq_len(h), paste0("f", seq_len(ncol(F_fcst))))
+  print(round(F_fcst, digits))
+  cat("\nSeries Forecasts\n")
+  X_fcst <- x$X_fcst
+  dimnames(X_fcst)[[1L]] <- seq_len(h)
+  print(round(X_fcst, digits))
+}
+
+#' @export
+# TODO: Proper plot margins and multiple plot types...
+plot.dfm_fc <- function(x, ...) { # , type = c("joint", "individual", "residual")
+  F <- x$F
+  r <- ncol(F)
+  cols <- rainbow(r)
+  F <- rbind(F, matrix(NA_real_, x$h, r))
+  X <- x$X_imp
+  T <- nrow(X)
+  n <- ncol(X)
+  X <- rbind(X, matrix(NA_real_, x$h, n))
+  if(length(W <- attr(X, "missing"))) X[W] <- NA
+  F_fcst <- rbind(matrix(NA_real_, T, r), x$F_fcst)
+  X_fcst <- rbind(matrix(NA_real_, T, n), x$X_fcst)
+  ts.plot(X, col = "grey85")
+  for (i in seq_len(n)) lines(X_fcst[, i], col = "grey40", lty = 3)
+  for (i in seq_len(r)) lines(F[, i], col = cols[i])
+  for (i in seq_len(r)) lines(F_fcst[, i], col = cols[i], lty = 3)
+  legend("topleft", paste("Factor", seq_len(nf)), col = cols, lty = 1, bty = "n")
+}
 
 # interpolate.dfm <- function(x, method = "qml", interpolate = TRUE) {
 #   W <- is.na(data)
