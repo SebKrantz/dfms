@@ -15,19 +15,26 @@
 #' @param \dots further arguments to be added here in the future, such as further estimation methods or block-structures.
 #' @param rQ restrictions on the state (transition) covariance matrix (Q).
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
-#' @param min.inter minimum number of EM iterations (to ensure a convergence path).
-#' @param max.inter maximum number of EM iterations.
-#' @param tol EM convergence tolerance.
-#' @param max.missing proportion of series missing for a case to be considered missing.
-#' @param na.rm.method method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
-#' @param na.impute method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
+#' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
+#' \tabular{llll}{
+#' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, but does not specifically account for missing values. \cr\cr
+#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura & Modugno (2014), suitable for datasets with arbitrary patterns of missing data. \cr\cr
+#' \code{"none"} \tab\tab Performs no EM iterations and just returns the twostep estimates from running PC's through the Kalman Filter and Smoother once as in
+#' Doz, Giannone and Reichlin (2011). This yields significant performance gains over the iterative methods. System matrices are then estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
+#' }
+#' @param min.inter integer. Minimum number of EM iterations (to ensure a convergence path).
+#' @param max.inter integer. Maximum number of EM iterations.
+#' @param tol numeric. EM convergence tolerance.
+#' @param max.missing numeric. Proportion of series missing for a case to be considered missing.
+#' @param na.rm.method character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
+#' @param na.impute character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
 #' \tabular{llll}{
 #' \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
 #' \code{"rnrom"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
-#' \code{"med_MA"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
-#' \code{"med_MA_spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
+#' \code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
+#' \code{"median.ma.spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
 #' }
-#' @param na.impute.MA the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"med_MA"} and \code{"med_MA_spline"}.
+#' @param ma.terms the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"median.ma"} and \code{"median.ma.spline"}.
 #'
 #' @details
 #' This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:
@@ -71,6 +78,14 @@
 #'  \eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr % that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[ft|Ft-1] = E[ft|ft-1] = A1 ft-1} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
 #'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 #' }
+#'
+#' @references
+#' Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. \emph{Journal of Econometrics, 164}(1), 188-205.
+#'
+#' Doz, C., Giannone, D., & Reichlin, L. (2012). A quasi-maximum likelihood approach for large, approximate dynamic factor models. \emph{Review of economics and statistics, 94}(4), 1014-1024.
+#'
+#' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160.
+#'
 #' @useDynLib DFM, .registration = TRUE
 #' @importFrom collapse fscale qsu fvar fmedian qM unattrib na_omit
 #' @export
@@ -78,16 +93,16 @@
 DFM <- function(X, r, p = 1L, ...,
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
-                EM.method = c("DGR", "BM", "none"),
+                em.method = c("DGR", "BM", "none"),
                 min.iter = 25L, max.iter = 100L, tol = 1e-4,
-                max.missing = 0.5,
+                max.missing = 0.8,
                 na.rm.method = c("LE", "all"),
-                na.impute = c("median", "rnrom", "med_MA", "med_MA_spline"),
-                na.impute.MA = 3L) {
+                na.impute = c("median", "rnrom", "median.ma", "median.ma.spline"),
+                ma.terms = 3L) {
 
   rRi <- switch(rR[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(rQ[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
-  BMl <- switch(EM.method[1L], DGR = FALSE, BM = TRUE, none = NA, stop("Unknown EM option:", EM.method[1L]))
+  BMl <- switch(em.method[1L], DGR = FALSE, BM = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
 
   rp <- r * p
   sr <- 1:r
@@ -108,7 +123,7 @@ DFM <- function(X, r, p = 1L, ...,
   anymiss <- anyNA(X)
   if(anymiss) { # Missing value removal / imputation
     W <- NULL
-    list2env(tsremimpNA(X, max.missing, na.rm.method, na.impute, na.impute.MA),
+    list2env(tsremimpNA(X, max.missing, na.rm.method, na.impute, ma.terms),
              envir = environment())
     if(length(na.rm)) X <- X[-na.rm, ]
   }
@@ -142,7 +157,7 @@ DFM <- function(X, r, p = 1L, ...,
   ks_res <- KalmanFilterSmoother(X, C, Q, R, A, F0, P0)
 
   ## Two-step solution is state mean from the Kalman smoother
-  F_kal <- ks_res$Fs[, sr, drop = FALSE]
+  F_kal <- setCN(ks_res$Fs[, sr, drop = FALSE], fnam)
 
   # Results object for the two-step case
   object_init <- list(X_imp = structure(X_imp,
@@ -151,17 +166,17 @@ DFM <- function(X, r, p = 1L, ...,
                                         attributes = ax,
                                         is.list = ilX),
                        pca = setCN(F_pc, paste0("PC", sr)),
-                       twostep = setCN(F_kal, fnam),
+                       twostep = F_kal,
                        anyNA = anymiss,
                        na.rm = na.rm,
-                       EM.method = EM.method[1L],
+                       em.method = em.method[1L],
                        call = match.call())
 
   # We only report two-step solution
   if(is.na(BMl)) {
-  # TODO: Better solution for system matrix estimation after Kalman Filtering and Smoothing?
+  # TODO: Better solution for system matrix estimation after Kalman Filtering and Smoothing? (could take matrices from Kalman Filter, but that would be before smoothing)
     var <- fVAR(F_kal, p)
-    beta <- ainv(crossprod(F_kal)) %*% crossprod(F_kal, X_imp)
+    beta <- ainv(crossprod(F_kal)) %*% crossprod(F_kal, if(anymiss) replace(X_imp, W, 0) else X_imp) # good??
     Q <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
     if(rRi) {
       res <- X_imp - F_kal %*% beta
@@ -170,9 +185,9 @@ DFM <- function(X, r, p = 1L, ...,
     } else R <- diag(n)
     final_object <- c(object_init[1:3],
                       list(A = `dimnames<-`(t(var$A), lagnam(fnam, p)), # A[sr, , drop = FALSE],
-                           C = beta, # C[, sr, drop = FALSE],
-                           Q = Q,    # Q[sr, sr, drop = FALSE],
-                           R = R),
+                           C = t(beta), # C[, sr, drop = FALSE],
+                           Q = `dimnames<-`(Q, list(unam, unam)),       # Q[sr, sr, drop = FALSE],
+                           R = `dimnames<-`(R, list(Xnam, Xnam))),
                       object_init[-(1:3)])
     class(final_object) <- "dfm"
     return(final_object)
@@ -183,8 +198,8 @@ DFM <- function(X, r, p = 1L, ...,
   num_iter <- 0L
   converged <- FALSE
 
-  # TODO: What is the good solution with missing values here???
-  cpX <- crossprod(X_imp) # <- crossprod(if(anymiss) na_omit(X) else X)
+  # TODO: What is the good solution with missing values here?? -> Zeros are ignored in crossprod, so it's like skipping those obs
+  cpX <- crossprod(if(anymiss) replace(X_imp, W, 0) else X_imp) # <- crossprod(if(anymiss) na_omit(X) else X)
   em_res <- list()
   expr <- if(BMl) .EM_BM else .EM_DGR
   encl <- environment()
