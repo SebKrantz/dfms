@@ -91,11 +91,14 @@ DFM <- function(X, r, p = 1L, ...,
 
   rp <- r * p
   sr <- 1:r
+  fnam <- paste0("f", sr)
+  unam <- paste0("u", sr)
   # srp <- 1:rp
   ax <- attributes(X)
   ilX <- is.list(X)
   Xstat <- qsu(X)
   X <- fscale(qM(X))
+  Xnam <- dimnames(X)[[2L]]
   T <- dim(X)[1L]
   n <- dim(X)[2L]
 
@@ -139,7 +142,7 @@ DFM <- function(X, r, p = 1L, ...,
   ks_res <- KalmanFilterSmoother(X, C, Q, R, A, F0, P0)
 
   ## Two-step solution is state mean from the Kalman smoother
-  F_kal <- ks_res$Fs
+  F_kal <- ks_res$Fs[, sr, drop = FALSE]
 
   # Results object for the two-step case
   object_init <- list(X_imp = structure(X_imp,
@@ -147,8 +150,8 @@ DFM <- function(X, r, p = 1L, ...,
                                         missing = if(anymiss) W else NULL,
                                         attributes = ax,
                                         is.list = ilX),
-                       pca = F_pc,
-                       twostep = F_kal[, sr, drop = FALSE],
+                       pca = setCN(F_pc, paste0("PC", sr)),
+                       twostep = setCN(F_kal, fnam),
                        anyNA = anymiss,
                        na.rm = na.rm,
                        EM.method = EM.method[1L],
@@ -157,10 +160,18 @@ DFM <- function(X, r, p = 1L, ...,
   # We only report two-step solution
   if(is.na(BMl)) {
   # TODO: Better solution for system matrix estimation after Kalman Filtering and Smoothing?
+    var <- fVAR(F_kal, p)
+    beta <- ainv(crossprod(F_kal)) %*% crossprod(F_kal, X_imp)
+    Q <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
+    if(rRi) {
+      res <- X_imp - F_kal %*% beta
+      if(anymiss) res[W] <- NA
+      R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
+    } else R <- diag(n)
     final_object <- c(object_init[1:3],
-                      list(A = A[sr, , drop = FALSE],
-                           C = C[, sr, drop = FALSE],
-                           Q = Q[sr, sr, drop = FALSE],
+                      list(A = `dimnames<-`(t(var$A), lagnam(fnam, p)), # A[sr, , drop = FALSE],
+                           C = beta, # C[, sr, drop = FALSE],
+                           Q = Q,    # Q[sr, sr, drop = FALSE],
                            R = R),
                       object_init[-(1:3)])
     class(final_object) <- "dfm"
@@ -197,11 +208,11 @@ DFM <- function(X, r, p = 1L, ...,
   ## with optimal estimates
   F_hat <- eval(.KFS, em_res, encl)$Fs
   final_object <- c(object_init[1:3],
-               list(qml = F_hat[, sr, drop = FALSE],
-                    A = em_res$A[sr, , drop = FALSE],
-                    C = em_res$C[, sr, drop = FALSE],
-                    Q = em_res$Q[sr, sr, drop = FALSE],
-                    R = em_res$R,
+               list(qml = setCN(F_hat[, sr, drop = FALSE], fnam),
+                    A = `dimnames<-`(em_res$A[sr, , drop = FALSE], lagnam(fnam, p)),
+                    C = `dimnames<-`(em_res$C[, sr, drop = FALSE], list(Xnam, fnam)),
+                    Q = `dimnames<-`(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
+                    R = `dimnames<-`(em_res$R, list(Xnam, Xnam)),
                     loglik = loglik_all,
                     tol = tol,
                     converged = converged),
