@@ -2,10 +2,10 @@
 
 S3method(fitted,dfm)
 S3method(plot,dfm)
-S3method(plot,dfm_fc)
+S3method(plot,dfm_forecast)
 S3method(predict,dfm)
 S3method(print,dfm)
-S3method(print,dfm_fc)
+S3method(print,dfm_forecast)
 S3method(print,dfm_summary)
 S3method(residuals,dfm)
 S3method(summary,dfm)

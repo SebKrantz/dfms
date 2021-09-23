@@ -1,3 +1,26 @@
+setCN <- function(x, nam) `dimnames<-`(x, list(NULL, nam))
+
+lagnam <- function(nam, p) list(nam, as.vector(t(outer(paste0("L", seq_len(p)), nam, paste, sep = "."))))
+
+msum <- function(x) {
+  stats <- qsu(x)
+  med <- fmedian(x)
+  res <- if(is.matrix(x)) cbind(stats[, 1:2], Median = med, stats[, -(1:2)]) else
+    c(stats[1:2], Median = med, stats[-(1:2)])
+  class(res) <- "qsu"
+  res
+}
+
+AC1 <- function(res, anymiss) {
+  ACF <- cov(res[-1L, ], res[-nrow(res), ],
+             use = if(anymiss) "pairwise.complete.obs" else "everything")
+  diag(ACF) / fvar(res)
+}
+
+unscale <- function(x, stats) TRA.matrix(TRA.matrix(x, stats[, "SD"], "*"), stats[, "Mean"], "+")
+
+ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
+
 #' Fast Vector-Autoregression
 #'
 #' Quickly estimate an VAR(p) model using Armadillo's inverse function.
@@ -118,7 +141,7 @@ tsremimpNA <- function(X,
                        na.rm.method = c("LE", "all"),
                        na.impute = c("median", "rnrom", "med_MA", "med_MA_spline"),
                        na.impute.MA = 3L) {
-  W <- is.na(X)
+  W <- !is.finite(X) # is.na(X)
   n <- dim(X)[2L]
   na.rm <- NULL
   if(max.missing < 1) {

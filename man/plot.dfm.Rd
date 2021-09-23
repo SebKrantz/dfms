@@ -7,9 +7,9 @@
 \method{plot}{dfm}(x, method = "qml", type = c("joint", "individual", "residual"), ...)
 }
 \arguments{
-\item{x}{object of class 'dfm'.}
+\item{x}{an object class 'dfm'.}
 
-\item{method}{character. \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
+\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
 
 \item{type}{character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.}
 }

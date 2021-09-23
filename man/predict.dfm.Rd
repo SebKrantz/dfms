@@ -2,19 +2,39 @@
 % Please edit documentation in R/methods.R
 \name{predict.dfm}
 \alias{predict.dfm}
+\alias{forecast.dfm}
+\alias{print.dfm_forecast}
+\alias{plot.dfm_forecast}
 \title{DFM Forecasts}
 \usage{
-\method{predict}{dfm}(object, h = 10L, method = "qml", resid.fc.FUN = NULL, ...)
+\method{predict}{dfm}(object, h = 10L, method = "qml", resFUN = NULL, resAC = 0.1, ...)
+
+\method{print}{dfm_forecast}(x, digits = 4L, ...)
+
+\method{plot}{dfm_forecast}(x, ...)
 }
 \arguments{
-\item{object}{object of class 'dfm'.}
+\item{object}{an object of class 'dfm'.}
 
-\item{h}{forecast horizon.}
+\item{h}{integer. The forecast horizon.}
 
-\item{method}{character. \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
+\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
 
-\item{resid.fc.FUN}{function to forecast residuals.}
+\item{resFUN}{an (optional) function to compute a univariate forecast of the residuals.
+The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.}
+
+\item{resAC}{numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.}
+
+\item{digits}{integer. The number of digits to print out.}
 }
 \description{
-DFM Forecasts
+This function produces h-step ahead forecasts of both the factors and the data,
+with an option to also forecast autocorrelated residuals with a univariate method and produce a combined forecast.
+}
+\examples{
+dfm <- DFM(diff(Eustockmarkets), 2, 2)
+predict(dfm)
+fcfun <- function(x, h) predict(ar(x), n.ahead = h)$pred
+predict(dfm, resFUN = fcfun)
+
 }

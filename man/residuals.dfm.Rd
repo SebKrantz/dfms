@@ -2,7 +2,9 @@
 % Please edit documentation in R/methods.R
 \name{residuals.dfm}
 \alias{residuals.dfm}
-\title{Residuals from DFM}
+\alias{fitted.dfm}
+\alias{resid.dfm}
+\title{DFM Residuals and Fitted Values}
 \usage{
 \method{residuals}{dfm}(
   object,
@@ -11,16 +13,18 @@
   standardized = FALSE,
   ...
 )
+
+\method{fitted}{dfm}(object, method = "qml", orig.format = FALSE, standardized = FALSE, ...)
 }
 \arguments{
-\item{object}{object of class 'dfm'.}
+\item{object}{an object of class 'dfm'.}
 
-\item{method}{character. \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
+\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
 
-\item{orig.format}{logical. \code{TRUE} returns residuals in a data format similar to \code{X}.}
+\item{orig.format}{logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.}
 
-\item{standardized}{logical. \code{FALSE} will put residuals on the original data scale.}
+\item{standardized}{logical. \code{FALSE} will put residuals/fitted values on the original data scale.}
 }
 \description{
-Residuals from DFM
+DFM Residuals and Fitted Values
 }
