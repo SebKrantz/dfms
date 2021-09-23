@@ -77,10 +77,10 @@ em_converged <- function(loglik, previous_loglik, threshold = 1e-4) { # , check_
 findNA_LE <- function(W, threshold) {
   d <- dim(W)
   st <- 1:d[1L]
-  rem1 = rowSums(W) > d[2L] * threshold
-  nanLead = cumsum(rem1) == st
-  nanEnd = rev(cumsum(rev(rem1)) == st)
-  return(which(nanLead | nanEnd))
+  rem1 <- rowSums(W) > d[2L] * threshold
+  nanLead <- cumsum(rem1) == st
+  nanEnd <- rev(cumsum(rev(rem1)) == st)
+  return(nanLead | nanEnd)
 }
 
 
@@ -128,7 +128,7 @@ impNA_spline <- function(X, W, k) {
 
 #' Remove and Impute Missing Values in a Multivariate Time Series
 #'
-#' This function imputes missing values in a stationary multivariate time series using various
+#' This function imputes missing (and infinite) values in a stationary multivariate time series using various
 #' methods, and removes cases with too many missing values.
 #'
 #' @param X a matrix or multivariate time series where each column is a series.
@@ -136,10 +136,11 @@ impNA_spline <- function(X, W, k) {
 #'
 #' @returns A list with the imputed matrix \code{X_imp}, a missingness matrix \code{W} matching the dimensions of \code{X_imp},
 #' and a vector or cases \code{na.rm} indicating cases with too many missing values that were removed beforehand.
+#' @export
 tsremimpNA <- function(X,
                        max.missing = 0.5,
                        na.rm.method = c("LE", "all"),
-                       na.impute = c("median", "rnrom", "med_MA", "med_MA_spline"),
+                       na.impute = c("median", "rnrom", "median.ma", "median.ma.spline"),
                        na.impute.MA = 3L) {
   W <- !is.finite(X) # is.na(X)
   n <- dim(X)[2L]
@@ -158,8 +159,8 @@ tsremimpNA <- function(X,
   list(X_imp = switch(na.impute[1L],
                   median = replace(X, W, fmedian(X, TRA = 1L)[W]),
                   rnrom = replace(X, W, rnorm(sum(W))),
-                  med_MA = impNA_MA(X, W, na.impute.MA),
-                  med_MA_spline = impNA_spline(X, W, na.impute.MA),
+                  median.ma = impNA_MA(X, W, na.impute.MA),
+                  median.ma.spline = impNA_spline(X, W, na.impute.MA),
                   stop("Unknown na.impute option:", na.impute[1L])),
        W = W,
        na.rm = na.rm)

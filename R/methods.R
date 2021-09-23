@@ -1,4 +1,4 @@
-#' @name DFM_summary
+#' @name summary.dfm
 #' @aliases print.dfm
 #' @aliases summary.dfm
 #' @aliases print.dfm_summary
@@ -26,14 +26,14 @@ print.dfm <- function(x,
   print(round(A, digits))
 }
 
-#' @rdname DFM_summary
+#' @rdname summary.dfm
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
 #' @return Summary information following a dynamic factor model estimation.
 #' @importFrom stats cov
 #' @importFrom collapse pwcov
 #' @export
 summary.dfm <- function(object,
-                        method = "qml", ...) {
+                        method = if(is.null(object$qml)) "twostep" else "qml", ...) {
 
   X <- object$X_imp
   F <- object[[method]]
@@ -64,7 +64,7 @@ summary.dfm <- function(object,
   return(summ)
 }
 
-#' @rdname DFM_summary
+#' @rdname summary.dfm
 #' @param compact integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and covariance matrix [R], and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.
 #' @export
 print.dfm_summary <- function(x,
@@ -115,35 +115,57 @@ print.dfm_summary <- function(x,
 #' @importFrom graphics boxplot
 #' @export
 plot.dfm <- function(x,
-                     method = "qml",
+                     method = if(is.null(x$qml)) "twostep" else "qml",
                      type = c("joint", "individual", "residual"), ...) {
-  F <- x[[method]]
+  F <- switch(method[1L],
+              all = cbind(x$pca, setCN(x$twostep, paste("2S", colnames(x$twostep))),
+                          if(length(x$qml)) setCN(x$qml, paste("QML", colnames(x$qml))) else NULL),
+              pca = x$pca, twostep = x$twostep, qml = x$qml, stop("Unknown method:", method[1L]))
   nf <- dim(F)[2L]
   switch(type[1L],
     joint = {
       Xr <- range(x$X_imp)
       Fr <- range(F)
-      ts.plot(x$X_imp, col = "grey85", ylim = c(min(Xr[1L], Fr[1L]), max(Xr[2L], Fr[2L])))
+      ts.plot(x$X_imp, col = "grey85", ylim = c(min(Xr[1L], Fr[1L]), max(Xr[2L], Fr[2L])),
+              ylab = "Value", main = "Standardized Series and Factor Estimates")
       cols <- rainbow(nf)
       for (i in seq_len(nf)) lines(F[, i], col = cols[i])
-      legend("topleft", paste("Factor", seq_len(nf)), col = cols, lty = 1, bty = "n")
+      legend("topleft", colnames(F), col = cols, lty = 1, bty = "n")
     },
-    individual = {
-      d <- ceiling(nf / 2L)
-      d <- if(d == 1) c(2L, 1L) else c(d, 1L)
-      oldpar <- par(mfrow = d)
-      on.exit(par(oldpar))
-      for (i in seq_len(nf)) plot(F[, i], type = 'l', main = paste0("QML estimated factor ", i),
-                                  ylab = "Value", xlab = "Time")
+    individual = { # TODO: Reduce plot margins
+      if(method[1L] == "all") {
+        qml <- !is.null(x$qml)
+        nf <- nf / (2L + qml)
+        oldpar <- par(mfrow = c(nf, 1L))
+        on.exit(par(oldpar))
+        for (i in seq_len(nf)) {
+          plot(F[, i], type = 'l', main = paste("Factor", i), col = "red", ylab = "Value",
+               xlab = if(i == nf) "Time" else "")
+          lines(F[, i + nf], type = 'l', col = "orange")
+          if(qml) lines(F[, i + 2L * nf], type = 'l', col = "blue")
+          if(i == 1L) legend("topleft", c("PCA", "2S", if(qml) "QML"),
+                             col = c("red", "orange", "blue"), lty = 1, bty = "n")
+        }
+      } else {
+        oldpar <- par(mfrow = c(nf, 1L))
+        on.exit(par(oldpar))
+        cnF <- colnames(F)
+        for (i in seq_len(nf)) plot(F[, i], type = 'l', main = cnF[i], ylab = "Value",
+                                    xlab = if(i == nf) "Time" else "")
+      }
     },
-    residual = boxplot(x$X_imp - tcrossprod(F, x$C), main = "Residuals by input variable"),
-    stop("Unknown plot method: ", type[1L])
+    residual = {
+      if(method[1L] == "all") stop("Need to choose a specific method for residual plots")
+      boxplot(x$X_imp - tcrossprod(F, x$C), main = "Residuals by input variable")
+    },
+    stop("Unknown plot type: ", type[1L])
   )
 }
 
 #' @name residuals.dfm
-#' @aliases fitted.dfm
+#' @aliases residuals.dfm
 #' @aliases resid.dfm
+#' @aliases fitted.dfm
 #'
 #' @title DFM Residuals and Fitted Values
 #'
@@ -154,7 +176,7 @@ plot.dfm <- function(x,
 #' @importFrom collapse TRA.matrix mctl setAttrib pad
 #' @export
 residuals.dfm <- function(object,
-                          method = "qml",
+                          method = if(is.null(object$qml)) "twostep" else "qml",
                           orig.format = FALSE,
                           standardized = FALSE, ...) {
   X <- object$X_imp
@@ -178,7 +200,7 @@ resid.dfm <- residuals.dfm
 #' @rdname residuals.dfm
 #' @export
 fitted.dfm <- function(object,
-                       method = "qml",
+                       method = if(is.null(object$qml)) "twostep" else "qml",
                        orig.format = FALSE,
                        standardized = FALSE, ...) {
   X <- object$X_imp
@@ -217,10 +239,10 @@ fitted.dfm <- function(object,
 #' predict(dfm, resFUN = fcfun)
 #'
 #' @export
-
+# TODO: Prediction in original format??
 predict.dfm <- function(object,
                         h = 10L,
-                        method = "qml",
+                        method = if(is.null(object$qml)) "twostep" else "qml",
                         standardized = TRUE,
                         resFUN = NULL,
                         resAC = 0.1, ...) {
@@ -255,14 +277,15 @@ predict.dfm <- function(object,
     fcr <- which(abs(ACF) >= abs(resAC)) # TODO: Check length of forecast??
     for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(resid[, i], h, ...))
   } else fcr <- NULL
-
+  # TODO: Unstandardize factors with the average mean and SD??
   if(!standardized) {
     stats <- attr(X, "stats")
     X_fc <- unscale(X_fc, stats)
     X <- unscale(X, stats)
   }
 
-  dimnames(X_fc)[[2L]] <- dimnames(X)[[2L]]
+  dimnames(X_fc) <- list(NULL, dimnames(X)[[2L]])
+  dimnames(F_fc) <- dimnames(F)
 
   if(object$anyNA) X[attr(X, "missing")] <- NA
 
@@ -273,7 +296,7 @@ predict.dfm <- function(object,
               F = F,
               method = method,
               h = h,
-              resid.fc = !is.null(resFUN),
+              resid.fc = !is.null(resFUN), # TODO: Rename list elements??
               resid.fc.ind = fcr,
               call = match.call())
   class(res) <- "dfm_forecast"
@@ -291,7 +314,7 @@ print.dfm_forecast <- function(x,
   cat(h, "Step Ahead Forecast from Dynamic Factor Model\n\n")
   cat("Factor Forecasts\n")
   F_fcst <- x$F_fcst
-  dimnames(F_fcst) <- list(seq_len(h), paste0("f", seq_len(ncol(F_fcst))))
+  dimnames(F_fcst)[[1L]] <- seq_len(h)
   print(round(F_fcst, digits))
   cat("\nSeries Forecasts\n")
   X_fcst <- x$X_fcst
@@ -308,17 +331,16 @@ plot.dfm_forecast <- function(x, ...) { # , type = c("joint", "individual", "res
   r <- ncol(F)
   cols <- rainbow(r)
   F <- rbind(F, matrix(NA_real_, x$h, r))
-  X <- x$X_imp
+  X <- x$X
   T <- nrow(X)
   n <- ncol(X)
-  if(length(W <- attr(X, "missing"))) X[W] <- NA
   Xr <- range(X, na.rm = TRUE)
   Pr <- range(c(x$F_fcst, x$X_fcst))
   X <- rbind(X, matrix(NA_real_, x$h, n))
   F_fcst <- rbind(matrix(NA_real_, T, r), x$F_fcst)
   X_fcst <- rbind(matrix(NA_real_, T, n), x$X_fcst)
   ts.plot(X, col = "grey85", ylim = c(min(Xr[1L], Fr[1L], Pr[1L]), max(Xr[2L], Fr[2L], Pr[1L])))
-  for (i in seq_len(n)) lines(X_fcst[, i], col = "grey50", lty = 3)
+  for (i in seq_len(n)) lines(X_fcst[, i], col = "grey65", lty = 3)
   for (i in seq_len(r)) {
     lines(F[, i], col = cols[i])
     lines(F_fcst[, i], col = cols[i], lty = 3)

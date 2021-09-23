@@ -11,14 +11,14 @@ DFM(
   ...,
   rQ = c("none", "diagonal", "identity"),
   rR = c("diagonal", "identity", "none"),
-  EM.method = c("DGR", "BM", "none"),
+  em.method = c("DGR", "BM", "none"),
   min.iter = 25L,
   max.iter = 100L,
   tol = 1e-04,
-  max.missing = 0.5,
+  max.missing = 0.8,
   na.rm.method = c("LE", "all"),
-  na.impute = c("median", "rnrom", "med_MA", "med_MA_spline"),
-  na.impute.MA = 3L
+  na.impute = c("median", "rnrom", "median.ma", "median.ma.spline"),
+  ma.terms = 3L
 )
 }
 \arguments{
@@ -34,25 +34,33 @@ DFM(
 
 \item{rR}{restrictions on the observation (measurement) covariance matrix (R).}
 
-\item{tol}{EM convergence tolerance.}
+\item{em.method}{character. The implementation of the Expectation Maximization Algorithm used. The options are:
+\tabular{llll}{
+\code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, but does not specifically account for missing values. \cr\cr
+\code{"BM"} \tab\tab The modified EM algorithm of Banbura & Modugno (2014), suitable for datasets with arbitrary patterns of missing data. \cr\cr
+\code{"none"} \tab\tab Performs no EM iterations and just returns the twostep estimates from running PC's through the Kalman Filter and Smoother once as in
+Doz, Giannone and Reichlin (2011). This yields significant performance gains over the iterative methods. System matrices are then estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
+}}
 
-\item{max.missing}{proportion of series missing for a case to be considered missing.}
+\item{tol}{numeric. EM convergence tolerance.}
 
-\item{na.rm.method}{method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.}
+\item{max.missing}{numeric. Proportion of series missing for a case to be considered missing.}
 
-\item{na.impute}{method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
+\item{na.rm.method}{character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.}
+
+\item{na.impute}{character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
 \tabular{llll}{
 \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
 \code{"rnrom"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
-\code{"med_MA"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
-\code{"med_MA_spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
+\code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
+\code{"median.ma.spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
 }}
 
-\item{na.impute.MA}{the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"med_MA"} and \code{"med_MA_spline"}.}
+\item{ma.terms}{the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"median.ma"} and \code{"median.ma.spline"}.}
 
-\item{min.inter}{minimum number of EM iterations (to ensure a convergence path).}
+\item{min.inter}{integer. Minimum number of EM iterations (to ensure a convergence path).}
 
-\item{max.inter}{maximum number of EM iterations.}
+\item{max.inter}{integer. Maximum number of EM iterations.}
 }
 \description{
 Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data of a single frequency,
@@ -100,4 +108,11 @@ where
  \eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr % that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[ft|Ft-1] = E[ft|ft-1] = A1 ft-1} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 }
+}
+\references{
+Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. \emph{Journal of Econometrics, 164}(1), 188-205.
+
+Doz, C., Giannone, D., & Reichlin, L. (2012). A quasi-maximum likelihood approach for large, approximate dynamic factor models. \emph{Review of economics and statistics, 94}(4), 1014-1024.
+
+Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160.
 }

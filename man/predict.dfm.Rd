@@ -7,7 +7,15 @@
 \alias{plot.dfm_forecast}
 \title{DFM Forecasts}
 \usage{
-\method{predict}{dfm}(object, h = 10L, method = "qml", resFUN = NULL, resAC = 0.1, ...)
+\method{predict}{dfm}(
+  object,
+  h = 10L,
+  method = if (is.null(object$qml)) "twostep" else "qml",
+  standardized = TRUE,
+  resFUN = NULL,
+  resAC = 0.1,
+  ...
+)
 
 \method{print}{dfm_forecast}(x, digits = 4L, ...)
 

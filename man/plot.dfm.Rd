@@ -4,7 +4,12 @@
 \alias{plot.dfm}
 \title{Plot DFM}
 \usage{
-\method{plot}{dfm}(x, method = "qml", type = c("joint", "individual", "residual"), ...)
+\method{plot}{dfm}(
+  x,
+  method = if (is.null(x$qml)) "twostep" else "qml",
+  type = c("joint", "individual", "residual"),
+  ...
+)
 }
 \arguments{
 \item{x}{an object class 'dfm'.}

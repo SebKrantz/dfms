@@ -2,19 +2,25 @@
 % Please edit documentation in R/methods.R
 \name{residuals.dfm}
 \alias{residuals.dfm}
-\alias{fitted.dfm}
 \alias{resid.dfm}
+\alias{fitted.dfm}
 \title{DFM Residuals and Fitted Values}
 \usage{
 \method{residuals}{dfm}(
   object,
-  method = "qml",
+  method = if (is.null(object$qml)) "twostep" else "qml",
   orig.format = FALSE,
   standardized = FALSE,
   ...
 )
 
-\method{fitted}{dfm}(object, method = "qml", orig.format = FALSE, standardized = FALSE, ...)
+\method{fitted}{dfm}(
+  object,
+  method = if (is.null(object$qml)) "twostep" else "qml",
+  orig.format = FALSE,
+  standardized = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{an object of class 'dfm'.}
