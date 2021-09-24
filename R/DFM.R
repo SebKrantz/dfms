@@ -18,9 +18,10 @@
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
 #' \tabular{llll}{
 #' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, but does not specifically account for missing values. \cr\cr
-#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura & Modugno (2014), suitable for datasets with arbitrary patterns of missing data. \cr\cr
-#' \code{"none"} \tab\tab Performs no EM iterations and just returns the twostep estimates from running PC's through the Kalman Filter and Smoother once as in
-#' Doz, Giannone and Reichlin (2011). This yields significant performance gains over the iterative methods. System matrices are then estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
+#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014), suitable for datasets with arbitrary patterns of missing data. \cr\cr
+#' \code{"none"} \tab\tab Performs no EM iterations and just returns the twostep estimates from running the data through the Kalman Filter and Smoother once as in
+#' Doz, Giannone and Reichlin (2011) (the Kalman Filter is Initialized with system matrices obtained from a regression and VAR on PCA factor estimates).
+#' This yields significant performance gains over the iterative methods. Final system matrices are estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
 #' }
 #' @param min.inter integer. Minimum number of EM iterations (to ensure a convergence path).
 #' @param max.inter integer. Maximum number of EM iterations.
@@ -77,6 +78,31 @@
 #'  \eqn{\textbf{A}}{A} \tab\tab stacked \eqn{rp \times rp}{rp x rp} state transition matrix consisting of 3 parts: the top \eqn{r \times rp}{r x rp} part provides the dynamic relationships captured by \eqn{(\textbf{A}_1, \dots, \textbf{A}_p)}{(A1, \dots, Ap)} in the dynamic form, the terms \code{A[(r+1):rp, 1:(rp-r)]} constitute an \eqn{(rp-r) \times (rp-r)}{(rp-r) x (rp-r)} identity matrix mapping all lagged factors to their known values at times t. The remining part \code{A[(rp-r+1):rp, (rp-r+1):rp]} is an \eqn{r \times r}{r x r} matrix of zeros. \cr\cr
 #'  \eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr % that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[ft|Ft-1] = E[ft|ft-1] = A1 ft-1} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
 #'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
+#' }
+#'
+#' @returns A list-like object of class 'dfm' with the following elements:
+#' \tabular{llll}{
+#'  \code{X_imp} \tab\tab \eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
+#'    \itemize{
+#'       \item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr
+#'       \item \code{"missing"} is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr
+#'       \item \code{"attributes"} contains the \code{\link{attributes}} or the original data input.\cr
+#'       \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
+#'    } \cr\cr
+#'  \code{pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - obtained from running PCA on \code{X_imp}. \cr\cr
+#'  \code{twostep} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
+#'  \code{qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratiely Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
+#'  \code{A} \tab\tab \eqn{r \times rp}{r x rp} factor transition matrix.\cr\cr
+#'  \code{C} \tab\tab \eqn{n \times r}{n x r} observation matrix.\cr\cr
+#'  \code{Q} \tab\tab \eqn{r \times r}{r x r} state (error) covariance matrix.\cr\cr
+#'  \code{R} \tab\tab \eqn{n \times n}{n x n} observation (error) covariance matrix.\cr\cr
+#'  \code{loglik} \tab\tab vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.\cr\cr
+#'  \code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
+#'  \code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
+#'  \code{anyNA} \tab\tab single logical valued indicating whether there were any missing values in the data. If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
+#'  \code{na.rm} \tab\tab vector of any cases that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
+#'  \code{em.method} \tab\tab The EM method used.\cr\cr
+#'  \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
 #' }
 #'
 #' @references
