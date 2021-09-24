@@ -233,7 +233,7 @@ fitted.dfm <- function(object,
 #' @param resAC numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.
 #'
 #' @examples
-#' dfm <- DFM(diff(Eustockmarkets), 2, 2)
+#' dfm <- DFM(diff(Seatbelts[, 1:7], lag = 12), 3, 3)
 #' predict(dfm)
 #' fcfun <- function(x, h) predict(ar(x), n.ahead = h)$pred
 #' predict(dfm, resFUN = fcfun)
@@ -323,29 +323,71 @@ print.dfm_forecast <- function(x,
 }
 
 #' @rdname predict.dfm
+#' @param main,xlab,ylab character. Graphical parameters passed to \code{\link{ts.plot}}.
+#' @param factors integers indicating which factors to display. Setting this to \code{NA}, \code{NULL} or \code{0} will omit factor plots.
+#' @param factor.col,factor.lwd graphical parameters affecting the colour and line width of factor estimates plots. See \code{\link{par}}.
+#' @param fcst.lty integer or character giving the line type of the forecasts of factors and data. See \code{\link{par}}.
+#' @param data.col character vector of length 2 indicating the colours of historical data and forecasts of that data. Setting this to \code{NA}, \code{NULL} or \code{""} will not plot data and data forecasts.
+#' @param legend logical. \code{TRUE} draws a legend in the top-left of the chart.
+#' @param legend.items character names of factors for the legend.
+#' @param grid logical. \code{TRUE} draws a grid on the background of the plot.
+#' @param vline logical. \code{TRUE} draws a vertical line deliminaing historical data and forecasts.
+#' @param vline.lty,vline.col graphical parameters affecting the appearance of the vertical line. See \code{\link{par}}.
+#' @param \dots further arguments passed to \code{\link{ts.plot}}. Sensible choices are \code{xlim} and \code{ylim} to restrict the plot range.
 #' @export
-# TODO: multiple plot types...
-plot.dfm_forecast <- function(x, ...) { # , type = c("joint", "individual", "residual")
-  F <- x$F
-  Fr <- range(F)
+# TODO: multiple plot types...# , type = c("joint", "individual")
+# also arguments show = c("both", "factors", "data"), and
+# Also put plot on original timescale if ts object
+plot.dfm_forecast <- function(x,
+                              main = paste(x$h, "Period Ahead DFM Forecast"),
+                              xlab = "Time", ylab = "Standardized Data",
+                              factors = 1:ncol(x$F), factor.col = rainbow(length(factors)), factor.lwd = 1.5,
+                              fcst.lty = "dashed",
+                              data.col = c("grey85", "grey65"),
+                              legend = TRUE, legend.items = paste0("f", factors),
+                              grid = FALSE, vline = TRUE, vline.lty = "dotted", vline.col = "black", ...) {
+
+  dcl <- is.character(data.col[1L]) && nzchar(data.col[1L])
+  ffl <- length(factors) && !is.na(factors[1L]) && factors[1L] > 0L
+  nyliml <- !(...length() && any(...names() == "ylim"))
+  if(!ffl) factors <- 1L
+  F <- x$F[, factors, drop = FALSE]
   r <- ncol(F)
-  cols <- rainbow(r)
-  F <- rbind(F, matrix(NA_real_, x$h, r))
-  X <- x$X
-  T <- nrow(X)
-  n <- ncol(X)
-  Xr <- range(X, na.rm = TRUE)
-  Pr <- range(c(x$F_fcst, x$X_fcst))
-  X <- rbind(X, matrix(NA_real_, x$h, n))
-  F_fcst <- rbind(matrix(NA_real_, T, r), x$F_fcst)
-  X_fcst <- rbind(matrix(NA_real_, T, n), x$X_fcst)
-  ts.plot(X, col = "grey85", ylim = c(min(Xr[1L], Fr[1L], Pr[1L]), max(Xr[2L], Fr[2L], Pr[1L])))
-  for (i in seq_len(n)) lines(X_fcst[, i], col = "grey65", lty = 3)
-  for (i in seq_len(r)) {
-    lines(F[, i], col = cols[i])
-    lines(F_fcst[, i], col = cols[i], lty = 3)
+  T <- nrow(F)
+  if(ffl) {
+    if(nyliml) Fr <- range(F)
+    F_fcst <- x$F_fcst[, factors, drop = FALSE]
+    F <- rbind(F, matrix(NA_real_, x$h, r))
+  } else Fr <- NULL
+  if(dcl) {
+    X <- x$X
+    n <- ncol(X)
+    if(nyliml) {
+      Xr <- range(X, na.rm = TRUE)
+      Pr <- range(if(ffl) c(F_fcst, x$X_fcst) else x$X_fcst)
+    }
+    X_fcst <- rbind(matrix(NA_real_, T-1L, n), X[T, , drop = FALSE], x$X_fcst)
+    X <- rbind(X, matrix(NA_real_, x$h, n))
+  } else {
+    data.col <- Xr <- NULL
+    X <- F[, 1L]
+    if(nyliml) Pr <- range(F_fcst)
   }
-  legend("topleft", paste("Factor", seq_len(r)), col = cols, lty = 1, bty = "n")
+  if(ffl) F_fcst <- rbind(matrix(NA_real_, T-1L, r), F[T, , drop = FALSE], F_fcst)
+  if(nyliml) {
+    ts.plot(X, col = data.col[1L],
+            ylim = c(min(Xr[1L], Fr[1L], Pr[1L]), max(Xr[2L], Fr[2L], Pr[1L])),
+            main = main, xlab = xlab, ylab = ylab, ...)
+  } else ts.plot(X, col = data.col[1L], main = main, xlab = xlab, ylab = ylab, ...)
+  if(grid) grid()
+  if(dcl) for (i in seq_len(n)) lines(X_fcst[, i], col = data.col[2L], lty = fcst.lty)
+  if(ffl) for (i in seq_len(r)) {
+    lines(F[, i], col = factor.col[i], lwd = factor.lwd)
+    lines(F_fcst[, i], col = factor.col[i], lwd = factor.lwd, lty = fcst.lty)
+  }
+  if(ffl && legend) legend("topleft", legend.items, col = factor.col,
+                           lwd = factor.lwd, lty = 1L, bty = "n")
+  if(vline) abline(v = T, col = vline.col, lwd = 1L, lty = vline.lty)
 }
 
 # interpolate.dfm <- function(x, method = "qml", interpolate = TRUE) {

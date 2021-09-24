@@ -19,7 +19,24 @@
 
 \method{print}{dfm_forecast}(x, digits = 4L, ...)
 
-\method{plot}{dfm_forecast}(x, ...)
+\method{plot}{dfm_forecast}(
+  x,
+  main = paste(x$h, "Period Ahead DFM Forecast"),
+  xlab = "Time",
+  ylab = "Standardized Data",
+  factors = 1:ncol(x$F),
+  factor.col = rainbow(length(factors)),
+  factor.lwd = 1.5,
+  fcst.lty = "dashed",
+  data.col = c("grey85", "grey65"),
+  legend = TRUE,
+  legend.items = paste0("f", factors),
+  grid = FALSE,
+  vline = TRUE,
+  vline.lty = "dotted",
+  vline.col = "black",
+  ...
+)
 }
 \arguments{
 \item{object}{an object of class 'dfm'.}
@@ -33,14 +50,36 @@ The function needs to have a second argument providing the forecast horizon (\co
 
 \item{resAC}{numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.}
 
+\item{\dots}{further arguments passed to \code{\link{ts.plot}}. Sensible choices are \code{xlim} and \code{ylim} to restrict the plot range.}
+
 \item{digits}{integer. The number of digits to print out.}
+
+\item{main, xlab, ylab}{character. Graphical parameters passed to \code{\link{ts.plot}}.}
+
+\item{factors}{integers indicating which factors to display. Setting this to \code{NA}, \code{NULL} or \code{0} will omit factor plots.}
+
+\item{factor.col, factor.lwd}{graphical parameters affecting the colour and line width of factor estimates plots. See \code{\link{par}}.}
+
+\item{fcst.lty}{integer or character giving the line type of the forecasts of factors and data. See \code{\link{par}}.}
+
+\item{data.col}{character vector of length 2 indicating the colours of historical data and forecasts of that data. Setting this to \code{NA}, \code{NULL} or \code{""} will not plot data and data forecasts.}
+
+\item{legend}{logical. \code{TRUE} draws a legend in the top-left of the chart.}
+
+\item{legend.items}{character names of factors for the legend.}
+
+\item{grid}{logical. \code{TRUE} draws a grid on the background of the plot.}
+
+\item{vline}{logical. \code{TRUE} draws a vertical line deliminaing historical data and forecasts.}
+
+\item{vline.lty, vline.col}{graphical parameters affecting the appearance of the vertical line. See \code{\link{par}}.}
 }
 \description{
 This function produces h-step ahead forecasts of both the factors and the data,
 with an option to also forecast autocorrelated residuals with a univariate method and produce a combined forecast.
 }
 \examples{
-dfm <- DFM(diff(Eustockmarkets), 2, 2)
+dfm <- DFM(diff(Seatbelts[, 1:7], lag = 12), 3, 3)
 predict(dfm)
 fcfun <- function(x, h) predict(ar(x), n.ahead = h)$pred
 predict(dfm, resFUN = fcfun)
