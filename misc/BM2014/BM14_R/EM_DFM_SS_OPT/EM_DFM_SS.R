@@ -56,7 +56,7 @@ EM_DFM_SS_OPT <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4) {
   LL = -Inf
   converged = FALSE
 
-  # Y for the estimation is WITH missing data
+  # Y for the final estimation WITH missing data
   Y = t(X_STD)
 
   #--------------------------------------------------------------------------
