@@ -1,161 +1,166 @@
 #--------------------------------------------------------------------------
 # KALMAN FILTER
 #--------------------------------------------------------------------------
-# y = y_est; x_0 = Z_0; Sig_0 = V_0
-runKF <- function(y, A, C, Q, R, x_0, Sig_0, S) { # [xsmooth, Vsmooth, VVsmooth, loglik]
 
-  S = SKF(y, C, R, A, Q, x_0, Sig_0, S) # Stationary Kalman Filter
-  S = FIS(y, C, R, A, Q, S)             # Fixed-Interval Smoother
+runKF <- function(Y, A, C, Q, R, Z_0, V_0, S) {
 
-  list(xsmooth = S$AmT,
-       Vsmooth = S$PmT,
-       VVsmooth = S$PmT_1,
-       loglik = S$loglik)
+  S = SKF(Y, C, R, A, Q, Z_0, V_0, S)   # Stationary Kalman Filter
+  return(FIS(Y, C, R, A, Q, S))         # Fixed-Interval Smoother
+
 }
 
 
 #______________________________________________________________________
-# Kalman filter for stationary systems with time-varying system matrices
-# and missing data.
+# Kalman filter for stationary systems with time-varying system matrices and missing data.
 #
-# The model is        y_t   = Z * a_t + eps_t
-#                     a_t+1 = T * a_t + u_t
+# The model is        Y_t   = C * Z_t + r_t ~ N(0, R)
+#                     Z_t+1 = A * Z_t + q_t ~ N(0, Q)
+#                     Cov(Z_t) = V; Cov(Z_t+1,Z_t) = VV
 #
 #______________________________________________________________________
 # INPUT
-#        Y         Data                                  (nobs x n)
-# OUTPUT
-#        S.Am       Predicted state vector  A_t|t-1      (nobs x m)
-#        S.AmU      Filtered  state vector  A_t|t        (nobs+1 x m)
-#        S.Pm       Predicted covariance of A_t|t-1      (nobs x m x m)
-#        S.PmU      Filtered  covariance of A_t|t        (nobs+1 x m x m)
+#        Y         Data                                  (n x T)
+#        C         Observation Matrix                    (n x rp)
+#        R         Observation Covariance Matrix         (n x n)
+#        A         Transition Matrix                     (rp x rp)
+#        Q         Transition Covariance Matrix          (rp x rp)
+#        Z_0       Factor Initialization (zeros)         (rp x 1)
+#        V_0       Factor Covariance, PCA Estimates      (rp x rp)
+#        S         Structure with empty results matrices
+#
+# OUTPUT (including initisation values in first obs)
+#        S.ZT       Predicted state vector  Z_t|t-1      (rp x T)
+#        S.ZT_0     Filtered  state vector  Z_t|t        (rp x T+1)
+#        S.VT       Predicted covariance of Z_t|t-1      (rp x rp x T)
+#        S.VT_0     Filtered  covariance of Z_t|t        (rp x rp x T+1)
 #        S.loglik   Value of likelihood function
-SKF <- function(Y, Z, R, T, Q, A_0, P_0, S) {
+#        S.KC       Kalman Gain * observation matrix of final period, for smoothing...
+
+SKF <- function(Y, C, R, A, Q, Z_0, V_0, S) {
 
   # Output structure & dimensions
-  c("n", "m") %=% dim(Z) # Note: m = rp
-  nobs  = ncol(Y)
+  T  = ncol(Y)
+  S$ZT_0[, 1L]  = Z_0
+  S$VT_0[,, 1L] = V_0
 
-  # ______________________________________________________________________
-  Au = A_0  # A_0|0;
-  Pu = P_0  # P_0|0
+  for (t in 1:T) {
 
-  S$AmU[, 1L]  = Au
-  S$PmU[,, 1L] = Pu
-  e = diag(n)     # Used to be in MissData
+    ### (1) Time update (Predict future state / factors before new measurement comes in)
+    Z   = A %*% Z_0                         # A-priori prediction of factors from transition equation: Z = Z_t|t-1
+    V   = A %*% tcrossprod(V_0, A) + Q      # A-priori estimate of the transition error covariance:    V = V_t|t-1
+    V   =  0.5 * (V + t(V))                 # Ensure symmetry
 
-  for (t in 1:nobs) {
-    # print(t)
-    # A = A_t|t-1 & P = P_t|t-1
-    A   = T %*% Au
-    P   = T %*% tcrossprod(Pu, T) %+=% Q
-    P   =  0.5 * (P + t(P))
+    ### (2) handling the missing data: simply removing...
+    c("y_t", "C_t", "R_t") %=% MissData(Y[, t], C, R)
 
-    # handling the missing data
-    c("y_t", "Z_t", "R_t", "L_t") %=% MissData(Y[, t], Z, R, e)
+    ### (3) Measurement Update (Correct)
+    if(!length(y_t)) { # If no data, take predictions and move on
+      Z_0 = Z
+      V_0 = V
+    } else {
+      # Kalman Gain K = VC'(CVC' + R)^(-1)
+      # is chosen to be the gain or blending factor that minimizes the a-posteriori error covariance V.
+      # As the measurement error covariance R_t approaches zero, the gain K is larger and weights the measurement residual more heavily
+      # If measurement error tends to zero lim R -> 0 then K -> C^(-1).
+      VC  = tcrossprod(V, C_t)
+      iF  = ainv(C_t %*% VC %+=% R_t)    # Inverse: needed for Kalman Gain and likelihood
+      K = VC %*% iF                      # Kalman Gain
+      MR  = y_t - C_t %*% Z              # Measurement Residual: also needed for likelihood
+      Z_0  = Z + K %*% MR                # A-posteriori factor estimate: Kalman gain weights contribution of new measurement to prediction
+      V_0  = V  - tcrossprod(K, VC)      # This now gets the a-posteriori error covariance estimate...
+      # ... if measurement error tends to zero lim R -> 0 then K -> C^(-1), and V_0 = V - V = 0 (perfect measurement, zero error)
+      V_0  =  0.5 * (V_0 + t(V_0))       # Ensure symmetry
+      # Compute log-likelihood
+      S$loglik = S$loglik + 0.5 * (log(det(iF)) - crossprod(MR, iF) %*% MR)
+    }
 
-      if(!length(y_t)) {
-        Au = A
-        Pu = P
-      } else {
-        PZ  = tcrossprod(P, Z_t)
-        iF  = cinv(Z_t %*% PZ %+=% R_t)
-        PZF = PZ %*% iF
-        V   = y_t - Z_t %*% A
-        Au  = A  + PZF %*% V
-        Pu  = P  - tcrossprod(PZF, PZ)
-        Pu  =  0.5 * (Pu + t(Pu))
-        S$loglik = S$loglik + 0.5 * (log(det(iF)) - crossprod(V, iF) %*% V)
-      }
+    # Save results: Initial prediction
+    S$ZT[, t]  = Z  # Z = Z_t|t-1
+    S$VT[,, t] = V  # V = V_t|t-1
 
-    S$Am[, t]  = A
-    S$Pm[,, t] = P
-
-    # Au = A_t|t & Pu = P_t|t
-    S$AmU[, t + 1L]  = Au
-    S$PmU[,, t + 1L] = Pu
+    # Save results: Final prediction
+    S$ZT_0[, t + 1L]  = Z_0  # Z_0 = Z_t|t
+    S$VT_0[,, t + 1L] = V_0  # V_0 = V_t|t
   }
 
-  S$KZ = if(!length(y_t)) matrix(0, m, m) else PZF %*% Z_t
+  S$KC = if(!length(y_t)) matrix(0, ncol(C), ncol(C)) else K %*% C_t # Needed for smoothing...
   return(S)
 }
 
 
 #______________________________________________________________________
 # Fixed intervall smoother (see Harvey, 1989, p. 154)
-# FIS returns the smoothed state vector AmT and its covar matrix PmT
+# FIS returns the smoothed state vector Zsmooth and its covar matrix Vsmooth
 # Use this in conjnuction with function SKF
 #______________________________________________________________________
 # INPUT
-#        Y         Data                                 (nobs x n)
-#        S Estimates from Kalman filter SKF
-#          S.Am   : Estimates     a_t|t-1                  (nobs x m)
-#          S.Pm   : P_t|t-1 = Cov(a_t|t-1)             (nobs x m x m)
-#          S.AmU  : Estimates     a_t|t                    (nobs x m)
-#          S.PmU  : P_t|t   = Cov(a_t|t)               (nobs x m x m)
+#        Y, C, R, A, Q                See SKF Inputs
+#        S.ZT, S.ZT_0, S.VT, S.VT_0   See SKF Outputs
+#
 # OUTPUT
 #        S Smoothed estimates added to above
-#          S.AmT  : Estimates     a_t|T                    (nobs x m)
-#          S.PmT :  P_t|T   = Cov(a_t|T)               (nobs x m x m)
-#          S.PmU : Cov(a_ta_t-1|T)
-#        where m is the dim of state vector and t = 1 ...T is time
+#        S.Zsmooth  : Estimates     Z_t|T                    (T x rp)
+#        S.Vsmooth :  V_t|A   = Cov(Z_t|T)               (T x rp x rp)
+#        S.VT_0 : Cov(Z_tZ_t-1|T)
+#        where rp is the dim of state vector and t = 1 ...T is time
 
-# Y = y; Z = C; T = A
-FIS <- function(Y, Z, R, T, Q, S) {
+FIS <- function(Y, C, R, A, Q, S) {
 
-  c("m", "nobs") %=% dim(S$Am)
-  nobsp = nobs + 1L
-  S$AmT             = matrix(0, m, nobsp)
-  S$PmT             = array(0, c(m, m, nobsp))
-  S$PmT_1           = array(0, c(m, m, nobs))
-  S$AmT[, nobsp]    = S$AmU[, nobsp]
-  S$PmT[,, nobsp]   = S$PmU[,, nobsp]
-  S$PmT_1[,, nobs]  = (diag(m) - S$KZ) %*% T %*% S$PmU[,, nobs]
+  # Output structure & dimensions
+  list2env(S, envir = environment())
+  c("rp", "T") %=% dim(ZT)
+  Tp = T + 1L
 
-  dm = c(m, m)
-  tmp = S$Pm[,, nobs]
+  # First Smoothing observation is last filtering observation
+  ZsmoothT[, Tp]   = ZT_0[, Tp]
+  VsmoothT[,, Tp]  = VT_0[,, Tp]
+  VVsmoothT[,, T]  = (diag(rp) - KC) %*% A %*% VT_0[,, T]
+
+  # If rp = 1, need to set dimensions...
+  dm = c(rp, rp)
+  tmp = VT[,, T]
   dim(tmp) = dm
-  J_2 = tcrossprod(S$PmU[,, nobs], T) %*% apinv(tmp)
+  J_2 = tcrossprod(VT_0[,, T], A) %*% apinv(tmp)
 
-  for (t in nobs:1) {
-    PmU = S$PmU[,, t]
-    Pm1 = S$Pm[,, t]
-    P_T = S$PmT[,, t + 1L]
-    P_T1 = S$PmT_1[,, t]
+  # TODO: Add comments + can optimize??
+  for (t in T:1) {
+    Z_0 = ZT_0[, t]
+    V_0 = VT_0[,, t]
     J_1 = J_2
 
-    S$AmT[, t]  = S$AmU[, t] + J_1 %*% (S$AmT[, t + 1L] - T %*% S$AmU[, t])
-    S$PmT[,, t] = PmU        + J_1 %*% tcrossprod(P_T - Pm1, J_1)
+    ZsmoothT[, t]  = Z_0 + J_1 %*% (ZsmoothT[, t+1L] - A %*% Z_0)
+    VsmoothT[,, t] = V_0 + J_1 %*% tcrossprod(VsmoothT[,, t+1L] - VT[,, t], J_1)
 
     if(t > 1L) {
-      tmp = S$Pm[,, t-1L]
+      tmp = VT[,, t-1L]
       dim(tmp) = dm
-      J_2 = tcrossprod(S$PmU[,, t-1L], T) %*% apinv(tmp)
-      S$PmT_1[,, t-1L] = tcrossprod(PmU, J_2) + J_1 %*% tcrossprod(P_T1 - T %*% PmU, J_2)
+      J_2 = tcrossprod(VT_0[,, t-1L], A) %*% apinv(tmp)
+      VVsmoothT[,, t-1L] = tcrossprod(V_0, J_2) + J_1 %*% tcrossprod(VVsmoothT[,, t] - A %*% V_0, J_2)
     }
   }
-  return(S)
+
+  return(list(Zsmooth = ZsmoothT,
+              Vsmooth = VsmoothT,
+              VVsmooth = VVsmoothT,
+              loglik = loglik))
 }
 
 #______________________________________________________________________
 # PROC missdata
-# PURPOSE: eliminates the rows in y & matrices Z, G that correspond to
-#          missing data (NaN) in y
-# INPUT    y             vector of observations at time t  (n x 1 )
-#          S             KF system matrices             (structure)
-#                        must contain Z & G
-# OUTPUT   y             vector of observations (reduced)   (# x 1)
-#          Z G           KF system matrices     (reduced)   (# x ?)
-#          L             To restore standard dimensions     (n x #)
-#                        where # is the nr of available data in y
+# PURPOSE: eliminates the rows in Y & matrices C, R that correspond to
+#          missing data (NaN) in Y
+# INPUT    y_t           vector of observations at time t   (n x 1)
+#          C, R          KF system matrices: n x rp and n x n
+#
+# OUTPUT   y_t           vector of observations (reduced)   (# x 1)
+#          C R           KF system matrices     (reduced)   (# x ?)
 #______________________________________________________________________
 
-MissData <- function(y, C, R, e) { # [y,C,R,L]
-  if(!anyNA(y)) return(list(y, C, R, e))
-  ix = whichNA(y, invert = TRUE)
-  # if(length(ix) == length(y)) return(list(y, C, R, e))
-  list(y[ix],
+MissData <- function(y_t, C, R) {
+  if(!anyNA(y_t)) return(list(y_t, C, R))
+  ix = whichNA(y_t, invert = TRUE)
+  # if(length(ix) == length(y_t)) return(list(y_t, C, R))
+  list(y_t[ix],
        C[ix,, drop = FALSE],
-       R[ix, ix, drop = FALSE],
-       e[, ix, drop = FALSE])
+       R[ix, ix, drop = FALSE])
 }

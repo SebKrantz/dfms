@@ -50,17 +50,11 @@ InitCond <- function(x, r, p, optNaN) { # [A, C, Q, R, initZ, initV]
   return(list(A = A, C = C, Q = Q, R = R, initZ = initZ, initV = initV))
 }
 
-# sum3 <- function(a) {
-#   d <- dim(a)
-#   if(length(d) != 3L) stop("a needs to be a 3D array")
-#   dim(a) <- c(d[1L] * d[2L], d[3L])
-#   sa <- rowSums(a, dims = 2)
-# }
 
-EMstep_OPT <- function(y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C_new, R_new, A_new, Q_new, Z_0, V_0, loglik]
+EMstep_OPT <- function(Y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C_new, R_new, A_new, Q_new, Z_0, V_0, loglik]
 
-  c("n", "T") %=% dim(y)
-  c("Zsmooth", "Vsmooth", "VVsmooth", "loglik") %=% runKF(y, A, C, Q, R, Z_0, V_0, S)
+  c("n", "T") %=% dim(Y)
+  c("Zsmooth", "Vsmooth", "VVsmooth", "loglik") %=% runKF(Y, A, C, Q, R, Z_0, V_0, S)
   nc = dim(Zsmooth)[2L]
   ncv = dim(Vsmooth)[3L]
   sr = 1:r
@@ -74,18 +68,17 @@ EMstep_OPT <- function(y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C
   A_new = A
   A_new[sr, ] = EZZ_FB[sr, , drop = FALSE] %*% ainv(EZZ_BB)
   Q_new = Q;
-  # return(list(Q_new, EZZ, A_new, EZZ_FB, T))
   Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
 
   # E(Y'Y) & E(Y'Z)
-  nanY = is.na(y)
-  y[nanY] = 0
+  nanY = is.na(Y)
+  Y[nanY] = 0
 
   denom = numeric(n*r^2)
   nom = matrix(0, n, r)
   for (t in 1:T) {
       tmp = Zsmooth[sr, t+1L]
-      nom %+=% tcrossprod(y[, t], tmp)
+      nom %+=% tcrossprod(Y[, t], tmp)
       tmp2 = tcrossprod(tmp) + Vsmooth[sr, sr, t+1L]
       dim(tmp2) = NULL
       denom %+=% tcrossprod(tmp2, !nanY[, t])
@@ -93,7 +86,7 @@ EMstep_OPT <- function(y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C
 
   dim(denom) = c(r, r, n)
   dnkron[dnkron_ind] = aperm(denom, c(1L, 3L, 2L))
-  C_new = cinv(dnkron) %*% unattrib(nom)
+  C_new = ainv(dnkron) %*% unattrib(nom) # cinv
   dim(C_new) = c(n, r)
 
   R_new = matrix(0, n, n)
@@ -103,7 +96,7 @@ EMstep_OPT <- function(y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C
       R2 = R
       diag(R2) = diag(R) * nanYt
       tmp2 = tmp %*% tcrossprod(Vsmooth[sr, sr, t+1L], tmp)
-      tmp2 %+=% tcrossprod(y[, t] - tmp %*% Zsmooth[sr, t+1L])
+      tmp2 %+=% tcrossprod(Y[, t] - tmp %*% Zsmooth[sr, t+1L])
       tmp2 %+=% R2
       R_new %+=% tmp2
   }
