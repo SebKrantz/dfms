@@ -2,7 +2,7 @@ library(collapse) # 1.8+
 library(roll)
 library(DFM)
 
-setwd("~/Documents/R/DFM/misc/BM2014/BM14_R")
+setwd("~/Documents/R/DFM/misc/BM2014/BM14_R/EM_DFM_SS")
 source("remNaNs_spline.R")
 source("runKF.R")
 source("Procedures.R")
