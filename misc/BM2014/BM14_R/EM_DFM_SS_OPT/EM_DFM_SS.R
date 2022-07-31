@@ -9,8 +9,8 @@ source("remNaNs_spline.R")
 source("runKF.R")
 source("Procedures.R")
 
-# TODO: make it work with just 1 factor or lag, and also for 1 series???
-# Also make sure cinv solution is robust!!??
+# TODO: make it work with just 1 series?
+# Also make sure cinv solution is robust!!
 # Also try to use FKF package...
 # FKF::fkf
 
@@ -20,7 +20,7 @@ EM_DFM_SS_OPT <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4) { # Res
   # Preparation of the data
   #--------------------------------------------------------------------------
 
-  X = qM(X) # Matlab works with matrixes...
+  X = qM(X)
   c("T", "N") %=% dim(X)
 
   # Standardise x
