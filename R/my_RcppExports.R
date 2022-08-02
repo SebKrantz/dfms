@@ -1,38 +1,52 @@
+Estep <- function(X, A, C, Q, R, F0, P0) {
+  .Call(Cpp_Estep, X, A, C, Q, R, F0, P0)
+}
+
 #' Implementation of a Kalman filter
 #' @param X Data matrix (T x n)
-#' @param H Observation matrix
-#' @param Q State covariance
-#' @param R Observation covariance
-#' @param F Transition matrix
-#' @param F0 Initial state vector
-#' @param P0 Initial state covariance
-#' @export
-KalmanFilter <- function(X, H, Q, R, F, F0, P0) {
-  .Call(Cpp_KalmanFilter, X, H, Q, R, F, F0, P0)
+#' @param A Transition matrix (rp x rp)
+#' @param C Observation matrix (n x rp)
+#' @param Q State covariance (rp x rp)
+#' @param R Observation covariance (n x n)
+#' @param F0 Initial state vector (rp x 1)
+#' @param P0 Initial state covariance (rp x rp)
+KalmanFilter <- function(X, A, C, Q, R, F0, P0) {
+  .Call(Cpp_KalmanFilter, X, A, C, Q, R, F0, P0)
 }
 
 #' Runs a Kalman smoother
-#' @param F transition matrix
-#' @param H observation matrix
-#' @param R Observation covariance
-#' @param FfT State estimates
-#' @param FpTm State predicted estimates
-#' @param PfT_v Variance estimates
-#' @param PpT_v Predicted variance estimates
+#' @param A Transition matrix (rp x rp)
+#' @param C Observation matrix (n x rp)
+#' @param R Observation covariance (n x n)
+#' @param ZTf State estimates
+#' @param ZTp State predicted estimates
+#' @param VTf_v Variance estimates
+#' @param VTp_v Predicted variance estimates
 #' @return List of smoothed estimates
-#' @export
-KalmanSmoother <- function(F, H, R, FfT, FpT, PfT_v, PpT_v) {
-  .Call(Cpp_KalmanSmoother, F, H, R, FfT, FpT, PfT_v, PpT_v)
+KalmanSmoother <- function(A, C, R, ZTf, ZTp, VTf_v, VTp_v) {
+  .Call(Cpp_KalmanSmoother, A, C, R, ZTf, ZTp, VTf_v, VTp_v)
 }
 
-
-KalmanFilterSmoother <- function(X, H, Q, R, F, F0, P0) {
-  .Call(Cpp_KalmanFilterSmoother, X, H, Q, R, F, F0, P0)
+#' Kalman Filter and Smoother
+#' @param X Data matrix (T x n)
+#' @param A Transition matrix (rp x rp)
+#' @param C Observation matrix (n x rp)
+#' @param Q State covariance (rp x rp)
+#' @param R Observation covariance (n x n)
+#' @param F0 Initial state vector (rp x 1)
+#' @param P0 Initial state covariance (rp x rp)
+KalmanFilterSmoother <- function(X, A, C, Q, R, F0, P0) {
+  .Call(Cpp_KalmanFilterSmoother, X, A, C, Q, R, F0, P0)
 }
 
-Estep <- function(X, H, Q, R, F, F0, P0) {
-  .Call(Cpp_Estep, X, H, Q, R, F, F0, P0)
+ainv <- function(x) {
+  .Call(Cpp_ainv, x)
 }
+
+apinv <- function(x) {
+  .Call(Cpp_apinv, x)
+}
+
 
 
 #' @title Armadillo's Inverse Functions

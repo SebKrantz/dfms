@@ -1,7 +1,7 @@
 # Quoting some functions that need to be evaluated iteratively
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi))
 .EM_BM <- quote(EMstepBM(X, A, C, Q, R, F0, P0))
-.KFS <- quote(KalmanFilterSmoother(X, C, Q, R, A, F0, P0))
+.KFS <- quote(KalmanFilterSmoother(X, A, C, Q, R, F0, P0))
 
 
 #' Estimate a Dynamic Factor Model
@@ -113,7 +113,7 @@
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160.
 #'
 #' @useDynLib DFM, .registration = TRUE
-#' @importFrom collapse fscale qsu fvar fmedian qM unattrib na_omit
+#' @importFrom collapse fscale qsu fvar fmedian qM unattrib na_omit %=%
 #' @export
 
 DFM <- function(X, r, p = 1L, ...,
@@ -180,7 +180,7 @@ DFM <- function(X, r, p = 1L, ...,
   # BM2014: P0 <- matrix(solve(diag(rp^2) - kronecker(A, A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
-  ks_res <- KalmanFilterSmoother(X, C, Q, R, A, F0, P0)
+  ks_res <- KalmanFilterSmoother(X, A, C, Q, R, F0, P0)
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- setCN(ks_res$Fs[, sr, drop = FALSE], fnam)

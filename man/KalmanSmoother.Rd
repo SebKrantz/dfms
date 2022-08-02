@@ -4,32 +4,24 @@
 \alias{KalmanSmoother}
 \title{Runs a Kalman smoother}
 \usage{
-KalmanSmoother(F, H, R, FfT, FpT, PfT_v, PpT_v)
+KalmanSmoother(A, C, R, ZTf, ZTp, VTf_v, VTp_v)
 
-KalmanSmoother(F, H, R, FfT, FpT, PfT_v, PpT_v)
+KalmanSmoother(A, C, R, ZTf, ZTp, VTf_v, VTp_v)
 }
 \arguments{
-\item{F}{transition matrix}
+\item{A}{Transition matrix (rp x rp)}
 
-\item{H}{observation matrix}
+\item{C}{Observation matrix (n x rp)}
 
-\item{R}{Observation covariance}
+\item{R}{Observation covariance (n x n)}
 
-\item{FfT}{State estimates}
+\item{ZTf}{State estimates}
 
-\item{PfT_v}{Variance estimates}
+\item{ZTp}{State predicted estimates}
 
-\item{PpT_v}{Predicted variance estimates}
+\item{VTf_v}{Variance estimates}
 
-\item{A}{transition matrix}
-
-\item{C}{observation matrix}
-
-\item{FT}{State estimates}
-
-\item{PTm}{State predicted estimates}
-
-\item{FpTm}{State predicted estimates}
+\item{VTp_v}{Predicted variance estimates}
 }
 \value{
 List of smoothed estimates

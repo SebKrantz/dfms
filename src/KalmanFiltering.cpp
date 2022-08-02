@@ -4,281 +4,288 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
 
+// TODO: Ensure Symmetry???
 
 //' Implementation of a Kalman filter
 //' @param X Data matrix (T x n)
-//' @param C Observation matrix
-//' @param Q State covariance
-//' @param R Observation covariance
-//' @param A Transition matrix
-//' @param F0 Initial state vector
-//' @param P0 Initial state covariance
+//' @param A Transition matrix (rp x rp)
+//' @param C Observation matrix (n x rp)
+//' @param Q State covariance (rp x rp)
+//' @param R Observation covariance (n x n)
+//' @param F0 Initial state vector (rp x 1)
+//' @param P0 Initial state covariance (rp x rp)
 // [[Rcpp::export]]
-Rcpp::List KalmanFilter(arma::mat X, arma::mat C, arma::mat Q, arma::mat R,
-                        arma::mat A, arma::colvec F0, arma::mat P0) {
+Rcpp::List KalmanFilter(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
+                        arma::mat R, arma::colvec F0, arma::mat P0) {
 
   const int T = X.n_rows;
   const int n = X.n_cols;
   const int rp = A.n_rows;
 
-  double loglik = 0;
-  mat K, Pf, Pp;
-  colvec ff, fp, xe;
+  // In internal code factors are Z (instead of F) and factor covariance V (instead of P),
+  // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
+  // Additionally the results matrices for all time periods have a T in the name.
+
+  double loglik = 0, dn = double(n), detS;
+  colvec Zp = F0, Zf, et;
+  mat K, Vp = P0, Vf, S, VCt;
+
   // Predicted state mean and covariance
-  mat PT(T+1, rp, fill::zeros);
-  cube PpT(rp, rp, T+1, fill::zeros);
+  mat ZTp(T+1, rp, fill::zeros);
+  cube VTp(rp, rp, T+1, fill::zeros);
 
   // Filtered state mean and covariance
-  mat FT(T, rp, fill::zeros);
-  cube PfT(rp, rp, T, fill::zeros);
+  mat ZTf(T, rp, fill::zeros);
+  cube VTf(rp, rp, T, fill::zeros);
 
-  mat tC = C;
-  mat tR = R;
-  mat S;
-  uvec miss;
-  uvec nmiss = find_finite(A.row(0));
-  uvec a(1);
+  // Handling missing values in the filter
+  mat Ci, Ri;
+  uvec miss, nmiss = find_finite(A.row(0)), a(1);
 
-  fp = F0;
-  Pp = P0;
-
-  for (int t=0; t < T; ++t) {
+  for (int i = 0; i < T; ++i) {
 
     // If missing observations are present at some timepoints, exclude the
     // appropriate matrix slices from the filtering procedure.
-    miss = find_finite(X.row(t));
-    C = tC.submat(miss, nmiss);
-    R = tR.submat(miss, miss);
-    a[0] = t;
+    miss = find_finite(X.row(i));
+    Ci = C.submat(miss, nmiss);
+    Ri = R.submat(miss, miss);
+    a[0] = i;
 
-    S = (C * Pp * C.t() + R).i();
+    // Intermediate results
+    VCt = Vp * Ci.t();
+    S = (Ci * VCt + Ri).i();
 
     // Prediction error
-    xe = X.submat(a, miss).t() - C * fp;
+    et = X.submat(a, miss).t() - Ci * Zp;
     // Kalman gain
-    K = Pp * C.t() * S;
+    K = VCt * S;
     // Updated state estimate
-    ff = fp + K * xe;
+    Zf = Zp + K * et;
     // Updated state covariance estimate
-    Pf = Pp - K * C * Pp;
+    Vf = Vp - K * Ci * Vp;
 
     // Compute likelihood. Skip this part if S is not positive definite.
-    if (det(S) > 0) {
-      loglik += -0.5 * (double(n) * log(2.0 * datum::pi) - log(det(S)) +
-        conv_to<double>::from(xe.t() * S * xe));
+    detS = det(S);
+    if(detS > 0) {
+      loglik += -0.5 * (dn * log(2.0 * datum::pi) - log(detS) +
+        conv_to<double>::from(et.t() * S * et));
     }
 
     // Store predicted and filtered data needed for smoothing
-    PT.row(t) = fp.t();
-    PpT.slice(t) = Pp;
-    FT.row(t) = ff.t();
-    PfT.slice(t) = Pf;
+    ZTp.row(i) = Zp.t();
+    VTp.slice(i) = Vp;
+    ZTf.row(i) = Zf.t();
+    VTf.slice(i) = Vf;
 
     // Run a prediction
-    fp = A * FT.row(t).t();
-    Pp = A * PfT.slice(t) * A.t() + Q;
+    Zp = A * ZTf.row(i).t();
+    Vp = A * VTf.slice(i) * A.t() + Q;
 
   }
 
-  return Rcpp::List::create(Rcpp::Named("F") = FT,
-                            Rcpp::Named("Pf") = PfT,
-                            Rcpp::Named("P") = PT,
-                            Rcpp::Named("Pp") = PpT,
+  return Rcpp::List::create(Rcpp::Named("F") = ZTf,
+                            Rcpp::Named("P") = VTf,
+                            Rcpp::Named("F_pred") = ZTp,
+                            Rcpp::Named("P_pred") = VTp,
                             Rcpp::Named("loglik") = loglik);
 }
 
 
+// TODO: Futher Optimize Smoother
+
 //' Runs a Kalman smoother
-//' @param A transition matrix
-//' @param C observation matrix
-//' @param R Observation covariance
-//' @param FT State estimates
-//' @param PTm State predicted estimates
-//' @param PfT_v Variance estimates
-//' @param PpT_v Predicted variance estimates
+//' @param A Transition matrix (rp x rp)
+//' @param C Observation matrix (n x rp)
+//' @param R Observation covariance (n x n)
+//' @param ZTf State estimates
+//' @param ZTp State predicted estimates
+//' @param VTf_v Variance estimates
+//' @param VTp_v Predicted variance estimates
 //' @return List of smoothed estimates
 // [[Rcpp::export]]
 Rcpp::List KalmanSmoother(arma::mat A, arma::mat C, arma::mat R,
-                          arma::mat FT, arma::mat PT,
-                          Rcpp::NumericVector PfT_v, Rcpp::NumericVector PpT_v) {
+                          arma::mat ZTf, arma::mat ZTp,
+                          Rcpp::NumericVector VTf_v,
+                          Rcpp::NumericVector VTp_v) {
 
-  const int T = FT.n_rows;
+  const int T = ZTf.n_rows;
   const int rp = A.n_rows;
   const int n = C.n_rows;
 
-  cube PfT = array2cube(PfT_v);
-  cube PpT = array2cube(PpT_v);
+  cube VTf = array2cube(VTf_v);
+  cube VTp = array2cube(VTp_v);
 
   cube J(rp, rp, T, fill::zeros);
   cube L(n, n, T, fill::zeros);
-  cube K(rp, n, T, fill::zeros);
-
-  cube PsTm(rp, rp, T, fill::zeros);
+  cube Ks(rp, n, T, fill::zeros);
 
   // Smoothed state mean and covariance
-  mat FsT(T, rp, fill::zeros);
-  cube PsT(rp, rp, T, fill::zeros);
-  // Initialize smoothed data with last observation of filtered data
-  FsT.row(T-1) = FT.row(T-1);
-  PsT.slice(T-1) = PfT.slice(T-1);
+  mat ZsT(T, rp, fill::zeros);
+  cube VsT(rp, rp, T, fill::zeros);
+  cube VVsT(rp, rp, T, fill::zeros);
 
-  // cube PsTm(rp,rp,T, fill::zeros);
-  for (int t=0; t < T-1; ++t) {
-    J.slice(t) = PfT.slice(t) * A.t() * PpT.slice(t+1).i();
+  // Initialize smoothed data with last observation of filtered data
+  ZsT.row(T-1) = ZTf.row(T-1);
+  VsT.slice(T-1) = VTf.slice(T-1);
+
+  for (int i = 0; i < T-1; ++i) {
+    J.slice(i) = VTf.slice(i) * A.t() * VTp.slice(i+1).i();
   }
 
   // Smoothed state variable and covariance
-  for (int j=2; j < T+1; ++j) {
+  for (int j = 2; j < T+1; ++j) {
 
-    FsT.row(T-j) = FT.row(T-j) +
-      (J.slice(T-j) * (FsT.row(T-j+1) - PT.row(T-j+1)).t()).t();
+    ZsT.row(T-j) = ZTf.row(T-j) +
+      (J.slice(T-j) * (ZsT.row(T-j+1) - ZTp.row(T-j+1)).t()).t();
 
-    PsT.slice(T-j) = PfT.slice(T-j) +
-      J.slice(T-j) * (PsT.slice(T-j+1) - PpT.slice(T-j+1)) * J.slice(T-j).t();
+    VsT.slice(T-j) = VTf.slice(T-j) +
+      J.slice(T-j) * (VsT.slice(T-j+1) - VTp.slice(T-j+1)) * J.slice(T-j).t();
 
   }
 
   // Additional variables used in EM-algorithm
-  for (int i=0; i < T; ++i) {
-    L.slice(i) = (C * PpT.slice(i) * C.t() + R).i();
-    K.slice(i) = PpT.slice(i) * C.t() * L.slice(i);
+  for (int i = 0; i < T; ++i) {
+    L.slice(i) = (C * VTp.slice(i) * C.t() + R).i();
+    Ks.slice(i) = VTp.slice(i) * C.t() * L.slice(i);
   }
 
-  PsTm.slice(T-1) = (eye(rp,rp) - K.slice(T-1) * C) * A * PfT.slice(T-2);
+  VVsT.slice(T-1) = (eye(rp,rp) - Ks.slice(T-1) * C) * A * VTf.slice(T-2);
 
-  for (int j=2; j < T-1; ++j) {
-    PsTm.slice(T-j) = PfT.slice(T-j) * J.slice(T-j-1).t() + J.slice(T-j)
-    * (PsTm.slice(T-j+1) - A * PfT.slice(T-j))
+  for (int j = 2; j < T-1; ++j) {
+    VVsT.slice(T-j) = VTf.slice(T-j) * J.slice(T-j-1).t() + J.slice(T-j)
+    * (VVsT.slice(T-j+1) - A * VTf.slice(T-j))
     * J.slice(T-j-1).t();
   }
 
-  return Rcpp::List::create(Rcpp::Named("Fs") = FsT,
-                            Rcpp::Named("Ps") = PsT,
-                            Rcpp::Named("PsTm") = PsTm);
+  return Rcpp::List::create(Rcpp::Named("Fs") = ZsT,
+                            Rcpp::Named("Ps") = VsT,
+                            Rcpp::Named("PPs") = VVsT);
 }
 
 
 
 //' Kalman Filter and Smoother
 //' @param X Data matrix (T x n)
-//' @param C Observation matrix
-//' @param Q State covariance
-//' @param R Observation covariance
-//' @param A Transition matrix
-//' @param F0 Initial state vector
-//' @param P0 Initial state covariance
+//' @param A Transition matrix (rp x rp)
+//' @param C Observation matrix (n x rp)
+//' @param Q State covariance (rp x rp)
+//' @param R Observation covariance (n x n)
+//' @param F0 Initial state vector (rp x 1)
+//' @param P0 Initial state covariance (rp x rp)
 // [[Rcpp::export]]
-Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat C, arma::mat Q, arma::mat R,
-                                arma::mat A, arma::colvec F0, arma::mat P0) {
+Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
+                                arma::mat R, arma::colvec F0, arma::mat P0) {
 
   const int T = X.n_rows;
   const int n = X.n_cols;
   const int rp = A.n_rows;
 
-  double loglik = 0;
-  mat K, Pf, Pp;
-  colvec ff, fp, xe;
+  // In internal code factors are Z (instead of F) and factor covariance V (instead of P),
+  // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
+  // Additionally the results matrices for all time periods have a T in the name.
+
+  double loglik = 0, dn = double(n), detS;
+  colvec Zp = F0, Zf, et;
+  mat K, Vp = P0, Vf, S, VCt;
+
   // Predicted state mean and covariance
-  mat PT(T+1, rp, fill::zeros);
-  cube PpT(rp, rp, T+1, fill::zeros);
+  mat ZTp(T+1, rp, fill::zeros);
+  cube VTp(rp, rp, T+1, fill::zeros);
 
   // Filtered state mean and covariance
-  mat FT(T, rp, fill::zeros);
-  cube PfT(rp, rp, T, fill::zeros);
+  mat ZTf(T, rp, fill::zeros);
+  cube VTf(rp, rp, T, fill::zeros);
 
-  mat tC = C;
-  mat tR = R;
-  mat S;
-  uvec miss;
-  uvec nmiss = find_finite(A.row(0));
-  uvec a(1);
+  // Handling missing values in the filter
+  mat Ci, Ri;
+  uvec miss, nmiss = find_finite(A.row(0)), a(1);
 
-  fp = F0;
-  Pp = P0;
-
-  for (int t=0; t < T; ++t) {
+  for (int i = 0; i < T; ++i) {
 
     // If missing observations are present at some timepoints, exclude the
     // appropriate matrix slices from the filtering procedure.
-    miss = find_finite(X.row(t));
-    C = tC.submat(miss, nmiss);
-    R = tR.submat(miss, miss);
-    a[0] = t;
+    miss = find_finite(X.row(i));
+    Ci = C.submat(miss, nmiss);
+    Ri = R.submat(miss, miss);
+    a[0] = i;
 
-    S = (C * Pp * C.t() + R).i();
+    // Intermediate results
+    VCt = Vp * Ci.t();
+    S = (Ci * VCt + Ri).i();
 
     // Prediction error
-    xe = X.submat(a, miss).t() - C * fp;
+    et = X.submat(a, miss).t() - Ci * Zp;
     // Kalman gain
-    K = Pp * C.t() * S;
+    K = VCt * S;
     // Updated state estimate
-    ff = fp + K * xe;
+    Zf = Zp + K * et;
     // Updated state covariance estimate
-    Pf = Pp - K * C * Pp;
+    Vf = Vp - K * Ci * Vp;
 
     // Compute likelihood. Skip this part if S is not positive definite.
-    if (det(S) > 0) {
-      loglik += -0.5 * (double(n) * log(2.0 * datum::pi) - log(det(S)) +
-        conv_to<double>::from(xe.t() * S * xe));
+    detS = det(S);
+    if(detS > 0) {
+      loglik += -0.5 * (dn * log(2.0 * datum::pi) - log(detS) +
+        conv_to<double>::from(et.t() * S * et));
     }
 
     // Store predicted and filtered data needed for smoothing
-    PT.row(t) = fp.t();
-    PpT.slice(t) = Pp;
-    FT.row(t) = ff.t();
-    PfT.slice(t) = Pf;
+    ZTp.row(i) = Zp.t();
+    VTp.slice(i) = Vp;
+    ZTf.row(i) = Zf.t();
+    VTf.slice(i) = Vf;
 
     // Run a prediction
-    fp = A * FT.row(t).t();
-    Pp = A * PfT.slice(t) * A.t() + Q;
+    Zp = A * ZTf.row(i).t();
+    Vp = A * VTf.slice(i) * A.t() + Q;
+
   }
 
-  // Kamlman Smoother
+  // Kalman Smoother
   cube J(rp, rp, T, fill::zeros);
   cube L(n, n, T, fill::zeros);
-  cube KS(rp, n, T, fill::zeros);
-  cube PsTm(rp, rp, T, fill::zeros);
+  cube Ks(rp, n, T, fill::zeros);
 
   // Smoothed state mean and covariance
-  mat FsT(T, rp, fill::zeros);
-  cube PsT(rp, rp, T, fill::zeros);
-  // Initialize smoothed data with last observation of filtered data
-  FsT.row(T-1) = FT.row(T-1);
-  PsT.slice(T-1) = PfT.slice(T-1);
+  mat ZsT(T, rp, fill::zeros);
+  cube VsT(rp, rp, T, fill::zeros);
+  cube VVsT(rp, rp, T, fill::zeros);
 
-  // cube PsTm(rp,rp,T, fill::zeros);
-  for (int t=0; t < T-1; ++t) {
-    J.slice(t) = PfT.slice(t) * A.t() * PpT.slice(t+1).i();
+  // Initialize smoothed data with last observation of filtered data
+  ZsT.row(T-1) = ZTf.row(T-1);
+  VsT.slice(T-1) = VTf.slice(T-1);
+
+  for (int i = 0; i < T-1; ++i) {
+    J.slice(i) = VTf.slice(i) * A.t() * VTp.slice(i+1).i();
   }
 
   // Smoothed state variable and covariance
-  for (int j=2; j < T+1; ++j) {
+  for (int j = 2; j < T+1; ++j) {
 
-    FsT.row(T-j) = FT.row(T-j) +
-      (J.slice(T-j) * (FsT.row(T-j+1) - PT.row(T-j+1)).t()).t();
+    ZsT.row(T-j) = ZTf.row(T-j) +
+      (J.slice(T-j) * (ZsT.row(T-j+1) - ZTp.row(T-j+1)).t()).t();
 
-    PsT.slice(T-j) = PfT.slice(T-j) +
-      J.slice(T-j) * (PsT.slice(T-j+1) - PpT.slice(T-j+1)) * J.slice(T-j).t();
+    VsT.slice(T-j) = VTf.slice(T-j) +
+      J.slice(T-j) * (VsT.slice(T-j+1) - VTp.slice(T-j+1)) * J.slice(T-j).t();
 
   }
 
   // Additional variables used in EM-algorithm
-  for (int i=0; i < T; ++i) {
-    L.slice(i) = (C * PpT.slice(i) * C.t() + R).i();
-    KS.slice(i) = PpT.slice(i) * C.t() * L.slice(i);
+  for (int i = 0; i < T; ++i) {
+    L.slice(i) = (C * VTp.slice(i) * C.t() + R).i();
+    Ks.slice(i) = VTp.slice(i) * C.t() * L.slice(i);
   }
 
-  PsTm.slice(T-1) = (eye(rp,rp) - KS.slice(T-1) * C) * A * PfT.slice(T-2);
+  VVsT.slice(T-1) = (eye(rp,rp) - Ks.slice(T-1) * C) * A * VTf.slice(T-2);
 
-  for (int j=2; j < T-1; ++j) {
-    PsTm.slice(T-j) = PfT.slice(T-j) * J.slice(T-j-1).t() + J.slice(T-j)
-    * (PsTm.slice(T-j+1) - A * PfT.slice(T-j))
+  for (int j = 2; j < T-1; ++j) {
+    VVsT.slice(T-j) = VTf.slice(T-j) * J.slice(T-j-1).t() + J.slice(T-j)
+    * (VVsT.slice(T-j+1) - A * VTf.slice(T-j))
     * J.slice(T-j-1).t();
   }
 
-  return Rcpp::List::create(Rcpp::Named("Fs") = FsT,
-                            Rcpp::Named("Ps") = PsT,
-                            Rcpp::Named("PsTm") = PsTm,
+  return Rcpp::List::create(Rcpp::Named("Fs") = ZsT,
+                            Rcpp::Named("Ps") = VsT,
+                            Rcpp::Named("PPs") = VVsT,
                             Rcpp::Named("loglik") = loglik);
-
 }

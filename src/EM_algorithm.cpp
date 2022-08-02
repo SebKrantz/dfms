@@ -10,19 +10,19 @@ using namespace Rcpp;
 using namespace std;
 
 // [[Rcpp::export]]
-Rcpp::List Estep(arma::mat X, arma::mat C, arma::mat Q, arma::mat R,
-                    arma::mat A, arma::colvec F0, arma::mat P0) {
+Rcpp::List Estep(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
+                 arma::mat R, arma::colvec F0, arma::mat P0) {
 
   const unsigned int T = X.n_rows;
   const unsigned int n = X.n_cols;
   const unsigned int rp = A.n_rows;
 
   // Run Kalman filter and Smoother
-  List ks = KalmanFilterSmoother(X, C, Q, R, A, F0, P0);
+  List ks = KalmanFilterSmoother(X, A, C, Q, R, F0, P0);
   double loglik = as<double>(ks["loglik"]);
   mat Fs = as<mat>(ks["Fs"]);
   cube Psmooth = array2cube(as<NumericVector>(ks["Ps"]));
-  cube Wsmooth = array2cube(as<NumericVector>(ks["PsTm"]));
+  cube Wsmooth = array2cube(as<NumericVector>(ks["PPs"]));
 
   // Run computations and return all estimates
   mat delta(n, rp); delta.zeros();
