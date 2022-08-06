@@ -20,9 +20,9 @@ Rcpp::List Estep(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   // Run Kalman filter and Smoother
   List ks = KalmanFilterSmoother(X, A, C, Q, R, F0, P0);
   double loglik = as<double>(ks["loglik"]);
-  mat Fs = as<mat>(ks["Fs"]);
-  cube Psmooth = array2cube(as<NumericVector>(ks["Ps"]));
-  cube Wsmooth = array2cube(as<NumericVector>(ks["PPs"]));
+  mat Fs = as<mat>(ks["F_smooth"]);
+  cube Psmooth = array2cube(as<NumericVector>(ks["P_smooth"]));
+  cube Wsmooth = array2cube(as<NumericVector>(ks["PPm_smooth"]));
 
   // Run computations and return all estimates
   mat delta(n, rp); delta.zeros();

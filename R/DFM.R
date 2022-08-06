@@ -183,7 +183,7 @@ DFM <- function(X, r, p = 1L, ...,
   ks_res <- KalmanFilterSmoother(X, A, C, Q, R, F0, P0)
 
   ## Two-step solution is state mean from the Kalman smoother
-  F_kal <- setCN(ks_res$Fs[, sr, drop = FALSE], fnam)
+  F_kal <- setCN(ks_res$F_smooth[, sr, drop = FALSE], fnam)
 
   # Results object for the two-step case
   object_init <- list(X_imp = structure(X_imp,
@@ -247,7 +247,8 @@ DFM <- function(X, r, p = 1L, ...,
 
   ## Run the Kalman filtering and smoothing step for the last time
   ## with optimal estimates
-  F_hat <- eval(.KFS, em_res, encl)$Fs
+  F_hat <- eval(.KFS, em_res, encl)$F_smooth
+
   final_object <- c(object_init[1:3],
                list(qml = setCN(F_hat[, sr, drop = FALSE], fnam),
                     A = `dimnames<-`(em_res$A[sr, , drop = FALSE], lagnam(fnam, p)),
