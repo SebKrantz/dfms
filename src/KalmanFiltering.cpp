@@ -4,9 +4,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
 
-// TODO: Ensure Symmetry???
-// Also: skip all missing rows !!
-
 // Implementation of a Kalman filter
 // X Data matrix (T x n)
 // A Transition matrix (rp x rp)
