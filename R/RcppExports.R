@@ -5,39 +5,14 @@ Estep <- function(X, A, C, Q, R, F0, P0) {
     .Call(`_DFM_Estep`, X, A, C, Q, R, F0, P0)
 }
 
-#' Implementation of a Kalman filter
-#' @param X Data matrix (T x n)
-#' @param A Transition matrix (rp x rp)
-#' @param C Observation matrix (n x rp)
-#' @param Q State covariance (rp x rp)
-#' @param R Observation covariance (n x n)
-#' @param F0 Initial state vector (rp x 1)
-#' @param P0 Initial state covariance (rp x rp)
 KalmanFilter <- function(X, A, C, Q, R, F0, P0) {
     .Call(`_DFM_KalmanFilter`, X, A, C, Q, R, F0, P0)
 }
 
-#' Runs a Kalman smoother
-#' @param A Transition matrix (rp x rp)
-#' @param C Observation matrix (n x rp)
-#' @param R Observation covariance (n x n)
-#' @param ZTf State estimates
-#' @param ZTp State predicted estimates
-#' @param VTf_v Variance estimates
-#' @param VTp_v Predicted variance estimates
-#' @return List of smoothed estimates
-KalmanSmoother <- function(A, C, R, ZTf, ZTp, VTf_v, VTp_v) {
-    .Call(`_DFM_KalmanSmoother`, A, C, R, ZTf, ZTp, VTf_v, VTp_v)
+KalmanSmoother <- function(A, ZTf, ZTp, VTf_v, VTp_v) {
+    .Call(`_DFM_KalmanSmoother`, A, ZTf, ZTp, VTf_v, VTp_v)
 }
 
-#' Kalman Filter and Smoother
-#' @param X Data matrix (T x n)
-#' @param A Transition matrix (rp x rp)
-#' @param C Observation matrix (n x rp)
-#' @param Q State covariance (rp x rp)
-#' @param R Observation covariance (n x n)
-#' @param F0 Initial state vector (rp x 1)
-#' @param P0 Initial state covariance (rp x rp)
 KalmanFilterSmoother <- function(X, A, C, Q, R, F0, P0) {
     .Call(`_DFM_KalmanFilterSmoother`, X, A, C, Q, R, F0, P0)
 }
