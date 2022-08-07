@@ -12,11 +12,9 @@ Description: Dynamic factor models constitute a subset of more general state spa
     factor models allowing for state variable to follow a vector autoregressive
     process.
 Depends: R (>= 3.0.0)
-Imports: Rcpp, optimx, collapse
+Imports: Rcpp, collapse
 LinkingTo: Rcpp, RcppArmadillo
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Suggests: xts, testthat, knitr
-VignetteBuilder: knitr
 RoxygenNote: 7.1.2
