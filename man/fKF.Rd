@@ -2,7 +2,7 @@
 % Please edit documentation in R/my_RcppExports.R
 \name{fKF}
 \alias{fKF}
-\title{Fast Stationary Kalman Filter}
+\title{Fast Kalman Filter}
 \usage{
 fKF(X, A, C, Q, R, F0, P0, loglik = FALSE)
 }
@@ -34,5 +34,37 @@ loglik \tab\tab value of the log likelihood
 }
 }
 \description{
-Fast Stationary Kalman Filter
+A simple and fast C++ implementation of the Kalman Filter for stationary data with time-invariant system matrices and missing data.
+}
+\details{
+The underlying state space model is:
+
+\deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \tilde N(\textbf{0}, \textbf{R})}{xt = C Ft + et ~ N(0, R)}
+\deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \tilde N(0, \textbf{Q})}{Ft = A Ft-1 + ut ~ N(0, Q)}
+
+where \eqn{x_t}{xt} is \code{X[t, ]}. The filter then first performs a time update (prediction)
+
+\deqn{\textbf{F}_t = \textbf{A F}_{t-1}}{Ft = A Ft-1}
+\deqn{\textbf{P}_t = \textbf{A P}_{t-1}\textbf{A}' + \textbf{Q}}{Pt = A Pt-1 A' + Q}
+
+where \eqn{P_t = Cov(F_t)}{Pt = Cov(Ft)}. This is followed by the measurement update (filtering)
+
+\deqn{\textbf{K}_t = \textbf{P}_t \textbf{C}' (\textbf{C P}_t \textbf{C}' + \textbf{R})^{-1}}{Kt = Pt C' (C Pt C' + R)^-1}
+\deqn{\textbf{F}_t = \textbf{F}_t + \textbf{K}_t (\textbf{x}_t - \textbf{C F}_t)}{Ft = Ft + Kt (xt - C Ft)}
+\deqn{\textbf{P}_t = \textbf{P}_t - \textbf{K}_t\textbf{C P}_t}{Pt = Pt - Kt C Pt}
+
+If a row of the data is all missing the measurement update is skipped i.e. the prediction becomes the filtered value. The log-likelihood is
+computed as
+\deqn{1/2 \sum_t \log(|St|)-e_t'S_te_t-T\log(2\pi)}{1/2 sum_t[log(det(St)) - et' St et - T log(2 pi)]}
+where \eqn{S_t = (C P_t C' + R)^{-1}}{St = (C Pt C' + R)^-1} and \eqn{e_t = x_t - C F_t}{et = xt - C Ft} is the prediction error.
+
+For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Kfilter0}.
+For another fast (C-based) implementation that allows time-varying system matrices and non-stationary data see \code{FKF::fkf}.
+}
+\references{
+Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
+
+Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman filter.
+
+Hamilton, J. D. (1994). Time Series Analysis. Princeton university press.
 }
