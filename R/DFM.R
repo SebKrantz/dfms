@@ -182,7 +182,7 @@ DFM <- function(X, r, p = 1L, ...,
   # Initial state and state covariance (P) ------------
   F0 <- rep(0, rp) # ar$X[1L, ] #
   # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  P0 <- if(BMl) matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp) else
+  P0 <- if(!is.na(BMl) && BMl) matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp) else
                 matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
