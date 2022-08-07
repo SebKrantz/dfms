@@ -17,8 +17,8 @@
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
 #'    \tabular{llll}{
-#' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, but does not specifically account for missing values. \cr\cr
-#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014), suitable for datasets with arbitrary patterns of missing data. \cr\cr
+#' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, but does not specifically account for missing values in EM iterations. \cr\cr
+#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014), optimal for datasets with arbitrary patterns of missing data. \cr\cr
 #' \code{"none"} \tab\tab Performs no EM iterations and just returns the twostep estimates from running the data through the Kalman Filter and Smoother once as in
 #' Doz, Giannone and Reichlin (2011) (the Kalman Filter is Initialized with system matrices obtained from a regression and VAR on PCA factor estimates).
 #' This yields significant performance gains over the iterative methods. Final system matrices are estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
