@@ -28,7 +28,7 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
   // Additionally the results matrices for all time periods have a T in the name.
 
-  double loglik = retLL ? 0 : NA_REAL, dn, detS;
+  double loglik = retLL ? 0 : NA_REAL, dn = 0, detS;
   if(retLL) dn = n * log(2.0 * datum::pi);
   colvec Zp = F0, Zf, et;
   mat K, Vp = P0, Vf, S, VCt;
@@ -176,7 +176,7 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
   // Additionally the results matrices for all time periods have a T in the name.
 
-  double loglik = retLL > 0 ? 0 : NA_REAL, dn, detS;
+  double loglik = retLL > 0 ? 0 : NA_REAL, dn = 0, detS;
   if(retLL == 1) dn = n * log(2.0 * datum::pi);
   colvec Zp = F0, Zf, et;
   mat K, Vp = P0, Vf, S, VCt;
