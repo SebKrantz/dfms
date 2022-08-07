@@ -29,8 +29,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // KalmanFilter
-Rcpp::List KalmanFilter(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F0, arma::mat P0);
-RcppExport SEXP _DFM_KalmanFilter(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F0SEXP, SEXP P0SEXP) {
+Rcpp::List KalmanFilter(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F0, arma::mat P0, bool retLL);
+RcppExport SEXP _DFM_KalmanFilter(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F0SEXP, SEXP P0SEXP, SEXP retLLSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -41,7 +41,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type R(RSEXP);
     Rcpp::traits::input_parameter< arma::colvec >::type F0(F0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type P0(P0SEXP);
-    rcpp_result_gen = Rcpp::wrap(KalmanFilter(X, A, C, Q, R, F0, P0));
+    Rcpp::traits::input_parameter< bool >::type retLL(retLLSEXP);
+    rcpp_result_gen = Rcpp::wrap(KalmanFilter(X, A, C, Q, R, F0, P0, retLL));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -61,8 +62,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // KalmanFilterSmoother
-Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F0, arma::mat P0);
-RcppExport SEXP _DFM_KalmanFilterSmoother(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F0SEXP, SEXP P0SEXP) {
+Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F0, arma::mat P0, int retLL);
+RcppExport SEXP _DFM_KalmanFilterSmoother(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F0SEXP, SEXP P0SEXP, SEXP retLLSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -73,7 +74,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type R(RSEXP);
     Rcpp::traits::input_parameter< arma::colvec >::type F0(F0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type P0(P0SEXP);
-    rcpp_result_gen = Rcpp::wrap(KalmanFilterSmoother(X, A, C, Q, R, F0, P0));
+    Rcpp::traits::input_parameter< int >::type retLL(retLLSEXP);
+    rcpp_result_gen = Rcpp::wrap(KalmanFilterSmoother(X, A, C, Q, R, F0, P0, retLL));
     return rcpp_result_gen;
 END_RCPP
 }

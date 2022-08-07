@@ -4,7 +4,7 @@
 \alias{KalmanFilter}
 \title{Implementation of a Kalman filter}
 \usage{
-KalmanFilter(X, A, C, Q, R, F0, P0)
+KalmanFilter(X, A, C, Q, R, F0, P0, loglik = FALSE)
 }
 \arguments{
 \item{X}{Data matrix (T x n)}
@@ -20,6 +20,8 @@ KalmanFilter(X, A, C, Q, R, F0, P0)
 \item{F0}{Initial state vector (rp x 1)}
 
 \item{P0}{Initial state covariance (rp x rp)}
+
+\item{loglik}{logical. Compute log-likelihood?}
 }
 \value{
 Predicted and filtered state vectors and covarainces, including a prediction for period T+1.

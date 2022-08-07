@@ -5,6 +5,7 @@
 using namespace arma;
 
 // TODO: what about likelihood with BM??
+// TODO: Compute without likelihood...
 
 // Implementation of a Kalman filter
 // X Data matrix (T x n)
@@ -14,9 +15,10 @@ using namespace arma;
 // R Observation covariance (n x n)
 // F0 Initial state vector (rp x 1)
 // P0 Initial state covariance (rp x rp)
+// retLL Return log-likelihood.
 // [[Rcpp::export]]
 Rcpp::List KalmanFilter(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                        arma::mat R, arma::colvec F0, arma::mat P0) {
+                        arma::mat R, arma::colvec F0, arma::mat P0, bool retLL = false) {
 
   const int T = X.n_rows;
   const int n = X.n_cols;
@@ -26,7 +28,7 @@ Rcpp::List KalmanFilter(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
   // Additionally the results matrices for all time periods have a T in the name.
 
-  double loglik = 0, dn = double(n), detS;
+  double loglik = retLL ? 0 : NA_REAL, dn = double(n), detS;
   colvec Zp = F0, Zf, et;
   mat K, Vp = P0, Vf, S, VCt;
 
@@ -68,10 +70,12 @@ Rcpp::List KalmanFilter(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
       Vf = Vp - K * Ci * Vp;
 
       // Compute likelihood. Skip this part if S is not positive definite.
-      detS = det(S);
-      if(detS > 0) {
-        loglik += -0.5 * (dn * log(2.0 * datum::pi) - log(detS) +
-          conv_to<double>::from(et.t() * S * et));
+      if(retLL) {
+        detS = det(S);
+        if(detS > 0) {
+          loglik += -0.5 * (dn * log(2.0 * datum::pi) - log(detS) +
+            conv_to<double>::from(et.t() * S * et));
+        }
       }
 
     } else { // If all missing: just prediction.
@@ -159,9 +163,10 @@ Rcpp::List KalmanSmoother(arma::mat A,
 // R Observation covariance (n x n)
 // F0 Initial state vector (rp x 1)
 // P0 Initial state covariance (rp x rp)
+// retLL 0-no likelihood, 1-standard Kalman Filter, 2-BM14
 // [[Rcpp::export]]
 Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                                arma::mat R, arma::colvec F0, arma::mat P0) {
+                                arma::mat R, arma::colvec F0, arma::mat P0, int retLL = 0) {
 
   const int T = X.n_rows;
   const int n = X.n_cols;
@@ -171,7 +176,7 @@ Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat A, arma::mat C, arma::mat
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
   // Additionally the results matrices for all time periods have a T in the name.
 
-  double loglik = 0, dn = double(n), detS;
+  double loglik = retLL > 0 ? 0 : NA_REAL, dn = double(n), detS, etSe;
   colvec Zp = F0, Zf, et;
   mat K, Vp = P0, Vf, S, VCt;
 
@@ -214,10 +219,16 @@ Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat A, arma::mat C, arma::mat
       Vf =  0.5 * (Vf + Vf.t()); // Ensure symmetry
 
       // Compute likelihood. Skip this part if S is not positive definite.
-      detS = det(S);
-      if(detS > 0) {
-        loglik += -0.5 * (dn * log(2.0 * datum::pi) - log(detS) +
-          conv_to<double>::from(et.t() * S * et));
+      if(retLL > 0) {
+        detS = det(S);
+        if(detS > 0) {
+          etSe = conv_to<double>::from(et.t() * S * et);
+          if(retLL == 1) { // Standard Kalman Filter Likelihood
+            loglik += -0.5 * (dn * log(2.0 * datum::pi) - log(detS) + etSe);
+          } else { // Banbura and Mudungo (2014)
+            loglik += 0.5 * (log(detS) - etSe);
+          }
+        }
       }
 
     } else { // If all missing: just prediction.

@@ -5,16 +5,16 @@ Estep <- function(X, A, C, Q, R, F0, P0) {
     .Call(`_DFM_Estep`, X, A, C, Q, R, F0, P0)
 }
 
-KalmanFilter <- function(X, A, C, Q, R, F0, P0) {
-    .Call(`_DFM_KalmanFilter`, X, A, C, Q, R, F0, P0)
+KalmanFilter <- function(X, A, C, Q, R, F0, P0, retLL = FALSE) {
+    .Call(`_DFM_KalmanFilter`, X, A, C, Q, R, F0, P0, retLL)
 }
 
 KalmanSmoother <- function(A, ZTf, ZTp, VTf_v, VTp_v) {
     .Call(`_DFM_KalmanSmoother`, A, ZTf, ZTp, VTf_v, VTp_v)
 }
 
-KalmanFilterSmoother <- function(X, A, C, Q, R, F0, P0) {
-    .Call(`_DFM_KalmanFilterSmoother`, X, A, C, Q, R, F0, P0)
+KalmanFilterSmoother <- function(X, A, C, Q, R, F0, P0, retLL = 0L) {
+    .Call(`_DFM_KalmanFilterSmoother`, X, A, C, Q, R, F0, P0, retLL)
 }
 
 ainv <- function(x) {
