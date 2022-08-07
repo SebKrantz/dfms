@@ -32,7 +32,7 @@ Estep <- function(X, A, C, Q, R, F0, P0) {
 #'
 #' If a row of the data is all missing the measurement update is skipped i.e. the prediction becomes the filtered value. The log-likelihood is
 #' computed as
-#' \deqn{1/2 \sum_t \log(|St|)-e_t'S_te_t-T\log(2\pi)}{1/2 sum_t[log(det(St)) - et' St et - T log(2 pi)]}
+#' \deqn{1/2 \sum_t \log(|St|)-e_t'S_te_t-n\log(2\pi)}{1/2 sum_t[log(det(St)) - et' St et - n log(2 pi)]}
 #' where \eqn{S_t = (C P_t C' + R)^{-1}}{St = (C Pt C' + R)^-1} and \eqn{e_t = x_t - C F_t}{et = xt - C Ft} is the prediction error.
 #'
 #' For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Kfilter0}.
