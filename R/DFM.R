@@ -1,6 +1,6 @@
 # Quoting some functions that need to be evaluated iteratively
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi))
-.EM_BM <- quote(EMstepBM(X, A, C, Q, R, F0, P0))
+.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkron_ind))
 .KFS <- quote(KalmanFilterSmoother(X, A, C, Q, R, F0, P0))
 
 
@@ -140,8 +140,8 @@ DFM <- function(X, r, p = 1L, ...,
   Xstat <- qsu(X)
   X <- fscale(qM(X))
   Xnam <- dimnames(X)[[2L]]
-  T <- dim(X)[1L]
-  n <- dim(X)[2L]
+  dimnames(X) <- NULL
+  n <- ncol(X)
 
   # Missing values
   X_imp <- X
@@ -153,6 +153,7 @@ DFM <- function(X, r, p = 1L, ...,
              envir = environment())
     if(length(na.rm)) X <- X[-na.rm, ]
   }
+  T <- nrow(X)
 
   # Run PCA to get initial factor estimates:
   v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v
@@ -174,10 +175,10 @@ DFM <- function(X, r, p = 1L, ...,
   Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
 
   # Initial state and state covariance (P) ------------
-  F0 <- var$X[1L, ] # rep(0, rp)
+  F0 <- rep(0, rp) # ar$X[1L, ] #
   # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  P0 <- matrix(apinv(kronecker(A, A)) %*% unattrib(Q), rp, rp)
-  # BM2014: P0 <- matrix(solve(diag(rp^2) - kronecker(A, A)) %*% unattrib(Q), rp, rp)
+  P0 <- if(BMl) matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp) else
+                matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
   ks_res <- KalmanFilterSmoother(X, A, C, Q, R, F0, P0)
@@ -224,14 +225,23 @@ DFM <- function(X, r, p = 1L, ...,
   num_iter <- 0L
   converged <- FALSE
 
-  # TODO: What is the good solution with missing values here?? -> Zeros are ignored in crossprod, so it's like skipping those obs
-  cpX <- crossprod(if(anymiss) replace(X_imp, W, 0) else X_imp) # <- crossprod(if(anymiss) na_omit(X) else X)
+  if(BMl) {
+    expr <- .EM_BM
+    dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep
+    dnkron_ind <- whichv(dnkron, 1)
+    XW0 <- X_imp
+    if(anymiss) XW0[W] <- 0 else W <- is.na(X) # TODO: think about this...
+  } else {
+    expr <- .EM_DGR
+    # TODO: What is the good solution with missing values here?? -> Zeros are ignored in crossprod, so it's like skipping those obs
+    cpX <- crossprod(if(anymiss) replace(X_imp, W, 0) else X_imp) # <- crossprod(if(anymiss) na_omit(X) else X)
+  }
   em_res <- list()
-  expr <- if(BMl) .EM_BM else .EM_DGR
   encl <- environment()
   while(num_iter < max.iter && !converged) {
-
+    # print(num_iter)
     em_res <- eval(expr, em_res, encl)
+    # if(is.null(em_res[[1]])) return(em_res)
     loglik <- em_res$loglik
 
     ## Iterate at least min.iter times
