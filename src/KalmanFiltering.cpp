@@ -4,6 +4,8 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
 
+// TODO: what about likelihood with BM??
+
 // Implementation of a Kalman filter
 // X Data matrix (T x n)
 // A Transition matrix (rp x rp)
@@ -248,7 +250,8 @@ Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat A, arma::mat C, arma::mat
   // Initialize smoothed data with last observation of filtered data
   ZsT.row(T-1) = Zf.t();
   VsT.slice(T-1) = Vf;
-  VVsT.slice(T-1) = (eye(rp,rp) - K * Ci) * A * VTf.slice(T-2);
+  K = (miss.n_elem == 0) ? mat(rp, rp, fill::zeros) : K * Ci;
+  VVsT.slice(T-1) = (eye(rp,rp) - K) * A * VTf.slice(T-2);
 
   mat At = A.t(), Jimt = (VTf.slice(T-2) * At * VTp.slice(T-1).i()).t(), Ji;
 
