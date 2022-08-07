@@ -24,7 +24,7 @@ KalmanFilter(X, A, C, Q, R, F0, P0, loglik = FALSE)
 \item{loglik}{logical. Compute log-likelihood?}
 }
 \value{
-Predicted and filtered state vectors and covarainces, including a prediction for period T+1.
+Predicted and filtered state vectors and covariances, including a prediction for period T+1.
 \tabular{lll}{
 F \tab\tab T x rp filtered state vectors \cr\cr
 P \tab\tab rp x rp x T filtered state covariances \cr\cr

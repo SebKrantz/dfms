@@ -2,7 +2,6 @@
 % Please edit documentation in R/methods.R
 \name{predict.dfm}
 \alias{predict.dfm}
-\alias{forecast.dfm}
 \alias{print.dfm_forecast}
 \alias{plot.dfm_forecast}
 \title{DFM Forecasts}
@@ -45,12 +44,16 @@
 
 \item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
 
+\item{standardized}{logical. \code{FALSE} will return factor and data forecasts on the original scale.}
+
 \item{resFUN}{an (optional) function to compute a univariate forecast of the residuals.
 The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.}
 
 \item{resAC}{numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.}
 
 \item{\dots}{further arguments passed to \code{\link{ts.plot}}. Sensible choices are \code{xlim} and \code{ylim} to restrict the plot range.}
+
+\item{x}{object of type 'dfm_forecast', returned from \code{predict.dfm}.}
 
 \item{digits}{integer. The number of digits to print out.}
 
@@ -70,7 +73,7 @@ The function needs to have a second argument providing the forecast horizon (\co
 
 \item{grid}{logical. \code{TRUE} draws a grid on the background of the plot.}
 
-\item{vline}{logical. \code{TRUE} draws a vertical line deliminaing historical data and forecasts.}
+\item{vline}{logical. \code{TRUE} draws a vertical line deliminating historical data and forecasts.}
 
 \item{vline.lty, vline.col}{graphical parameters affecting the appearance of the vertical line. See \code{\link{par}}.}
 }

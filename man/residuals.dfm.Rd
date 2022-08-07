@@ -30,6 +30,8 @@
 \item{orig.format}{logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.}
 
 \item{standardized}{logical. \code{FALSE} will put residuals/fitted values on the original data scale.}
+
+\item{\dots}{not used.}
 }
 \description{
 DFM Residuals and Fitted Values

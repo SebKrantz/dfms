@@ -21,7 +21,7 @@ KalmanFilterSmoother(X, A, C, Q, R, F0, P0, loglik = 0L)
 
 \item{P0}{Initial state covariance (rp x rp)}
 
-\item{loglik}{integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Mudungo (2014).}
+\item{loglik}{integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Modungo (2014).}
 }
 \value{
 All results from \code{\link{KalmanFilter}} and \code{\link{KalmanSmoother}}, and additionally

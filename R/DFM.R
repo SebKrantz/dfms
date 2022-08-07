@@ -16,20 +16,20 @@
 #' @param rQ restrictions on the state (transition) covariance matrix (Q).
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
-#' \tabular{llll}{
+#'    \tabular{llll}{
 #' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, but does not specifically account for missing values. \cr\cr
 #' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014), suitable for datasets with arbitrary patterns of missing data. \cr\cr
 #' \code{"none"} \tab\tab Performs no EM iterations and just returns the twostep estimates from running the data through the Kalman Filter and Smoother once as in
 #' Doz, Giannone and Reichlin (2011) (the Kalman Filter is Initialized with system matrices obtained from a regression and VAR on PCA factor estimates).
 #' This yields significant performance gains over the iterative methods. Final system matrices are estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
 #' }
-#' @param min.inter integer. Minimum number of EM iterations (to ensure a convergence path).
-#' @param max.inter integer. Maximum number of EM iterations.
+#' @param min.iter integer. Minimum number of EM iterations (to ensure a convergence path).
+#' @param max.iter integer. Maximum number of EM iterations.
 #' @param tol numeric. EM convergence tolerance.
 #' @param max.missing numeric. Proportion of series missing for a case to be considered missing.
 #' @param na.rm.method character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
 #' @param na.impute character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
-#' \tabular{llll}{
+#'    \tabular{llll}{
 #' \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
 #' \code{"rnrom"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
 #' \code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
@@ -75,7 +75,7 @@
 #'  \eqn{\textbf{x}_t}{xt} \tab\tab \eqn{n \times 1}{n x 1} vector of observed series at time \eqn{t}{t}: \eqn{(x_{1t}, \dots, x_{nt})'}{(x1t, \dots, xnt)'}. Some observations can be missing.  \cr\cr
 #'  \eqn{\textbf{F}_t}{Ft} \tab\tab \eqn{rp \times 1}{rp x 1} vector of stacked factors at time \eqn{t}{t}: \eqn{(f_{1t}, \dots, f_{rt}, f_{1,t-1}, \dots, f_{r,t-1}, \dots, f_{1,t-p}, \dots, f_{r,t-p})'}{(f1t, \dots, frt, f1t-1, \dots, frt-1, \dots, f1t-p, \dots, frt-p)'}.\cr\cr
 #'  \eqn{\textbf{C}}{C} \tab\tab \eqn{n \times rp}{n x rp} observation matrix. Only the first \eqn{n \times r}{n x r} terms are non-zero, by assumption 3 that \eqn{E[\textbf{x}_t|\textbf{F}_t] = E[\textbf{x}_t|\textbf{f}_t]}{E[Xt|Ft] = E[Xt|ft]} (no relationship of observed series with lagged factors given contemporaneous factors).\cr\cr
-#'  \eqn{\textbf{A}}{A} \tab\tab stacked \eqn{rp \times rp}{rp x rp} state transition matrix consisting of 3 parts: the top \eqn{r \times rp}{r x rp} part provides the dynamic relationships captured by \eqn{(\textbf{A}_1, \dots, \textbf{A}_p)}{(A1, \dots, Ap)} in the dynamic form, the terms \code{A[(r+1):rp, 1:(rp-r)]} constitute an \eqn{(rp-r) \times (rp-r)}{(rp-r) x (rp-r)} identity matrix mapping all lagged factors to their known values at times t. The remining part \code{A[(rp-r+1):rp, (rp-r+1):rp]} is an \eqn{r \times r}{r x r} matrix of zeros. \cr\cr
+#'  \eqn{\textbf{A}}{A} \tab\tab stacked \eqn{rp \times rp}{rp x rp} state transition matrix consisting of 3 parts: the top \eqn{r \times rp}{r x rp} part provides the dynamic relationships captured by \eqn{(\textbf{A}_1, \dots, \textbf{A}_p)}{(A1, \dots, Ap)} in the dynamic form, the terms \code{A[(r+1):rp, 1:(rp-r)]} constitute an \eqn{(rp-r) \times (rp-r)}{(rp-r) x (rp-r)} identity matrix mapping all lagged factors to their known values at times t. The remaining part \code{A[(rp-r+1):rp, (rp-r+1):rp]} is an \eqn{r \times r}{r x r} matrix of zeros. \cr\cr
 #'  \eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr % that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[ft|Ft-1] = E[ft|ft-1] = A1 ft-1} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
 #'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 #' }
@@ -113,14 +113,19 @@
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160.
 #'
 #' @useDynLib DFM, .registration = TRUE
-#' @importFrom collapse fscale qsu fvar fmedian qM unattrib na_omit %=%
+#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% whichv
+#' @importFrom grDevices rainbow
+#' @importFrom graphics abline legend lines par
+#' @importFrom stats filter residuals rnorm spline ts.plot
 #' @export
 
 DFM <- function(X, r, p = 1L, ...,
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
                 em.method = c("DGR", "BM", "none"),
-                min.iter = 25L, max.iter = 100L, tol = 1e-4,
+                min.iter = 25L,
+                max.iter = 100L,
+                tol = 1e-4,
                 max.missing = 0.8,
                 na.rm.method = c("LE", "all"),
                 na.impute = c("median", "rnrom", "median.ma", "median.ma.spline"),
@@ -181,7 +186,7 @@ DFM <- function(X, r, p = 1L, ...,
                 matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
-  ks_res <- KalmanFilterSmoother(X, A, C, Q, R, F0, P0)
+  ks_res <- KalmanFilterSmoother(X, A, C, Q, R, F0, P0, FALSE)
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- setCN(ks_res$F_smooth[, sr, drop = FALSE], fnam)

@@ -9,7 +9,7 @@ tsremimpNA(
   max.missing = 0.5,
   na.rm.method = c("LE", "all"),
   na.impute = c("median", "rnrom", "median.ma", "median.ma.spline"),
-  na.impute.MA = 3L
+  ma.terms = 3L
 )
 }
 \arguments{
@@ -20,12 +20,14 @@ tsremimpNA(
 \item{na.rm.method}{character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.}
 
 \item{na.impute}{character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
-\tabular{llll}{
+   \tabular{llll}{
 \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
 \code{"rnrom"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
 \code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
 \code{"median.ma.spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
 }}
+
+\item{ma.terms}{the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"median.ma"} and \code{"median.ma.spline"}.}
 }
 \value{
 A list with the imputed matrix \code{X_imp}, a missingness matrix \code{W} matching the dimensions of \code{X_imp},

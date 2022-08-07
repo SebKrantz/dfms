@@ -12,7 +12,7 @@ Estep <- function(X, A, C, Q, R, F0, P0) {
 #' @param P0 Initial state covariance (rp x rp)
 #' @param loglik logical. Compute log-likelihood?
 #'
-#' @returns Predicted and filtered state vectors and covarainces, including a prediction for period T+1.
+#' @returns Predicted and filtered state vectors and covariances, including a prediction for period T+1.
 #' \tabular{lll}{
 #' F \tab\tab T x rp filtered state vectors \cr\cr
 #' P \tab\tab rp x rp x T filtered state covariances \cr\cr
@@ -46,7 +46,7 @@ KalmanSmoother <- function(A, F, F_pred, P, P_pred) {
 
 #' Kalman Filter and Smoother
 #' @inheritParams KalmanFilter
-#' @param loglik integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Mudungo (2014).
+#' @param loglik integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Modungo (2014).
 #'
 #' @returns All results from \code{\link{KalmanFilter}} and \code{\link{KalmanSmoother}}, and additionally
 #' a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of Cov(F_smooth_t, F_smooth_t-1|T) and needed for EM iterations.

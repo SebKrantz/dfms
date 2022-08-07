@@ -17,6 +17,8 @@
 
 \item{digits}{integer. The number of digits to print out.}
 
+\item{\dots}{not used.}
+
 \item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
 
 \item{compact}{integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and covariance matrix [R], and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.}

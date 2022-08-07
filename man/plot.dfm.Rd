@@ -17,6 +17,8 @@
 \item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
 
 \item{type}{character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.}
+
+\item{\dots}{further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot.}
 }
 \description{
 Plot DFM

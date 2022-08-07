@@ -10,6 +10,7 @@
 #'
 #' @param x,object an object class 'dfm'.
 #' @param digits integer. The number of digits to print out.
+#' @param \dots not used.
 #' @importFrom collapse qsu
 #' @export
 print.dfm <- function(x,
@@ -28,6 +29,7 @@ print.dfm <- function(x,
 
 #' @rdname summary.dfm
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
+#' @param \dots not used.
 #' @return Summary information following a dynamic factor model estimation.
 #' @importFrom stats cov
 #' @importFrom collapse pwcov
@@ -66,6 +68,7 @@ summary.dfm <- function(object,
 
 #' @rdname summary.dfm
 #' @param compact integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and covariance matrix [R], and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.
+#' @param \dots not used.
 #' @export
 print.dfm_summary <- function(x,
                               digits = 4L,
@@ -112,6 +115,7 @@ print.dfm_summary <- function(x,
 #' @param x an object class 'dfm'.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
 #' @param type character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.
+#' @param \dots further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot.
 #' @importFrom graphics boxplot
 #' @export
 plot.dfm <- function(x,
@@ -127,7 +131,7 @@ plot.dfm <- function(x,
       Xr <- range(x$X_imp)
       Fr <- range(F)
       ts.plot(x$X_imp, col = "grey85", ylim = c(min(Xr[1L], Fr[1L]), max(Xr[2L], Fr[2L])),
-              ylab = "Value", main = "Standardized Series and Factor Estimates")
+              ylab = "Value", main = "Standardized Series and Factor Estimates", ...)
       cols <- rainbow(nf)
       for (i in seq_len(nf)) lines(F[, i], col = cols[i])
       legend("topleft", colnames(F), col = cols, lty = 1, bty = "n")
@@ -140,7 +144,7 @@ plot.dfm <- function(x,
         on.exit(par(oldpar))
         for (i in seq_len(nf)) {
           plot(F[, i], type = 'l', main = paste("Factor", i), col = "red", ylab = "Value",
-               xlab = if(i == nf) "Time" else "")
+               xlab = if(i == nf) "Time" else "", ...)
           lines(F[, i + nf], type = 'l', col = "orange")
           if(qml) lines(F[, i + 2L * nf], type = 'l', col = "blue")
           if(i == 1L) legend("topleft", c("PCA", "2S", if(qml) "QML"),
@@ -151,12 +155,12 @@ plot.dfm <- function(x,
         on.exit(par(oldpar))
         cnF <- colnames(F)
         for (i in seq_len(nf)) plot(F[, i], type = 'l', main = cnF[i], ylab = "Value",
-                                    xlab = if(i == nf) "Time" else "")
+                                    xlab = if(i == nf) "Time" else "" , ...)
       }
     },
     residual = {
       if(method[1L] == "all") stop("Need to choose a specific method for residual plots")
-      boxplot(x$X_imp - tcrossprod(F, x$C), main = "Residuals by input variable")
+      boxplot(x$X_imp - tcrossprod(F, x$C), main = "Residuals by input variable", ...)
     },
     stop("Unknown plot type: ", type[1L])
   )
@@ -173,6 +177,7 @@ plot.dfm <- function(x,
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
 #' @param orig.format logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals/fitted values on the original data scale.
+#' @param \dots not used.
 #' @importFrom collapse TRA.matrix mctl setAttrib pad
 #' @export
 residuals.dfm <- function(object,
@@ -195,8 +200,6 @@ residuals.dfm <- function(object,
   return(qM(res))
 }
 
-resid.dfm <- residuals.dfm
-
 #' @rdname residuals.dfm
 #' @export
 fitted.dfm <- function(object,
@@ -215,8 +218,8 @@ fitted.dfm <- function(object,
   return(qM(res))
 }
 
+#% @aliases forecast.dfm
 #' @name predict.dfm
-#' @aliases forecast.dfm
 #' @aliases print.dfm_forecast
 #' @aliases plot.dfm_forecast
 #'
@@ -228,10 +231,11 @@ fitted.dfm <- function(object,
 #' @param object an object of class 'dfm'.
 #' @param h integer. The forecast horizon.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
+#' @param standardized logical. \code{FALSE} will return factor and data forecasts on the original scale.
 #' @param resFUN an (optional) function to compute a univariate forecast of the residuals.
 #' The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.
 #' @param resAC numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.
-#'
+#' @param \dots further arguments to \code{resFUN}.
 #' @examples
 #' dfm <- DFM(diff(Seatbelts[, 1:7], lag = 12), 3, 3)
 #' predict(dfm)
@@ -271,11 +275,11 @@ predict.dfm <- function(object,
   if(!is.null(resFUN)) {
     if(!is.function(resFUN)) stop("resFUN needs to be a forecasting function with second argument h that produces a numeric h-step ahead forecast of a univariate time series")
     ofl <- !attr(X, "is.list") && length(attr(X, "attributes")[["class"]])
-    resid <- residuals(object, method, orig.format = ofl, standardized = TRUE)
-    if(ofl && length(object$na.rm)) resid <- resid[-object$na.rm, , drop = FALSE] # drop = FALSE?
-    ACF <- AC1(resid, object$anyNA)
+    rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE)
+    if(ofl && length(object$na.rm)) rsid <- rsid[-object$na.rm, , drop = FALSE] # drop = FALSE?
+    ACF <- AC1(rsid, object$anyNA)
     fcr <- which(abs(ACF) >= abs(resAC)) # TODO: Check length of forecast??
-    for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(resid[, i], h, ...))
+    for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(rsid[, i], h, ...))
   } else fcr <- NULL
   # TODO: Unstandardize factors with the average mean and SD??
   if(!standardized) {
@@ -302,11 +306,12 @@ predict.dfm <- function(object,
   class(res) <- "dfm_forecast"
   return(res)
 }
-
-forecast.dfm <- predict.dfm
+# forecast.dfm <- predict.dfm
 
 #' @rdname predict.dfm
+#' @param x object of type 'dfm_forecast', returned from \code{predict.dfm}.
 #' @param digits integer. The number of digits to print out.
+#' @param \dots not used.
 #' @export
 print.dfm_forecast <- function(x,
                                digits = 4L, ...) {
@@ -331,7 +336,7 @@ print.dfm_forecast <- function(x,
 #' @param legend logical. \code{TRUE} draws a legend in the top-left of the chart.
 #' @param legend.items character names of factors for the legend.
 #' @param grid logical. \code{TRUE} draws a grid on the background of the plot.
-#' @param vline logical. \code{TRUE} draws a vertical line deliminaing historical data and forecasts.
+#' @param vline logical. \code{TRUE} draws a vertical line deliminating historical data and forecasts.
 #' @param vline.lty,vline.col graphical parameters affecting the appearance of the vertical line. See \code{\link{par}}.
 #' @param \dots further arguments passed to \code{\link{ts.plot}}. Sensible choices are \code{xlim} and \code{ylim} to restrict the plot range.
 #' @export
