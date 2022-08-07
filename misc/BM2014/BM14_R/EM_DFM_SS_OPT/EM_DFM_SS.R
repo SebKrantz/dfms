@@ -66,6 +66,7 @@ EM_DFM_SS_OPT <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4) {
   # Remove the leading and ending nans for the estimation
   optNaN$method = 3
   Y_narm = t(remNaNs(X_STD, optNaN)$X)
+  dimnames(Y_narm) = NULL
   dnkron = matrix(1, r, r) %x% diag(nrow(Y_narm)) # Used to be inside EMstep
   dnkron_ind = whichv(dnkron, 1)
   T = ncol(Y_narm)

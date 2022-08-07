@@ -124,7 +124,7 @@ FIS <- function(Y, C, R, A, Q, S) {
 
   # TODO: Add comments + can optimize??
   for (t in T:1) {
-    Z_0 = ZT_0[, t]
+    Z_0 = ZT_0[, t] # same as t-1: because has one more slot...
     V_0 = VT_0[,, t]
     J_1 = J_2
 

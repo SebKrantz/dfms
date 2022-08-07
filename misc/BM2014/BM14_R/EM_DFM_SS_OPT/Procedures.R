@@ -54,6 +54,7 @@ InitCond <- function(x, r, p, optNaN) { # [A, C, Q, R, initZ, initV]
 EMstep_OPT <- function(Y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C_new, R_new, A_new, Q_new, Z_0, V_0, loglik]
 
   c("n", "T") %=% dim(Y)
+  dimnames(Y) <- NULL
   c("Zsmooth", "Vsmooth", "VVsmooth", "loglik") %=% runKF(Y, A, C, Q, R, Z_0, V_0, S)
   nc = dim(Zsmooth)[2L]
   ncv = dim(Vsmooth)[3L]
@@ -81,7 +82,7 @@ EMstep_OPT <- function(Y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C
       nom %+=% tcrossprod(Y[, t], tmp)
       tmp2 = tcrossprod(tmp) + Vsmooth[sr, sr, t+1L]
       dim(tmp2) = NULL
-      denom %+=% tcrossprod(tmp2, !nanY[, t])
+      denom %+=% tcrossprod(tmp2, !nanY[, t]) # outer() ??? -> Nope, tcrossprod is faster...
   }
 
   dim(denom) = c(r, r, n)
