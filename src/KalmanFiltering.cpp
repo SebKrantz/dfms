@@ -28,7 +28,8 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
   // Additionally the results matrices for all time periods have a T in the name.
 
-  double loglik = retLL ? 0 : NA_REAL, dn = double(n), detS;
+  double loglik = retLL ? 0 : NA_REAL, dn, detS;
+  if(retLL) dn = n * log(2.0 * datum::pi);
   colvec Zp = F0, Zf, et;
   mat K, Vp = P0, Vf, S, VCt;
 
@@ -72,10 +73,7 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
       // Compute likelihood. Skip this part if S is not positive definite.
       if(retLL) {
         detS = det(S);
-        if(detS > 0) {
-          loglik += -0.5 * (dn * log(2.0 * datum::pi) - log(detS) +
-            conv_to<double>::from(et.t() * S * et));
-        }
+        if(detS > 0) loglik += log(detS) - conv_to<double>::from(et.t() * S * et) - dn;
       }
 
     } else { // If all missing: just prediction.
@@ -94,6 +92,8 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
     Vp = A * VTf.slice(i) * A.t() + Q;
 
   }
+
+  if(retLL) loglik *= 0.5;
 
   // Store final prediction for time T+1 (prediction for time 1 was initialization values)
   ZTp.row(T) = Zp.t();
@@ -176,7 +176,8 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
   // Additionally the results matrices for all time periods have a T in the name.
 
-  double loglik = retLL > 0 ? 0 : NA_REAL, dn = double(n), detS, etSe;
+  double loglik = retLL > 0 ? 0 : NA_REAL, dn, detS;
+  if(retLL == 1) dn = n * log(2.0 * datum::pi);
   colvec Zp = F0, Zf, et;
   mat K, Vp = P0, Vf, S, VCt;
 
@@ -222,12 +223,8 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
       if(retLL > 0) {
         detS = det(S);
         if(detS > 0) {
-          etSe = conv_to<double>::from(et.t() * S * et);
-          if(retLL == 1) { // Standard Kalman Filter Likelihood
-            loglik += -0.5 * (dn * log(2.0 * datum::pi) - log(detS) + etSe);
-          } else { // Banbura and Mudungo (2014)
-            loglik += 0.5 * (log(detS) - etSe);
-          }
+          loglik += log(detS) - conv_to<double>::from(et.t() * S * et);
+          if(retLL == 1) loglik -= dn; // Standard Kalman Filter Likelihood
         }
       }
 
@@ -248,6 +245,8 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
     Vp =  0.5 * (Vp + Vp.t()); // Ensure symmetry
 
   }
+
+  if(retLL > 0) loglik *= 0.5;
 
   // Store final prediction for time T+1 (prediction for time 1 was initialization values)
   ZTp.row(T) = Zp.t();
