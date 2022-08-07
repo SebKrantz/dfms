@@ -4,8 +4,11 @@ EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkr
   kfs_res = KalmanFilterSmoother(X, A, C, Q, R, F0, P0, 2L)
   # kfs_res = tryCatch(KalmanFilterSmoother(X, A, C, Q, R, F0, P0), error = function(e) return(list(NULL, X, A, C, Q, R, F0, P0)))
   # if(is.null(kfs_res[[1]])) return(kfs_res)
-  c("Zsmooth", "Vsmooth", "VVsmooth", "Zsmooth0", "Vsmooth0", "loglik") %=%
-   kfs_res[c("F_smooth", "P_smooth", "PPm_smooth", "F_smooth_0", "P_smooth_0", "loglik")]
+  Zsmooth = kfs_res$F_smooth
+  Vsmooth = kfs_res$P_smooth
+  VVsmooth = kfs_res$PPm_smooth
+  Zsmooth0 = kfs_res$F_smooth_0
+  Vsmooth0 = kfs_res$P_smooth_0
 
   tmp = rbind(Zsmooth0, Zsmooth[-T,, drop = FALSE])
   EZZ = crossprod(Zsmooth) %+=% rowSums(Vsmooth, dims = 2L)                                     # E(Z'Z)
@@ -65,7 +68,7 @@ EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkr
               R = R_new,
               F0 = drop(Zsmooth0),
               P0 = Vsmooth0,
-              loglik = loglik))
+              loglik = kfs_res$loglik))
 }
 
 
