@@ -1,5 +1,5 @@
 Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                        arma::mat R, arma::colvec F0, arma::mat P0, bool retLL = true);
+                        arma::mat R, arma::colvec F0, arma::mat P0, bool retLL = false);
 
 Rcpp::List fKS(arma::mat A,
                           arma::mat ZTf, arma::mat ZTp,
@@ -7,4 +7,4 @@ Rcpp::List fKS(arma::mat A,
                           Rcpp::NumericVector VTp_v);
 
 Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                                arma::mat R, arma::colvec F0, arma::mat P0, int retLL = 1);
+                                arma::mat R, arma::colvec F0, arma::mat P0, int retLL = 0);
