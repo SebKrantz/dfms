@@ -2,7 +2,7 @@ Estep <- function(X, A, C, Q, R, F0, P0) {
   .Call(Cpp_Estep, X, A, C, Q, R, F0, P0)
 }
 
-#' Implementation of a Kalman filter
+#' Fast Stationary Kalman Filter
 #' @param X Data matrix (T x n)
 #' @param A Transition matrix (rp x rp)
 #' @param C Observation matrix (n x rp)
@@ -21,11 +21,11 @@ Estep <- function(X, A, C, Q, R, F0, P0) {
 #' loglik \tab\tab value of the log likelihood
 #' }
 #' @export
-KalmanFilter <- function(X, A, C, Q, R, F0, P0, loglik = FALSE) {
-  .Call(Cpp_KalmanFilter, X, A, C, Q, R, F0, P0, loglik)
+fKF <- function(X, A, C, Q, R, F0, P0, loglik = FALSE) {
+  .Call(Cpp_fKF, X, A, C, Q, R, F0, P0, loglik)
 }
 
-#' Runs a Kalman smoother
+#' Fast Kalman Smoother
 #' @param A Transition matrix (rp x rp)
 #' @param F State estimates (T x rp)
 #' @param F_pred State predicted estimates (T x rp) or (T+1 x rp)
@@ -40,19 +40,19 @@ KalmanFilter <- function(X, A, C, Q, R, F0, P0, loglik = FALSE) {
 #' P_smooth_0 \tab\tab rp x rp initial smoothed state covariance, based on P0
 #' }
 #' @export
-KalmanSmoother <- function(A, F, F_pred, P, P_pred) {
-  .Call(Cpp_KalmanSmoother, A, F, F_pred, P, P_pred)
+fKS <- function(A, F, F_pred, P, P_pred) {
+  .Call(Cpp_fKS, A, F, F_pred, P, P_pred)
 }
 
-#' Kalman Filter and Smoother
-#' @inheritParams KalmanFilter
+#' Fast Kalman Filter and Smoother
+#' @inheritParams fKF
 #' @param loglik integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Modungo (2014).
 #'
-#' @returns All results from \code{\link{KalmanFilter}} and \code{\link{KalmanSmoother}}, and additionally
+#' @returns All results from \code{\link{fKF}} and \code{\link{fKS}}, and additionally
 #' a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of Cov(F_smooth_t, F_smooth_t-1|T) and needed for EM iterations.
 #' @export
-KalmanFilterSmoother <- function(X, A, C, Q, R, F0, P0, loglik = 0L) {
-  .Call(Cpp_KalmanFilterSmoother, X, A, C, Q, R, F0, P0, loglik)
+fKFS <- function(X, A, C, Q, R, F0, P0, loglik = 0L) {
+  .Call(Cpp_fKFS, X, A, C, Q, R, F0, P0, loglik)
 }
 
 

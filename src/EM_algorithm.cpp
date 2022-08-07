@@ -18,7 +18,7 @@ Rcpp::List Estep(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   const unsigned int rp = A.n_rows;
 
   // Run Kalman filter and Smoother
-  List ks = KalmanFilterSmoother(X, A, C, Q, R, F0, P0, 1);
+  List ks = fKFS(X, A, C, Q, R, F0, P0, 1);
   double loglik = as<double>(ks["loglik"]);
   mat Fs = as<mat>(ks["F_smooth"]);
   cube Psmooth = array2cube(as<NumericVector>(ks["P_smooth"]));

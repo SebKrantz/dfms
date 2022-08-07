@@ -1,8 +1,8 @@
 
 EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkron_ind) {
 
-  kfs_res = KalmanFilterSmoother(X, A, C, Q, R, F0, P0, 2L)
-  # kfs_res = tryCatch(KalmanFilterSmoother(X, A, C, Q, R, F0, P0), error = function(e) return(list(NULL, X, A, C, Q, R, F0, P0)))
+  kfs_res = fKFS(X, A, C, Q, R, F0, P0, 2L)
+  # kfs_res = tryCatch(fKFS(X, A, C, Q, R, F0, P0), error = function(e) return(list(NULL, X, A, C, Q, R, F0, P0)))
   # if(is.null(kfs_res[[1]])) return(kfs_res)
   Zsmooth = kfs_res$F_smooth
   Vsmooth = kfs_res$P_smooth
@@ -95,7 +95,7 @@ EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkr
 #   ###    loglik: scalar, log-likelihood
 #
 #   c("T", "n") %=% dim(X)
-#   c("Fsmooth", "Psmooth", "PPsmooth", "loglik") %=% KalmanFilterSmoother(X, C, Q, R, A, F0, P0)
+#   c("Fsmooth", "Psmooth", "PPsmooth", "loglik") %=% fKFS(X, C, Q, R, A, F0, P0)
 #   r <- dim(Fsmooth)[2L]
 #   # TODO: Psmooth should have 1 more obs..
 #   ncv <- dim(Psmooth)[3L]

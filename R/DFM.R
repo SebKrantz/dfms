@@ -1,7 +1,7 @@
 # Quoting some functions that need to be evaluated iteratively
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi))
 .EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkron_ind))
-.KFS <- quote(KalmanFilterSmoother(X, A, C, Q, R, F0, P0))
+.KFS <- quote(fKFS(X, A, C, Q, R, F0, P0))
 
 
 #' Estimate a Dynamic Factor Model
@@ -186,7 +186,7 @@ DFM <- function(X, r, p = 1L, ...,
                 matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
-  ks_res <- KalmanFilterSmoother(X, A, C, Q, R, F0, P0, FALSE)
+  ks_res <- fKFS(X, A, C, Q, R, F0, P0, FALSE)
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- setCN(ks_res$F_smooth[, sr, drop = FALSE], fnam)

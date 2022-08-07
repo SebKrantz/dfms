@@ -17,7 +17,7 @@ using namespace arma;
 // P0 Initial state covariance (rp x rp)
 // retLL Return log-likelihood.
 // [[Rcpp::export]]
-Rcpp::List KalmanFilter(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
+Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
                         arma::mat R, arma::colvec F0, arma::mat P0, bool retLL = false) {
 
   const int T = X.n_rows;
@@ -113,7 +113,7 @@ Rcpp::List KalmanFilter(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 // VTf_v Variance estimates
 // VTp_v Predicted variance estimates
 // [[Rcpp::export]]
-Rcpp::List KalmanSmoother(arma::mat A,
+Rcpp::List fKS(arma::mat A,
                           arma::mat ZTf, arma::mat ZTp,
                           Rcpp::NumericVector VTf_v,
                           Rcpp::NumericVector VTp_v) {
@@ -165,7 +165,7 @@ Rcpp::List KalmanSmoother(arma::mat A,
 // P0 Initial state covariance (rp x rp)
 // retLL 0-no likelihood, 1-standard Kalman Filter, 2-BM14
 // [[Rcpp::export]]
-Rcpp::List KalmanFilterSmoother(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
+Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
                                 arma::mat R, arma::colvec F0, arma::mat P0, int retLL = 0) {
 
   const int T = X.n_rows;
