@@ -1,3 +1,6 @@
 ^DFM\.Rproj$
 ^\.Rproj\.user$
 misc
+.RData
+LICENSE
+^\.github$
