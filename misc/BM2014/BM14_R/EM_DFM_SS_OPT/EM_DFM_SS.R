@@ -14,17 +14,17 @@ library(DFM)
 # Matlab code, particularly because of the reduced use of kronecker products
 ################################################################################
 
-setwd("~/Documents/R/DFM/misc/BM2014/BM14_R/EM_DFM_SS_OPT")
-source("remNaNs_spline.R")
-source("runKF.R")
-source("Procedures.R")
+setwd("~/Documents/R/DFM")
+source("misc/BM2014/BM14_R/EM_DFM_SS_OPT/remNaNs_spline.R")
+source("misc/BM2014/BM14_R/EM_DFM_SS_OPT/runKF.R")
+source("misc/BM2014/BM14_R/EM_DFM_SS_OPT/Procedures.R")
 
 # TODO: make it work with just 1 series?
 # Also make sure cinv solution is robust!!
 # Also try to use FKF package...
 # FKF::fkf
 
-EM_DFM_SS_OPT <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4) {
+EM_DFM_SS_OPT <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4, na.method = 2L, ma.k = 3L) {
 
   # --------------------------------------------------------------------------
   # Preparation of the data
@@ -44,8 +44,8 @@ EM_DFM_SS_OPT <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4) {
 
   # Removing missing values (for initial estimators)
   optNaN = list()
-  optNaN$method = 2 # Remove leading and closing zeros
-  optNaN$k = 3      # order of the moving average for replacing the missing observations
+  optNaN$method = na.method # See remNaNs_spline.R
+  optNaN$k = ma.k           # order of the moving average for replacing the missing observations
 
   # return(InitCond(X_STD, r, p, optNaN))
   c("A", "C", "Q", "R", "Z_0", "V_0") %=% InitCond(X_STD, r, p, optNaN)

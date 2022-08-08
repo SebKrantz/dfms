@@ -7,9 +7,9 @@ source("remNaNs_spline.R")
 source("runKF.R")
 source("Procedures.R")
 
-EM_DFM_SS <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4) { # Res
+EM_DFM_SS <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4, na.method = 2L, ma.k = 3L) {
 
-  X = qM(X) # Matlab works with matrixes...
+  X = qM(X) # Matlab works with matrices...
 
   # thresh = 1e-4
   # r = P$r # number of factors
@@ -33,8 +33,8 @@ EM_DFM_SS <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4) { # Res
 
   # Removing missing values (for initial estimators)
   optNaN = list()
-  optNaN$method = 2 # Remove leading and closing zeros
-  optNaN$k = 3      # order of the moving average for replacing the missing observations
+  optNaN$method = na.method # See remNaNs_spline.R
+  optNaN$k = ma.k           # order of the moving average for replacing the missing observations
 
   c("A", "C", "Q", "R", "Z_0", "V_0") %=% InitCond(xNaN, r, p, optNaN)
 
