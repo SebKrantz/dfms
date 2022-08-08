@@ -8,7 +8,7 @@ tsremimpNA(
   X,
   max.missing = 0.5,
   na.rm.method = c("LE", "all"),
-  na.impute = c("median", "rnrom", "median.ma", "median.ma.spline"),
+  na.impute = c("median", "rnorm", "median.ma", "median.ma.spline"),
   ma.terms = 3L
 )
 }
@@ -22,7 +22,7 @@ tsremimpNA(
 \item{na.impute}{character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
    \tabular{llll}{
 \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
-\code{"rnrom"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
+\code{"rnorm"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
 \code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
 \code{"median.ma.spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
 }}

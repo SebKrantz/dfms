@@ -140,7 +140,7 @@ impNA_spline <- function(X, W, k) {
 tsremimpNA <- function(X,
                        max.missing = 0.5,
                        na.rm.method = c("LE", "all"),
-                       na.impute = c("median", "rnrom", "median.ma", "median.ma.spline"),
+                       na.impute = c("median", "rnorm", "median.ma", "median.ma.spline"),
                        ma.terms = 3L) {
   W <- !is.finite(X) # is.na(X)
   n <- dim(X)[2L]
@@ -158,7 +158,7 @@ tsremimpNA <- function(X,
   }
   list(X_imp = switch(na.impute[1L],
                   median = replace(X, W, fmedian(X, TRA = 1L)[W]),
-                  rnrom = replace(X, W, rnorm(sum(W))),
+                  rnorm = replace(X, W, rnorm(sum(W))),
                   median.ma = impNA_MA(X, W, ma.terms),
                   median.ma.spline = impNA_spline(X, W, ma.terms),
                   stop("Unknown na.impute option:", na.impute[1L])),
