@@ -45,32 +45,43 @@ fVAR <- function(x, p = 1L) {
 # ginv <- MASS::ginv # use apinv
 
 
-#' Convergence test for EM-algorithm.
+#' Convergence Test for EM-Algorithm
 #'
-#' @param loglik Current value of the log-likelihood function
-#' @param previous_loglik Value of the log-likelihood function at the previous
-#  iteration
-#' @param threshold If difference is less than threshold, then algorithm has
-#' converged
-#' @return A logical statement indicating whether EM algorithm has converged
-#' according to slope convergence test
-em_converged <- function(loglik, previous_loglik, threshold = 1e-4) { # , check_increased = TRUE
+#' @param loglik vurrent value of the log-likelihood function.
+#' @param previous_loglik value of the log-likelihood function at the previous iteration.
+#' @param tol the numerical tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.
+#' @param check.increased logical. Check if likelihood has increased.
+#' @return A logical statement indicating whether EM algorithm has converged. if \code{check.increased = TRUE}, a vector with 2 elements indicating the convergence status and whether the likelihood has decreased.
+#' @export
+em_converged <- function(loglik, previous_loglik, tol = 1e-4, check.increased = TRUE) { # [converged, decrease]
+  # EM_CONVERGED Has EM converged?
+  # [converged, decrease] = em_converged(loglik, previous_loglik, tol)
+  #
+  # We have converged if the slope of the log-likelihood function falls below 'tol',
+  # i.e., |f(t) - f(t-1)| / avg < tol,
+  # where avg = (|f(t)| + |f(t-1)|)/2 and f(t) is log lik at iteration t.
+  # 'tol' defaults to 1e-4.
+  #
+  # This stopping criterion is from Numerical Recipes in C p423
+  #
+  # If we are doing MAP estimation (using priors), the likelihood can decrase,
+  # even though the mode of the posterior is increasing.
 
-  # converged <- FALSE
-  # decrease <- 0
-  # if (check_increased) {
-  #   if (loglik - previous_loglik < -0.001) {
-  #     #            message("*** Likelihood decreased from ", previous_loglik, " to ", loglik, "\n")
-  #     decrease <- 1
-  #   }
-  # }
-  if(is.finite(loglik) && is.finite(previous_loglik)) {
-    delta_loglik <- abs(loglik - previous_loglik)
-    avg_loglik <- (abs(loglik) + abs(previous_loglik) + .Machine$double.eps)/2
-    if(delta_loglik/avg_loglik < threshold) return(TRUE)
-  }
-  return(FALSE)
-  # return(list('converged'=converged, 'decrease'=decrease))
+ delta_loglik = abs(loglik - previous_loglik)
+ avg_loglik = (abs(loglik) + abs(previous_loglik) + .Machine$double.eps)/2
+ test = delta_loglik / avg_loglik < tol
+ converged = is.finite(test) && test
+
+ if(check.increased) {
+    test <- loglik - previous_loglik < -1e-3
+    if(is.finite(test) && test) { # allow for a little imprecision
+      sprintf('******likelihood decreased from %6.4f to %6.4f!\n', previous_loglik, loglik)
+      decrease = TRUE
+    } else decrease = FALSE
+    return(c(converged = converged, decrease = decrease))
+ }
+
+ converged
 }
 
 

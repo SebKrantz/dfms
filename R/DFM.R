@@ -126,9 +126,10 @@ DFM <- function(X, r, p = 1L, ...,
                 min.iter = 25L,
                 max.iter = 100L,
                 tol = 1e-4,
+                check.increased = FALSE,
                 max.missing = 0.8,
                 na.rm.method = c("LE", "all"),
-                na.impute = c("median", "rnorm", "median.ma", "median.ma.spline"),
+                na.impute = c("median.ma.spline", "median.ma", "median", "rnorm"),
                 ma.terms = 3L) {
 
   rRi <- switch(rR[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
@@ -161,15 +162,18 @@ DFM <- function(X, r, p = 1L, ...,
   T <- nrow(X)
 
   # Run PCA to get initial factor estimates:
-  v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v
+  # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v # Not faster than eigen...
+  eigen_decomp = eigen(cov(X_imp), symmetric = TRUE)
+  v = eigen_decomp$vectors[, sr, drop = FALSE]
+  # d = eigen_decomp$values[sr]
   F_pc <- X_imp %*% v
 
   # Observation equation -------------------------------
   # Static predictions (all.equal(unattrib(HDB(X_imp, F_pc)), unattrib(F_pc %*% t(v))))
   C <- cbind(v, matrix(0, n, rp-r))
   if(rRi) {
-    res <- X_imp - F_pc %*% t(v) # residuals from static predictions
-    if(anymiss) res[W] <- NA # Good??? -> Yes, BM do the same...
+    res <- X_imp - tcrossprod(F_pc, v) # residuals from static predictions
+    if(anymiss) res[W] <- NA
     R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
   } else R <- diag(n)
 
@@ -225,7 +229,7 @@ DFM <- function(X, r, p = 1L, ...,
     return(final_object)
   }
 
-  previous_loglik <- -.Machine$double.xmax
+  previous_loglik <- -Inf # .Machine$double.xmax
   loglik_all <- NULL
   num_iter <- 0L
   converged <- FALSE
@@ -251,7 +255,7 @@ DFM <- function(X, r, p = 1L, ...,
 
     ## Iterate at least min.iter times
     converged <- if(num_iter < min.iter) FALSE else
-        em_converged(loglik, previous_loglik, tol)
+        em_converged(loglik, previous_loglik, tol, check.increased)[1L]
     previous_loglik <- loglik
     loglik_all <- c(loglik_all, loglik)
     num_iter <- num_iter + 1L

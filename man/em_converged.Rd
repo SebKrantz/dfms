@@ -2,22 +2,22 @@
 % Please edit documentation in R/utils.R
 \name{em_converged}
 \alias{em_converged}
-\title{Convergence test for EM-algorithm.}
+\title{Convergence Test for EM-Algorithm}
 \usage{
-em_converged(loglik, previous_loglik, threshold = 1e-04)
+em_converged(loglik, previous_loglik, tol = 1e-04, check.increased = TRUE)
 }
 \arguments{
-\item{loglik}{Current value of the log-likelihood function}
+\item{loglik}{vurrent value of the log-likelihood function.}
 
-\item{previous_loglik}{Value of the log-likelihood function at the previous}
+\item{previous_loglik}{value of the log-likelihood function at the previous iteration.}
 
-\item{threshold}{If difference is less than threshold, then algorithm has
-converged}
+\item{tol}{the numerical tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.}
+
+\item{check.increased}{logical. Check if likelihood has increased.}
 }
 \value{
-A logical statement indicating whether EM algorithm has converged
-according to slope convergence test
+A logical statement indicating whether EM algorithm has converged. if \code{check.increased = TRUE}, a vector with 2 elements indicating the convergence status and whether the likelihood has decreased.
 }
 \description{
-Convergence test for EM-algorithm.
+Convergence Test for EM-Algorithm
 }

@@ -15,9 +15,10 @@ DFM(
   min.iter = 25L,
   max.iter = 100L,
   tol = 1e-04,
+  check.increased = FALSE,
   max.missing = 0.8,
   na.rm.method = c("LE", "all"),
-  na.impute = c("median", "rnorm", "median.ma", "median.ma.spline"),
+  na.impute = c("median.ma.spline", "median.ma", "median", "rnorm"),
   ma.terms = 3L
 )
 }
