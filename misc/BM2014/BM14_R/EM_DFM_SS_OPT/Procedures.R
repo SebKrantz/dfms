@@ -111,10 +111,12 @@ EMstep_OPT <- function(Y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C
   V_0 = Vsmooth[,, 1L]
   if(length(V_0) == 1L) dim(V_0) = c(1L, 1L)
 
-  return(list(C_new = C_new,
-              R_new = R_new,
-              A_new = A_new,
-              Q_new = Q_new,
+  C[, 1:r] = C_new
+
+  return(list(A = A_new,
+              C = C,
+              Q = Q_new,
+              R = R_new,
               Z_0 = Z_0,
               V_0 = V_0,
               loglik = loglik))

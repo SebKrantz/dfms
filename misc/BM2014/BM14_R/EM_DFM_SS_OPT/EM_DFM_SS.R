@@ -84,8 +84,7 @@ EM_DFM_SS_OPT <- function(X, r, p = 1L, max_iter = 100L, thresh = 1e-4, na.metho
 
   while(num_iter < max_iter && !converged) {
 
-    c("C_new", "R", "A", "Q", "Z_0", "V_0", "loglik") %=% EMstep_OPT(Y_narm, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S)
-    C[, 1:r] = C_new
+    c("A", "C", "Q", "R", "Z_0", "V_0", "loglik") %=% EMstep_OPT(Y_narm, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S)
 
     # Checking convergence
     c("converged", "decrease") %=% em_converged(loglik, previous_loglik, thresh, TRUE)
