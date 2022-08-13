@@ -50,6 +50,8 @@ This yields significant performance gains over the iterative methods. Final syst
 
 \item{tol}{numeric. EM convergence tolerance.}
 
+\item{check.increased}{logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}.}
+
 \item{max.missing}{numeric. Proportion of series missing for a case to be considered missing.}
 
 \item{na.rm.method}{character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.}

@@ -26,6 +26,7 @@
 #' @param min.iter integer. Minimum number of EM iterations (to ensure a convergence path).
 #' @param max.iter integer. Maximum number of EM iterations.
 #' @param tol numeric. EM convergence tolerance.
+#' @param check.increased logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}.
 #' @param max.missing numeric. Proportion of series missing for a case to be considered missing.
 #' @param na.rm.method character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
 #' @param na.impute character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
