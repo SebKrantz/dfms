@@ -1,7 +1,7 @@
 
 EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dnkron, dnkron_ind) {
 
-  kfs_res = fKFS(X, A, C, Q, R, F_0, P_0, 2L)
+  kfs_res = fKFS(X, A, C, Q, R, F_0, P_0, TRUE)
   # kfs_res = tryCatch(fKFS(X, A, C, Q, R, F_0, P_0), error = function(e) return(list(NULL, X, A, C, Q, R, F_0, P_0)))
   # if(is.null(kfs_res[[1]])) return(kfs_res)
   Zsmooth = kfs_res$F_smooth

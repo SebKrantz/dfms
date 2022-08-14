@@ -8,4 +8,4 @@ Rcpp::List fKS(arma::mat A,
                arma::colvec F_0, arma::mat P_0);
 
 Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                arma::mat R, arma::colvec F_0, arma::mat P_0, int retLL = 0);
+                arma::mat R, arma::colvec F_0, arma::mat P_0, bool retLL = false);

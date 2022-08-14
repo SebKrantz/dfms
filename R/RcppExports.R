@@ -13,7 +13,7 @@ fKS <- function(A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP) {
     .Call(`_DFM_fKS`, A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP)
 }
 
-fKFS <- function(X, A, C, Q, R, F_0, P_0, retLL = 0L) {
+fKFS <- function(X, A, C, Q, R, F_0, P_0, retLL = FALSE) {
     .Call(`_DFM_fKFS`, X, A, C, Q, R, F_0, P_0, retLL)
 }
 

@@ -191,7 +191,7 @@ Rcpp::List fKS(arma::mat A,
 // retLL 0-no likelihood, 1-standard Kalman Filter, 2-BM14
 // [[Rcpp::export]]
 Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                arma::mat R, arma::colvec F_0, arma::mat P_0, int retLL = 0) {
+                arma::mat R, arma::colvec F_0, arma::mat P_0, bool retLL = false) {
 
   const int T = X.n_rows;
   const int n = X.n_cols;
@@ -202,8 +202,8 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
   // Additionally the results matrices for all time periods have a T in the name.
 
-  double loglik = retLL > 0 ? 0 : NA_REAL, dn = 0, detS;
-  if(retLL == 1) dn = n * log(2.0 * datum::pi);
+  double loglik = retLL ? 0 : NA_REAL, dn = 0, detS;
+  if(retLL) dn = n * log(2.0 * datum::pi);
   colvec Zp, Zf = F_0, et, xt;
   mat K, Vp, Vf = P_0, S, VCt;
 
@@ -259,12 +259,9 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
       Vf *= 0.5;
 
       // Compute likelihood. Skip this part if S is not positive definite.
-      if(retLL > 0) {
+      if(retLL) {
         detS = det(S);
-        if(detS > 0) {
-          loglik += log(detS) - conv_to<double>::from(et.t() * S * et);
-          if(retLL == 1) loglik -= dn; // Standard Kalman Filter Likelihood
-        }
+        if(detS > 0) loglik += log(detS) - conv_to<double>::from(et.t() * S * et) - dn; // Standard Kalman Filter Likelihood
       }
 
     } else { // If all missing: just prediction.

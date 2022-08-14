@@ -81,14 +81,14 @@ fKS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
   .Call(Cpp_fKS, A, F, F_pred, P, P_pred, F_0, P_0)
 }
 
+# @param loglik integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Modungo (2014).
 #' Fast Kalman Filter and Smoother
 #' @inheritParams fKF
-#' @param loglik integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Modungo (2014).
 #'
 #' @returns All results from \code{\link{fKF}} and \code{\link{fKS}}, and additionally
 #' a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of Cov(F_smooth_t, F_smooth_t-1|T) and needed for EM iterations.
 #' @export
-fKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = 0L) {
+fKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
   .Call(Cpp_fKFS, X, A, C, Q, R, F_0, P_0, loglik)
 }
 

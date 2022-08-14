@@ -64,7 +64,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // fKFS
-Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F_0, arma::mat P_0, int retLL);
+Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F_0, arma::mat P_0, bool retLL);
 RcppExport SEXP _DFM_fKFS(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F_0SEXP, SEXP P_0SEXP, SEXP retLLSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -76,7 +76,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type R(RSEXP);
     Rcpp::traits::input_parameter< arma::colvec >::type F_0(F_0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type P_0(P_0SEXP);
-    Rcpp::traits::input_parameter< int >::type retLL(retLLSEXP);
+    Rcpp::traits::input_parameter< bool >::type retLL(retLLSEXP);
     rcpp_result_gen = Rcpp::wrap(fKFS(X, A, C, Q, R, F_0, P_0, retLL));
     return rcpp_result_gen;
 END_RCPP
