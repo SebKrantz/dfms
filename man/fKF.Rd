@@ -4,7 +4,7 @@
 \alias{fKF}
 \title{Fast Kalman Filter}
 \usage{
-fKF(X, A, C, Q, R, F0, P0, loglik = FALSE)
+fKF(X, A, C, Q, R, F_0, P_0, loglik = FALSE)
 }
 \arguments{
 \item{X}{Data matrix (T x n)}
@@ -17,19 +17,19 @@ fKF(X, A, C, Q, R, F0, P0, loglik = FALSE)
 
 \item{R}{Observation covariance (n x n)}
 
-\item{F0}{Initial state vector (rp x 1)}
+\item{F_0}{Initial state vector (rp x 1)}
 
-\item{P0}{Initial state covariance (rp x rp)}
+\item{P_0}{Initial state covariance (rp x rp)}
 
 \item{loglik}{logical. Compute log-likelihood?}
 }
 \value{
-Predicted and filtered state vectors and covariances, including a prediction for period T+1.
+Predicted and filtered state vectors and covariances.
 \tabular{lll}{
 F \tab\tab T x rp filtered state vectors \cr\cr
 P \tab\tab rp x rp x T filtered state covariances \cr\cr
-F_pred \tab\tab T+1 x rp predicted state vectors, prediction for period t = 1 is F0 \cr\cr
-P_pred \tab\tab rp x rp x T+1 predicted state covariances, prediction for period t = 1 is P0 \cr\cr
+F_pred \tab\tab T x rp predicted state vectors \cr\cr
+P_pred \tab\tab rp x rp x T predicted state covariances \cr\cr
 loglik \tab\tab value of the log likelihood
 }
 }

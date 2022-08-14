@@ -1,11 +1,11 @@
 
-EMstepDGR <- function(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi) {
+EMstepDGR <- function(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi) {
 
   ## E-step will return a list of sufficient statistics, namely second
   ## (cross)-moments for latent and observed data. This is then plugged back
   ## into M-step.
   beta = gamma = delta = gamma1 = gamma2 = loglik = NULL
-  list2env(Estep(X, A, C, Q, R, F0, P0), envir = environment())
+  list2env(Estep(X, A, C, Q, R, F_0, P_0), envir = environment())
   betasr <- beta[sr, , drop = FALSE]
 
   ## M-step computes model parameters as a function of the sufficient
@@ -31,6 +31,6 @@ EMstepDGR <- function(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi) {
     }
   } else R <- diag(n)
 
-  return(list(A = A, C = C, Q = Q, R = R, F0 = F0, P0 = P0, loglik = loglik))
+  return(list(A = A, C = C, Q = Q, R = R, F_0 = F_0, P_0 = P_0, loglik = loglik))
 
 }

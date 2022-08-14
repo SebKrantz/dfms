@@ -1,7 +1,7 @@
 # Quoting some functions that need to be evaluated iteratively
-.EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F0, P0, cpX, n, r, sr, T, rQi, rRi))
-.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkron_ind))
-.KFS <- quote(fKFS(X, A, C, Q, R, F0, P0))
+.EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi))
+.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dnkron, dnkron_ind))
+.KFS <- quote(fKFS(X, A, C, Q, R, F_0, P_0))
 
 
 #' Estimate a Dynamic Factor Model
@@ -185,13 +185,13 @@ DFM <- function(X, r, p = 1L, ...,
   Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
 
   # Initial state and state covariance (P) ------------
-  F0 <- rep(0, rp) # ar$X[1L, ] #
+  F_0 <- rep(0, rp) # ar$X[1L, ] #
   # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  P0 <- if(!is.na(BMl) && BMl) matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp) else
+  P_0 <- if(!is.na(BMl) && BMl) matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp) else
                 matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
-  ks_res <- fKFS(X, A, C, Q, R, F0, P0, FALSE)
+  ks_res <- fKFS(X, A, C, Q, R, F_0, P_0, FALSE)
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- setCN(ks_res$F_smooth[, sr, drop = FALSE], fnam)

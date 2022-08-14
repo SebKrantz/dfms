@@ -4,7 +4,7 @@
 \alias{fKFS}
 \title{Fast Kalman Filter and Smoother}
 \usage{
-fKFS(X, A, C, Q, R, F0, P0, loglik = 0L)
+fKFS(X, A, C, Q, R, F_0, P_0, loglik = 0L)
 }
 \arguments{
 \item{X}{Data matrix (T x n)}
@@ -17,9 +17,9 @@ fKFS(X, A, C, Q, R, F0, P0, loglik = 0L)
 
 \item{R}{Observation covariance (n x n)}
 
-\item{F0}{Initial state vector (rp x 1)}
+\item{F_0}{Initial state vector (rp x 1)}
 
-\item{P0}{Initial state covariance (rp x rp)}
+\item{P_0}{Initial state covariance (rp x rp)}
 
 \item{loglik}{integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Modungo (2014).}
 }

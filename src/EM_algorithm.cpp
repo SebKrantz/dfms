@@ -11,14 +11,14 @@ using namespace std;
 
 // [[Rcpp::export]]
 Rcpp::List Estep(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                 arma::mat R, arma::colvec F0, arma::mat P0) {
+                 arma::mat R, arma::colvec F_0, arma::mat P_0) {
 
   const unsigned int T = X.n_rows;
   const unsigned int n = X.n_cols;
   const unsigned int rp = A.n_rows;
 
   // Run Kalman filter and Smoother
-  List ks = fKFS(X, A, C, Q, R, F0, P0, 1);
+  List ks = fKFS(X, A, C, Q, R, F_0, P_0, 1);
   double loglik = as<double>(ks["loglik"]);
   mat Fs = as<mat>(ks["F_smooth"]);
   cube Psmooth = array2cube(as<NumericVector>(ks["P_smooth"]));
@@ -51,8 +51,8 @@ Rcpp::List Estep(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
                             Rcpp::Named("delta") = delta,
                             Rcpp::Named("gamma1") = gamma1,
                             Rcpp::Named("gamma2") = gamma2,
-                            Rcpp::Named("F0") = F1,
-                            Rcpp::Named("P0") = P1,
+                            Rcpp::Named("F_0") = F1,
+                            Rcpp::Named("P_0") = P1,
                             Rcpp::Named("loglik") = loglik);
                             // Rcpp::Named("Fs") = ks["Fs"]);
 }

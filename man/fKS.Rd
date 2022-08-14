@@ -4,28 +4,35 @@
 \alias{fKS}
 \title{Fast Kalman Smoother}
 \usage{
-fKS(A, F, F_pred, P, P_pred)
+fKS(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL)
 }
 \arguments{
 \item{A}{Transition matrix (rp x rp)}
 
 \item{F}{State estimates (T x rp)}
 
-\item{F_pred}{State predicted estimates (T x rp) or (T+1 x rp)}
+\item{F_pred}{State predicted estimates (T x rp)}
 
 \item{P}{Variance estimates (rp x rp x T)}
 
-\item{P_pred}{Predicted variance estimates (rp x rp x T) or (rp x rp x T+1)}
+\item{P_pred}{Predicted variance estimates (rp x rp x T)}
+
+\item{F_0}{Initial state vector (rp x 1) or empty (NULL)}
+
+\item{P_0}{Initial state covariance (rp x rp) or empty (NULL)}
 }
 \value{
 Smoothed state and covariance estimates, including initial (t = 0) values.
 \tabular{lll}{
 F_smooth \tab\tab T x rp smoothed state vectors, equal to the filtered state in period T \cr\cr
 P_smooth \tab\tab rp x rp x T smoothed state covariance, equal to the filtered covariance in period T \cr\cr
-F_smooth_0 \tab\tab 1 x rp initial smoothed state vectors, based on F0 \cr\cr
-P_smooth_0 \tab\tab rp x rp initial smoothed state covariance, based on P0
+F_smooth_0 \tab\tab 1 x rp initial smoothed state vectors, based on F_0 \cr\cr
+P_smooth_0 \tab\tab rp x rp initial smoothed state covariance, based on P_0
 }
 }
 \description{
 Fast Kalman Smoother
+}
+\details{
+If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are calculated and returned.
 }

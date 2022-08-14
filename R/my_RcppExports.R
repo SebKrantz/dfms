@@ -1,5 +1,5 @@
-Estep <- function(X, A, C, Q, R, F0, P0) {
-  .Call(Cpp_Estep, X, A, C, Q, R, F0, P0)
+Estep <- function(X, A, C, Q, R, F_0, P_0) {
+  .Call(Cpp_Estep, X, A, C, Q, R, F_0, P_0)
 }
 
 #' Fast Kalman Filter
@@ -10,8 +10,8 @@ Estep <- function(X, A, C, Q, R, F0, P0) {
 #' @param C Observation matrix (n x rp)
 #' @param Q State covariance (rp x rp)
 #' @param R Observation covariance (n x n)
-#' @param F0 Initial state vector (rp x 1)
-#' @param P0 Initial state covariance (rp x rp)
+#' @param F_0 Initial state vector (rp x 1)
+#' @param P_0 Initial state covariance (rp x rp)
 #' @param loglik logical. Compute log-likelihood?
 #'
 #' @details The underlying state space model is:
@@ -45,36 +45,40 @@ Estep <- function(X, A, C, Q, R, F0, P0) {
 #'
 #' Hamilton, J. D. (1994). Time Series Analysis. Princeton university press.
 #'
-#' @returns Predicted and filtered state vectors and covariances, including a prediction for period T+1.
+#' @returns Predicted and filtered state vectors and covariances.
 #' \tabular{lll}{
 #' F \tab\tab T x rp filtered state vectors \cr\cr
 #' P \tab\tab rp x rp x T filtered state covariances \cr\cr
-#' F_pred \tab\tab T+1 x rp predicted state vectors, prediction for period t = 1 is F0 \cr\cr
-#' P_pred \tab\tab rp x rp x T+1 predicted state covariances, prediction for period t = 1 is P0 \cr\cr
+#' F_pred \tab\tab T x rp predicted state vectors \cr\cr
+#' P_pred \tab\tab rp x rp x T predicted state covariances \cr\cr
 #' loglik \tab\tab value of the log likelihood
 #' }
 #' @export
-fKF <- function(X, A, C, Q, R, F0, P0, loglik = FALSE) {
-  .Call(Cpp_fKF, X, A, C, Q, R, F0, P0, loglik)
+fKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
+  .Call(Cpp_fKF, X, A, C, Q, R, F_0, P_0, loglik)
 }
 
 #' Fast Kalman Smoother
 #' @param A Transition matrix (rp x rp)
 #' @param F State estimates (T x rp)
-#' @param F_pred State predicted estimates (T x rp) or (T+1 x rp)
+#' @param F_pred State predicted estimates (T x rp)
 #' @param P Variance estimates (rp x rp x T)
-#' @param P_pred Predicted variance estimates (rp x rp x T) or (rp x rp x T+1)
+#' @param P_pred Predicted variance estimates (rp x rp x T)
+#' @param F_0 Initial state vector (rp x 1) or empty (NULL)
+#' @param P_0 Initial state covariance (rp x rp) or empty (NULL)
+#'
+#' @details If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are calculated and returned.
 #'
 #' @returns Smoothed state and covariance estimates, including initial (t = 0) values.
 #' \tabular{lll}{
 #' F_smooth \tab\tab T x rp smoothed state vectors, equal to the filtered state in period T \cr\cr
 #' P_smooth \tab\tab rp x rp x T smoothed state covariance, equal to the filtered covariance in period T \cr\cr
-#' F_smooth_0 \tab\tab 1 x rp initial smoothed state vectors, based on F0 \cr\cr
-#' P_smooth_0 \tab\tab rp x rp initial smoothed state covariance, based on P0
+#' F_smooth_0 \tab\tab 1 x rp initial smoothed state vectors, based on F_0 \cr\cr
+#' P_smooth_0 \tab\tab rp x rp initial smoothed state covariance, based on P_0
 #' }
 #' @export
-fKS <- function(A, F, F_pred, P, P_pred) {
-  .Call(Cpp_fKS, A, F, F_pred, P, P_pred)
+fKS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
+  .Call(Cpp_fKS, A, F, F_pred, P, P_pred, F_0, P_0)
 }
 
 #' Fast Kalman Filter and Smoother
@@ -84,8 +88,8 @@ fKS <- function(A, F, F_pred, P, P_pred) {
 #' @returns All results from \code{\link{fKF}} and \code{\link{fKS}}, and additionally
 #' a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of Cov(F_smooth_t, F_smooth_t-1|T) and needed for EM iterations.
 #' @export
-fKFS <- function(X, A, C, Q, R, F0, P0, loglik = 0L) {
-  .Call(Cpp_fKFS, X, A, C, Q, R, F0, P0, loglik)
+fKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = 0L) {
+  .Call(Cpp_fKFS, X, A, C, Q, R, F_0, P_0, loglik)
 }
 
 

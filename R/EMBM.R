@@ -1,14 +1,15 @@
 
-EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkron_ind) {
+EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dnkron, dnkron_ind) {
 
-  kfs_res = fKFS(X, A, C, Q, R, F0, P0, 2L)
-  # kfs_res = tryCatch(fKFS(X, A, C, Q, R, F0, P0), error = function(e) return(list(NULL, X, A, C, Q, R, F0, P0)))
+  kfs_res = fKFS(X, A, C, Q, R, F_0, P_0, 2L)
+  # kfs_res = tryCatch(fKFS(X, A, C, Q, R, F_0, P_0), error = function(e) return(list(NULL, X, A, C, Q, R, F_0, P_0)))
   # if(is.null(kfs_res[[1]])) return(kfs_res)
   Zsmooth = kfs_res$F_smooth
   Vsmooth = kfs_res$P_smooth
   VVsmooth = kfs_res$PPm_smooth
   Zsmooth0 = kfs_res$F_smooth_0
   Vsmooth0 = kfs_res$P_smooth_0
+  # return(kfs_res[.c(F_smooth, P_smooth, F_smooth_0, P_smooth_0, PPm_smooth)])
 
   tmp = rbind(Zsmooth0, Zsmooth[-T,, drop = FALSE])
   EZZ = crossprod(Zsmooth) %+=% rowSums(Vsmooth, dims = 2L)                                     # E(Z'Z)
@@ -58,25 +59,25 @@ EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkr
   # C = C
   # Q = Q_new
   # R = R_new
-  # F0 = drop(Zsmooth0)
-  # P0 = Vsmooth0
-  # A; C; Q; diag(R); F0; P0
+  # F_0 = drop(Zsmooth0)
+  # P_0 = Vsmooth0
+  # A; C; Q; diag(R); F_0; P_0
 
   return(list(A = A_new,
               C = C,
               Q = Q_new,
               R = R_new,
-              F0 = drop(Zsmooth0),
-              P0 = Vsmooth0,
+              F_0 = drop(Zsmooth0),
+              P_0 = Vsmooth0,
               loglik = kfs_res$loglik))
 }
 
 
 
-# Estep(X, C, Q, R, A, F0, P0)
-# F0 = F0
-# P0 = P0
-# EMstepBM <- function(X, A, C, Q, R, F0, P0) { # [C_new, R_new, A_new, Q_new, F0, P0, loglik]
+# Estep(X, C, Q, R, A, F_0, P_0)
+# F_0 = F_0
+# P_0 = P_0
+# EMstepBM <- function(X, A, C, Q, R, F_0, P_0) { # [C_new, R_new, A_new, Q_new, F_0, P_0, loglik]
 #
 #   # Kalman filer BM:
 #   ###  Inputs:
@@ -85,8 +86,8 @@ EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkr
 #   ###    C: k-by-m measurement matrix
 #   ###    Q: m-by-m covariance matrix for transition equation residuals (mu_t)
 #   ###    R: k-by-k covariance for measurement matrix residuals (e_t)
-#   ###    F0: 1-by-m vector, initial value of state
-#   ###    P0: m-by-m matrix, initial value of factor covariance matrix
+#   ###    F_0: 1-by-m vector, initial value of state
+#   ###    P_0: m-by-m matrix, initial value of factor covariance matrix
 #   ###
 #   ###  Outputs:
 #   ###    Fsmooth: k-by-(nobs+1) matrix, smoothed factor estimates (i.e. Fsmooth[, t + 1] = F_t|T)
@@ -95,7 +96,7 @@ EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkr
 #   ###    loglik: scalar, log-likelihood
 #
 #   c("T", "n") %=% dim(X)
-#   c("Fsmooth", "Psmooth", "PPsmooth", "loglik") %=% fKFS(X, C, Q, R, A, F0, P0)
+#   c("Fsmooth", "Psmooth", "PPsmooth", "loglik") %=% fKFS(X, C, Q, R, A, F_0, P_0)
 #   r <- dim(Fsmooth)[2L]
 #   # TODO: Psmooth should have 1 more obs..
 #   ncv <- dim(Psmooth)[3L]
@@ -146,14 +147,14 @@ EMstepBMOPT <- function(X, A, C, Q, R, F0, P0, XW0, W, n, r, sr, T, dnkron, dnkr
 #   R_new = diag(RR)
 #
 #   # Initial conditions
-#   F0 = Fsmooth[, ] # zeros(size(Fsmooth,1),1); %
-#   P0 = Psmooth[,, 1]
+#   F_0 = Fsmooth[, ] # zeros(size(Fsmooth,1),1); %
+#   P_0 = Psmooth[,, 1]
 #
 #   list(A = A_new,
 #        C= C_new,
 #        Q = Q_new,
 #        R = R_new,
-#        F0 = F0,
-#        P0 = P0,
+#        F_0 = F_0,
+#        P_0 = P_0,
 #        loglik = loglik)
 # }
