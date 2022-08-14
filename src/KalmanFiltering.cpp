@@ -23,6 +23,7 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   const int T = X.n_rows;
   const int n = X.n_cols;
   const int rp = A.n_rows;
+  int n_c;
 
   // In internal code factors are Z (instead of F) and factor covariance V (instead of P),
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
@@ -30,7 +31,7 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 
   double loglik = retLL ? 0 : NA_REAL, dn = 0, detS;
   if(retLL) dn = n * log(2.0 * datum::pi);
-  colvec Zp, Zf = F_0, et;
+  colvec Zp, Zf = F_0, et, xt;
   mat K, Vp, Vf = P_0, S, VCt;
 
   // Predicted state mean and covariance
@@ -43,38 +44,46 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 
   // Handling missing values in the filter
   mat Ci, Ri;
-  uvec miss, nmiss = find_finite(A.row(0)), a(1);
-  if(nmiss.n_elem == 0) Rcpp::stop("Missing first row of transition matrix");
+  uvec nmiss, arow = find_finite(A.row(0));
+  if(arow.n_elem == 0) Rcpp::stop("Missing first row of transition matrix");
 
   for (int i = 0; i < T; ++i) {
 
     // Run a prediction
     Zp = A * Zf;
     Vp = A * Vf * A.t() + Q;
-    Vp =  0.5 * (Vp + Vp.t()); // Ensure symmetry
+    Vp += Vp.t(); // Ensure symmetry
+    Vp *= 0.5;
 
     // If missing observations are present at some timepoints, exclude the
     // appropriate matrix slices from the filtering procedure.
-    miss = find_finite(X.row(i));
-    if(miss.n_elem > 0) {
-
-      Ci = C.submat(miss, nmiss);
-      Ri = R.submat(miss, miss);
-      a[0] = i;
+    xt = X.row(i).t();
+    nmiss = find_finite(xt);
+    n_c = nmiss.n_elem;
+    if(n_c > 0) {
+      if(n_c == n) {
+        Ci = C;
+        Ri = R;
+      } else {
+        Ci = C.submat(nmiss, arow);
+        Ri = R.submat(nmiss, nmiss);
+        xt = xt.elem(nmiss);
+      }
 
       // Intermediate results
       VCt = Vp * Ci.t();
       S = (Ci * VCt + Ri).i();
 
       // Prediction error
-      et = X.submat(a, miss).t() - Ci * Zp;
+      et = xt - Ci * Zp;
       // Kalman gain
       K = VCt * S;
       // Updated state estimate
       Zf = Zp + K * et;
       // Updated state covariance estimate
       Vf = Vp - K * Ci * Vp;
-      Vf =  0.5 * (Vf + Vf.t()); // Ensure symmetry
+      Vf += Vf.t(); // Ensure symmetry
+      Vf *= 0.5;
 
       // Compute likelihood. Skip this part if S is not positive definite.
       if(retLL) {
@@ -187,6 +196,7 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   const int T = X.n_rows;
   const int n = X.n_cols;
   const int rp = A.n_rows;
+  int n_c;
 
   // In internal code factors are Z (instead of F) and factor covariance V (instead of P),
   // to avoid confusion between the matrices and their predicted (p) and filtered (f) states.
@@ -194,7 +204,7 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 
   double loglik = retLL > 0 ? 0 : NA_REAL, dn = 0, detS;
   if(retLL == 1) dn = n * log(2.0 * datum::pi);
-  colvec Zp, Zf = F_0, et;
+  colvec Zp, Zf = F_0, et, xt;
   mat K, Vp, Vf = P_0, S, VCt;
 
   // Predicted state mean and covariance
@@ -207,38 +217,46 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 
   // Handling missing values in the filter
   mat Ci, Ri;
-  uvec miss, nmiss = find_finite(A.row(0)), a(1);
-  if(nmiss.n_elem == 0) Rcpp::stop("Missing first row of transition matrix");
+  uvec nmiss, arow = find_finite(A.row(0));
+  if(arow.n_elem == 0) Rcpp::stop("Missing first row of transition matrix");
 
   for (int i = 0; i < T; ++i) {
 
     // Run a prediction
     Zp = A * Zf;
     Vp = A * Vf * A.t() + Q;
-    Vp =  0.5 * (Vp + Vp.t()); // Ensure symmetry
+    Vp += Vp.t(); // Ensure symmetry
+    Vp *= 0.5;
 
     // If missing observations are present at some timepoints, exclude the
     // appropriate matrix slices from the filtering procedure.
-    miss = find_finite(X.row(i));
-    if(miss.n_elem > 0) {
-
-      Ci = C.submat(miss, nmiss);
-      Ri = R.submat(miss, miss);
-      a[0] = i;
+    xt = X.row(i).t();
+    nmiss = find_finite(xt);
+    n_c = nmiss.n_elem;
+    if(n_c > 0) {
+      if(n_c == n) {
+        Ci = C;
+        Ri = R;
+      } else {
+        Ci = C.submat(nmiss, arow);
+        Ri = R.submat(nmiss, nmiss);
+        xt = xt.elem(nmiss);
+      }
 
       // Intermediate results
       VCt = Vp * Ci.t();
       S = (Ci * VCt + Ri).i();
 
       // Prediction error
-      et = X.submat(a, miss).t() - Ci * Zp;
+      et = xt - Ci * Zp;
       // Kalman gain
       K = VCt * S;
       // Updated state estimate
       Zf = Zp + K * et;
       // Updated state covariance estimate
       Vf = Vp - K * Ci * Vp;
-      Vf =  0.5 * (Vf + Vf.t()); // Ensure symmetry
+      Vf += Vf.t(); // Ensure symmetry
+      Vf *= 0.5;
 
       // Compute likelihood. Skip this part if S is not positive definite.
       if(retLL > 0) {
@@ -272,7 +290,7 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   // Initialize smoothed data with last observation of filtered data
   ZsT.row(T-1) = Zf.t();
   VsT.slice(T-1) = Vf;
-  K = (miss.n_elem == 0) ? mat(rp, rp, fill::zeros) : K * Ci;
+  K = (n_c == 0) ? mat(rp, rp, fill::zeros) : K * Ci;
   VVsT.slice(T-1) = (eye(rp,rp) - K) * A * VTf.slice(T-2);
 
   mat At = A.t(), Jimt = (VTf.slice(T-2) * At * VTp.slice(T-1).i()).t(), Ji;
