@@ -13,12 +13,12 @@ using namespace arma;
 // C Observation matrix (n x rp)
 // Q State covariance (rp x rp)
 // R Observation covariance (n x n)
-// F0 Initial state vector (rp x 1)
-// P0 Initial state covariance (rp x rp)
+// F_0 Initial state vector (rp x 1)
+// P_0 Initial state covariance (rp x rp)
 // retLL Return log-likelihood.
 // [[Rcpp::export]]
 Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                        arma::mat R, arma::colvec F0, arma::mat P0, bool retLL = false) {
+               arma::mat R, arma::colvec F_0, arma::mat P_0, bool retLL = false) {
 
   const int T = X.n_rows;
   const int n = X.n_cols;
@@ -30,12 +30,12 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 
   double loglik = retLL ? 0 : NA_REAL, dn = 0, detS;
   if(retLL) dn = n * log(2.0 * datum::pi);
-  colvec Zp = F0, Zf, et;
-  mat K, Vp = P0, Vf, S, VCt;
+  colvec Zp, Zf = F_0, et;
+  mat K, Vp, Vf = P_0, S, VCt;
 
   // Predicted state mean and covariance
-  mat ZTp(T+1, rp, fill::zeros);
-  cube VTp(rp, rp, T+1, fill::zeros);
+  mat ZTp(T, rp, fill::zeros);
+  cube VTp(rp, rp, T, fill::zeros);
 
   // Filtered state mean and covariance
   mat ZTf(T, rp, fill::zeros);
@@ -47,6 +47,11 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   if(nmiss.n_elem == 0) Rcpp::stop("Missing first row of transition matrix");
 
   for (int i = 0; i < T; ++i) {
+
+    // Run a prediction
+    Zp = A * Zf;
+    Vp = A * Vf * A.t() + Q;
+    Vp =  0.5 * (Vp + Vp.t()); // Ensure symmetry
 
     // If missing observations are present at some timepoints, exclude the
     // appropriate matrix slices from the filtering procedure.
@@ -69,6 +74,7 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
       Zf = Zp + K * et;
       // Updated state covariance estimate
       Vf = Vp - K * Ci * Vp;
+      Vf =  0.5 * (Vf + Vf.t()); // Ensure symmetry
 
       // Compute likelihood. Skip this part if S is not positive definite.
       if(retLL) {
@@ -87,22 +93,16 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
     ZTf.row(i) = Zf.t();
     VTf.slice(i) = Vf;
 
-    // Run a prediction
-    Zp = A * ZTf.row(i).t();
-    Vp = A * VTf.slice(i) * A.t() + Q;
-
   }
 
   if(retLL) loglik *= 0.5;
-
-  // Store final prediction for time T+1 (prediction for time 1 was initialization values)
-  ZTp.row(T) = Zp.t();
-  VTp.slice(T) = Vp;
 
   return Rcpp::List::create(Rcpp::Named("F") = ZTf,
                             Rcpp::Named("P") = VTf,
                             Rcpp::Named("F_pred") = ZTp,
                             Rcpp::Named("P_pred") = VTp,
+                            // Rcpp::Named("F_0") = F_0,
+                            // Rcpp::Named("P_0") = P_0,
                             Rcpp::Named("loglik") = loglik);
 }
 
@@ -112,11 +112,14 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 // ZTp State predicted estimates
 // VTf_v Variance estimates
 // VTp_v Predicted variance estimates
+// F_0 Initial state vector (rp x 1)
+// P_0 Initial state covariance (rp x rp)
 // [[Rcpp::export]]
 Rcpp::List fKS(arma::mat A,
-                          arma::mat ZTf, arma::mat ZTp,
-                          Rcpp::NumericVector VTf_v,
-                          Rcpp::NumericVector VTp_v) {
+               arma::mat ZTf, arma::mat ZTp,
+               Rcpp::NumericVector VTf_v,
+               Rcpp::NumericVector VTp_v,
+               SEXP F_0SEXP, SEXP P_0SEXP) {
 
   const int T = ZTf.n_rows;
   const int rp = A.n_rows;
@@ -132,25 +135,38 @@ Rcpp::List fKS(arma::mat A,
   ZsT.row(T-1) = ZTf.row(T-1);
   VsT.slice(T-1) = VTf.slice(T-1);
 
-  mat At = A.t(), Ji, Vfi;
+  mat At = A.t(), Ji, Vfi, Vpi;
 
   // Smoothed state variable and covariance
   // See e.g. Shumway and Stoffer (2002) p297, or astsa::Ksmooth0
   for (int i = T-1; i--; ) {
     Vfi = VTf.slice(i);
-    Ji = Vfi * At * VTp.slice(i+1).i();
+    Vpi = VTp.slice(i+1);
+    Ji = Vfi * At * Vpi.i();
     ZsT.row(i) = ZTf.row(i) + (Ji * (ZsT.row(i+1) - ZTp.row(i+1)).t()).t();
-    VsT.slice(i) = Vfi + Ji * (VsT.slice(i+1) - VTp.slice(i+1)) * Ji.t();
+    VsT.slice(i) = Vfi + Ji * (VsT.slice(i+1) - Vpi) * Ji.t();
   }
 
+  if(Rf_isNull(F_0SEXP) || Rf_isNull(P_0SEXP))
+    return Rcpp::List::create(Rcpp::Named("F_smooth") = ZsT,
+                              Rcpp::Named("P_smooth") = VsT);
+
+
+  // From https://dirk.eddelbuettel.com/papers/rcpp_ku_nov2013-part2.pdf
+  Rcpp::NumericVector F_0_v(F_0SEXP);
+  Rcpp::NumericMatrix P_0_v(P_0SEXP);
+  int n = P_0_v.nrow(), k = P_0_v.ncol();
+  arma::mat P_0(P_0_v.begin(), n, k, false);
+  arma::rowvec F_0(F_0_v.begin(), n, false);
+
   // Smoothed value for t = 0
-  Vfi = VTp.slice(0);
-  Ji = Vfi * At * VTp.slice(0).i();
+  Vpi = VTp.slice(0);
+  Ji = P_0 * At * Vpi.i();
 
   return Rcpp::List::create(Rcpp::Named("F_smooth") = ZsT,
                             Rcpp::Named("P_smooth") = VsT,
-                            Rcpp::Named("F_smooth_0") = ZTp.row(0) + (Ji * (ZsT.row(0) - ZTp.row(0)).t()).t(),
-                            Rcpp::Named("P_smooth_0") = Vfi + Ji * (VsT.slice(0) - Vfi) * Ji.t());
+                            Rcpp::Named("F_smooth_0") = F_0 + (Ji * (ZsT.row(0) -  ZTp.row(0)).t()).t(),
+                            Rcpp::Named("P_smooth_0") = P_0 + Ji * (VsT.slice(0) - Vpi) * Ji.t());
 }
 
 
@@ -161,12 +177,12 @@ Rcpp::List fKS(arma::mat A,
 // C Observation matrix (n x rp)
 // Q State covariance (rp x rp)
 // R Observation covariance (n x n)
-// F0 Initial state vector (rp x 1)
-// P0 Initial state covariance (rp x rp)
+// F_0 Initial state vector (rp x 1)
+// P_0 Initial state covariance (rp x rp)
 // retLL 0-no likelihood, 1-standard Kalman Filter, 2-BM14
 // [[Rcpp::export]]
 Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
-                                arma::mat R, arma::colvec F0, arma::mat P0, int retLL = 0) {
+                arma::mat R, arma::colvec F_0, arma::mat P_0, int retLL = 0) {
 
   const int T = X.n_rows;
   const int n = X.n_cols;
@@ -178,12 +194,12 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 
   double loglik = retLL > 0 ? 0 : NA_REAL, dn = 0, detS;
   if(retLL == 1) dn = n * log(2.0 * datum::pi);
-  colvec Zp = F0, Zf, et;
-  mat K, Vp = P0, Vf, S, VCt;
+  colvec Zp, Zf = F_0, et;
+  mat K, Vp, Vf = P_0, S, VCt;
 
   // Predicted state mean and covariance
-  mat ZTp(T+1, rp, fill::zeros);
-  cube VTp(rp, rp, T+1, fill::zeros);
+  mat ZTp(T, rp, fill::zeros);
+  cube VTp(rp, rp, T, fill::zeros);
 
   // Filtered state mean and covariance
   mat ZTf(T, rp, fill::zeros);
@@ -195,6 +211,11 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
   if(nmiss.n_elem == 0) Rcpp::stop("Missing first row of transition matrix");
 
   for (int i = 0; i < T; ++i) {
+
+    // Run a prediction
+    Zp = A * Zf;
+    Vp = A * Vf * A.t() + Q;
+    Vp =  0.5 * (Vp + Vp.t()); // Ensure symmetry
 
     // If missing observations are present at some timepoints, exclude the
     // appropriate matrix slices from the filtering procedure.
@@ -239,18 +260,9 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
     ZTf.row(i) = Zf.t();
     VTf.slice(i) = Vf;
 
-    // Run a prediction
-    Zp = A * ZTf.row(i).t();
-    Vp = A * VTf.slice(i) * A.t() + Q;
-    Vp =  0.5 * (Vp + Vp.t()); // Ensure symmetry
-
   }
 
-  if(retLL > 0) loglik *= 0.5;
-
-  // Store final prediction for time T+1 (prediction for time 1 was initialization values)
-  ZTp.row(T) = Zp.t();
-  VTp.slice(T) = Vp;
+  if(retLL) loglik *= 0.5;
 
   // Smoothed state mean and covariance
   mat ZsT(T, rp, fill::zeros);
@@ -272,13 +284,18 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
     ZsT.row(i) = ZTf.row(i) + (Ji * (ZsT.row(i+1) - ZTp.row(i+1)).t()).t();
     VsT.slice(i) = Vf + Ji * (VsT.slice(i+1) - VTp.slice(i+1)) * Jimt;
     // Cov(Z_t, Z_t-1): Needed for EM
-    if(i > 0) Jimt = (VTf.slice(i-1) * At * VTp.slice(i).i()).t();
-    VVsT.slice(i) = Vf * Jimt + Ji * (VVsT.slice(i+1) - A * Vf) * Jimt;
+    if(i > 0) {
+      Jimt = (VTf.slice(i-1) * At * VTp.slice(i).i()).t();
+      VVsT.slice(i) = Vf * Jimt + Ji * (VVsT.slice(i+1) - A * Vf) * Jimt;
+    }
   }
 
   // Smoothed value for t = 0
-  Vf = VTp.slice(0);
-  Ji = Vf * At * VTp.slice(0).i();
+  Vp = VTp.slice(0);
+  Jimt = (P_0 * At * Vp.i()).t();
+  VVsT.slice(0) = Vf * Jimt + Ji * (VVsT.slice(1) - A * Vf) * Jimt;
+  Ji = Jimt.t();
+
 
   return Rcpp::List::create(Rcpp::Named("F") = ZTf,
                             Rcpp::Named("P") = VTf,
@@ -287,8 +304,8 @@ Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
                             Rcpp::Named("F_smooth") = ZsT,
                             Rcpp::Named("P_smooth") = VsT,
                             Rcpp::Named("PPm_smooth") = VVsT,
-                            Rcpp::Named("F_smooth_0") = ZTp.row(0) + (Ji * (ZsT.row(0) - ZTp.row(0)).t()).t(),
-                            Rcpp::Named("P_smooth_0") = Vf + Ji * (VsT.slice(0) - Vf) * Ji.t(),
+                            Rcpp::Named("F_smooth_0") = F_0.t() + (Ji * (ZsT.row(0) - ZTp.row(0)).t()).t(),
+                            Rcpp::Named("P_smooth_0") = P_0 + Ji * (VsT.slice(0) - Vp) * Jimt,
                             Rcpp::Named("loglik") = loglik);
 }
 
