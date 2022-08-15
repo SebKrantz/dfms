@@ -1,6 +1,6 @@
 # Quoting some functions that need to be evaluated iteratively
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi))
-.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dnkron, dnkron_ind))
+.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind))
 .KFS <- quote(fKFS(X, A, C, Q, R, F_0, P_0))
 
 
@@ -240,6 +240,7 @@ DFM <- function(X, r, p = 1L, ...,
     dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep
     dnkron_ind <- whichv(dnkron, 1)
     XW0 <- X_imp
+    dgind <- 0:(n-1) * n + 1:n
     if(anymiss) XW0[W] <- 0 else W <- is.na(X) # TODO: think about this...
   } else {
     expr <- .EM_DGR

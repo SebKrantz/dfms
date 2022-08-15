@@ -1,5 +1,5 @@
 
-EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dnkron, dnkron_ind) {
+EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind) {
 
   kfs_res = fKFS(X, A, C, Q, R, F_0, P_0, TRUE)
   # kfs_res = tryCatch(fKFS(X, A, C, Q, R, F_0, P_0), error = function(e) return(list(NULL, X, A, C, Q, R, F_0, P_0)))
@@ -34,24 +34,25 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dnkron, dn
 
   dim(denom) = c(r, r, n)
   dnkron[dnkron_ind] = aperm(denom, c(1L, 3L, 2L))
-  C_new = ainv(dnkron) %*% unattrib(nom) # cinv
+  C_new = solve.default(dnkron) %*% unattrib(nom) # ainv -> slower...
   dim(C_new) = c(n, r)
 
   R_new = matrix(0, n, n)
+  Rdg = R[dgind]
   for (t in 1:T) {
     nanYt = W[t, ]
     tmp = C_new * !nanYt
-    R2 = R
-    diag(R2) = diag(R) * nanYt
+    R[dgind] = Rdg * nanYt
     tmp2 = tmp %*% tcrossprod(Vsmooth[sr, sr, t], tmp)
     tmp2 %+=% tcrossprod(XW0[t, ] - tmp %*% Zsmooth[t, sr])
-    tmp2 %+=% R2
+    tmp2 %+=% R
     R_new %+=% tmp2
   }
 
-  R_new %/=% T
-  RR = diag(R_new) # RR(RR<1e-2) = 1e-2;
-  R_new = diag(RR)
+  # R_new %/=% T
+  # RR = diag(R_new) # RR(RR<1e-2) = 1e-2;
+  # R_new = diag(R_new)
+  R_new = diag(R_new[dgind] / T)
 
   C[, sr] = C_new
 
