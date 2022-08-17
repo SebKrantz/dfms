@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{dfm}(
   x,
-  method = if (is.null(x$qml)) "twostep" else "qml",
+  method = switch(x$em.method, none = "twostep", "qml"),
   type = c("joint", "individual", "residual"),
   ...
 )
@@ -14,7 +14,7 @@
 \arguments{
 \item{x}{an object class 'dfm'.}
 
-\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
+\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"}, \code{"pca"} or \code{"all"} to plot all estimates.}
 
 \item{type}{character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.}
 

@@ -76,9 +76,13 @@ A list-like object of class 'dfm' with the following elements:
       \item \code{"attributes"} contains the \code{\link{attributes}} or the original data input.\cr
       \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
    } \cr\cr
- \code{pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - obtained from running PCA on \code{X_imp}. \cr\cr
- \code{twostep} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
- \code{qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratiely Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
+ \code{eigen} \tab\tab \code{eigen(cov(X_imp))}. \cr\cr
+ \code{F_pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - \code{X_imp \%*\% eigen$vectors}. \cr\cr
+ \code{P_0} \tab\tab \eqn{r \times r}{r x r} initial factor covariance matrix estimate based on PCA results. \cr\cr
+ \code{F_twostep} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
+ \code{P_twostep} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. \cr\cr
+ \code{F_qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratiely Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
+ \code{P_qml} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of QML factor estimates. \cr\cr
  \code{A} \tab\tab \eqn{r \times rp}{r x rp} factor transition matrix.\cr\cr
  \code{C} \tab\tab \eqn{n \times r}{n x r} observation matrix.\cr\cr
  \code{Q} \tab\tab \eqn{r \times r}{r x r} state (error) covariance matrix.\cr\cr

@@ -8,7 +8,11 @@
 \usage{
 \method{print}{dfm}(x, digits = 4L, ...)
 
-\method{summary}{dfm}(object, method = if (is.null(object$qml)) "twostep" else "qml", ...)
+\method{summary}{dfm}(
+  object,
+  method = switch(object$em.method, none = "twostep", "qml"),
+  ...
+)
 
 \method{print}{dfm_summary}(x, digits = 4L, compact = sum(x$info["n"] > 15, x$info["n"] > 40), ...)
 }

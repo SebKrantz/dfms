@@ -90,9 +90,13 @@
 #'       \item \code{"attributes"} contains the \code{\link{attributes}} or the original data input.\cr
 #'       \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
 #'    } \cr\cr
-#'  \code{pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - obtained from running PCA on \code{X_imp}. \cr\cr
-#'  \code{twostep} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
-#'  \code{qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratiely Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
+#'  \code{eigen} \tab\tab \code{eigen(cov(X_imp))}. \cr\cr
+#'  \code{F_pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - \code{X_imp \%*\% eigen$vectors}. \cr\cr
+#'  \code{P_0} \tab\tab \eqn{r \times r}{r x r} initial factor covariance matrix estimate based on PCA results. \cr\cr
+#'  \code{F_twostep} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
+#'  \code{P_twostep} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. \cr\cr
+#'  \code{F_qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratiely Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
+#'  \code{P_qml} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of QML factor estimates. \cr\cr
 #'  \code{A} \tab\tab \eqn{r \times rp}{r x rp} factor transition matrix.\cr\cr
 #'  \code{C} \tab\tab \eqn{n \times r}{n x r} observation matrix.\cr\cr
 #'  \code{Q} \tab\tab \eqn{r \times r}{r x r} state (error) covariance matrix.\cr\cr
@@ -114,7 +118,7 @@
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160.
 #'
 #' @useDynLib DFM, .registration = TRUE
-#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% whichv
+#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% whichv setColnames setDimnames
 #' @importFrom grDevices rainbow
 #' @importFrom graphics abline legend lines par
 #' @importFrom stats filter residuals rnorm spline ts.plot
@@ -158,7 +162,7 @@ DFM <- function(X, r, p = 1L, ...,
     W <- NULL
     list2env(tsremimpNA(X, max.missing, na.rm.method, na.impute, ma.terms),
              envir = environment())
-    if(length(na.rm)) X <- X[-na.rm, ]
+    if(length(na.rm)) X <- X[-na.rm, , drop = FALSE]
   }
   T <- nrow(X)
 
@@ -186,15 +190,16 @@ DFM <- function(X, r, p = 1L, ...,
 
   # Initial state and state covariance (P) ------------
   F_0 <- rep(0, rp) # ar$X[1L, ] #
-  # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  P_0 <- if(!is.na(BMl) && BMl) matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp) else
-                matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
+  # TODO: Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
+  # -> cannot be that this influences the twostep estimates. Need to chosse one way to initialize. Better BM14..
+  P_0 <- matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp)
+  # if(!is.na(BMl) && BMl)  else matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
-  ks_res <- fKFS(X, A, C, Q, R, F_0, P_0, FALSE)
+  kfs_res <- fKFS(X, A, C, Q, R, F_0, P_0, FALSE)
 
   ## Two-step solution is state mean from the Kalman smoother
-  F_kal <- setCN(ks_res$F_smooth[, sr, drop = FALSE], fnam)
+  F_kal <- kfs_res$F_smooth[, sr, drop = FALSE]
 
   # Results object for the two-step case
   object_init <- list(X_imp = structure(X_imp,
@@ -202,8 +207,11 @@ DFM <- function(X, r, p = 1L, ...,
                                         missing = if(anymiss) W else NULL,
                                         attributes = ax,
                                         is.list = ilX),
-                       pca = setCN(F_pc, paste0("PC", sr)),
-                       twostep = F_kal,
+                       eigen = eigen_decomp,
+                       F_pca = setColnames(F_pc, paste0("PC", sr)),
+                       P_0 = setDimnames(P_0[sr, sr, drop = FALSE], list(fnam, fnam)),
+                       F_twostep = setColnames(F_kal, fnam),
+                       P_twostep = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
                        anyNA = anymiss,
                        na.rm = na.rm,
                        em.method = em.method[1L],
@@ -220,12 +228,12 @@ DFM <- function(X, r, p = 1L, ...,
       if(anymiss) res[W] <- NA
       R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
     } else R <- diag(n)
-    final_object <- c(object_init[1:3],
-                      list(A = `dimnames<-`(t(var$A), lagnam(fnam, p)), # A[sr, , drop = FALSE],
-                           C = t(beta), # C[, sr, drop = FALSE],
-                           Q = `dimnames<-`(Q, list(unam, unam)),       # Q[sr, sr, drop = FALSE],
-                           R = `dimnames<-`(R, list(Xnam, Xnam))),
-                      object_init[-(1:3)])
+    final_object <- c(object_init[1:6],
+                      list(A = setDimnames(t(var$A), lagnam(fnam, p)), # A[sr, , drop = FALSE],
+                           C = setDimnames(t(beta), list(Xnam, fnam)), # C[, sr, drop = FALSE],
+                           Q = setDimnames(Q, list(unam, unam)),       # Q[sr, sr, drop = FALSE],
+                           R = setDimnames(R, list(Xnam, Xnam))),
+                      object_init[-(1:6)])
     class(final_object) <- "dfm"
     return(final_object)
   }
@@ -268,18 +276,19 @@ DFM <- function(X, r, p = 1L, ...,
 
   ## Run the Kalman filtering and smoothing step for the last time
   ## with optimal estimates
-  F_hat <- eval(.KFS, em_res, encl)$F_smooth
+  kfs_res <- eval(.KFS, em_res, encl)
 
-  final_object <- c(object_init[1:3],
-               list(qml = setCN(F_hat[, sr, drop = FALSE], fnam),
-                    A = `dimnames<-`(em_res$A[sr, , drop = FALSE], lagnam(fnam, p)),
-                    C = `dimnames<-`(em_res$C[, sr, drop = FALSE], list(Xnam, fnam)),
-                    Q = `dimnames<-`(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
-                    R = `dimnames<-`(em_res$R, list(Xnam, Xnam)),
+  final_object <- c(object_init[1:6],
+               list(F_qml = setColnames(kfs_res$F_smooth[, sr, drop = FALSE], fnam),
+                    P_qml = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
+                    A = setDimnames(em_res$A[sr, , drop = FALSE], lagnam(fnam, p)),
+                    C = setDimnames(em_res$C[, sr, drop = FALSE], list(Xnam, fnam)),
+                    Q = setDimnames(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
+                    R = setDimnames(em_res$R, list(Xnam, Xnam)),
                     loglik = loglik_all,
                     tol = tol,
                     converged = converged),
-                    object_init[-(1:3)])
+                    object_init[-(1:6)])
 
   class(final_object) <- "dfm"
   return(final_object)

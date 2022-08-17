@@ -9,7 +9,7 @@
 \method{predict}{dfm}(
   object,
   h = 10L,
-  method = if (is.null(object$qml)) "twostep" else "qml",
+  method = switch(object$em.method, none = "twostep", "qml"),
   standardized = TRUE,
   resFUN = NULL,
   resAC = 0.1,

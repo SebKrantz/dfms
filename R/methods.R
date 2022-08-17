@@ -11,7 +11,7 @@
 #' @param x,object an object class 'dfm'.
 #' @param digits integer. The number of digits to print out.
 #' @param \dots not used.
-#' @importFrom collapse qsu
+#' @importFrom collapse qsu frange
 #' @export
 print.dfm <- function(x,
                       digits = 4L, ...) {
@@ -34,11 +34,10 @@ print.dfm <- function(x,
 #' @importFrom stats cov
 #' @importFrom collapse pwcov
 #' @export
-summary.dfm <- function(object,
-                        method = if(is.null(object$qml)) "twostep" else "qml", ...) {
+summary.dfm <- function(object, method = switch(object$em.method, none = "twostep", "qml"), ...) {
 
   X <- object$X_imp
-  F <- object[[method]]
+  F <- switch(method, pca = object$F_pca, twostep = object$F_twostep, qml = object$F_qml, stop("Unkown method", method))
   A <- object$A
   r <- dim(A)[1L]
   p <- dim(A)[2L] / r
@@ -113,32 +112,33 @@ print.dfm_summary <- function(x,
 
 #' Plot DFM
 #' @param x an object class 'dfm'.
-#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
+#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"}, \code{"pca"} or \code{"all"} to plot all estimates.
 #' @param type character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.
 #' @param \dots further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot.
 #' @importFrom graphics boxplot
+#' @importFrom collapse unlist2d ckmatch na_rm seq_row
 #' @export
 plot.dfm <- function(x,
-                     method = if(is.null(x$qml)) "twostep" else "qml",
+                     method = switch(x$em.method, none = "twostep", "qml"),
                      type = c("joint", "individual", "residual"), ...) {
   F <- switch(method[1L],
-              all = cbind(x$pca, setCN(x$twostep, paste("2S", colnames(x$twostep))),
-                          if(length(x$qml)) setCN(x$qml, paste("QML", colnames(x$qml))) else NULL),
-              pca = x$pca, twostep = x$twostep, qml = x$qml, stop("Unknown method:", method[1L]))
+              all = cbind(x$F_pca, setColnames(x$F_twostep, paste("TwoStep", colnames(x$F_twostep))),
+                          if(length(x$F_qml)) setColnames(x$F_qml, paste("QML", colnames(x$F_qml))) else NULL),
+              pca = x$F_pca, twostep = x$F_twostep, qml = x$F_qml, stop("Unknown method:", method[1L]))
   nf <- dim(F)[2L]
   switch(type[1L],
     joint = {
-      Xr <- range(x$X_imp)
-      Fr <- range(F)
+      Xr <- frange(x$X_imp)
+      Fr <- frange(F)
       ts.plot(x$X_imp, col = "grey85", ylim = c(min(Xr[1L], Fr[1L]), max(Xr[2L], Fr[2L])),
               ylab = "Value", main = "Standardized Series and Factor Estimates", ...)
       cols <- rainbow(nf)
       for (i in seq_len(nf)) lines(F[, i], col = cols[i])
-      legend("topleft", colnames(F), col = cols, lty = 1, bty = "n")
+      legend("topleft", colnames(F), col = cols, lty = 1, bty = "n", ncol = if(method[1L] == "all") 3L else 1L)
     },
     individual = { # TODO: Reduce plot margins
       if(method[1L] == "all") {
-        qml <- !is.null(x$qml)
+        qml <- !is.null(x$F_qml)
         nf <- nf / (2L + qml)
         oldpar <- par(mfrow = c(nf, 1L))
         on.exit(par(oldpar))
@@ -147,7 +147,7 @@ plot.dfm <- function(x,
                xlab = if(i == nf) "Time" else "", ...)
           lines(F[, i + nf], type = 'l', col = "orange")
           if(qml) lines(F[, i + 2L * nf], type = 'l', col = "blue")
-          if(i == 1L) legend("topleft", c("PCA", "2S", if(qml) "QML"),
+          if(i == 1L) legend("topleft", c("PCA", "TwoStep", if(qml) "QML"),
                              col = c("red", "orange", "blue"), lty = 1, bty = "n")
         }
       } else {
@@ -166,6 +166,65 @@ plot.dfm <- function(x,
   )
 }
 
+
+#' Extract Factor Estimates in a Data Frame
+#' @param x an object class 'dfm'.
+#' @param method character. The factor estimates to use: any of \code{"qml"}, \code{"twostep"}, \code{"pca"} (multiple can be supplied) or \code{"all"} for all estimates.
+#' @param pivot character. The orientation of the frame: \code{"long"}, \code{"wide.factor"} or \code{"wide.method"} or \code{"wide"}.
+#' @param time a vector identifying the time dimension, or \code{NULL} to omit a time variable.
+#' @param stringsAsFactors make factors from method and factor identifiers. Same as option to \code{\link{as.data.frame.table}}.
+#' @param \dots not used.
+#'
+#' @importFrom collapse ckmatch na_rm seq_row t_list unattrib
+#' @importFrom stats setNames
+#' @export
+as.data.frame.dfm <- function(x, ...,
+                              method = "all",
+                              pivot = c("long", "wide.factor", "wide.method", "wide", "t.wide"),
+                              time = seq_row(x$F_pca),
+                              stringsAsFactors = TRUE) {
+
+  estm <- c(PCA = "pca", TwoStep = "twostep", QML = "qml")
+  if(length(method) > 1L || method != "all")
+     estm <- estm[ckmatch(method, estm, e = "Unknown method:")]
+  estlist <- x[paste0("F_", estm)]
+  names(estlist) <- names(estm)
+  estlist <- na_rm(estlist) # Also removes NULL elements
+
+  nam <- names(estlist)
+  m <- length(estlist)
+  T <- nrow(estlist[[1L]])
+  r <- ncol(estlist[[1L]])
+
+  if(!is.null(time) && length(time) != T) {
+    if(length(res$na.rm)) time <- time[-res$na.rm]
+    if(length(time) != T) stop(sprintf("time must be a length %s vector or NULL", T))
+  }
+
+  res <- switch(pivot[1L],
+    long = list(Method = if(stringsAsFactors) setAttrib(rep(1:m, each = T*r), list(levels = nam, class = "factor")) else rep(nam, each = T*r),
+                Factor = if(stringsAsFactors) setAttrib(rep(1:r, times = m, each = T), list(levels = paste0("f", 1:r), class = "factor")) else rep(paste0("f", 1:r), times = m, each = T),
+                Time = if(length(time)) rep(time, times = m*r) else NULL,
+                Value = unlist(estlist, use.names = FALSE)),
+    wide.factor = c(list(Method = if(stringsAsFactors) setAttrib(rep(1:m, each = T), list(levels = nam, class = "factor")) else rep(nam, each = T),
+                         Time = if(length(time)) rep(time, times = m) else NULL),
+                    setNames(lapply(t_list(unattrib(lapply(estlist, mctl))), unlist, FALSE, FALSE), paste0("f", 1:r))),
+    wide.method = c(list(Factor = if(stringsAsFactors) setAttrib(rep(1:r, each = T), list(levels = paste0("f", 1:r), class = "factor")) else rep(paste0("f", 1:r), each = T),
+                         Time = if(length(time)) rep(time, times = r) else NULL),
+                    lapply(estlist, unattrib)),
+    # If only one method, do not do combine names e.g. "QML_f1"? -> most of the time people just want a simple frame like this...
+    wide = c(list(Time = time), setNames(unlist(lapply(estlist, mctl), FALSE, FALSE), if(length(nam) == 1L) paste0("f", 1:r) else t(outer(nam, 1:r, paste, sep = "_f")))),
+    t.wide = c(list(Time = time), setNames(unlist(t_list(lapply(estlist, mctl)), FALSE, FALSE), if(length(nam) == 1L) paste0("f", 1:r) else outer(nam, 1:r, paste, sep = "_f"))),
+    stop("Unknown pivot option:", pivot[1L])
+  )
+
+  if(is.null(time)) res <- na_rm(res)
+  attr(res, "methods") <- estm
+  attr(res, "row.names") <- .set_row_names(length(res[[1L]]))
+  class(res) <- "data.frame"
+  return(res)
+}
+
 #' @name residuals.dfm
 #' @aliases residuals.dfm
 #' @aliases resid.dfm
@@ -181,11 +240,13 @@ plot.dfm <- function(x,
 #' @importFrom collapse TRA.matrix mctl setAttrib pad
 #' @export
 residuals.dfm <- function(object,
-                          method = if(is.null(object$qml)) "twostep" else "qml",
+                          method = switch(object$em.method, none = "twostep", "qml"),
                           orig.format = FALSE,
                           standardized = FALSE, ...) {
   X <- object$X_imp
-  X_pred <- tcrossprod(object[[method]], object$C)
+  F <- switch(method, pca = object$F_pca, twostep = object$F_twostep, qml = object$F_qml,
+              stop("Unkown method", method))
+  X_pred <- tcrossprod(F, object$C)
   if(!standardized) {
     stats <- attr(X, "stats")
     X_pred <- unscale(X_pred, stats)
@@ -203,11 +264,13 @@ residuals.dfm <- function(object,
 #' @rdname residuals.dfm
 #' @export
 fitted.dfm <- function(object,
-                       method = if(is.null(object$qml)) "twostep" else "qml",
+                       method = switch(object$em.method, none = "twostep", "qml"),
                        orig.format = FALSE,
                        standardized = FALSE, ...) {
   X <- object$X_imp
-  res <- tcrossprod(object[[method]], object$C)
+  F <- switch(method, pca = object$F_pca, twostep = object$F_twostep, qml = object$F_qml,
+              stop("Unkown method", method))
+  res <- tcrossprod(F, object$C)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
   if(object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
@@ -246,12 +309,13 @@ fitted.dfm <- function(object,
 # TODO: Prediction in original format??
 predict.dfm <- function(object,
                         h = 10L,
-                        method = if(is.null(object$qml)) "twostep" else "qml",
+                        method = switch(object$em.method, none = "twostep", "qml"),
                         standardized = TRUE,
                         resFUN = NULL,
                         resAC = 0.1, ...) {
 
-  F <- object[[method]]
+  F <- switch(method, pca = object$F_pca, twostep = object$F_twostep, qml = object$F_qml,
+              stop("Unkown method", method))
   nf <- dim(F)[2L]
   C <- object$C
   ny <- dim(C)[1L]
@@ -360,7 +424,7 @@ plot.dfm_forecast <- function(x,
   r <- ncol(F)
   T <- nrow(F)
   if(ffl) {
-    if(nyliml) Fr <- range(F)
+    if(nyliml) Fr <- frange(F)
     F_fcst <- x$F_fcst[, factors, drop = FALSE]
     F <- rbind(F, matrix(NA_real_, x$h, r))
   } else Fr <- NULL
@@ -368,15 +432,15 @@ plot.dfm_forecast <- function(x,
     X <- x$X
     n <- ncol(X)
     if(nyliml) {
-      Xr <- range(X, na.rm = TRUE)
-      Pr <- range(if(ffl) c(F_fcst, x$X_fcst) else x$X_fcst)
+      Xr <- frange(X, na.rm = TRUE)
+      Pr <- frange(if(ffl) c(F_fcst, x$X_fcst) else x$X_fcst)
     }
     X_fcst <- rbind(matrix(NA_real_, T-1L, n), X[T, , drop = FALSE], x$X_fcst)
     X <- rbind(X, matrix(NA_real_, x$h, n))
   } else {
     data.col <- Xr <- NULL
     X <- F[, 1L]
-    if(nyliml) Pr <- range(F_fcst)
+    if(nyliml) Pr <- frange(F_fcst)
   }
   if(ffl) F_fcst <- rbind(matrix(NA_real_, T-1L, r), F[T, , drop = FALSE], F_fcst)
   if(nyliml) {

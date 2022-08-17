@@ -8,7 +8,7 @@
 \usage{
 \method{residuals}{dfm}(
   object,
-  method = if (is.null(object$qml)) "twostep" else "qml",
+  method = switch(object$em.method, none = "twostep", "qml"),
   orig.format = FALSE,
   standardized = FALSE,
   ...
@@ -16,7 +16,7 @@
 
 \method{fitted}{dfm}(
   object,
-  method = if (is.null(object$qml)) "twostep" else "qml",
+  method = switch(object$em.method, none = "twostep", "qml"),
   orig.format = FALSE,
   standardized = FALSE,
   ...

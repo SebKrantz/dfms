@@ -1,4 +1,3 @@
-setCN <- function(x, nam) `dimnames<-`(x, list(NULL, nam))
 
 lagnam <- function(nam, p) list(nam, as.vector(t(outer(paste0("L", seq_len(p)), nam, paste, sep = "."))))
 
@@ -17,7 +16,7 @@ AC1 <- function(res, anymiss) {
   diag(ACF) / fvar(res)
 }
 
-unscale <- function(x, stats) TRA.matrix(TRA.matrix(x, stats[, "SD"], "*"), stats[, "Mean"], "+")
+unscale <- function(x, stats) TRA.matrix(TRA.matrix(x, stats[, "SD"], "*"), stats[, "Mean"], "+", set = TRUE)
 
 ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 
