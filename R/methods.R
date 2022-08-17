@@ -197,7 +197,7 @@ as.data.frame.dfm <- function(x, ...,
   r <- ncol(estlist[[1L]])
 
   if(!is.null(time) && length(time) != T) {
-    if(length(res$na.rm)) time <- time[-res$na.rm]
+    if(length(x$na.rm)) time <- time[-x$na.rm]
     if(length(time) != T) stop(sprintf("time must be a length %s vector or NULL", T))
   }
 
