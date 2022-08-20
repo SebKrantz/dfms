@@ -484,6 +484,8 @@ plot.dfm_forecast <- function(x,
 #' A Screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
 #' @param X a \code{T x n} data matrix or frame.
 #' @param max.r integer. The maximum number of factors for which ICs should be computed (or eigenvalues to be displayed in the screeplot).
+#' @param x an object of type 'ICr'.
+#' @param \dots furtehr arguments to \code{\link{ts.plot}} or \code{\link{plot}}.
 #'
 #' @return A list of 4 elements:
 #' \item{F_pca}{\code{T x n} matrix of principle component factor estimates.}
@@ -516,6 +518,9 @@ ICr <- function(X, max.r = min(20, ncol(X))) {
 
   if(!is.matrix(X)) X <- qM(X)
 
+  # Standardizing
+  X <- fscale(X)
+
   if(anyNA(X)) {
     message("Missing values detected: imputing data with tsremimpNA() with default settings")
     X <- tsremimpNA(X)$X_imp
@@ -527,9 +532,6 @@ ICr <- function(X, max.r = min(20, ncol(X))) {
   # defining rmax and checking if it is a positive integer
   if(max.r < 1L || max.r != as.integer(max.r)) stop("rmax needs to be a positive integer")
   else if(max.r > n) max.r <- n
-
-  # Standardizing
-  X <- fscale(X)
 
   # Eigen decomposition
   eigen_decomp = eigen(cov(X), symmetric = TRUE)
@@ -574,13 +576,14 @@ print.ICr <- function(x, ...) {
 
 #' @rdname ICr
 #' @importFrom collapse fmin.matrix
+#' @importFrom graphics grid points
 #' @export
 plot.ICr <- function(x, ...) {
 
   ts.plot(x$IC, gpars = list(xlab = "Number of Factors (r)", ylab = "IC Value", lty = c(2L, 1L, 3L),
-                             main = "Optimal Number of Factors (r) from Bai and Ng (2002) Criteria"))
+                             main = "Optimal Number of Factors (r) from Bai and Ng (2002) Criteria"), ...)
   # grid()
-  legend("topleft", paste0(names(x$r.star), ", r* = ", x$r.star), lty = c(2L, 1L, 3L))
+  legend("topleft", paste0(names(x$r.star), ", r* = ", x$r.star), lty = c(2L, 1L, 3L)) # , bty = "n"
   points(x = x$r.star, y = fmin.matrix(x$IC), pch = 19, col ="red")
 
 }
@@ -588,6 +591,7 @@ plot.ICr <- function(x, ...) {
 #' @rdname ICr
 #' @param type character. Either \code{"ev"} (eigenvalues), \code{"pve"} (percent variance explained), or \code{"cum.pve"} (cumulative PVE). Multiple plots can be requested.
 #' @param show.grid logical. \code{TRUE} shows gridlines in each plot.
+#' @importFrom stats screeplot
 #' @export
 screeplot.ICr <- function(x, type = c("pve", "cum.pve"), show.grid = TRUE, max.r = 30, ...) {
   ev = x$eigenvalues

@@ -20,6 +20,10 @@ ICr(X, max.r = min(20, ncol(X)))
 
 \item{max.r}{integer. The maximum number of factors for which ICs should be computed (or eigenvalues to be displayed in the screeplot).}
 
+\item{x}{an object of type 'ICr'.}
+
+\item{\dots}{furtehr arguments to \code{\link{ts.plot}} or \code{\link{plot}}.}
+
 \item{type}{character. Either \code{"ev"} (eigenvalues), \code{"pve"} (percent variance explained), or \code{"cum.pve"} (cumulative PVE). Multiple plots can be requested.}
 
 \item{show.grid}{logical. \code{TRUE} shows gridlines in each plot.}
