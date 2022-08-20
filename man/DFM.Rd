@@ -23,7 +23,7 @@ DFM(
 )
 }
 \arguments{
-\item{X}{data matrix or frame.}
+\item{X}{a \code{T x n} data matrix or frame.}
 
 \item{r}{number of factors.}
 

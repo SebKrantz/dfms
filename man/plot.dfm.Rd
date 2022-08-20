@@ -2,6 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{plot.dfm}
 \alias{plot.dfm}
+\alias{screeplot.dfm}
 \title{Plot DFM}
 \usage{
 \method{plot}{dfm}(
@@ -10,6 +11,8 @@
   type = c("joint", "individual", "residual"),
   ...
 )
+
+\method{screeplot}{dfm}(x, ...)
 }
 \arguments{
 \item{x}{an object class 'dfm'.}
@@ -18,7 +21,7 @@
 
 \item{type}{character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.}
 
-\item{\dots}{further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot.}
+\item{\dots}{for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.}
 }
 \description{
 Plot DFM

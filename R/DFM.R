@@ -9,7 +9,7 @@
 #' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data of a single frequency,
 #' with time-invariant system matrices and classical assumptions, while permitting arbitrary patterns of missing data.
 #'
-#' @param X data matrix or frame.
+#' @param X a \code{T x n} data matrix or frame.
 #' @param r number of factors.
 #' @param p number of lags in factor VAR.
 #' @param \dots further arguments to be added here in the future, such as further estimation methods or block-structures.

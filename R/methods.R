@@ -114,7 +114,7 @@ print.dfm_summary <- function(x,
 #' @param x an object class 'dfm'.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"}, \code{"pca"} or \code{"all"} to plot all estimates.
 #' @param type character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.
-#' @param \dots further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot.
+#' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
 #' @importFrom graphics boxplot
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
 #' @export
@@ -477,3 +477,143 @@ plot.dfm_forecast <- function(x,
 #
 # backcast.dfm <- function(x, method = "qml", ...) {
 # }
+
+# Adapted from: https://github.com/nmecsys/nowcasting/blob/master/R/ICfactors.R
+#' @title Information Criteria to Determine the Number of Factors (r)
+#' @description Minimizes 3 information criterio proposed by Bai & Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
+#' A screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
+#' @param X a \code{T x n} data matrix or frame.
+#' @param max.r integer. The maximum number of factors for which ICs should be computed (or eigenvalues to be displayed in the screeplot).
+#'
+#' @return A list of 3 elements:
+#' \item{F_pca}{\code{T x n} matrix of principle component factor estimates.}
+#' \item{eigenvalues}{the eigenvalues of the covariance matrix of \code{X}.}
+#' \item{IC}{\code{r.max x 3} 'table' containing the 3 information criteria of Bai & Ng (2002), computed for all values of \code{r} from \code{1:r.max}.}
+#' \item{r.star}{vector of length 3 containing the number of factors (\code{r}) minimizing each information criterion.}
+#'
+#' @note To determine the number of lags (\code{p}) in the factor transition equation, use the function \code{vars::VARselect} with r* principle components (also returned by \code{ICr}).
+#'
+#' @references
+#' Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. <doi:10.1111/1468-0262.00273>
+#' Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. \emph{The Review of Economics and Statistics, 92}(4), 1004-1016.
+#' De Valk, S., de Mattos, D., & Ferreira, P. (2019). Nowcasting: An R package for predicting economic variables using dynamic factor models. \emph{The R Journal, 11}(1), 230-244.
+#' @export
+ICr <- function(X, max.r = min(20, ncol(X))) {
+
+  if(!is.matrix(X)) X <- qM(X)
+
+  if(anyNA(X)) {
+    message("Missing values detected: imputing data with tsremimpNA() with default settings")
+    X <- tsremimpNA(X)$X_imp
+  }
+
+  n <- ncol(X)
+  T <- nrow(X)
+
+  # defining rmax and checking if it is a positive integer
+  if(max.r < 1L || max.r != as.integer(max.r)) stop("rmax needs to be a positive integer")
+  else if(max.r > n) max.r <- n
+
+  # Standardizing
+  X <- fscale(X)
+
+  # Eigen decomposition
+  eigen_decomp = eigen(cov(X), symmetric = TRUE)
+  evs = eigen_decomp$vectors
+  F_pca = X %*% evs
+
+  # Various constant terms, according to the 3 criteria of Bai & Ng (2002)
+  Tn <- T * n
+  npTdTn <- (n + T) / Tn
+  minnT <- min(n, T)
+  c1 <- npTdTn * log(1/npTdTn)
+  c2 <- npTdTn * log(minnT)
+  c3 <- log(minnT) / minnT
+  result <- matrix(0, max.r, 3)
+
+  # Calculating the ICs
+  for (r in 1:max.r) {
+    # Residuals from r PC's
+    res <- X - tcrossprod(F_pca[, 1:r], evs[, 1:r])
+    # Log normalized sum of squared errors
+    logV <- log(sum(colSums(res^2)/Tn))
+    # Computing criteria
+    result[r, ] <- c(logV + r * c1, logV + r * c2, logV + r * c3)
+  }
+
+  dimnames(result) <- list(r = 1:max.r, IC = paste0("IC", 1:3))
+  class(result) <- "table"
+  colnames(F_pca) <- paste0("PC", 1:n)
+
+  res_obj <- list(F_pca = F_pca, eigenvalues = eigen_decomp$values, IC = result, r.star = apply(result, 2, which.min))
+  class(res_obj) <- "ICr"
+  return(res_obj)
+}
+
+#' @rdname ICr
+#' @export
+print.ICr <- function(x, ...) {
+  cat("Optimal Number of Factors (r) from Bai & Ng (2002) Criteria\n\n")
+  print(x$r.star)
+}
+
+#' @rdname ICr
+#' @importFrom collapse fmin.matrix
+#' @export
+plot.ICr <- function(x, ...) {
+
+  ts.plot(x$IC, gpars = list(xlab = "Number of Factors (r)", ylab = "IC Value", lty = c(2L, 1L, 3L),
+                             main = "Optimal Number of Factors (r) from Bai & Ng (2002) Criteria"))
+  # grid()
+  legend("topleft", paste0(names(x$r.star), ", r* = ", x$r.star), lty = c(2L, 1L, 3L))
+  points(x = x$r.star, y = fmin.matrix(x$IC), pch = 19, col ="red")
+
+}
+
+#' @rdname ICr
+#' @param type character. Either \code{"pve"} (percent variance explained), \code{"cum.pve"} or both.
+#' @param show.grid logical. \code{TRUE} shows gridlines in each plot.
+#' @export
+screeplot.ICr <- function(x, type = c("pve", "cum.pve"), show.grid = TRUE, max.r = 30, ...) {
+  ev = x$eigenvalues
+  pve = (ev / sum(ev)) * 100
+  cs_pve = cumsum(pve)
+
+  if(length(ev) > max.r) {
+    pve = pve[1:max.r]
+    cs_pve = cs_pve[1:max.r]
+  }
+
+  ## This is smarter, but less flexible...
+  # if(length(ev) > 20) {
+  #   if(cs_pve[21] > 90) {
+  #     pve = pve[1:20]
+  #     cs_pve = cs_pve[1:20]
+  #   } else {
+  #     pve = pve[cs_pve < 90]
+  #     cs_pve = cs_pve[cs_pve < 90]
+  #   }
+  # }
+
+  if(length(type) == 2L) {
+    oldpar <- par(mfrow = c(1, 2))
+    on.exit(par(oldpar))
+  }
+  if(any(type == "pve")) {
+    plot(pve, type = "o", ylab = "% Variance Explained", xlab = "Principal Component", col = "dodgerblue4", ...)
+    if(show.grid) grid()
+    abline(h = 100 / length(ev), lty = 2)
+  }
+  if(any(type == "cum.pve")) {
+    plot(cs_pve, type = "o", ylab = "Cumulative % Variance Explained", xlab = "Number of Principal Components", col = "brown3", ...)
+    if(show.grid) grid()
+  }
+}
+
+#' @rdname plot.dfm
+#' @export
+screeplot.dfm <- function(x, ...) {
+  xl <- list(eigenvalues = x$eigen$values)
+  screeplot.ICr(xl, ...)
+}
+
