@@ -20,26 +20,41 @@ ICr(X, max.r = min(20, ncol(X)))
 
 \item{max.r}{integer. The maximum number of factors for which ICs should be computed (or eigenvalues to be displayed in the screeplot).}
 
-\item{type}{character. Either \code{"pve"} (percent variance explained), \code{"cum.pve"} or both.}
+\item{type}{character. Either \code{"ev"} (eigenvalues), \code{"pve"} (percent variance explained), or \code{"cum.pve"} (cumulative PVE). Multiple plots can be requested.}
 
 \item{show.grid}{logical. \code{TRUE} shows gridlines in each plot.}
 }
 \value{
-A list of 3 elements:
+A list of 4 elements:
 \item{F_pca}{\code{T x n} matrix of principle component factor estimates.}
 \item{eigenvalues}{the eigenvalues of the covariance matrix of \code{X}.}
-\item{IC}{\code{r.max x 3} 'table' containing the 3 information criteria of Bai & Ng (2002), computed for all values of \code{r} from \code{1:r.max}.}
+\item{IC}{\code{r.max x 3} 'table' containing the 3 information criteria of Bai and Ng (2002), computed for all values of \code{r} from \code{1:r.max}.}
 \item{r.star}{vector of length 3 containing the number of factors (\code{r}) minimizing each information criterion.}
 }
 \description{
-Minimizes 3 information criterio proposed by Bai & Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
-A screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
+Minimizes 3 information criterio proposed by Bai and Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
+A Screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
+}
+\details{
+Following Bai and Ng (2002) and De Valk et al. (2019), let NSSR(r) be the normalized sum of squared residuals [= SSR(r) / (n x T)] when r factors are estimated using principal components.
+Then the information criteria can be written as follows:
+
+\deqn{IC_{r1} = \ln(NSSR(r)) + r\left(\frac{n + T}{nT}\right) + \ln\left(\frac{nT}{n + T}\right)}{ICr1 = ln(NSSR(r)) + r * (n + T)/(n * T) + ln((n * T)/(n + T))}
+\deqn{IC_{r2} = \ln(NSSR(r)) + r\left(\frac{n + T}{nT}\right) + \ln(\min(n, T))}{ICr2 = ln(NSSR(r)) + r * (n + T)/(n * T) + ln(min(n, T))}
+\deqn{IC_{r3} = \ln(NSSR(r)) + r\left(\frac{\ln(\min(n, T))}{\min(n, T)}\right)}{ICr3 = ln(NSSR(r)) + r * ln(min(n, T))/min(n, T)}
+
+The optimal number of factors r* corresponds to the minimum IC. The three criteria are are asymptotically equivalent, but may give significantly
+different results for finite samples. The penalty in \eqn{IC_{r2}}{ICr2} is highest in finite samples.
+
+In the Screeplot a horizontal dashed line is shown signifying an eigenvalue of 1, or a share of variance corresponding to 1 divided by the number of eigenvalues.
 }
 \note{
 To determine the number of lags (\code{p}) in the factor transition equation, use the function \code{vars::VARselect} with r* principle components (also returned by \code{ICr}).
 }
 \references{
 Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. <doi:10.1111/1468-0262.00273>
+
 Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. \emph{The Review of Economics and Statistics, 92}(4), 1004-1016.
+
 De Valk, S., de Mattos, D., & Ferreira, P. (2019). Nowcasting: An R package for predicting economic variables using dynamic factor models. \emph{The R Journal, 11}(1), 230-244.
 }

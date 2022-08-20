@@ -480,22 +480,36 @@ plot.dfm_forecast <- function(x,
 
 # Adapted from: https://github.com/nmecsys/nowcasting/blob/master/R/ICfactors.R
 #' @title Information Criteria to Determine the Number of Factors (r)
-#' @description Minimizes 3 information criterio proposed by Bai & Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
-#' A screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
+#' @description Minimizes 3 information criterio proposed by Bai and Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
+#' A Screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
 #' @param X a \code{T x n} data matrix or frame.
 #' @param max.r integer. The maximum number of factors for which ICs should be computed (or eigenvalues to be displayed in the screeplot).
 #'
-#' @return A list of 3 elements:
+#' @return A list of 4 elements:
 #' \item{F_pca}{\code{T x n} matrix of principle component factor estimates.}
 #' \item{eigenvalues}{the eigenvalues of the covariance matrix of \code{X}.}
-#' \item{IC}{\code{r.max x 3} 'table' containing the 3 information criteria of Bai & Ng (2002), computed for all values of \code{r} from \code{1:r.max}.}
+#' \item{IC}{\code{r.max x 3} 'table' containing the 3 information criteria of Bai and Ng (2002), computed for all values of \code{r} from \code{1:r.max}.}
 #' \item{r.star}{vector of length 3 containing the number of factors (\code{r}) minimizing each information criterion.}
+#'
+#' @details Following Bai and Ng (2002) and De Valk et al. (2019), let NSSR(r) be the normalized sum of squared residuals [= SSR(r) / (n x T)] when r factors are estimated using principal components.
+#' Then the information criteria can be written as follows:
+#'
+#' \deqn{IC_{r1} = \ln(NSSR(r)) + r\left(\frac{n + T}{nT}\right) + \ln\left(\frac{nT}{n + T}\right)}{ICr1 = ln(NSSR(r)) + r * (n + T)/(n * T) + ln((n * T)/(n + T))}
+#' \deqn{IC_{r2} = \ln(NSSR(r)) + r\left(\frac{n + T}{nT}\right) + \ln(\min(n, T))}{ICr2 = ln(NSSR(r)) + r * (n + T)/(n * T) + ln(min(n, T))}
+#' \deqn{IC_{r3} = \ln(NSSR(r)) + r\left(\frac{\ln(\min(n, T))}{\min(n, T)}\right)}{ICr3 = ln(NSSR(r)) + r * ln(min(n, T))/min(n, T)}
+#'
+#' The optimal number of factors r* corresponds to the minimum IC. The three criteria are are asymptotically equivalent, but may give significantly
+#' different results for finite samples. The penalty in \eqn{IC_{r2}}{ICr2} is highest in finite samples.
+#'
+#' In the Screeplot a horizontal dashed line is shown signifying an eigenvalue of 1, or a share of variance corresponding to 1 divided by the number of eigenvalues.
 #'
 #' @note To determine the number of lags (\code{p}) in the factor transition equation, use the function \code{vars::VARselect} with r* principle components (also returned by \code{ICr}).
 #'
 #' @references
 #' Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. <doi:10.1111/1468-0262.00273>
+#'
 #' Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. \emph{The Review of Economics and Statistics, 92}(4), 1004-1016.
+#'
 #' De Valk, S., de Mattos, D., & Ferreira, P. (2019). Nowcasting: An R package for predicting economic variables using dynamic factor models. \emph{The R Journal, 11}(1), 230-244.
 #' @export
 ICr <- function(X, max.r = min(20, ncol(X))) {
@@ -522,13 +536,14 @@ ICr <- function(X, max.r = min(20, ncol(X))) {
   evs = eigen_decomp$vectors
   F_pca = X %*% evs
 
-  # Various constant terms, according to the 3 criteria of Bai & Ng (2002)
+  # Various constant terms, according to the 3 criteria of Bai and Ng (2002)
   Tn <- T * n
   npTdTn <- (n + T) / Tn
   minnT <- min(n, T)
   c1 <- npTdTn * log(1/npTdTn)
   c2 <- npTdTn * log(minnT)
   c3 <- log(minnT) / minnT
+  cvec <- c(c1, c2, c3)
   result <- matrix(0, max.r, 3)
 
   # Calculating the ICs
@@ -538,7 +553,7 @@ ICr <- function(X, max.r = min(20, ncol(X))) {
     # Log normalized sum of squared errors
     logV <- log(sum(colSums(res^2)/Tn))
     # Computing criteria
-    result[r, ] <- c(logV + r * c1, logV + r * c2, logV + r * c3)
+    result[r, ] <- logV + r * cvec
   }
 
   dimnames(result) <- list(r = 1:max.r, IC = paste0("IC", 1:3))
@@ -553,7 +568,7 @@ ICr <- function(X, max.r = min(20, ncol(X))) {
 #' @rdname ICr
 #' @export
 print.ICr <- function(x, ...) {
-  cat("Optimal Number of Factors (r) from Bai & Ng (2002) Criteria\n\n")
+  cat("Optimal Number of Factors (r) from Bai and Ng (2002) Criteria\n\n")
   print(x$r.star)
 }
 
@@ -563,7 +578,7 @@ print.ICr <- function(x, ...) {
 plot.ICr <- function(x, ...) {
 
   ts.plot(x$IC, gpars = list(xlab = "Number of Factors (r)", ylab = "IC Value", lty = c(2L, 1L, 3L),
-                             main = "Optimal Number of Factors (r) from Bai & Ng (2002) Criteria"))
+                             main = "Optimal Number of Factors (r) from Bai and Ng (2002) Criteria"))
   # grid()
   legend("topleft", paste0(names(x$r.star), ", r* = ", x$r.star), lty = c(2L, 1L, 3L))
   points(x = x$r.star, y = fmin.matrix(x$IC), pch = 19, col ="red")
@@ -571,15 +586,17 @@ plot.ICr <- function(x, ...) {
 }
 
 #' @rdname ICr
-#' @param type character. Either \code{"pve"} (percent variance explained), \code{"cum.pve"} or both.
+#' @param type character. Either \code{"ev"} (eigenvalues), \code{"pve"} (percent variance explained), or \code{"cum.pve"} (cumulative PVE). Multiple plots can be requested.
 #' @param show.grid logical. \code{TRUE} shows gridlines in each plot.
 #' @export
 screeplot.ICr <- function(x, type = c("pve", "cum.pve"), show.grid = TRUE, max.r = 30, ...) {
   ev = x$eigenvalues
+  n = length(ev)
   pve = (ev / sum(ev)) * 100
   cs_pve = cumsum(pve)
 
   if(length(ev) > max.r) {
+    ev = ev[1:max.r]
     pve = pve[1:max.r]
     cs_pve = cs_pve[1:max.r]
   }
@@ -595,14 +612,19 @@ screeplot.ICr <- function(x, type = c("pve", "cum.pve"), show.grid = TRUE, max.r
   #   }
   # }
 
-  if(length(type) == 2L) {
-    oldpar <- par(mfrow = c(1, 2))
+  if(length(type) > 1L) {
+    oldpar <- par(mfrow = c(1, length(type)))
     on.exit(par(oldpar))
+  }
+  if(any(type == "ev")) {
+    plot(ev, type = "o", ylab = "Eigenvalue", xlab = "Principal Component", col = "dodgerblue4", ...)
+    if(show.grid) grid()
+    abline(h = 1, lty = 2)
   }
   if(any(type == "pve")) {
     plot(pve, type = "o", ylab = "% Variance Explained", xlab = "Principal Component", col = "dodgerblue4", ...)
     if(show.grid) grid()
-    abline(h = 100 / length(ev), lty = 2)
+    abline(h = 100 / n, lty = 2)
   }
   if(any(type == "cum.pve")) {
     plot(cs_pve, type = "o", ylab = "Cumulative % Variance Explained", xlab = "Number of Principal Components", col = "brown3", ...)
