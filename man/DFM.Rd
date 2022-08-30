@@ -216,7 +216,7 @@ dfm_large = DFM(BM14, 6, 3, em.method = "BM")
 # Inspecting the model
 summary(dfm_large)
 plot(dfm_large)  # Factors and data
-plot(dfm_large, method = "all", type = "individual") # Factor estimates
+# plot(dfm_large, method = "all", type = "individual") # Factor estimates
 plot(dfm_large, type = "residual") # Residuals from factor predictions
 
 # 10 periods ahead forecast
