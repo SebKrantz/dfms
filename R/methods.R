@@ -516,10 +516,8 @@ plot.dfm_forecast <- function(x,
 #' @export
 ICr <- function(X, max.r = min(20, ncol(X))) {
 
-  if(!is.matrix(X)) X <- qM(X)
-
-  # Standardizing
-  X <- fscale(X)
+  # Converting to matrix and standardizing
+  X <- fscale(qM(X))
 
   if(anyNA(X)) {
     message("Missing values detected: imputing data with tsremimpNA() with default settings")
