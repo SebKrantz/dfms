@@ -29,6 +29,6 @@ BM14_Q
 }
 \description{
 A data extract from BM 2014 replication files. Some proprietary series (mostly PMI's) are excluded. The dataset \code{BM14_Models} provides information about all series
-and their includion in the 'small', 'medium' and 'large' sized dynamic factor models estimated by BM 2014. The actual data is contained in \code{BM14_M} for monthly data and \code{BM14_Q} for quarterly data.
+and their includion in the 'small', 'medium' and 'large' sized dynamic factor models estimated by BM 2014. The actual data is contained in \emph{xts} format in \code{BM14_M} for monthly data and \code{BM14_Q} for quarterly data.
 }
 \keyword{datasets}
