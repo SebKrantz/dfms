@@ -7,7 +7,7 @@
 \alias{screeplot.ICr}
 \title{Information Criteria to Determine the Number of Factors (r)}
 \usage{
-ICr(X, max.r = min(20, ncol(X)))
+ICr(X, max.r = min(20, ncol(X) - 1))
 
 \method{print}{ICr}(x, ...)
 

@@ -160,7 +160,9 @@ plot.dfm <- function(x,
     },
     residual = {
       if(method[1L] == "all") stop("Need to choose a specific method for residual plots")
-      boxplot(x$X_imp - tcrossprod(F, x$C), main = "Residuals by input variable", ...)
+      oldpar <- par(mar = c(11.5, 4.1, 4.1, 2.1))
+      on.exit(par(oldpar))
+      boxplot(x$X_imp - tcrossprod(F, x$C), main = "Residuals by input variable", las = 2, ...)
     },
     stop("Unknown plot type: ", type[1L])
   )
@@ -514,7 +516,7 @@ plot.dfm_forecast <- function(x,
 #'
 #' De Valk, S., de Mattos, D., & Ferreira, P. (2019). Nowcasting: An R package for predicting economic variables using dynamic factor models. \emph{The R Journal, 11}(1), 230-244.
 #' @export
-ICr <- function(X, max.r = min(20, ncol(X))) {
+ICr <- function(X, max.r = min(20, ncol(X)-1)) {
 
   # Converting to matrix and standardizing
   X <- fscale(qM(X))
