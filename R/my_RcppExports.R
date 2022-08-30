@@ -16,24 +16,24 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #'
 #' @details The underlying state space model is:
 #'
-#' \deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \tilde N(\textbf{0}, \textbf{R})}{xt = C Ft + et ~ N(0, R)}
-#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \tilde N(0, \textbf{Q})}{Ft = A Ft-1 + ut ~ N(0, Q)}
+#' \deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \tilde N(\textbf{0}, \textbf{R})}{x(t) = C F(t) + e(t) ~ N(0, R)}
+#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \tilde N(0, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
 #'
-#' where \eqn{x_t}{xt} is \code{X[t, ]}. The filter then first performs a time update (prediction)
+#' where \eqn{x_t}{x(t)} is \code{X[t, ]}. The filter then first performs a time update (prediction)
 #'
-#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1}}{Ft = A Ft-1}
-#' \deqn{\textbf{P}_t = \textbf{A P}_{t-1}\textbf{A}' + \textbf{Q}}{Pt = A Pt-1 A' + Q}
+#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1}}{F(t) = A F(t-1)}
+#' \deqn{\textbf{P}_t = \textbf{A P}_{t-1}\textbf{A}' + \textbf{Q}}{P(t) = A P(t-1) A' + Q}
 #'
-#' where \eqn{P_t = Cov(F_t)}{Pt = Cov(Ft)}. This is followed by the measurement update (filtering)
+#' where \eqn{P_t = Cov(F_t)}{P(t) = Cov(F(t))}. This is followed by the measurement update (filtering)
 #'
-#' \deqn{\textbf{K}_t = \textbf{P}_t \textbf{C}' (\textbf{C P}_t \textbf{C}' + \textbf{R})^{-1}}{Kt = Pt C' (C Pt C' + R)^-1}
-#' \deqn{\textbf{F}_t = \textbf{F}_t + \textbf{K}_t (\textbf{x}_t - \textbf{C F}_t)}{Ft = Ft + Kt (xt - C Ft)}
-#' \deqn{\textbf{P}_t = \textbf{P}_t - \textbf{K}_t\textbf{C P}_t}{Pt = Pt - Kt C Pt}
+#' \deqn{\textbf{K}_t = \textbf{P}_t \textbf{C}' (\textbf{C P}_t \textbf{C}' + \textbf{R})^{-1}}{K(t) = P(t) C' inv(C P(t) C' + R)}
+#' \deqn{\textbf{F}_t = \textbf{F}_t + \textbf{K}_t (\textbf{x}_t - \textbf{C F}_t)}{F(t) = F(t) + K(t) (x(t) - C F(t))}
+#' \deqn{\textbf{P}_t = \textbf{P}_t - \textbf{K}_t\textbf{C P}_t}{P(t) = P(t) - K(t) C P(t)}
 #'
 #' If a row of the data is all missing the measurement update is skipped i.e. the prediction becomes the filtered value. The log-likelihood is
 #' computed as
-#' \deqn{1/2 \sum_t \log(|St|)-e_t'S_te_t-n\log(2\pi)}{1/2 sum_t[log(det(St)) - et' St et - n log(2 pi)]}
-#' where \eqn{S_t = (C P_t C' + R)^{-1}}{St = (C Pt C' + R)^-1} and \eqn{e_t = x_t - C F_t}{et = xt - C Ft} is the prediction error.
+#' \deqn{1/2 \sum_t \log(|St|)-e_t'S_te_t-n\log(2\pi)}{1/2 sum_t[log(det(S(t))) - e(t)' S(t) e(t) - n log(2 pi)]}
+#' where \eqn{S_t = (C P_t C' + R)^{-1}}{S(t) = inv(C P(t) C' + R)} and \eqn{e_t = x_t - C F_t}{e(t) = x(t) - C F(t)} is the prediction error.
 #'
 #' For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Kfilter0}.
 #' For another fast (C-based) implementation that allows time-varying system matrices and non-stationary data see \code{FKF::fkf}.
@@ -67,7 +67,13 @@ fKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #' @param F_0 Initial state vector (rp x 1) or empty (NULL)
 #' @param P_0 Initial state covariance (rp x rp) or empty (NULL)
 #'
-#' @details If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are calculated and returned.
+#' @details The Kalman Smoother is given by:
+#'
+#' \deqn{\textbf{J}_t = \textbf{P}_t \textbf{A} + inv(\textbf{P}^{pred}_{t+1})}{J(t) = P(t) A inv(P_pred(t+1))}
+#' \deqn{\textbf{F}^{smooth}_t = \textbf{F}_t + \textbf{J}_t (\textbf{F}^{smooth}_{t+1} - \textbf{F}^{pred}_{t+1})}{F_smooth(t) = F(t) + J(t) (F_smooth(t+1) - F_pred(t+1))}
+#' \deqn{\textbf{P}^{smooth}_t = \textbf{P}_t + \textbf{J}_t (\textbf{P}^{smooth}_{t+1} - \textbf{P}^{pred}_{t+1}) \textbf{J}_t'}{P_smooth(t) = P(t) + J(t) (P_smooth(t+1) - P_pred(t+1)) J(t)'}
+#'
+#' The initial smoothed values for period t = T are set equal to the filtered values. If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are also calculated and returned.
 #'
 #' @returns Smoothed state and covariance estimates, including initial (t = 0) values.
 #' \tabular{lll}{
@@ -76,6 +82,12 @@ fKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #' F_smooth_0 \tab\tab 1 x rp initial smoothed state vectors, based on F_0 \cr\cr
 #' P_smooth_0 \tab\tab rp x rp initial smoothed state covariance, based on P_0
 #' }
+#'
+#' @references
+#' Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
+#'
+#' Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman filter.
+#'
 #' @export
 fKS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
   .Call(Cpp_fKS, A, F, F_pred, P, P_pred, F_0, P_0)

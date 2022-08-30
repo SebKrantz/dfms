@@ -34,5 +34,16 @@ P_smooth_0 \tab\tab rp x rp initial smoothed state covariance, based on P_0
 Fast Kalman Smoother
 }
 \details{
-If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are calculated and returned.
+The Kalman Smoother is given by:
+
+\deqn{\textbf{J}_t = \textbf{P}_t \textbf{A} + inv(\textbf{P}^{pred}_{t+1})}{J(t) = P(t) A inv(P_pred(t+1))}
+\deqn{\textbf{F}^{smooth}_t = \textbf{F}_t + \textbf{J}_t (\textbf{F}^{smooth}_{t+1} - \textbf{F}^{pred}_{t+1})}{F_smooth(t) = F(t) + J(t) (F_smooth(t+1) - F_pred(t+1))}
+\deqn{\textbf{P}^{smooth}_t = \textbf{P}_t + \textbf{J}_t (\textbf{P}^{smooth}_{t+1} - \textbf{P}^{pred}_{t+1}) \textbf{J}_t'}{P_smooth(t) = P(t) + J(t) (P_smooth(t+1) - P_pred(t+1)) J(t)'}
+
+The initial smoothed values for period t = T are set equal to the filtered values. If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are also calculated and returned.
+}
+\references{
+Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
+
+Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman filter.
 }
