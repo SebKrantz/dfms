@@ -14,7 +14,7 @@ Description: Dynamic factor models constitute a subset of more general state spa
 Depends: R (>= 3.0.0)
 Imports: Rcpp, collapse
 LinkingTo: Rcpp, RcppArmadillo
-Suggests: xts
+Suggests: xts, vars, magrittr
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
