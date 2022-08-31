@@ -117,6 +117,8 @@
 #'
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160.
 #'
+#' Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. \emph{Handbook of Macroeconomics, 2}, 415–525. https://doi.org/10.1016/bs.hesmac.2016.04.002
+#'
 #' @useDynLib DFM, .registration = TRUE
 #' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% whichv setColnames setDimnames
 #' @importFrom grDevices rainbow
