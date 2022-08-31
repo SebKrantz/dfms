@@ -5,12 +5,22 @@ Title: Dynamic Factor Models
 Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"), 
                     email = "sebastian.krantz@graduateinstitute.ch"),
              person("Rytis", "Bagdziunas", role = "aut"))
-Description: Dynamic factor models constitute a subset of more general state space
-    models. Dynamic factor models are commonly used in economics for short-term
-    forecasting due to possibility to summarize information from large datasets in
-    a small number of factors. This package provides an implementation for dynamic
-    factor models allowing for state variable to follow a vector autoregressive
-    process.
+Description: Efficient estimation of Dynamic Factor Models using the Expectation Maximization (EM) algorithm 
+  or two-step estimation, on datasets with missing data. The implementation follows advances in the econometric 
+  literature i.e. estimation can be done either by running the Kalman Filter and Smoother once with initial values 
+  from PCA, following Doz, Giannone and Reichlin (2011), or via iterated Kalman Filtering and Smoothing until EM 
+  convergence, folowing Doz, Giannone and Reichlin (2012), or using the adapted EM algorithm of Banbura and Modugno 
+  (2014), allowing estimation with arbitrary patterns of missing data. The implementation makes heavy use of the 
+  Armadillo C++ library and the collapse package, permitting particularly speedy estimation. A comprehensive set of 
+  methods allows for interpreting the model and forecasting. Information criteria to choose the number of factors 
+  are also provided, following Bai and NG (2002).
+  --- Key References: ---
+  Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic 
+       factor models based on Kalman filtering. Journal of Econometrics, 164(1), 188-205.
+  Doz, C., Giannone, D., & Reichlin, L. (2012). A quasi-maximum likelihood approach for large, approximate 
+       dynamic factor models. Review of economics and statistics, 94(4), 1014-1024.
+  Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary 
+       pattern of missing data. Journal of Applied Econometrics, 29(1), 133-160.
 Depends: R (>= 3.0.0)
 Imports: Rcpp, collapse
 LinkingTo: Rcpp, RcppArmadillo
