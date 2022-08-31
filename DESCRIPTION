@@ -6,14 +6,14 @@ Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"),
                     email = "sebastian.krantz@graduateinstitute.ch"),
              person("Rytis", "Bagdziunas", role = "aut"))
 Description: Efficient estimation of Dynamic Factor Models using the Expectation Maximization (EM) algorithm 
-  or two-step estimation, on datasets with missing data. The implementation follows advances in the econometric 
-  literature i.e. estimation can be done either by running the Kalman Filter and Smoother once with initial values 
-  from PCA, following Doz, Giannone and Reichlin (2011), or via iterated Kalman Filtering and Smoothing until EM 
-  convergence, folowing Doz, Giannone and Reichlin (2012), or using the adapted EM algorithm of Banbura and Modugno 
+  or two-step (2S) estimation, on datasets with missing data. The implementation follows advances in the econometric 
+  literature: estimation can be done either by running the Kalman Filter and Smoother once with initial values 
+  from PCA - following Doz, Giannone and Reichlin (2011) (2S) - or via iterated Kalman Filtering and Smoothing until EM 
+  convergence - folowing Doz, Giannone and Reichlin (2012) - or using the adapted EM algorithm of Banbura and Modugno 
   (2014), allowing estimation with arbitrary patterns of missing data. The implementation makes heavy use of the 
-  Armadillo C++ library and the collapse package, permitting particularly speedy estimation. A comprehensive set of 
-  methods allows for interpreting the model and forecasting. Information criteria to choose the number of factors 
-  are also provided, following Bai and NG (2002).
+  Armadillo C++ library and the collapse package, providing for particularly speedy estimation. A comprehensive set of 
+  methods supports interpretation/visualization of the model and forecasting. Information criteria to choose the number 
+  of factors are also provided - following Bai and NG (2002).
   --- Key References: ---
   Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic 
        factor models based on Kalman filtering. Journal of Econometrics, 164(1), 188-205.
