@@ -183,7 +183,7 @@
 #'
 #'
 #' ### Large Model ---------------------------------
-#'
+#' \donttest{
 #' # IC for number of factors
 #' IC_large = ICr(BM14)
 #' plot(IC_large)
@@ -203,7 +203,7 @@
 #'
 #' # 10 periods ahead forecast
 #' plot(predict(dfm_large), xlim = c(300, 370))
-#'
+#' }
 #' @export
 
 DFM <- function(X, r, p = 1L, ...,

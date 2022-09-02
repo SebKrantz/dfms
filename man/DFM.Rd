@@ -201,7 +201,7 @@ plot(predict(dfm_medium), xlim = c(300, 370))
 
 
 ### Large Model ---------------------------------
-
+\donttest{
 # IC for number of factors
 IC_large = ICr(BM14)
 plot(IC_large)
@@ -221,7 +221,7 @@ plot(dfm_large, type = "residual") # Residuals from factor predictions
 
 # 10 periods ahead forecast
 plot(predict(dfm_large), xlim = c(300, 370))
-
+}
 }
 \references{
 Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. \emph{Journal of Econometrics, 164}(1), 188-205.
