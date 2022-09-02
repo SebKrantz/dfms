@@ -1,7 +1,7 @@
 # Quoting some functions that need to be evaluated iteratively
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi))
 .EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind))
-.KFS <- quote(fKFS(X, A, C, Q, R, F_0, P_0))
+.KFS <- quote(SKFS(X, A, C, Q, R, F_0, P_0))
 
 
 #' Estimate a Dynamic Factor Model
@@ -265,7 +265,7 @@ DFM <- function(X, r, p = 1L, ...,
   } else R <- diag(n)
 
   # Transition equation -------------------------------
-  var <- fVAR(F_pc, p)
+  var <- .VAR(F_pc, p)
   A <- rbind(t(var$A), diag(1, rp-r, rp)) # var$A is rp x r matrix
   Q <- matrix(0, rp, rp)
   Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
@@ -278,7 +278,7 @@ DFM <- function(X, r, p = 1L, ...,
   # if(!is.na(BMl) && BMl)  else matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
-  kfs_res <- fKFS(X, A, C, Q, R, F_0, P_0, FALSE)
+  kfs_res <- SKFS(X, A, C, Q, R, F_0, P_0, FALSE)
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- kfs_res$F_smooth[, sr, drop = FALSE]
@@ -302,7 +302,7 @@ DFM <- function(X, r, p = 1L, ...,
   # We only report two-step solution
   if(is.na(BMl)) {
   # TODO: Better solution for system matrix estimation after Kalman Filtering and Smoothing? (could take matrices from Kalman Filter, but that would be before smoothing)
-    var <- fVAR(F_kal, p)
+    var <- .VAR(F_kal, p)
     beta <- ainv(crossprod(F_kal)) %*% crossprod(F_kal, if(anymiss) replace(X_imp, W, 0) else X_imp) # good??
     Q <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
     if(rRi) {

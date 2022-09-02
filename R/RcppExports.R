@@ -5,16 +5,16 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
     .Call(`_DFM_Estep`, X, A, C, Q, R, F_0, P_0)
 }
 
-fKF <- function(X, A, C, Q, R, F_0, P_0, retLL = FALSE) {
-    .Call(`_DFM_fKF`, X, A, C, Q, R, F_0, P_0, retLL)
+SKF <- function(X, A, C, Q, R, F_0, P_0, retLL = FALSE) {
+    .Call(`_DFM_SKF`, X, A, C, Q, R, F_0, P_0, retLL)
 }
 
-fKS <- function(A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP) {
-    .Call(`_DFM_fKS`, A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP)
+FIS <- function(A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP) {
+    .Call(`_DFM_FIS`, A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP)
 }
 
-fKFS <- function(X, A, C, Q, R, F_0, P_0, retLL = FALSE) {
-    .Call(`_DFM_fKFS`, X, A, C, Q, R, F_0, P_0, retLL)
+SKFS <- function(X, A, C, Q, R, F_0, P_0, retLL = FALSE) {
+    .Call(`_DFM_SKFS`, X, A, C, Q, R, F_0, P_0, retLL)
 }
 
 ainv <- function(x) {

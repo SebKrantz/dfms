@@ -2,7 +2,7 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
   .Call(Cpp_Estep, X, A, C, Q, R, F_0, P_0)
 }
 
-#' Fast Kalman Filter
+#' (Fast) Stationary Kalman Filter
 #'
 #' @description A simple and fast C++ implementation of the Kalman Filter for stationary data with time-invariant system matrices and missing data.
 #' @param X Data matrix (T x n)
@@ -53,13 +53,13 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #' P_pred \tab\tab rp x rp x T predicted state covariances \cr\cr
 #' loglik \tab\tab value of the log likelihood
 #' }
-#' @seealso \code{\link{fKS}} \code{\link{fKFS}}
+#' @seealso \code{\link{FIS}} \code{\link{SKFS}}
 #' @export
-fKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
-  .Call(Cpp_fKF, X, A, C, Q, R, F_0, P_0, loglik)
+SKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
+  .Call(Cpp_SKF, X, A, C, Q, R, F_0, P_0, loglik)
 }
 
-#' Fast Kalman Smoother
+#' (Fast) Fixed-Interval Smoother (Kalman Smoother)
 #' @param A Transition matrix (rp x rp)
 #' @param F State estimates (T x rp)
 #' @param F_pred State predicted estimates (T x rp)
@@ -89,23 +89,23 @@ fKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #'
 #' Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman filter.
 #'
-#' @seealso \code{\link{fKF}} \code{\link{fKFS}}
+#' @seealso \code{\link{SKF}} \code{\link{SKFS}}
 #' @export
-fKS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
-  .Call(Cpp_fKS, A, F, F_pred, P, P_pred, F_0, P_0)
+FIS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
+  .Call(Cpp_FIS, A, F, F_pred, P, P_pred, F_0, P_0)
 }
 
 # @param loglik integer. 0 does not compute the likelihood, 1 computes a standard Kalman Filter likelihood, 2 computes the likelihood for Banbura and Modungo (2014).
-#' Fast Kalman Filter and Smoother
-#' @inheritParams fKF
+#' (Fast) Stationary Kalman Filter and Smoother
+#' @inheritParams SKF
 #'
-#' @returns All results from \code{\link{fKF}} and \code{\link{fKS}}, and additionally
+#' @returns All results from \code{\link{SKF}} and \code{\link{FIS}}, and additionally
 #' a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^smooth_t, F^smooth_{t-1} | T)}{Cov(F_smooth(t), F_smooth(t-1) | T)} and needed for EM iterations.
 #'
-#' @seealso \code{\link{fKF}} \code{\link{fKS}}
+#' @seealso \code{\link{SKF}} \code{\link{FIS}}
 #' @export
-fKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
-  .Call(Cpp_fKFS, X, A, C, Q, R, F_0, P_0, loglik)
+SKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
+  .Call(Cpp_SKFS, X, A, C, Q, R, F_0, P_0, loglik)
 }
 
 
@@ -128,7 +128,7 @@ ainv <- function(x) .Call(Cpp_ainv, x)
 #   `dimnames<-`(.Call(Cpp_ainv, x), dn)
 # }
 
-#'
+
 #' @rdname ainv
 #' @export
 apinv <- function(x) .Call(Cpp_apinv, x)

@@ -20,7 +20,7 @@ unscale <- function(x, stats) TRA.matrix(TRA.matrix(x, stats[, "SD"], "*"), stat
 
 ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 
-#' Fast Vector-Autoregression
+#' (Fast) Barebones Vector-Autoregression
 #'
 #' Quickly estimate an VAR(p) model using Armadillo's inverse function.
 #'
@@ -31,7 +31,7 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #' \code{A} which is the np x n transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
 #'
 #' @export
-fVAR <- function(x, p = 1L) {
+.VAR <- function(x, p = 1L) {
   T <- dim(x)[1L]
   Y <- x[(p + 1L):T, ]
   X <- do.call(cbind, lapply(1:p, function(i) x[(p + 1L - i):(T - i), ]))

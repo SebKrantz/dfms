@@ -17,7 +17,7 @@ using namespace arma;
 // P_0 Initial state covariance (rp x rp)
 // retLL Return log-likelihood.
 // [[Rcpp::export]]
-Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
+Rcpp::List SKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
                arma::mat R, arma::colvec F_0, arma::mat P_0, bool retLL = false) {
 
   const int T = X.n_rows;
@@ -124,7 +124,7 @@ Rcpp::List fKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 // F_0 Initial state vector (rp x 1)
 // P_0 Initial state covariance (rp x rp)
 // [[Rcpp::export]]
-Rcpp::List fKS(arma::mat A,
+Rcpp::List FIS(arma::mat A,
                arma::mat ZTf, arma::mat ZTp,
                Rcpp::NumericVector VTf_v,
                Rcpp::NumericVector VTp_v,
@@ -190,7 +190,7 @@ Rcpp::List fKS(arma::mat A,
 // P_0 Initial state covariance (rp x rp)
 // retLL 0-no likelihood, 1-standard Kalman Filter, 2-BM14
 // [[Rcpp::export]]
-Rcpp::List fKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
+Rcpp::List SKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
                 arma::mat R, arma::colvec F_0, arma::mat P_0, bool retLL = false) {
 
   const int T = X.n_rows;
