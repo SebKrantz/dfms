@@ -75,6 +75,8 @@ SKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #' \deqn{\textbf{P}^{smooth}_t = \textbf{P}_t + \textbf{J}_t (\textbf{P}^{smooth}_{t+1} - \textbf{P}^{pred}_{t+1}) \textbf{J}_t'}{P_smooth(t) = P(t) + J(t) (P_smooth(t+1) - P_pred(t+1)) J(t)'}
 #'
 #' The initial smoothed values for period t = T are set equal to the filtered values. If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are also calculated and returned.
+#' For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Ksmooth0}.
+#'
 #'
 #' @returns Smoothed state and covariance estimates, including initial (t = 0) values.
 #' \tabular{lll}{
@@ -101,8 +103,14 @@ FIS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
 #'
 #' @returns All results from \code{\link{SKF}} and \code{\link{FIS}}, and additionally
 #' a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^smooth_t, F^smooth_{t-1} | T)}{Cov(F_smooth(t), F_smooth(t-1) | T)} and needed for EM iterations.
+#' See 'Property 6.3: The Lag-One Covariance Smoother' in Shumway & Stoffer (2017).
+#'
 #'
 #' @seealso \code{\link{SKF}} \code{\link{FIS}}
+#'
+#' @references
+#' Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
+#'
 #' @export
 SKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
   .Call(Cpp_SKFS, X, A, C, Q, R, F_0, P_0, loglik)

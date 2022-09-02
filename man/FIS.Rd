@@ -41,6 +41,7 @@ The Kalman Smoother is given by:
 \deqn{\textbf{P}^{smooth}_t = \textbf{P}_t + \textbf{J}_t (\textbf{P}^{smooth}_{t+1} - \textbf{P}^{pred}_{t+1}) \textbf{J}_t'}{P_smooth(t) = P(t) + J(t) (P_smooth(t+1) - P_pred(t+1)) J(t)'}
 
 The initial smoothed values for period t = T are set equal to the filtered values. If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are also calculated and returned.
+For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Ksmooth0}.
 }
 \references{
 Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.

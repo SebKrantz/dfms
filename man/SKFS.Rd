@@ -26,9 +26,13 @@ SKFS(X, A, C, Q, R, F_0, P_0, loglik = FALSE)
 \value{
 All results from \code{\link{SKF}} and \code{\link{FIS}}, and additionally
 a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^smooth_t, F^smooth_{t-1} | T)}{Cov(F_smooth(t), F_smooth(t-1) | T)} and needed for EM iterations.
+See 'Property 6.3: The Lag-One Covariance Smoother' in Shumway & Stoffer (2017).
 }
 \description{
 (Fast) Stationary Kalman Filter and Smoother
+}
+\references{
+Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
 }
 \seealso{
 \code{\link{SKF}} \code{\link{FIS}}
