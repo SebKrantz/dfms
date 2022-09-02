@@ -6,8 +6,8 @@
 
 #' Estimate a Dynamic Factor Model
 #'
-#' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data of a single frequency,
-#' with time-invariant system matrices and classical assumptions, while permitting arbitrary patterns of missing data.
+#' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data
+#' with time-invariant system matrices and classical assumptions, while permitting missing data.
 #'
 #' @param X a \code{T x n} data matrix or frame.
 #' @param r number of factors.
@@ -17,8 +17,8 @@
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
 #'    \tabular{llll}{
-#' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, but does not specifically account for missing values in EM iterations. \cr\cr
-#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014), optimal for datasets with arbitrary patterns of missing data. \cr\cr
+#' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kamlman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
+#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
 #' \code{"none"} \tab\tab Performs no EM iterations and just returns the twostep estimates from running the data through the Kalman Filter and Smoother once as in
 #' Doz, Giannone and Reichlin (2011) (the Kalman Filter is Initialized with system matrices obtained from a regression and VAR on PCA factor estimates).
 #' This yields significant performance gains over the iterative methods. Final system matrices are estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
@@ -42,8 +42,8 @@
 #' This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:
 #' \enumerate{
 #' \item Linearity
-#' \item Idiosynchratic measurement (observation) errors (no cross-sectional correlation)
-#' \item No direct relationship between series and lagged factors (\emph{ceteris paribus})
+#' \item Idiosynchratic measurement (observation) errors (\emph{R} is diagonal)
+#' \item No direct relationship between series and lagged factors (\emph{ceteris paribus} contemporaneous factors)
 #' \item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation)
 #' }
 #' Factors are allowed to evolve in a \eqn{VAR(p)} process, and data is standardized (scaled and centered) before estimation (removing the need of intercept terms).
@@ -61,7 +61,7 @@
 #'  \eqn{\textbf{C}_0}{C0} \tab\tab \eqn{n \times r}{n x r} measurement (observation) matrix.\cr\cr
 #'  \eqn{\textbf{A}_j}{Aj} \tab\tab \eqn{r \times r}{r x r} state transition matrix at lag \eqn{j}{j}. \cr\cr
 #'  \eqn{\textbf{Q}_0}{Q0} \tab\tab \eqn{r \times r}{r x r} state covariance matrix.\cr\cr
-#'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} measurement (observation) covariance matrix. It is diagonal by assumption 2 that \eqn{E[\textbf{x}_{it}|\textbf{x}_{-i,t},\textbf{x}_{i,t-1}, \dots, \textbf{f}_t, \textbf{f}_{t-1}, \dots] = \textbf{Cf}_t \forall i}{E[xi(t)|x(-i)(t), x(t-1), \dots, f(t), f(t-1), \dots] = C f(t)}. This assumption is also referred to as 'Exact DFM' by Stock & Watson (2016), where all correlation between the series is accounted for by the latent factors.\cr\cr
+#'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} measurement (observation) covariance matrix. It is diagonal by assumption 2 that \eqn{E[\textbf{x}_{it}|\textbf{x}_{-i,t},\textbf{x}_{i,t-1}, \dots, \textbf{f}_t, \textbf{f}_{t-1}, \dots] = \textbf{Cf}_t \forall i}{E[xi(t)|x(-i)(t), x(t-1), \dots, f(t), f(t-1), \dots] = C f(t)}.\cr\cr  % This assumption is also referred to as 'Exact DFM' by Stock & Watson (2016), where all correlation between the series is accounted for by the latent factors.
 #' }
 #'
 #'

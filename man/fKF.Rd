@@ -59,7 +59,7 @@ computed as
 where \eqn{S_t = (C P_t C' + R)^{-1}}{S(t) = inv(C P(t) C' + R)} and \eqn{e_t = x_t - C F_t}{e(t) = x(t) - C F(t)} is the prediction error.
 
 For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Kfilter0}.
-For another fast (C-based) implementation that allows time-varying system matrices and non-stationary data see \code{FKF::fkf}.
+For another fast (C-based) implementation that also allows time-varying system matrices and non-stationary data see \code{FKF::fkf}.
 }
 \references{
 Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
@@ -67,4 +67,7 @@ Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applicatio
 Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman filter.
 
 Hamilton, J. D. (1994). Time Series Analysis. Princeton university press.
+}
+\seealso{
+\code{\link{fKS}} \code{\link{fKFS}}
 }

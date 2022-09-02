@@ -36,7 +36,7 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #' where \eqn{S_t = (C P_t C' + R)^{-1}}{S(t) = inv(C P(t) C' + R)} and \eqn{e_t = x_t - C F_t}{e(t) = x(t) - C F(t)} is the prediction error.
 #'
 #' For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Kfilter0}.
-#' For another fast (C-based) implementation that allows time-varying system matrices and non-stationary data see \code{FKF::fkf}.
+#' For another fast (C-based) implementation that also allows time-varying system matrices and non-stationary data see \code{FKF::fkf}.
 #'
 #' @references
 #' Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
@@ -53,6 +53,7 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #' P_pred \tab\tab rp x rp x T predicted state covariances \cr\cr
 #' loglik \tab\tab value of the log likelihood
 #' }
+#' @seealso \code{\link{fKS}} \code{\link{fKFS}}
 #' @export
 fKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
   .Call(Cpp_fKF, X, A, C, Q, R, F_0, P_0, loglik)
@@ -88,6 +89,7 @@ fKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #'
 #' Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman filter.
 #'
+#' @seealso \code{\link{fKF}} \code{\link{fKFS}}
 #' @export
 fKS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
   .Call(Cpp_fKS, A, F, F_pred, P, P_pred, F_0, P_0)
@@ -98,7 +100,9 @@ fKS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
 #' @inheritParams fKF
 #'
 #' @returns All results from \code{\link{fKF}} and \code{\link{fKS}}, and additionally
-#' a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of Cov(F_smooth_t, F_smooth_t-1|T) and needed for EM iterations.
+#' a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^smooth_t, F^smooth_{t-1} | T)}{Cov(F_smooth(t), F_smooth(t-1) | T)} and needed for EM iterations.
+#'
+#' @seealso \code{\link{fKF}} \code{\link{fKS}}
 #' @export
 fKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
   .Call(Cpp_fKFS, X, A, C, Q, R, F_0, P_0, loglik)

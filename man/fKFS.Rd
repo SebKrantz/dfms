@@ -25,8 +25,11 @@ fKFS(X, A, C, Q, R, F_0, P_0, loglik = FALSE)
 }
 \value{
 All results from \code{\link{fKF}} and \code{\link{fKS}}, and additionally
-a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of Cov(F_smooth_t, F_smooth_t-1|T) and needed for EM iterations.
+a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^smooth_t, F^smooth_{t-1}|T)}{Cov(F_smooth(t), F_smooth(t-1)|T)} and needed for EM iterations.
 }
 \description{
 Fast Kalman Filter and Smoother
+}
+\seealso{
+\code{\link{fKF}} \code{\link{fKS}}
 }
