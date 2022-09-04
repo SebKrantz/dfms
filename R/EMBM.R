@@ -1,5 +1,5 @@
 
-EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind) {
+EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind, rQi, rRi) {
 
   kfs_res = SKFS(X, A, C, Q, R, F_0, P_0, TRUE)
   # kfs_res = tryCatch(SKFS(X, A, C, Q, R, F_0, P_0), error = function(e) return(list(NULL, X, A, C, Q, R, F_0, P_0)))
@@ -19,7 +19,12 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
   A_new = A
   A_new[sr, ] = EZZ_FB[sr, , drop = FALSE] %*% ainv(EZZ_BB)
   Q_new = Q
-  Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
+  # Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
+  if(rQi) {
+    Qsr <- (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
+    Q[sr, sr] <- if(rQi == 2L) Qsr else diag(diag(Qsr))
+  } else Q[sr, sr] <- diag(r)
+
 
   # E(X'X) & E(X'Z)
   denom = numeric(n*r^2)
@@ -37,23 +42,26 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
   C_new = solve.default(dnkron) %*% unattrib(nom) # ainv -> slower...
   dim(C_new) = c(n, r)
 
-  R_new = matrix(0, n, n)
-  Rdg = R[dgind]
-  for (t in 1:T) {
-    nanYt = W[t, ]
-    tmp = C_new * !nanYt
-    # R[dgind] = Rdg * nanYt
-    tmp2 = tmp %*% tcrossprod(Vsmooth[sr, sr, t], tmp)
-    tmp2 %+=% tcrossprod(XW0[t, ] - tmp %*% Zsmooth[t, sr])
-    # tmp2 %+=% R
-    tmp2[dgind] = tmp2[dgind] + (Rdg * nanYt) # As long as R is diagonal...
-    R_new %+=% tmp2
-  }
-
-  # R_new %/=% T
-  # RR = diag(R_new) # RR(RR<1e-2) = 1e-2;
-  # R_new = diag(R_new)
-  R_new = diag(R_new[dgind] / T)
+  if(rRi) {
+    R_new = matrix(0, n, n)
+    Rdg = R[dgind]
+    for (t in 1:T) {
+      nanYt = W[t, ]
+      tmp = C_new * !nanYt
+      # R[dgind] = Rdg * nanYt
+      tmp2 = tmp %*% tcrossprod(Vsmooth[sr, sr, t], tmp)
+      tmp2 %+=% tcrossprod(XW0[t, ] - tmp %*% Zsmooth[t, sr])
+      # tmp2 %+=% R
+      tmp2[dgind] = tmp2[dgind] + (Rdg * nanYt) # As long as R is diagonal...
+      R_new %+=% tmp2
+    }
+    if(rRi == 2L) R_new %/=% T # Unrestricted
+    else R_new = diag(R_new[dgind] / T) # Diagonal
+    ## R_new %/=% T
+    ## RR = diag(R_new) # RR(RR<1e-2) = 1e-2;
+    ## R_new = diag(R_new)
+    # R_new = diag(R_new[dgind] / T)
+  } else R <- diag(n)
 
   C[, sr] = C_new
 

@@ -1,6 +1,6 @@
 # Quoting some functions that need to be evaluated iteratively
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi))
-.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind))
+.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind, rQi, rRi))
 .KFS <- quote(SKFS(X, A, C, Q, R, F_0, P_0))
 
 
