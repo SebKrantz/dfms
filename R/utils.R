@@ -22,7 +22,7 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 
 #' (Fast) Barebones Vector-Autoregression
 #'
-#' Quickly estimate an VAR(p) model using Armadillo's inverse function.
+#' Quickly estimate a VAR(p) model using Armadillo's inverse function.
 #'
 #' @param x data matrix with time series in columns - without missing values.
 #' @param p integer. The lag order of the VAR.

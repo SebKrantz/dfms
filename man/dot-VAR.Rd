@@ -16,5 +16,5 @@ A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 
 \code{A} which is the np x n transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
 }
 \description{
-Quickly estimate an VAR(p) model using Armadillo's inverse function.
+Quickly estimate a VAR(p) model using Armadillo's inverse function.
 }
