@@ -55,12 +55,14 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
       tmp2[dgind] = tmp2[dgind] + (Rdg * nanYt) # As long as R is diagonal...
       R_new %+=% tmp2
     }
-    if(rRi == 2L) R_new %/=% T # Unrestricted
-    else R_new = diag(R_new[dgind] / T) # Diagonal
-    ## R_new %/=% T
-    ## RR = diag(R_new) # RR(RR<1e-2) = 1e-2;
-    ## R_new = diag(R_new)
-    # R_new = diag(R_new[dgind] / T)
+    if(rRi == 2L) { # Unrestricted
+      R_new %/=% T
+      R_new[R_new < 1e-7] <- 1e-7
+    } else { # Diagonal
+      R_new <- R_new[dgind] / T
+      R_new[R_new < 1e-7] <- 1e-7 # RR(RR<1e-2) = 1e-2;
+      R_new = diag(R_new)
+    }
   } else R <- diag(n)
 
   C[, sr] = C_new
