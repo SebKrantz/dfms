@@ -4,8 +4,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
 
-// TODO: what about likelihood with BM??
-// TODO: Compute without likelihood...
 
 // Implementation of a Kalman filter
 // X Data matrix (T x n)
