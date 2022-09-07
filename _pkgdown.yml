@@ -1,0 +1,11 @@
+destination: docs
+
+home:
+  title: Dynamic Factor Models for R
+
+# template:
+#  bootstrap: 5
+
+right:
+   - icon: fa-github
+     href: https://github.com/SebKrantz/DFM

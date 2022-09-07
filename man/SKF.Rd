@@ -39,8 +39,8 @@ A simple and fast C++ implementation of the Kalman Filter for stationary data wi
 \details{
 The underlying state space model is:
 
-\deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \tilde N(\textbf{0}, \textbf{R})}{x(t) = C F(t) + e(t) ~ N(0, R)}
-\deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \tilde N(0, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
+\deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \sim N(\textbf{0}, \textbf{R})}{x(t) = C F(t) + e(t) ~ N(0, R)}
+\deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \sim N(0, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
 
 where \eqn{x_t}{x(t)} is \code{X[t, ]}. The filter then first performs a time update (prediction)
 
