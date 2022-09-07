@@ -23,8 +23,9 @@ Description: Efficient estimation of Dynamic Factor Models using the Expectation
 Depends: R (>= 3.0.0)
 Imports: Rcpp, collapse
 LinkingTo: Rcpp, RcppArmadillo
-Suggests: xts, vars, magrittr
+Suggests: xts, vars, magrittr, testthat (>= 3.0.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
+Config/testthat/edition: 3
