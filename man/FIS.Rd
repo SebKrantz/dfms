@@ -7,27 +7,27 @@
 FIS(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL)
 }
 \arguments{
-\item{A}{Transition matrix (rp x rp)}
+\item{A}{Transition matrix (\eqn{rp \times rp}{rp x rp})}
 
-\item{F}{State estimates (T x rp)}
+\item{F}{State estimates (\eqn{T \times rp}{T x rp})}
 
-\item{F_pred}{State predicted estimates (T x rp)}
+\item{F_pred}{State predicted estimates (\eqn{T \times rp}{T x rp})}
 
-\item{P}{Variance estimates (rp x rp x T)}
+\item{P}{Variance estimates (\eqn{rp \times rp \times T}{rp x rp x T})}
 
-\item{P_pred}{Predicted variance estimates (rp x rp x T)}
+\item{P_pred}{Predicted variance estimates (\eqn{rp \times rp \times T}{rp x rp x T})}
 
-\item{F_0}{Initial state vector (rp x 1) or empty (NULL)}
+\item{F_0}{Initial state vector (\eqn{rp \times 1}{rp x 1}) or empty (\code{NULL})}
 
-\item{P_0}{Initial state covariance (rp x rp) or empty (NULL)}
+\item{P_0}{Initial state covariance (\eqn{rp \times rp}{rp x rp}) or empty (\code{NULL})}
 }
 \value{
 Smoothed state and covariance estimates, including initial (t = 0) values.
 \tabular{lll}{
-F_smooth \tab\tab T x rp smoothed state vectors, equal to the filtered state in period T \cr\cr
-P_smooth \tab\tab rp x rp x T smoothed state covariance, equal to the filtered covariance in period T \cr\cr
-F_smooth_0 \tab\tab 1 x rp initial smoothed state vectors, based on F_0 \cr\cr
-P_smooth_0 \tab\tab rp x rp initial smoothed state covariance, based on P_0
+F_smooth \tab\tab \eqn{T \times rp}{T x rp} smoothed state vectors, equal to the filtered state in period \eqn{T} \cr\cr
+P_smooth \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} smoothed state covariance, equal to the filtered covariance in period \eqn{T} \cr\cr
+F_smooth_0 \tab\tab \eqn{1 \times rp}{1 x rp} initial smoothed state vectors, based on \code{F_0} \cr\cr
+P_smooth_0 \tab\tab \eqn{rp \times rp}{rp x rp} initial smoothed state covariance, based on \code{P_0}
 }
 }
 \description{

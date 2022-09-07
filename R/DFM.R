@@ -17,9 +17,9 @@
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
 #'    \tabular{llll}{
-#' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kamlman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
+#' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
 #' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
-#' \code{"none"} \tab\tab Performs no EM iterations and just returns the twostep estimates from running the data through the Kalman Filter and Smoother once as in
+#' \code{"none"} \tab\tab Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
 #' Doz, Giannone and Reichlin (2011) (the Kalman Filter is Initialized with system matrices obtained from a regression and VAR on PCA factor estimates).
 #' This yields significant performance gains over the iterative methods. Final system matrices are estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
 #' }
@@ -95,7 +95,7 @@
 #'  \code{P_0} \tab\tab \eqn{r \times r}{r x r} initial factor covariance matrix estimate based on PCA results. \cr\cr
 #'  \code{F_twostep} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
 #'  \code{P_twostep} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. \cr\cr
-#'  \code{F_qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratiely Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
+#'  \code{F_qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
 #'  \code{P_qml} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of QML factor estimates. \cr\cr
 #'  \code{A} \tab\tab \eqn{r \times rp}{r x rp} factor transition matrix.\cr\cr
 #'  \code{C} \tab\tab \eqn{n \times r}{n x r} observation matrix.\cr\cr

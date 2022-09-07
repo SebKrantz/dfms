@@ -7,7 +7,7 @@
 em_converged(loglik, previous_loglik, tol = 1e-04, check.increased = TRUE)
 }
 \arguments{
-\item{loglik}{vurrent value of the log-likelihood function.}
+\item{loglik}{current value of the log-likelihood function.}
 
 \item{previous_loglik}{value of the log-likelihood function at the previous iteration.}
 

@@ -18,11 +18,11 @@ ICr(X, max.r = min(20, ncol(X) - 1))
 \arguments{
 \item{X}{a \code{T x n} data matrix or frame.}
 
-\item{max.r}{integer. The maximum number of factors for which ICs should be computed (or eigenvalues to be displayed in the screeplot).}
+\item{max.r}{integer. The maximum number of factors for which IC should be computed (or eigenvalues to be displayed in the screeplot).}
 
 \item{x}{an object of type 'ICr'.}
 
-\item{\dots}{furtehr arguments to \code{\link{ts.plot}} or \code{\link{plot}}.}
+\item{\dots}{further arguments to \code{\link{ts.plot}} or \code{\link{plot}}.}
 
 \item{type}{character. Either \code{"ev"} (eigenvalues), \code{"pve"} (percent variance explained), or \code{"cum.pve"} (cumulative PVE). Multiple plots can be requested.}
 
@@ -36,7 +36,7 @@ A list of 4 elements:
 \item{r.star}{vector of length 3 containing the number of factors (\code{r}) minimizing each information criterion.}
 }
 \description{
-Minimizes 3 information criterio proposed by Bai and Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
+Minimizes 3 information criteria proposed by Bai and Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
 A Screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
 }
 \details{
