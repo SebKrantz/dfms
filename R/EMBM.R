@@ -22,8 +22,8 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
   # Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
   if(rQi) {
     Qsr <- (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
-    Q[sr, sr] <- if(rQi == 2L) Qsr else diag(diag(Qsr))
-  } else Q[sr, sr] <- diag(r)
+    Q_new[sr, sr] <- if(rQi == 2L) Qsr else diag(diag(Qsr))
+  } else Q_new[sr, sr] <- diag(r)
 
 
   # E(X'X) & E(X'Z)
@@ -48,21 +48,21 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
     for (t in 1:T) {
       nanYt = W[t, ]
       tmp = C_new * !nanYt
-      # R[dgind] = Rdg * nanYt
+      R[dgind] = Rdg * nanYt #
       tmp2 = tmp %*% tcrossprod(Vsmooth[sr, sr, t], tmp)
       tmp2 %+=% tcrossprod(XW0[t, ] - tmp %*% Zsmooth[t, sr])
-      # tmp2 %+=% R
-      tmp2[dgind] = tmp2[dgind] + (Rdg * nanYt) # As long as R is diagonal...
+      tmp2 %+=% R #
+      # tmp2[dgind] = tmp2[dgind] + (Rdg * nanYt) # As long as R is diagonal...
       R_new %+=% tmp2
     }
     if(rRi == 2L) { # Unrestricted
       R_new %/=% T
-      # R_new[R_new < 1e-7] <- 1e-7
+      R_new[R_new < 1e-7] <- 1e-7
     } else { # Diagonal
-      R_new = diag(R_new[dgind] / T)
-      # R_new <- R_new[dgind] / T
-      # R_new[R_new < 1e-7] <- 1e-7 # RR(RR<1e-2) = 1e-2;
-      # R_new = diag(R_new)
+      # R_new = diag(R_new[dgind] / T)
+      RR <- R_new[dgind] / T
+      RR[RR < 1e-7] <- 1e-7 # RR(RR<1e-2) = 1e-2;
+      R_new = diag(RR)
     }
   } else R_new <- diag(n)
 
