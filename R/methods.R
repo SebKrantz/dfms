@@ -482,12 +482,12 @@ plot.dfm_forecast <- function(x,
 
 # Adapted from: https://github.com/nmecsys/nowcasting/blob/master/R/ICfactors.R
 #' @title Information Criteria to Determine the Number of Factors (r)
-#' @description Minimizes 3 information criterio proposed by Bai and Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
+#' @description Minimizes 3 information criteria proposed by Bai and Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
 #' A Screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
 #' @param X a \code{T x n} data matrix or frame.
-#' @param max.r integer. The maximum number of factors for which ICs should be computed (or eigenvalues to be displayed in the screeplot).
+#' @param max.r integer. The maximum number of factors for which IC should be computed (or eigenvalues to be displayed in the screeplot).
 #' @param x an object of type 'ICr'.
-#' @param \dots furtehr arguments to \code{\link{ts.plot}} or \code{\link{plot}}.
+#' @param \dots further arguments to \code{\link{ts.plot}} or \code{\link{plot}}.
 #'
 #' @return A list of 4 elements:
 #' \item{F_pca}{\code{T x n} matrix of principle component factor estimates.}
@@ -548,7 +548,7 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
   cvec <- c(c1, c2, c3)
   result <- matrix(0, max.r, 3)
 
-  # Calculating the ICs
+  # Calculating the IC
   for (r in 1:max.r) {
     # Residuals from r PC's
     res <- X - tcrossprod(F_pca[, 1:r], evs[, 1:r])

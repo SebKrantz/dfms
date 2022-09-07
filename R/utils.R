@@ -28,7 +28,7 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #' @param p integer. The lag order of the VAR.
 #'
 #' @returns A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 1 - p of \code{x} combined column-wise,
-#' \code{A} which is the np x n transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
+#' \code{A} which is the \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
 #'
 #' @export
 .VAR <- function(x, p = 1L) {
@@ -46,7 +46,7 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 
 #' Convergence Test for EM-Algorithm
 #'
-#' @param loglik vurrent value of the log-likelihood function.
+#' @param loglik current value of the log-likelihood function.
 #' @param previous_loglik value of the log-likelihood function at the previous iteration.
 #' @param tol the numerical tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.
 #' @param check.increased logical. Check if likelihood has increased.

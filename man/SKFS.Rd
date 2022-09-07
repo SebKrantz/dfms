@@ -7,25 +7,25 @@
 SKFS(X, A, C, Q, R, F_0, P_0, loglik = FALSE)
 }
 \arguments{
-\item{X}{Data matrix (T x n)}
+\item{X}{Data matrix (\eqn{T \times n}{T x n})}
 
-\item{A}{Transition matrix (rp x rp)}
+\item{A}{Transition matrix (\eqn{rp \times rp}{rp x rp})}
 
-\item{C}{Observation matrix (n x rp)}
+\item{C}{Observation matrix (\eqn{n \times rp}{n x rp})}
 
-\item{Q}{State covariance (rp x rp)}
+\item{Q}{State covariance (\eqn{rp \times rp}{rp x rp})}
 
-\item{R}{Observation covariance (n x n)}
+\item{R}{Observation covariance (\eqn{n \times n}{n x n})}
 
-\item{F_0}{Initial state vector (rp x 1)}
+\item{F_0}{Initial state vector (\eqn{rp \times 1}{rp x 1})}
 
-\item{P_0}{Initial state covariance (rp x rp)}
+\item{P_0}{Initial state covariance (\eqn{rp \times rp}{rp x rp})}
 
 \item{loglik}{logical. Compute log-likelihood?}
 }
 \value{
 All results from \code{\link{SKF}} and \code{\link{FIS}}, and additionally
-a rp x rp x T matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^smooth_t, F^smooth_{t-1} | T)}{Cov(F_smooth(t), F_smooth(t-1) | T)} and needed for EM iterations.
+a \eqn{rp \times rp \times T}{rp x rp x T} matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^smooth_t, F^smooth_{t-1} | T)}{Cov(F_smooth(t), F_smooth(t-1) | T)} and needed for EM iterations.
 See 'Property 6.3: The Lag-One Covariance Smoother' in Shumway & Stoffer (2017).
 }
 \description{

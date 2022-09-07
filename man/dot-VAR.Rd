@@ -13,7 +13,7 @@
 }
 \value{
 A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 1 - p of \code{x} combined column-wise,
-\code{A} which is the np x n transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
+\code{A} which is the \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
 }
 \description{
 Quickly estimate a VAR(p) model using Armadillo's inverse function.

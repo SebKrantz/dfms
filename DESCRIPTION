@@ -5,10 +5,10 @@ Title: Dynamic Factor Models
 Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"), email = "sebastian.krantz@graduateinstitute.ch"),
              person("Rytis", "Bagdziunas", role = "aut"))
 Description: Efficient estimation of Dynamic Factor Models using the Expectation Maximization (EM) algorithm 
-  or two-step (2S) estimation, on datasets with missing data. The implementation follows advances in the econometric 
+  or Two-Step (2S) estimation, on datasets with missing data. The implementation follows advances in the econometric 
   literature: estimation can be done either by running the Kalman Filter and Smoother once with initial values 
   from PCA - following Doz, Giannone and Reichlin (2011) (2S) - or via iterated Kalman Filtering and Smoothing until EM 
-  convergence - folowing Doz, Giannone and Reichlin (2012) - or using the adapted EM algorithm of Banbura and Modugno 
+  convergence - following Doz, Giannone and Reichlin (2012) - or using the adapted EM algorithm of Banbura and Modugno 
   (2014), allowing estimation with arbitrary patterns of missing data. The implementation makes heavy use of the 
   Armadillo C++ library and the collapse package, providing for particularly speedy estimation. A comprehensive set of 
   methods supports interpretation/visualization of the model and forecasting. Information criteria to choose the number 
