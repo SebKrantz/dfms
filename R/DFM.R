@@ -286,6 +286,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   # Results object for the two-step case
   object_init <- list(X_imp = structure(X_imp,
+                                        dimnames = list(NULL, Xnam),
                                         stats = Xstat,
                                         missing = if(anymiss) W else NULL,
                                         attributes = ax,

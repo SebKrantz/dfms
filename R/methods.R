@@ -13,8 +13,7 @@
 #' @param \dots not used.
 #' @importFrom collapse qsu frange
 #' @export
-print.dfm <- function(x,
-                      digits = 4L, ...) {
+print.dfm <- function(x, digits = 4L, ...) {
 
   X <- x$X_imp
   A <- x$A
@@ -114,13 +113,15 @@ print.dfm_summary <- function(x,
 #' @param x an object class 'dfm'.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"}, \code{"pca"} or \code{"all"} to plot all estimates.
 #' @param type character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.
+#' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
 #' @importFrom graphics boxplot
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
 #' @export
 plot.dfm <- function(x,
                      method = switch(x$em.method, none = "twostep", "qml"),
-                     type = c("joint", "individual", "residual"), ...) {
+                     type = c("joint", "individual", "residual"),
+                     scale.factors = TRUE, ...) {
   F <- switch(method[1L],
               all = cbind(x$F_pca, setColnames(x$F_twostep, paste("TwoStep", colnames(x$F_twostep))),
                           if(length(x$F_qml)) setColnames(x$F_qml, paste("QML", colnames(x$F_qml))) else NULL),
@@ -129,6 +130,7 @@ plot.dfm <- function(x,
   switch(type[1L],
     joint = {
       Xr <- frange(x$X_imp)
+      if(scale.factors) F <- fscale(F)
       Fr <- frange(F)
       ts.plot(x$X_imp, col = "grey85", ylim = c(min(Xr[1L], Fr[1L]), max(Xr[2L], Fr[2L])),
               ylab = "Value", main = "Standardized Series and Factor Estimates", ...)
@@ -296,7 +298,7 @@ fitted.dfm <- function(object,
 #' @param object an object of class 'dfm'.
 #' @param h integer. The forecast horizon.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
-#' @param standardized logical. \code{FALSE} will return factor and data forecasts on the original scale.
+#' @param standardized logical. \code{FALSE} will return data forecasts on the original scale.
 #' @param resFUN an (optional) function to compute a univariate forecast of the residuals.
 #' The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.
 #' @param resAC numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.
@@ -308,7 +310,7 @@ fitted.dfm <- function(object,
 #' predict(dfm, resFUN = fcfun)
 #'
 #' @export
-# TODO: Prediction in original format??
+# TODO: Option for prediction in original format??
 predict.dfm <- function(object,
                         h = 10L,
                         method = switch(object$em.method, none = "twostep", "qml"),
@@ -331,15 +333,19 @@ predict.dfm <- function(object,
   F_last <- ftail(F, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
   spi <- p:1
 
+  # DFM forecasting loop
   for (i in seq_len(h)) {
     F_reg <- ftail(F_last, p)
-    F_fc[i, ] <- A %*% `dim<-`(t(F_reg)[, spi, drop = FALSE], NULL)
-    X_fc[i, ] <- C %*% F_fc[i, ]
-    F_last <- rbind(F_last, F_fc[i, ])
+    F_fc[i, ] <- tmp <- A %*% `dim<-`(t(F_reg)[, spi, drop = FALSE], NULL)
+    dim(tmp) <- NULL
+    X_fc[i, ] <- C %*% tmp
+    F_last <- rbind(F_last, tmp)
   }
-  # TODO: What about missing values??
-  if(!is.null(resFUN)) {
+
+  # Additional univariate forecasting of the residuals?
+  if(!is.null(resFUN)) { # TODO: What about missing values??
     if(!is.function(resFUN)) stop("resFUN needs to be a forecasting function with second argument h that produces a numeric h-step ahead forecast of a univariate time series")
+    # If X is a multivariate time series object for which the univariate forecasting function could have methods.
     ofl <- !attr(X, "is.list") && length(attr(X, "attributes")[["class"]])
     rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE)
     if(ofl && length(object$na.rm)) rsid <- rsid[-object$na.rm, , drop = FALSE] # drop = FALSE?
@@ -347,19 +353,19 @@ predict.dfm <- function(object,
     fcr <- which(abs(ACF) >= abs(resAC)) # TODO: Check length of forecast??
     for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(rsid[, i], h, ...))
   } else fcr <- NULL
-  # TODO: Unstandardize factors with the average mean and SD??
-  if(!standardized) {
+
+  if(!standardized) { # Unstandardize factors with the average mean and SD??
     stats <- attr(X, "stats")
     X_fc <- unscale(X_fc, stats)
     X <- unscale(X, stats)
   }
 
-  dimnames(X_fc) <- list(NULL, dimnames(X)[[2L]])
+  dimnames(X_fc) <- dimnames(X)
   dimnames(F_fc) <- dimnames(F)
 
   if(object$anyNA) X[attr(X, "missing")] <- NA
 
-  # model = object, # Better only save essential objects ??
+  # model = object, # Better only save essential objects...
   res <- list(X_fcst = X_fc,
               F_fcst = F_fc,
               X = X,
@@ -369,10 +375,13 @@ predict.dfm <- function(object,
               resid.fc = !is.null(resFUN), # TODO: Rename list elements??
               resid.fc.ind = fcr,
               call = match.call())
+
   class(res) <- "dfm_forecast"
   return(res)
 }
 # forecast.dfm <- predict.dfm
+
+# TODO: data frame method.
 
 #' @rdname predict.dfm
 #' @param x object of type 'dfm_forecast', returned from \code{predict.dfm}.
@@ -396,6 +405,7 @@ print.dfm_forecast <- function(x,
 #' @rdname predict.dfm
 #' @param main,xlab,ylab character. Graphical parameters passed to \code{\link{ts.plot}}.
 #' @param factors integers indicating which factors to display. Setting this to \code{NA}, \code{NULL} or \code{0} will omit factor plots.
+#' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param factor.col,factor.lwd graphical parameters affecting the colour and line width of factor estimates plots. See \code{\link{par}}.
 #' @param fcst.lty integer or character giving the line type of the forecasts of factors and data. See \code{\link{par}}.
 #' @param data.col character vector of length 2 indicating the colours of historical data and forecasts of that data. Setting this to \code{NA}, \code{NULL} or \code{""} will not plot data and data forecasts.
@@ -405,29 +415,41 @@ print.dfm_forecast <- function(x,
 #' @param vline logical. \code{TRUE} draws a vertical line deliminating historical data and forecasts.
 #' @param vline.lty,vline.col graphical parameters affecting the appearance of the vertical line. See \code{\link{par}}.
 #' @param \dots further arguments passed to \code{\link{ts.plot}}. Sensible choices are \code{xlim} and \code{ylim} to restrict the plot range.
+#' @importFrom collapse setop
 #' @export
 # TODO: multiple plot types...# , type = c("joint", "individual")
 # also arguments show = c("both", "factors", "data"), and
 # Also put plot on original timescale if ts object
+# TODO: Option to unstandardize factors.
 plot.dfm_forecast <- function(x,
                               main = paste(x$h, "Period Ahead DFM Forecast"),
                               xlab = "Time", ylab = "Standardized Data",
-                              factors = 1:ncol(x$F), factor.col = rainbow(length(factors)), factor.lwd = 1.5,
+                              factors = 1:ncol(x$F),
+                              scale.factors = TRUE,
+                              factor.col = rainbow(length(factors)),
+                              factor.lwd = 1.5,
                               fcst.lty = "dashed",
                               data.col = c("grey85", "grey65"),
-                              legend = TRUE, legend.items = paste0("f", factors),
-                              grid = FALSE, vline = TRUE, vline.lty = "dotted", vline.col = "black", ...) {
+                              legend = TRUE,
+                              legend.items = paste0("f", factors),
+                              grid = FALSE, vline = TRUE,
+                              vline.lty = "dotted", vline.col = "black", ...) {
 
   dcl <- is.character(data.col[1L]) && nzchar(data.col[1L])
   ffl <- length(factors) && !is.na(factors[1L]) && factors[1L] > 0L
-  nyliml <- !(...length() && any(...names() == "ylim"))
+  nyliml <- !(...length() && any(names(list(...)) == "ylim")) # ...names() -> Added after R 3.3.0
   if(!ffl) factors <- 1L
   F <- x$F[, factors, drop = FALSE]
   r <- ncol(F)
   T <- nrow(F)
   if(ffl) {
-    if(nyliml) Fr <- frange(F)
     F_fcst <- x$F_fcst[, factors, drop = FALSE]
+    if(scale.factors) {
+      fcstat <- qsu(F)
+      F_fcst <- setop(TRA.matrix(F_fcst, fcstat[, "Mean"], "-"), "/", fcstat[, "SD"], rowwise = TRUE)
+      F <- fscale(F)
+    }
+    if(nyliml) Fr <- frange(F)
     F <- rbind(F, matrix(NA_real_, x$h, r))
   } else Fr <- NULL
   if(dcl) {

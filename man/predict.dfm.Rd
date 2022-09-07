@@ -24,6 +24,7 @@
   xlab = "Time",
   ylab = "Standardized Data",
   factors = 1:ncol(x$F),
+  scale.factors = TRUE,
   factor.col = rainbow(length(factors)),
   factor.lwd = 1.5,
   fcst.lty = "dashed",
@@ -44,7 +45,7 @@
 
 \item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
 
-\item{standardized}{logical. \code{FALSE} will return factor and data forecasts on the original scale.}
+\item{standardized}{logical. \code{FALSE} will return data forecasts on the original scale.}
 
 \item{resFUN}{an (optional) function to compute a univariate forecast of the residuals.
 The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.}
@@ -60,6 +61,8 @@ The function needs to have a second argument providing the forecast horizon (\co
 \item{main, xlab, ylab}{character. Graphical parameters passed to \code{\link{ts.plot}}.}
 
 \item{factors}{integers indicating which factors to display. Setting this to \code{NA}, \code{NULL} or \code{0} will omit factor plots.}
+
+\item{scale.factors}{logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.}
 
 \item{factor.col, factor.lwd}{graphical parameters affecting the colour and line width of factor estimates plots. See \code{\link{par}}.}
 

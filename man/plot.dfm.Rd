@@ -9,6 +9,7 @@
   x,
   method = switch(x$em.method, none = "twostep", "qml"),
   type = c("joint", "individual", "residual"),
+  scale.factors = TRUE,
   ...
 )
 
@@ -20,6 +21,8 @@
 \item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"}, \code{"pca"} or \code{"all"} to plot all estimates.}
 
 \item{type}{character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.}
+
+\item{scale.factors}{logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.}
 
 \item{\dots}{for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.}
 }
