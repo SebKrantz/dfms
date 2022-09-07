@@ -48,11 +48,11 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
     for (t in 1:T) {
       nanYt = W[t, ]
       tmp = C_new * !nanYt
-      R[dgind] = Rdg * nanYt #
+      R[dgind] = Rdg * nanYt # If R is not diagonal
       tmp2 = tmp %*% tcrossprod(Vsmooth[sr, sr, t], tmp)
       tmp2 %+=% tcrossprod(XW0[t, ] - tmp %*% Zsmooth[t, sr])
-      tmp2 %+=% R #
-      # tmp2[dgind] = tmp2[dgind] + (Rdg * nanYt) # As long as R is diagonal...
+      tmp2 %+=% R # If R is not diagonal
+      # tmp2[dgind] = tmp2[dgind] + (Rdg * nanYt) # If R is diagonal...
       R_new %+=% tmp2
     }
     if(rRi == 2L) { # Unrestricted
