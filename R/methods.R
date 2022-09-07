@@ -488,6 +488,8 @@ plot.dfm_forecast <- function(x,
 #' @param x an object class 'dfm_forecast'.
 #' @param use character. Which forecasts to use \code{"factors"}, \code{"data"} or \code{"both"}.
 #' @param pivot character. The orientation of the frame: \code{"long"} or \code{"wide"}.
+#' @param time a vector identifying the time dimension, must be of length T + h, or \code{NULL} to omit a time variable.
+#' @param stringsAsFactors logical. If \code{TRUE} and \code{pivot = "long"} the 'Variable' column is created as a factor. Same as option to \code{\link{as.data.frame.table}}.
 #' @param \dots not used.
 #'
 #' @export

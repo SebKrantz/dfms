@@ -93,6 +93,10 @@ The function needs to have a second argument providing the forecast horizon (\co
 \item{use}{character. Which forecasts to use \code{"factors"}, \code{"data"} or \code{"both"}.}
 
 \item{pivot}{character. The orientation of the frame: \code{"long"} or \code{"wide"}.}
+
+\item{time}{a vector identifying the time dimension, must be of length T + h, or \code{NULL} to omit a time variable.}
+
+\item{stringsAsFactors}{logical. If \code{TRUE} and \code{pivot = "long"} the 'Variable' column is created as a factor. Same as option to \code{\link{as.data.frame.table}}.}
 }
 \description{
 This function produces h-step ahead forecasts of both the factors and the data,
