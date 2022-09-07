@@ -4,6 +4,7 @@
 \alias{predict.dfm}
 \alias{print.dfm_forecast}
 \alias{plot.dfm_forecast}
+\alias{as.data.frame.dfm_forecast}
 \title{DFM Forecasts}
 \usage{
 \method{predict}{dfm}(
@@ -24,6 +25,7 @@
   xlab = "Time",
   ylab = "Standardized Data",
   factors = 1:ncol(x$F),
+  scale.factors = TRUE,
   factor.col = rainbow(length(factors)),
   factor.lwd = 1.5,
   fcst.lty = "dashed",
@@ -36,6 +38,15 @@
   vline.col = "black",
   ...
 )
+
+\method{as.data.frame}{dfm_forecast}(
+  x,
+  ...,
+  use = c("factors", "data", "both"),
+  pivot = c("long", "wide"),
+  time = seq_len(nrow(x$F) + x$h),
+  stringsAsFactors = TRUE
+)
 }
 \arguments{
 \item{object}{an object of class 'dfm'.}
@@ -44,22 +55,24 @@
 
 \item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
 
-\item{standardized}{logical. \code{FALSE} will return factor and data forecasts on the original scale.}
+\item{standardized}{logical. \code{FALSE} will return data forecasts on the original scale.}
 
 \item{resFUN}{an (optional) function to compute a univariate forecast of the residuals.
 The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.}
 
 \item{resAC}{numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.}
 
-\item{\dots}{further arguments passed to \code{\link{ts.plot}}. Sensible choices are \code{xlim} and \code{ylim} to restrict the plot range.}
+\item{\dots}{not used.}
 
-\item{x}{object of type 'dfm_forecast', returned from \code{predict.dfm}.}
+\item{x}{an object class 'dfm_forecast'.}
 
 \item{digits}{integer. The number of digits to print out.}
 
 \item{main, xlab, ylab}{character. Graphical parameters passed to \code{\link{ts.plot}}.}
 
 \item{factors}{integers indicating which factors to display. Setting this to \code{NA}, \code{NULL} or \code{0} will omit factor plots.}
+
+\item{scale.factors}{logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.}
 
 \item{factor.col, factor.lwd}{graphical parameters affecting the colour and line width of factor estimates plots. See \code{\link{par}}.}
 
@@ -76,6 +89,14 @@ The function needs to have a second argument providing the forecast horizon (\co
 \item{vline}{logical. \code{TRUE} draws a vertical line deliminating historical data and forecasts.}
 
 \item{vline.lty, vline.col}{graphical parameters affecting the appearance of the vertical line. See \code{\link{par}}.}
+
+\item{use}{character. Which forecasts to use \code{"factors"}, \code{"data"} or \code{"both"}.}
+
+\item{pivot}{character. The orientation of the frame: \code{"long"} or \code{"wide"}.}
+
+\item{time}{a vector identifying the time dimension, must be of length T + h, or \code{NULL} to omit a time variable.}
+
+\item{stringsAsFactors}{logical. If \code{TRUE} and \code{pivot = "long"} the 'Variable' column is created as a factor. Same as option to \code{\link{as.data.frame.table}}.}
 }
 \description{
 This function produces h-step ahead forecasts of both the factors and the data,
