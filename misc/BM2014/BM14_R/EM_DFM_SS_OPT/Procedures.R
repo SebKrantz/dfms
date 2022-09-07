@@ -60,6 +60,8 @@ EMstep_OPT <- function(Y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C
   ncv = dim(Vsmooth)[3L]
   sr = 1:r
 
+  # return(list(t(Zsmooth)[-1, ], Vsmooth[,, -1], t(Zsmooth)[1, , drop = FALSE], Vsmooth[,, 1], VVsmooth))
+
   tmp = Zsmooth[, -1L, drop = FALSE]
   tmp2 = Zsmooth[, -nc, drop = FALSE]
   EZZ = tcrossprod(tmp) %+=% rowSums(Vsmooth[,, -1L, drop = FALSE], dims = 2L)       # E(Z'Z)
@@ -119,7 +121,7 @@ EMstep_OPT <- function(Y, A, C, Q, R, Z_0, V_0, r, dnkron, dnkron_ind, S) { # [C
               R = R_new,
               Z_0 = Z_0,
               V_0 = V_0,
-              loglik = loglik))
+              loglik = drop(loglik)))
 }
 
 
