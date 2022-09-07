@@ -1,4 +1,4 @@
-# DFM
+# DFM: Dynamic Factor Models for R
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/SebKrantz/DFM/workflows/R-CMD-check/badge.svg)](https://github.com/SebKrantz/DFM/actions)
 <!-- badges: end -->
