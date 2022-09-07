@@ -57,13 +57,14 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
     }
     if(rRi == 2L) { # Unrestricted
       R_new %/=% T
-      R_new[R_new < 1e-7] <- 1e-7
+      # R_new[R_new < 1e-7] <- 1e-7
     } else { # Diagonal
-      R_new <- R_new[dgind] / T
-      R_new[R_new < 1e-7] <- 1e-7 # RR(RR<1e-2) = 1e-2;
-      R_new = diag(R_new)
+      R_new = diag(R_new[dgind] / T)
+      # R_new <- R_new[dgind] / T
+      # R_new[R_new < 1e-7] <- 1e-7 # RR(RR<1e-2) = 1e-2;
+      # R_new = diag(R_new)
     }
-  } else R <- diag(n)
+  } else R_new <- diag(n)
 
   C[, sr] = C_new
 
