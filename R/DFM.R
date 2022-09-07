@@ -136,6 +136,7 @@
 #' BM14[, BM14_Models$freq == "M"] %<>% diff()
 #' BM14[, BM14_Models$freq == "Q"] %<>% diff(3)
 #'
+#'
 #' ### Small Model ---------------------------------------
 #'
 #' # IC for number of factors
