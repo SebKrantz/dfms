@@ -35,7 +35,7 @@ plot(mod)
 as.data.frame(mod)
 
 # Forecasting 20 periods ahead
-fc = predict(mod, n.ahead = 20)
+fc = predict(mod, h = 20)
 
 # 'dfm_forecast' methods
 print(fc)
