@@ -4,6 +4,7 @@
 \alias{predict.dfm}
 \alias{print.dfm_forecast}
 \alias{plot.dfm_forecast}
+\alias{as.data.frame.dfm_forecast}
 \title{DFM Forecasts}
 \usage{
 \method{predict}{dfm}(
@@ -37,6 +38,15 @@
   vline.col = "black",
   ...
 )
+
+\method{as.data.frame}{dfm_forecast}(
+  x,
+  ...,
+  use = c("factors", "data", "both"),
+  pivot = c("long", "wide"),
+  time = seq_len(nrow(x$F) + x$h),
+  stringsAsFactors = TRUE
+)
 }
 \arguments{
 \item{object}{an object of class 'dfm'.}
@@ -52,9 +62,9 @@ The function needs to have a second argument providing the forecast horizon (\co
 
 \item{resAC}{numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.}
 
-\item{\dots}{further arguments passed to \code{\link{ts.plot}}. Sensible choices are \code{xlim} and \code{ylim} to restrict the plot range.}
+\item{\dots}{not used.}
 
-\item{x}{object of type 'dfm_forecast', returned from \code{predict.dfm}.}
+\item{x}{an object class 'dfm_forecast'.}
 
 \item{digits}{integer. The number of digits to print out.}
 
@@ -79,6 +89,10 @@ The function needs to have a second argument providing the forecast horizon (\co
 \item{vline}{logical. \code{TRUE} draws a vertical line deliminating historical data and forecasts.}
 
 \item{vline.lty, vline.col}{graphical parameters affecting the appearance of the vertical line. See \code{\link{par}}.}
+
+\item{use}{character. Which forecasts to use \code{"factors"}, \code{"data"} or \code{"both"}.}
+
+\item{pivot}{character. The orientation of the frame: \code{"long"} or \code{"wide"}.}
 }
 \description{
 This function produces h-step ahead forecasts of both the factors and the data,

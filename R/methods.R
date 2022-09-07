@@ -174,7 +174,7 @@ plot.dfm <- function(x,
 #' Extract Factor Estimates in a Data Frame
 #' @param x an object class 'dfm'.
 #' @param method character. The factor estimates to use: any of \code{"qml"}, \code{"twostep"}, \code{"pca"} (multiple can be supplied) or \code{"all"} for all estimates.
-#' @param pivot character. The orientation of the frame: \code{"long"}, \code{"wide.factor"} or \code{"wide.method"} or \code{"wide"}.
+#' @param pivot character. The orientation of the frame: \code{"long"}, \code{"wide.factor"} or \code{"wide.method"}, \code{"wide"} or \code{"t.wide"}.
 #' @param time a vector identifying the time dimension, or \code{NULL} to omit a time variable.
 #' @param stringsAsFactors make factors from method and factor identifiers. Same as option to \code{\link{as.data.frame.table}}.
 #' @param \dots not used.
@@ -481,6 +481,47 @@ plot.dfm_forecast <- function(x,
   if(ffl && legend) legend("topleft", legend.items, col = factor.col,
                            lwd = factor.lwd, lty = 1L, bty = "n")
   if(vline) abline(v = T, col = vline.col, lwd = 1L, lty = vline.lty)
+}
+
+
+#' @rdname predict.dfm
+#' @param x an object class 'dfm_forecast'.
+#' @param use character. Which forecasts to use \code{"factors"}, \code{"data"} or \code{"both"}.
+#' @param pivot character. The orientation of the frame: \code{"long"} or \code{"wide"}.
+#' @param \dots not used.
+#'
+#' @export
+as.data.frame.dfm_forecast <- function(x, ...,
+                              use = c("factors", "data", "both"),
+                              pivot = c("long", "wide"),
+                              time = seq_len(nrow(x$F) + x$h),
+                              stringsAsFactors = TRUE) {
+
+  mat <- switch(use[1L],
+                factors = rbind(x$F, x$F_fcst),
+                data = rbind(x$X, x$X_fcst),
+                both = cbind(rbind(x$F, x$F_fcst), rbind(x$X, x$X_fcst)),
+                stop("Unknown use option:", use[1L]))
+
+  fcvec <- c(rep(FALSE, nrow(x$F)), rep(TRUE, x$h))
+  T <- nrow(mat)
+  r <- ncol(mat)
+  if(!is.null(time) && length(time) != T) stop(sprintf("time must be a length %s vector or NULL", T))
+
+  res <- switch(pivot[1L],
+      long = list(Variable = if(stringsAsFactors) setAttrib(rep(1:r, each = T), list(levels = dimnames(mat)[[2L]], class = "factor")) else
+                                                rep(dimnames(mat)[[2L]], each = T),
+                  Time = if(length(time)) rep(time, r) else NULL,
+                  Forecast = rep(fcvec, r),
+                  Value = unattrib(mat)),
+      wide = c(list(Time = time, Forecast = fcvec), mctl(mat, TRUE)),
+      stop("Unknown pivot option:", pivot[1L])
+  )
+
+  if(is.null(time)) res <- na_rm(res)
+  attr(res, "row.names") <- .set_row_names(length(res[[1L]]))
+  class(res) <- "data.frame"
+  return(res)
 }
 
 # interpolate.dfm <- function(x, method = "qml", interpolate = TRUE) {

@@ -32,6 +32,7 @@ mod = DFM(diff(BM14_M), r = 6, p = 3, em.method = "BM")
 # 'dfm' methods
 summary(mod)
 plot(mod)
+as.data.frame(mod)
 
 # Forecasting 20 periods ahead
 fc = predict(mod, n.ahead = 20)
@@ -39,4 +40,5 @@ fc = predict(mod, n.ahead = 20)
 # 'dfm_forecast' methods
 print(fc)
 plot(fc)
+as.data.frame(fc)
 ```
