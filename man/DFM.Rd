@@ -29,7 +29,7 @@ DFM(
 
 \item{p}{number of lags in factor VAR.}
 
-\item{\dots}{further arguments to be added here in the future. % such as further estimation methods or block-structures.}
+\item{\dots}{further arguments to be added here in the future, such as further estimation methods or block-structures.}
 
 \item{rQ}{restrictions on the state (transition) covariance matrix (Q).}
 

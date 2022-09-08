@@ -12,7 +12,7 @@
 #' @param X a \code{T x n} data matrix or frame.
 #' @param r number of factors.
 #' @param p number of lags in factor VAR.
-#' @param \dots further arguments to be added here in the future. % such as further estimation methods or block-structures.
+#' @param \dots further arguments to be added here in the future, such as further estimation methods or block-structures.
 #' @param rQ restrictions on the state (transition) covariance matrix (Q).
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
@@ -120,7 +120,7 @@
 #' Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. \emph{Handbook of Macroeconomics, 2}, 415–525. https://doi.org/10.1016/bs.hesmac.2016.04.002
 #'
 #' @useDynLib DFM, .registration = TRUE
-#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% whichv setColnames setDimnames
+#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% %*=% whichv setColnames setDimnames
 #' @importFrom grDevices rainbow
 #' @importFrom graphics abline legend lines par
 #' @importFrom stats filter residuals rnorm spline ts.plot
@@ -252,6 +252,7 @@ DFM <- function(X, r, p = 1L, ...,
   # Run PCA to get initial factor estimates:
   # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v # Not faster than eigen...
   eigen_decomp = eigen(cov(X_imp), symmetric = TRUE)
+  eigen_decomp$vectors %*=% -1 # TODO: how best to ensure factors correlate positively with data?
   v = eigen_decomp$vectors[, sr, drop = FALSE]
   # d = eigen_decomp$values[sr]
   F_pc <- X_imp %*% v

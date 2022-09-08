@@ -136,7 +136,7 @@ This yields significant performance gains over the iterative methods. Final syst
 <p>A list-like object of class 'dfm' with the following elements:</p><table class="table table"><tr><td><code>X_imp</code></td><td></td><td>\(T \times n\) matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
    <ul><li><p><code>"stats"</code> is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://sebkrantz.github.io/collapse/reference/qsu.html" class="external-link">qsu</a></code>).<br></p></li>
 <li><p><code>"missing"</code> is a \(T \times n\) logical matrix indicating missing or infinite values in the original data (which are imputed in <code>X_imp</code>).<br></p></li>
-<li><p><code>"attributes"</code> contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> or the original data input.<br></p></li>
+<li><p><code>"attributes"</code> contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.<br></p></li>
 <li><p><code>"is.list"</code> is a logical value indicating whether the original data input was a list / data frame. <br></p></li>
 </ul></td><td></td></tr><tr><td><code>eigen</code></td><td></td><td><code>eigen(cov(X_imp))</code>.</td><td></td></tr><tr><td><code>F_pca</code></td><td></td><td>\(T \times r\) matrix of principal component factor estimates - <code>X_imp %*% eigen$vectors</code>.</td><td></td></tr><tr><td><code>P_0</code></td><td></td><td>\(r \times r\) initial factor covariance matrix estimate based on PCA results.</td><td></td></tr><tr><td><code>F_twostep</code></td><td></td><td>\(T \times r\) matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA.</td><td></td></tr><tr><td><code>P_twostep</code></td><td></td><td>\(r \times r \times T\) covariance matrices of two-step factor estimates.</td><td></td></tr><tr><td><code>F_qml</code></td><td></td><td>\(T \times r\) matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence.</td><td></td></tr><tr><td><code>P_qml</code></td><td></td><td>\(r \times r \times T\) covariance matrices of QML factor estimates.</td><td></td></tr><tr><td><code>A</code></td><td></td><td>\(r \times rp\) factor transition matrix.</td><td></td></tr><tr><td><code>C</code></td><td></td><td>\(n \times r\) observation matrix.</td><td></td></tr><tr><td><code>Q</code></td><td></td><td>\(r \times r\) state (error) covariance matrix.</td><td></td></tr><tr><td><code>R</code></td><td></td><td>\(n \times n\) observation (error) covariance matrix.</td><td></td></tr><tr><td><code>loglik</code></td><td></td><td>vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.</td><td></td></tr><tr><td><code>tol</code></td><td></td><td>The numeric convergence tolerance used.</td><td></td></tr><tr><td><code>converged</code></td><td></td><td>single logical valued indicating whether the EM algorithm converged (within <code>max.iter</code> iterations subject to <code>tol</code>).</td><td></td></tr><tr><td><code>anyNA</code></td><td></td><td>single logical valued indicating whether there were any missing values in the data. If <code>FALSE</code>, <code>X_imp</code> is simply the original data in matrix form, and does not have the <code>"missing"</code> attribute attached.</td><td></td></tr><tr><td><code>na.rm</code></td><td></td><td>vector of any cases that were removed beforehand (subject to <code>max.missing</code> and <code>na.rm.method</code>). If no cases were removed the slot is <code>NULL</code>.</td><td></td></tr><tr><td><code>em.method</code></td><td></td><td>The EM method used.</td><td></td></tr><tr><td><code>call</code></td><td></td><td>call object obtained from <code><a href="https://rdrr.io/r/base/match.call.html" class="external-link">match.call()</a></code>.</td><td></td></tr></table></div>
     <div id="details">
@@ -148,11 +148,11 @@ This yields significant performance gains over the iterative methods. Final syst
 </ol><p>Factors are allowed to evolve in a \(VAR(p)\) process, and data is standardized (scaled and centered) before estimation (removing the need of intercept terms).
 By assumptions 1-4, this translates into the following dynamic form:</p>
 <p>$$\textbf{x}_t = \textbf{C}_0 \textbf{f}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})$$
-$$\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \ \sim\  N(0, \textbf{Q}_0)$$</p>
+$$\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q}_0)$$</p>
 <p>where the first equation is called the measurement or observation equation and the second equation is called transition, state or process equation, and</p>
 <table class="table table"><tr><td>\(n\)</td><td></td><td>number of series in \(\textbf{x}_t\) (\(r\) and \(p\) as the arguments to <code>DFM</code>).</td><td></td></tr><tr><td>\(\textbf{x}_t\)</td><td></td><td>\(n \times 1\) vector of observed series at time \(t\): \((x_{1t}, \dots, x_{nt})'\). Some observations can be missing.</td><td></td></tr><tr><td>\(\textbf{f}_t\)</td><td></td><td>\(r \times 1\) vector of factors at time \(t\): \((f_{1t}, \dots, f_{rt})'\).</td><td></td></tr><tr><td>\(\textbf{C}_0\)</td><td></td><td>\(n \times r\) measurement (observation) matrix.</td><td></td></tr><tr><td>\(\textbf{A}_j\)</td><td></td><td>\(r \times r\) state transition matrix at lag \(j\).</td><td></td></tr><tr><td>\(\textbf{Q}_0\)</td><td></td><td>\(r \times r\) state covariance matrix.</td><td></td></tr><tr><td>\(\textbf{R}\)</td><td></td><td>\(n \times n\) measurement (observation) covariance matrix. It is diagonal by assumption 2 that \(E[\textbf{x}_{it}|\textbf{x}_{-i,t},\textbf{x}_{i,t-1}, \dots, \textbf{f}_t, \textbf{f}_{t-1}, \dots] = \textbf{Cf}_t \forall i\).</td><td></td></tr></table><p>This model can be estimated using a classical form of the Kalman Filter and the Expectation Maximization (EM) algorithm, after transforming it to State-Space (stacked, VAR(1)) form:</p>
 <p>$$\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})$$
-$$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(0, \textbf{Q})$$</p>
+$$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q})$$</p>
 <p>where</p><table class="table table"><tr><td>\(n\)</td><td></td><td>number of series in \(\textbf{x}_t\) (\(r\) and \(p\) as the arguments to <code>DFM</code>).</td><td></td></tr><tr><td>\(\textbf{x}_t\)</td><td></td><td>\(n \times 1\) vector of observed series at time \(t\): \((x_{1t}, \dots, x_{nt})'\). Some observations can be missing.</td><td></td></tr><tr><td>\(\textbf{F}_t\)</td><td></td><td>\(rp \times 1\) vector of stacked factors at time \(t\): \((f_{1t}, \dots, f_{rt}, f_{1,t-1}, \dots, f_{r,t-1}, \dots, f_{1,t-p}, \dots, f_{r,t-p})'\).</td><td></td></tr><tr><td>\(\textbf{C}\)</td><td></td><td>\(n \times rp\) observation matrix. Only the first \(n \times r\) terms are non-zero, by assumption 3 that \(E[\textbf{x}_t|\textbf{F}_t] = E[\textbf{x}_t|\textbf{f}_t]\) (no relationship of observed series with lagged factors given contemporaneous factors).</td><td></td></tr><tr><td>\(\textbf{A}\)</td><td></td><td>stacked \(rp \times rp\) state transition matrix consisting of 3 parts: the top \(r \times rp\) part provides the dynamic relationships captured by \((\textbf{A}_1, \dots, \textbf{A}_p)\) in the dynamic form, the terms <code>A[(r+1):rp, 1:(rp-r)]</code> constitute an \((rp-r) \times (rp-r)\) identity matrix mapping all lagged factors to their known values at times t. The remaining part <code>A[(rp-r+1):rp, (rp-r+1):rp]</code> is an \(r \times r\) matrix of zeros.</td><td></td></tr><tr><td>\(\textbf{Q}\)</td><td></td><td>\(rp \times rp\) state covariance matrix. The top \(r \times r\) part gives the contemporaneous relationships, the rest are zeros by assumption 4.</td><td></td></tr><tr><td><!-- % that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[f(t)|F(t-1)] = E[f(t)|f(t-1)] = A1 f(t-1)} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr -->
  \(\textbf{R}\)</td><td></td><td>\(n \times n\) observation covariance matrix. It is diagonal by assumption 2 and identical to \(\textbf{R}\) as stated in the dynamic form.</td><td></td></tr></table></div>
     <div id="references">
@@ -228,8 +228,8 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(0, \textbf{Q})$$</
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD      Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356   0.0777  -0.1544  2.0324  -3.2519  8.9693</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356  -0.0468   0.0279  1.3933  -5.8201  4.2683</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0777   0.1544  2.0324  -8.9693  3.2519</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.0468  -0.0279  1.3933  -4.2683  5.8201</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     L1.f1   L1.f2    L2.f1   L2.f2   L3.f1    L3.f2</span>
@@ -248,20 +248,20 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(0, \textbf{Q})$$</
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observation Matrix [C]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             f1      f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr            -0.2450 -0.1850</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars               -0.0245 -0.0323</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> orders                 -0.1669 -0.1692</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl      -0.0493  0.0062</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind        -0.2450 -0.4559</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                -0.1196 -0.4508</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> urx                     0.3830 -0.1478</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val -0.0568 -0.0847</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                -0.1207 -0.2317</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                -0.0968 -0.1707</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                    -0.3666 -0.0236</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl                   -0.3661  0.2945</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity               -0.2730  0.1416</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                 -0.2194 -0.1953</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr             0.2450  0.1850</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                0.0245  0.0323</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> orders                  0.1669  0.1692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl       0.0493 -0.0062</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind         0.2450  0.4559</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                 0.1196  0.4508</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urx                    -0.3830  0.1478</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val  0.0568  0.0847</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                 0.1207  0.2317</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                 0.0968  0.1707</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                     0.3666  0.0236</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl                    0.3661 -0.2945</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                0.2730 -0.1416</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                  0.2194  0.1953</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observation Error Covariance Matrix [diag(R) - Restricted]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            ip_tot_cstr               new_cars                 orders </span>
@@ -416,10 +416,10 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(0, \textbf{Q})$$</
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$medium], r = 3, p = 3, em.method = "BM")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD      Min      Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356   0.0403  -0.4214  2.9848  -5.4713  17.3578</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356  -0.0109  -0.2687  2.0526  -4.8352   8.2507</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356   0.0274    0.119  1.5727  -4.0181   6.8234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean  Median      SD       Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0403  0.4214  2.9848  -17.3578  5.4713</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.0109  0.2687  2.0526   -8.2507  4.8352</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0274  -0.119  1.5727   -6.8234  4.0181</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1    L1.f2    L1.f3    L2.f1    L2.f2   L2.f3    L3.f1    L3.f2</span>
@@ -499,12 +499,12 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(0, \textbf{Q})$$</
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min      Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356   0.0128  -0.6589  4.8593  -12.1396  22.6273</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356  -0.1426   0.1953  3.2924  -13.4553  17.0049</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0121   0.0539  2.6158  -10.0501    7.645</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4  356  -0.0532   -0.227  3.0551   -10.345  17.2138</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  356   0.0526   0.0474  2.6591  -11.5097  10.8706</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6  356  -0.0074  -0.0276  2.3392   -8.0883  15.4214</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0128   0.6589  4.8593  -22.6273  12.1396</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.1426  -0.1953  3.2924  -17.0049  13.4553</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356   0.0121  -0.0539  2.6158    -7.645  10.0501</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4  356   0.0532    0.227  3.0551  -17.2138   10.345</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  356  -0.0526  -0.0474  2.6591  -10.8706  11.5097</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  356   0.0074   0.0276  2.3392  -15.4214   8.0883</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1    L1.f2     L1.f3    L1.f4    L1.f5    L1.f6    L2.f1    L2.f2</span>
