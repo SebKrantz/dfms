@@ -70,6 +70,7 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
+
 <div class="section level1">
 <div class="page-header"><h1 id="dfm-dynamic-factor-models-for-r">DFM: Dynamic Factor Models for R<a class="anchor" aria-label="anchor" href="#dfm-dynamic-factor-models-for-r"></a>
 </h1></div>
@@ -85,8 +86,8 @@
 <div class="section level3">
 <h3 id="comparison-with-other-r-packages">Comparison with Other R Packages<a class="anchor" aria-label="anchor" href="#comparison-with-other-r-packages"></a>
 </h3>
-<p>The implementation is based on efficient C++ code, making <em>DFM</em> orders of magnitude faster than packages such as <a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a> that can be used to fit dynamic factor models, or packages like <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and <a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>, which fit dynamic factor models specific to mixed-frequency nowcasting applications. The latter two packages additionally support blocking of variables into different groups for which factors are to be estimated, and EM adjustments for variables at different frequencies, whereas <em>DFM</em> with <code>em.method = "BM"</code> does allow mixed-frequency data but performs no adjustments for the frequency of the data. <em>DFM</em> currently also does not allow residual autocorrelation in the estimation, although the addition of this feature is planned.</p>
-<p><em>DFM</em> is intended to provide a robust and computationally efficient baseline implementation of Dynamic Factor Models for R, allowing straightforward application to various contexts such as time series dimensionality reduction and multivariate forecasting. The package is not meant to fit very general forms of the state space model such as provided by <a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a>, or advanced specifications of Dynamic Factor Models tailored to mixed-frequency nowcasting applications such as <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and <a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>. Such software could however benefit from the functions and methods provided in <em>DFM</em>, most notably <em>DFM</em> exports stationary Kalman Filters and Smoothers also used in nowcasting applications, that are noticeably faster than the more general implementations provided by the <a href="https://CRAN.R-project.org/package=FKF" class="external-link"><em>FKF</em></a> package.</p>
+<p><em>DFM</em> is intended to provide a simple, numerically robust, and computationally efficient baseline implementation of (linear Gaussian) Dynamic Factor Models for R, allowing straightforward application to various contexts such as time series dimensionality reduction and multivariate forecasting. The implementation is based on efficient C++ code, making <em>DFM</em> orders of magnitude faster than packages such as <a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a> that can be used to fit dynamic factor models, or packages like <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and <a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>, which fit dynamic factor models specific to mixed-frequency nowcasting applications. The latter two packages additionally support blocking of variables into different groups for which factors are to be estimated, and EM adjustments for variables at different frequencies. <em>DFM</em> with <code>em.method = "BM"</code> does allow mixed-frequency data but performs no specific adjustments for the frequency of the data<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. <em>DFM</em> currently also does not allow residual autocorrelation in the estimation, although the addition of this feature is planned.</p>
+<p>The package is currently not intended to fit more general forms of the state space model such as provided by <a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a>, or advanced specifications of Dynamic Factor Models tailored to mixed-frequency nowcasting applications such as <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and <a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>. Such software could however benefit from the functions and methods provided in <em>DFM</em>, most notably <em>DFM</em> exports stationary Kalman Filters and Smoothers used in nowcasting applications, that are noticeably faster than the more general implementations provided by the <a href="https://CRAN.R-project.org/package=FKF" class="external-link"><em>FKF</em></a> package.</p>
 <!-- Estimation with *DFM* also requires stationary data of a single frequency, and assumes time-invariant system matrices and classical assumptions (i.e. the 'exact factor model', assuming away residual autocorrelation in the observation equation). -->
 </div>
 <div class="section level3">
@@ -111,6 +112,13 @@
 <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></code></pre>
 </div>
 </div>
+<div class="footnotes footnotes-end-of-document">
+<hr>
+<ol>
+<li id="fn1"><p>All series are weighted equally, and the prevalenceof missing values in lower-frequency series downweights them. To remedy this lower frequency series could be included multiple times in the dataset e.g. include a quarterly series 3 times in a monthly dataset.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

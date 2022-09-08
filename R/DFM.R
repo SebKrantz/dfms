@@ -12,7 +12,7 @@
 #' @param X a \code{T x n} data matrix or frame.
 #' @param r number of factors.
 #' @param p number of lags in factor VAR.
-#' @param \dots further arguments to be added here in the future, such as further estimation methods or block-structures.
+#' @param \dots further arguments to be added here in the future. % such as further estimation methods or block-structures.
 #' @param rQ restrictions on the state (transition) covariance matrix (Q).
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
@@ -50,7 +50,7 @@
 #' By assumptions 1-4, this translates into the following dynamic form:
 #'
 #' \deqn{\textbf{x}_t = \textbf{C}_0 \textbf{f}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})}{x(t) = C0 f(t) + e(t) ~ N(0, R)}
-#' \deqn{\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \ \sim\  N(0, \textbf{Q}_0)}{f(t) = A1 f(t-1) + \dots + Ap f(t-p) + u(t) ~ N(0, Q0)}
+#' \deqn{\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q}_0)}{f(t) = A1 f(t-1) + \dots + Ap f(t-p) + u(t) ~ N(0, Q0)}
 #'
 #' where the first equation is called the measurement or observation equation and the second equation is called transition, state or process equation, and
 #'
@@ -68,7 +68,7 @@
 #' This model can be estimated using a classical form of the Kalman Filter and the Expectation Maximization (EM) algorithm, after transforming it to State-Space (stacked, VAR(1)) form:
 #'
 #' \deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})}{x(t) = C F(t) + e(t) ~ N(0, R)}
-#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(0, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
+#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
 #'
 #' where
 #' \tabular{llll}{
@@ -87,7 +87,7 @@
 #'    \itemize{
 #'       \item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr
 #'       \item \code{"missing"} is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr
-#'       \item \code{"attributes"} contains the \code{\link{attributes}} or the original data input.\cr
+#'       \item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
 #'       \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
 #'    } \cr\cr
 #'  \code{eigen} \tab\tab \code{eigen(cov(X_imp))}. \cr\cr
