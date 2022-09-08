@@ -50,7 +50,7 @@
 #' By assumptions 1-4, this translates into the following dynamic form:
 #'
 #' \deqn{\textbf{x}_t = \textbf{C}_0 \textbf{f}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})}{x(t) = C0 f(t) + e(t) ~ N(0, R)}
-#' \deqn{\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \ \sim\  N(0, \textbf{Q}_0)}{f(t) = A1 f(t-1) + \dots + Ap f(t-p) + u(t) ~ N(0, Q0)}
+#' \deqn{\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q}_0)}{f(t) = A1 f(t-1) + \dots + Ap f(t-p) + u(t) ~ N(0, Q0)}
 #'
 #' where the first equation is called the measurement or observation equation and the second equation is called transition, state or process equation, and
 #'
@@ -68,7 +68,7 @@
 #' This model can be estimated using a classical form of the Kalman Filter and the Expectation Maximization (EM) algorithm, after transforming it to State-Space (stacked, VAR(1)) form:
 #'
 #' \deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})}{x(t) = C F(t) + e(t) ~ N(0, R)}
-#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(0, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
+#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
 #'
 #' where
 #' \tabular{llll}{
@@ -87,7 +87,7 @@
 #'    \itemize{
 #'       \item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr
 #'       \item \code{"missing"} is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr
-#'       \item \code{"attributes"} contains the \code{\link{attributes}} or the original data input.\cr
+#'       \item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
 #'       \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
 #'    } \cr\cr
 #'  \code{eigen} \tab\tab \code{eigen(cov(X_imp))}. \cr\cr
@@ -120,7 +120,7 @@
 #' Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. \emph{Handbook of Macroeconomics, 2}, 415–525. https://doi.org/10.1016/bs.hesmac.2016.04.002
 #'
 #' @useDynLib DFM, .registration = TRUE
-#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% whichv setColnames setDimnames
+#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% %*=% whichv setColnames setDimnames
 #' @importFrom grDevices rainbow
 #' @importFrom graphics abline legend lines par
 #' @importFrom stats filter residuals rnorm spline ts.plot
@@ -252,6 +252,7 @@ DFM <- function(X, r, p = 1L, ...,
   # Run PCA to get initial factor estimates:
   # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v # Not faster than eigen...
   eigen_decomp = eigen(cov(X_imp), symmetric = TRUE)
+  eigen_decomp$vectors %*=% -1 # TODO: how best to ensure factors correlate positively with data?
   v = eigen_decomp$vectors[, sr, drop = FALSE]
   # d = eigen_decomp$values[sr]
   F_pc <- X_imp %*% v
