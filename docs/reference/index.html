@@ -38,69 +38,89 @@
     </div>
 
     <table class="ref-index"><colgroup><col class="alias"><col class="title"></colgroup><tbody><tr><th colspan="2">
-          <h2 id="all-functions">All functions <a href="#all-functions" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p>
+          <h2 id="information-criteria">Information Criteria <a href="#information-criteria" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Choose the number of factors and the lag-order of the factor VAR.</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="BM14_Models.html">BM14_Models</a></code> <code><a href="BM14_Models.html">BM14_M</a></code> <code><a href="BM14_Models.html">BM14_Q</a></code> </p>
-        </td>
-        <td><p>EU Macroeconomic Data from Banbura and Modugno 2014</p></td>
-      </tr><tr><td>
-          <p><code><a href="DFM.html">DFM()</a></code> </p>
-        </td>
-        <td><p>Estimate a Dynamic Factor Model</p></td>
-      </tr><tr><td>
-          <p><code><a href="FIS.html">FIS()</a></code> </p>
-        </td>
-        <td><p>(Fast) Fixed-Interval Smoother (Kalman Smoother)</p></td>
-      </tr><tr><td>
           <p><code><a href="ICr.html">ICr()</a></code> <code><a href="ICr.html">print(<i>&lt;ICr&gt;</i>)</a></code> <code><a href="ICr.html">plot(<i>&lt;ICr&gt;</i>)</a></code> <code><a href="ICr.html">screeplot(<i>&lt;ICr&gt;</i>)</a></code> </p>
         </td>
         <td><p>Information Criteria to Determine the Number of Factors (r)</p></td>
-      </tr><tr><td>
-          <p><code><a href="SKF.html">SKF()</a></code> </p>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="fit-a-dynamic-factor-model">Fit a Dynamic Factor Model <a href="#fit-a-dynamic-factor-model" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>DFM estimation via the EM algorithm and PCA, and various methods inspect the model and extract results.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="DFM.html">DFM()</a></code> </p>
         </td>
-        <td><p>(Fast) Stationary Kalman Filter</p></td>
-      </tr><tr><td>
-          <p><code><a href="SKFS.html">SKFS()</a></code> </p>
-        </td>
-        <td><p>(Fast) Stationary Kalman Filter and Smoother</p></td>
-      </tr><tr><td>
-          <p><code><a href="ainv.html">ainv()</a></code> <code><a href="ainv.html">apinv()</a></code> </p>
-        </td>
-        <td><p>Armadillo's Inverse Functions</p></td>
-      </tr><tr><td>
-          <p><code><a href="as.data.frame.dfm.html">as.data.frame(<i>&lt;dfm&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extract Factor Estimates in a Data Frame</p></td>
-      </tr><tr><td>
-          <p><code><a href="dot-VAR.html">.VAR()</a></code> </p>
-        </td>
-        <td><p>(Fast) Barebones Vector-Autoregression</p></td>
-      </tr><tr><td>
-          <p><code><a href="em_converged.html">em_converged()</a></code> </p>
-        </td>
-        <td><p>Convergence Test for EM-Algorithm</p></td>
-      </tr><tr><td>
-          <p><code><a href="plot.dfm.html">plot(<i>&lt;dfm&gt;</i>)</a></code> <code><a href="plot.dfm.html">screeplot(<i>&lt;dfm&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Plot DFM</p></td>
-      </tr><tr><td>
-          <p><code><a href="predict.dfm.html">predict(<i>&lt;dfm&gt;</i>)</a></code> <code><a href="predict.dfm.html">print(<i>&lt;dfm_forecast&gt;</i>)</a></code> <code><a href="predict.dfm.html">plot(<i>&lt;dfm_forecast&gt;</i>)</a></code> <code><a href="predict.dfm.html">as.data.frame(<i>&lt;dfm_forecast&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>DFM Forecasts</p></td>
-      </tr><tr><td>
-          <p><code><a href="residuals.dfm.html">residuals(<i>&lt;dfm&gt;</i>)</a></code> <code><a href="residuals.dfm.html">fitted(<i>&lt;dfm&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>DFM Residuals and Fitted Values</p></td>
+        <td><p>Estimate a Dynamic Factor Model</p></td>
       </tr><tr><td>
           <p><code><a href="summary.dfm.html">print(<i>&lt;dfm&gt;</i>)</a></code> <code><a href="summary.dfm.html">summary(<i>&lt;dfm&gt;</i>)</a></code> <code><a href="summary.dfm.html">print(<i>&lt;dfm_summary&gt;</i>)</a></code> </p>
         </td>
         <td><p>DFM Summary Methods</p></td>
       </tr><tr><td>
+          <p><code><a href="plot.dfm.html">plot(<i>&lt;dfm&gt;</i>)</a></code> <code><a href="plot.dfm.html">screeplot(<i>&lt;dfm&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Plot DFM</p></td>
+      </tr><tr><td>
+          <p><code><a href="as.data.frame.dfm.html">as.data.frame(<i>&lt;dfm&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract Factor Estimates in a Data Frame</p></td>
+      </tr><tr><td>
+          <p><code><a href="residuals.dfm.html">residuals(<i>&lt;dfm&gt;</i>)</a></code> <code><a href="residuals.dfm.html">fitted(<i>&lt;dfm&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>DFM Residuals and Fitted Values</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="forecasting">Forecasting <a href="#forecasting" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Forecast both the factors and the data, and methods to visualize forecasts and extract results.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="predict.dfm.html">predict(<i>&lt;dfm&gt;</i>)</a></code> <code><a href="predict.dfm.html">print(<i>&lt;dfm_forecast&gt;</i>)</a></code> <code><a href="predict.dfm.html">plot(<i>&lt;dfm_forecast&gt;</i>)</a></code> <code><a href="predict.dfm.html">as.data.frame(<i>&lt;dfm_forecast&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>DFM Forecasts</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="fast-stationary-kalman-filtering-and-smoothing">Fast Stationary Kalman Filtering and Smoothing <a href="#fast-stationary-kalman-filtering-and-smoothing" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Optimized Armadillo C++ implementations of the stationary Kalman Filter and Smoother.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="SKF.html">SKF()</a></code> </p>
+        </td>
+        <td><p>(Fast) Stationary Kalman Filter</p></td>
+      </tr><tr><td>
+          <p><code><a href="FIS.html">FIS()</a></code> </p>
+        </td>
+        <td><p>(Fast) Fixed-Interval Smoother (Kalman Smoother)</p></td>
+      </tr><tr><td>
+          <p><code><a href="SKFS.html">SKFS()</a></code> </p>
+        </td>
+        <td><p>(Fast) Stationary Kalman Filter and Smoother</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="helper-functions">Helper Functions <a href="#helper-functions" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Fast VAR, matrix inverses, imputation/removal of missing values in multivariate time series, and convergence check for EM algorithm.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="dot-VAR.html">.VAR()</a></code> </p>
+        </td>
+        <td><p>(Fast) Barebones Vector-Autoregression</p></td>
+      </tr><tr><td>
           <p><code><a href="tsremimpNA.html">tsremimpNA()</a></code> </p>
         </td>
         <td><p>Remove and Impute Missing Values in a Multivariate Time Series</p></td>
+      </tr><tr><td>
+          <p><code><a href="ainv.html">ainv()</a></code> <code><a href="ainv.html">apinv()</a></code> </p>
+        </td>
+        <td><p>Armadillo's Inverse Functions</p></td>
+      </tr><tr><td>
+          <p><code><a href="em_converged.html">em_converged()</a></code> </p>
+        </td>
+        <td><p>Convergence Test for EM-Algorithm</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="data">Data <a href="#data" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>EU macroeconomic data from Banbura and Modugno (2014), and 3 DFM specifications considered in their paper.</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="BM14_Models.html">BM14_Models</a></code> <code><a href="BM14_Models.html">BM14_M</a></code> <code><a href="BM14_Models.html">BM14_Q</a></code> </p>
+        </td>
+        <td><p>EU Macroeconomic Data from Banbura and Modugno 2014</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

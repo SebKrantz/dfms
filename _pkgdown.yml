@@ -9,3 +9,39 @@ home:
 right:
    - icon: fa-github
      href: https://github.com/SebKrantz/DFM
+
+reference:
+- title: "Information Criteria"
+  desc: "Choose the number of factors and the lag-order of the factor VAR."
+- contents:
+  - ICr
+- title: "Fit a Dynamic Factor Model"
+  desc: "DFM estimation via the EM algorithm and PCA, and various methods inspect the model and extract results."
+- contents:
+  - DFM
+  - print.dfm
+  - summary.dfm
+  - plot.dfm
+  - as.data.frame.dfm
+  - residuals.dfm
+- title: "Forecasting"
+  desc: "Forecast both the factors and the data, and methods to visualize forecasts and extract results."
+- contents:
+  - predict.dfm
+- title: "Fast Stationary Kalman Filtering and Smoothing"
+  desc: "Optimized Armadillo C++ implementations of the stationary Kalman Filter and Smoother."
+- contents:
+  - SKF
+  - FIS
+  - SKFS
+- title: "Helper Functions"
+  desc: "Fast VAR, matrix inverses, imputation/removal of missing values in multivariate time series, and convergence check for EM algorithm."
+- contents:
+  - .VAR
+  - tsremimpNA
+  - ainv
+  - em_converged
+- title: "Data"
+  desc: "EU macroeconomic data from Banbura and Modugno (2014), and 3 DFM specifications considered in their paper."
+- contents:
+  - BM14_Models
