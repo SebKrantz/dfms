@@ -8,6 +8,14 @@
 # Compiled code
 *.dll
 *.o
+*.so
+*.xml
+*.prj
+.DS_Store
+*.DS_Store
+*.RData
+*.zip
+*.asv
 
 # User-specific files
 .Ruserdata
