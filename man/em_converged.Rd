@@ -4,7 +4,7 @@
 \alias{em_converged}
 \title{Convergence Test for EM-Algorithm}
 \usage{
-em_converged(loglik, previous_loglik, tol = 1e-04, check.increased = TRUE)
+em_converged(loglik, previous_loglik, tol = 1e-04, check.increased = FALSE)
 }
 \arguments{
 \item{loglik}{current value of the log-likelihood function.}
