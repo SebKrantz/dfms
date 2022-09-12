@@ -1,4 +1,4 @@
- dynFA <- function(X, q, r, p, max_iter) { # [F_hat,F_pc,F_kal,num_iter]
+ dynFA <- function(X, r, p, max_iter) { # [F_hat,F_pc,F_kal,num_iter]
 ########################################################################################################
 # "A Quasi?Maximum Likelihood Approach for Large, Approximate Dynamic Factor Models,"
 # The Review of Economics and Statistics, MIT Press, vol. 94(4), pages 1014-1024, November 2012.
@@ -38,7 +38,7 @@
 
 X = qM(X)
 thresh = 1e-4
-.c(T, N) = dim(X)
+.c(T, N) %=% dim(X)
 
 Mx = fmean(X)
 Wx = fsd(X)
@@ -46,7 +46,8 @@ Wx = fsd(X)
 x = fscale(X)
 
 # the number of static factors cannot be great of the dynamic ones
-if (r < q) stop('q has to be less or equal to r')
+q = r
+# if (r < q) stop('q has to be less or equal to r')
 
 nlag = p-1
 
@@ -77,7 +78,7 @@ if (p > 0) {
     z = F[(p+1L):T, , drop = FALSE]
 
     # run the var chi(t) = A*chi(t-1) + e(t);
-    A = matrix(0, rp, rp)
+    A = matrix(0, r * p, r * p)
     A_temp = ainv(crossprod(Z)) %*% crossprod(Z, z) # OLS estimator of the VAR transition matrix
     A[1:r, 1:(r*p)] = t(A_temp)
     e = z  - Z %*% A_temp           # VAR residuals
@@ -104,7 +105,7 @@ initx = Z[1, ]                    # initial state mean
 
 
 # initial state covariance
-initV = pinv(diag((r*(nlag+1))^2)-kronecker(A,A)) %*% unattrib(Q)
+initV = apinv(diag((r*(nlag+1))^2)-kronecker(A,A)) %*% unattrib(Q)
 dim(initV) = c(r*(nlag+1),r*(nlag+1))
 
 C = cbind(v, matrix(0, N, r*nlag))
@@ -232,7 +233,7 @@ while ((num_iter < max_iter) & !converged) {
 .c(xitt, xittm, Ptt, Pttm, loglik_t) %=% K_filter(initx, initV, x, A, C, R, Q)
 .c(xsmooth, Vsmooth, VVsmooth) %=% K_smoother(A, xitt, xittm, Ptt, Pttm, C, R)
 
-chi = t(xsmooth) %*% t(C) %*% diag(Wx) + kronecker(rep(1, T), Mx)
+# chi = t(xsmooth) %*% t(C) %*% diag(Wx) + kronecker(rep(1, T), Mx)
 F_hat = t(xsmooth[1:r, ])
 
 return(list(F_hat = F_hat, F_pc = F_pc, F_kal = F_kal, num_iter = num_iter))
@@ -274,7 +275,7 @@ Estep <- function(y, A, C, Q, R, initx, initV) { # [beta, gamma, delta, gamma1, 
         # xsmooth expected value of the state
 
     .c(os, T) %=% dim(y)
-    ss = length(A)
+    ss = ncol(A)
 
       #   xsmooth = y;
       #   Vsmooth = zeros(ss, ss, T); # no uncertainty about the hidden states
@@ -298,7 +299,7 @@ Estep <- function(y, A, C, Q, R, initx, initV) { # [beta, gamma, delta, gamma1, 
    for (t in 1:T) {
        delta = delta + tcrossprod(y[, t], xsmooth[, t])
        gamma = gamma + tcrossprod(xsmooth[, t]) + Vsmooth[,, t]
-       if(t > 1) beta = beta + tcrosspord(xsmooth[, t], xsmooth[, t-1]) + VVsmooth[,, t]
+       if(t > 1) beta = beta + tcrossprod(xsmooth[, t], xsmooth[, t-1]) + VVsmooth[,, t]
    }
 
    gamma1 = gamma - tcrossprod(xsmooth[, T]) - Vsmooth[,, T]
@@ -377,11 +378,12 @@ K_filter <- function(initx, initV, x, A, C, R, Q) {  # [xitt,xittm,Ptt,Pttm,logl
 
   y = t(x)
 
-  xittm = cbind(initx, matrix(0, r, T))
+  xittm = cbind(initx, matrix(0, r, T+1))
   xitt = matrix(0, r, T)
-  Pttm = array(0, r, r, T)
+  Pttm = array(0, c(r, r, T+1))
   Pttm[,, 1] = initV
-  Ptt = array(0, r, r, T)
+  Ptt = array(0, c(r, r, T))
+  loglik = 0
 
   for (j in 1:T) {
 
@@ -391,11 +393,11 @@ K_filter <- function(initx, initV, x, A, C, R, Q) {  # [xitt,xittm,Ptt,Pttm,logl
     Ptt[,, j] = Pttm[,, j] - Pttm[,, j] %*% t(C) %*% L %*% C %*% Pttm[,, j]
     xittm[, j+1] = A %*% xitt[, j]
     Pttm[,, j+1] = A %*% Ptt[,, j] %*% t(A) + Q
-    lik[j] = ((2*pi)^(-N/2)) * (abs(det(C %*% Pttm[,, j] %*% t(C) + R))^(-.5)) * exp(-1/2*t(y[, j] - C %*% xittm[, j]) %*% L %*% (-1/2*(y[, j] - C %*% xittm[, j])))
+    # lik[j] = ((2*pi)^(-N/2)) * (abs(det(C %*% Pttm[,, j] %*% t(C) + R))^(-.5)) * exp(-1/2*t(y[, j] - C %*% xittm[, j]) %*% L %*% (-1/2*(y[, j] - C %*% xittm[, j])))
 
     e = y[, j] - C %*% xittm[, j] # error (innovation)
     n = length(e)
-    ss = length(A)
+    ss = ncol(A)
     d = dim(e)[1]
     S = C %*% Pttm[,, j] %*% t(C) + R
     GG = t(C) %*% diag(1/diag(R)) %*% C
@@ -406,11 +408,9 @@ K_filter <- function(initx, initV, x, A, C, R, Q) {  # [xitt,xittm,Ptt,Pttm,logl
     detS = prod(diag(R)) * det(diag(ss) + Pttm[,, j] %*% GG)
     denom = (2*pi)^(d/2) * sqrt(abs(detS))
     mahal = colSums(t(e) %*% Sinv %*% e)
-    logl[j] = -0.5 * mahal - log(denom)
+    loglik = loglik + (-0.5 * mahal - log(denom))
 
   }
-
-  loglik = sum(logl)
 
   return(list(xitt = xitt,
               xittm = xittm,
@@ -440,20 +440,22 @@ K_smoother <- function(A, xitt, xittm, Ptt, Pttm, C, R) { # [xitT,PtT,PtTm]
   r = dim(A)[1]
   Pttm = Pttm[,, -T]
   xittm = xittm[, -T]
-  J = array(0, r, r, T)
+  J = array(0, c(r, r, T))
 
-  for (i in 1:(T-1)) J[,, i] = Ptt[,, i] %*% t(A) %*% ainv(Pttm[,, i+1])
-
-  for (i in 1:T) {
-      L[,, i] = ainv(C %*% Pttm[,, i] %*% t(C) + R)
-      K[,, i] = Pttm[,, i] %*% t(C) %*% L[,, i]
+  for (i in 1:(T-1)) {
+    tmp = Pttm[,, i+1]
+    tmp[1:5, 1:5] = ainv(tmp[1:5, 1:5])
+    J[,, i] = Ptt[,, i] %*% t(A) %*% tmp
   }
 
+  for (i in 1:T) L = ainv(C %*% Pttm[,, i] %*% t(C) + R)
+  KT = Pttm[,, T] %*% t(C) %*% L
+
   xitT = cbind(matrix(0, r, T-1), xitt[, T])
-  PtT = array(0, r, r, T)
-  PtTm = array(0, r, r, T)
+  PtT = array(0, c(r, r, T))
+  PtTm = array(0, c(r, r, T))
   PtT[,, T] = Ptt[,, T]
-  PtTm[,, T] = (diag(r) - K[,, T] %*% C) %*% A %*% Ptt[,, T-1]
+  PtTm[,, T] = (diag(r) - KT %*% C) %*% A %*% Ptt[,, T-1]
 
   for (j  in 1:(T-1)) {
      xitT[, T-j] = xitt[, T-j] + J[,, T-j] %*% (xitT[, T+1-j] - xittm[, T+1-j])
@@ -463,6 +465,10 @@ K_smoother <- function(A, xitt, xittm, Ptt, Pttm, C, R) { # [xitT,PtT,PtTm]
 
   for (j  in 1:(T-2))
     PtTm[,, T-j] = Ptt[,, T-j] %*% t(J[,, T-j-1]) + J[,, T-j] %*% (PtTm[,, T-j+1] - A %*% Ptt[,, T-j]) %*% t(J[,, T-j-1])
+
+  return(list(xitT = xitT,
+              PtT = PtT,
+              PtTm = PtTm))
 }
 
 
