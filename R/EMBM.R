@@ -21,9 +21,9 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
   Q_new = Q
   # Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
   if(rQi) {
-    Qsr <- (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
-    Q_new[sr, sr] <- if(rQi == 2L) Qsr else diag(diag(Qsr))
-  } else Q_new[sr, sr] <- diag(r)
+    Qsr = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
+    Q_new[sr, sr] = if(rQi == 2L) Qsr else diag(diag(Qsr))
+  } else Q_new[sr, sr] = diag(r)
 
 
   # E(X'X) & E(X'Z)
@@ -60,11 +60,11 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
       R_new[R_new < 1e-7] <- 1e-7
     } else { # Diagonal
       # R_new = diag(R_new[dgind] / T)
-      RR <- R_new[dgind] / T
-      RR[RR < 1e-7] <- 1e-7 # RR(RR<1e-2) = 1e-2;
+      RR = R_new[dgind] / T
+      RR[RR < 1e-7] = 1e-7 # RR(RR<1e-2) = 1e-2;
       R_new = diag(RR)
     }
-  } else R_new <- diag(n)
+  } else R_new = diag(n)
 
   C[, sr] = C_new
 
