@@ -52,7 +52,7 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #' @param check.increased logical. Check if likelihood has increased.
 #' @return A logical statement indicating whether EM algorithm has converged. if \code{check.increased = TRUE}, a vector with 2 elements indicating the convergence status and whether the likelihood has decreased.
 #' @export
-em_converged <- function(loglik, previous_loglik, tol = 1e-4, check.increased = TRUE) { # [converged, decrease]
+em_converged <- function(loglik, previous_loglik, tol = 1e-4, check.increased = FALSE) { # [converged, decrease]
   # EM_CONVERGED Has EM converged?
   # [converged, decrease] = em_converged(loglik, previous_loglik, tol)
   #

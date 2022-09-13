@@ -26,6 +26,7 @@
 #' @param min.iter integer. Minimum number of EM iterations (to ensure a convergence path).
 #' @param max.iter integer. Maximum number of EM iterations.
 #' @param tol numeric. EM convergence tolerance.
+#' @param pos.corr logical. Increase the likelihood that factors correlate positively with the data, by scaling the eigenvectors such that the principal components (used to initialize the Kalman Filter) co-vary positively with the row-means of the standardized data.
 #' @param check.increased logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}.
 #' @param max.missing numeric. Proportion of series missing for a case to be considered missing.
 #' @param na.rm.method character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
@@ -214,6 +215,7 @@ DFM <- function(X, r, p = 1L, ...,
                 min.iter = 25L,
                 max.iter = 100L,
                 tol = 1e-4,
+                pos.corr = TRUE,
                 check.increased = FALSE,
                 max.missing = 0.8,
                 na.rm.method = c("LE", "all"),
@@ -252,10 +254,16 @@ DFM <- function(X, r, p = 1L, ...,
   # Run PCA to get initial factor estimates:
   # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v # Not faster than eigen...
   eigen_decomp = eigen(cov(X_imp), symmetric = TRUE)
-  eigen_decomp$vectors %*=% -1 # TODO: how best to ensure factors correlate positively with data?
+  # TODO: better way to ensure factors correlate positively with data?
+  # eigen_decomp$vectors %*=% -1
+  if(pos.corr) {
+    PCS = X_imp %*% eigen_decomp$vectors
+    setop(eigen_decomp$vectors, "*", c(-1,1)[(colSums(PCS %*=% rowMeans(X_imp)) > 0) + 1L], rowwise = TRUE)
+  }
   v = eigen_decomp$vectors[, sr, drop = FALSE]
   # d = eigen_decomp$values[sr]
   F_pc <- X_imp %*% v
+
 
   # Observation equation -------------------------------
   # Static predictions (all.equal(unattrib(HDB(X_imp, F_pc)), unattrib(F_pc %*% t(v))))
@@ -273,11 +281,11 @@ DFM <- function(X, r, p = 1L, ...,
   Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
 
   # Initial state and state covariance (P) ------------
-  F_0 <- rep(0, rp) # ar$X[1L, ] #
+  F_0 <- if(isTRUE(BMl)) rep(0, rp) else var$X[1L, ] # BM14 uses zeros, DGR12 uses the first row of PC's. Both give more or less the same...
   # TODO: Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
   # -> cannot be that this influences the twostep estimates. Need to chosse one way to initialize. Better BM14..
-  P_0 <- matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp)
-  # if(!is.na(BMl) && BMl)  else matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
+  P_0 <- ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q)
+  dim(P_0) <- c(rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
   kfs_res <- SKFS(X, A, C, Q, R, F_0, P_0, FALSE)
@@ -330,7 +338,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   if(BMl) {
     expr <- .EM_BM
-    dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep
+    dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep, taken out to speed up the algorithm
     dnkron_ind <- whichv(dnkron, 1)
     XW0 <- X_imp
     dgind <- 0:(n-1) * n + 1:n

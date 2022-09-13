@@ -15,6 +15,7 @@ DFM(
   min.iter = 25L,
   max.iter = 100L,
   tol = 1e-04,
+  pos.corr = TRUE,
   check.increased = FALSE,
   max.missing = 0.8,
   na.rm.method = c("LE", "all"),
@@ -49,6 +50,8 @@ This yields significant performance gains over the iterative methods. Final syst
 \item{max.iter}{integer. Maximum number of EM iterations.}
 
 \item{tol}{numeric. EM convergence tolerance.}
+
+\item{pos.corr}{logical. Increase the likelihood that factors correlate positively with the data, by scaling the eigenvectors such that the principal components (used to initialize the Kalman Filter) co-vary positively with the row-means of the standardized data.}
 
 \item{check.increased}{logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}.}
 
