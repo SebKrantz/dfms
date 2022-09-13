@@ -42,6 +42,6 @@ reference:
   - ainv
   - em_converged
 - title: "Data"
-  desc: "EU macroeconomic data from Banbura and Modugno (2014), and 3 DFM specifications considered in their paper."
+  desc: "Euro area macroeconomic data from Banbura and Modugno (2014), and 3 DFM specifications considered in their paper."
 - contents:
   - BM14_Models
