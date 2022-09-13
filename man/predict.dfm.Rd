@@ -10,7 +10,7 @@
 \method{predict}{dfm}(
   object,
   h = 10L,
-  method = switch(object$em.method, none = "twostep", "qml"),
+  method = switch(object$em.method, none = "2s", "qml"),
   standardized = TRUE,
   resFUN = NULL,
   resAC = 0.1,
@@ -53,7 +53,7 @@
 
 \item{h}{integer. The forecast horizon.}
 
-\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
+\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.}
 
 \item{standardized}{logical. \code{FALSE} will return data forecasts on the original scale.}
 

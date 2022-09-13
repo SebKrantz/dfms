@@ -8,11 +8,7 @@
 \usage{
 \method{print}{dfm}(x, digits = 4L, ...)
 
-\method{summary}{dfm}(
-  object,
-  method = switch(object$em.method, none = "twostep", "qml"),
-  ...
-)
+\method{summary}{dfm}(object, method = switch(object$em.method, none = "2s", "qml"), ...)
 
 \method{print}{dfm_summary}(x, digits = 4L, compact = sum(x$info["n"] > 15, x$info["n"] > 40), ...)
 }
@@ -23,7 +19,7 @@
 
 \item{\dots}{not used.}
 
-\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
+\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.}
 
 \item{compact}{integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and covariance matrix [R], and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.}
 }

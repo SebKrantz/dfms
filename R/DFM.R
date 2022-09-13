@@ -94,8 +94,8 @@
 #'  \code{eigen} \tab\tab \code{eigen(cov(X_imp))}. \cr\cr
 #'  \code{F_pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - \code{X_imp \%*\% eigen$vectors}. \cr\cr
 #'  \code{P_0} \tab\tab \eqn{r \times r}{r x r} initial factor covariance matrix estimate based on PCA results. \cr\cr
-#'  \code{F_twostep} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
-#'  \code{P_twostep} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. \cr\cr
+#'  \code{F_2s} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
+#'  \code{P_2s} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. \cr\cr
 #'  \code{F_qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
 #'  \code{P_qml} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of QML factor estimates. \cr\cr
 #'  \code{A} \tab\tab \eqn{r \times rp}{r x rp} factor transition matrix.\cr\cr
@@ -282,8 +282,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   # Initial state and state covariance (P) ------------
   F_0 <- if(isTRUE(BMl)) rep(0, rp) else var$X[1L, ] # BM14 uses zeros, DGR12 uses the first row of PC's. Both give more or less the same...
-  # TODO: Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  # -> cannot be that this influences the twostep estimates. Need to chosse one way to initialize. Better BM14..
+  # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
   P_0 <- ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q)
   dim(P_0) <- c(rp, rp)
 
@@ -303,8 +302,8 @@ DFM <- function(X, r, p = 1L, ...,
                        eigen = eigen_decomp,
                        F_pca = setColnames(F_pc, paste0("PC", sr)),
                        P_0 = setDimnames(P_0[sr, sr, drop = FALSE], list(fnam, fnam)),
-                       F_twostep = setColnames(F_kal, fnam),
-                       P_twostep = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
+                       F_2s = setColnames(F_kal, fnam),
+                       P_2s = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
                        anyNA = anymiss,
                        na.rm = na.rm,
                        em.method = em.method[1L],

@@ -8,7 +8,7 @@
 \usage{
 \method{residuals}{dfm}(
   object,
-  method = switch(object$em.method, none = "twostep", "qml"),
+  method = switch(object$em.method, none = "2s", "qml"),
   orig.format = FALSE,
   standardized = FALSE,
   ...
@@ -16,7 +16,7 @@
 
 \method{fitted}{dfm}(
   object,
-  method = switch(object$em.method, none = "twostep", "qml"),
+  method = switch(object$em.method, none = "2s", "qml"),
   orig.format = FALSE,
   standardized = FALSE,
   ...
@@ -25,7 +25,7 @@
 \arguments{
 \item{object}{an object of class 'dfm'.}
 
-\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.}
+\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.}
 
 \item{orig.format}{logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.}
 

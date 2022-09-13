@@ -7,7 +7,7 @@
 \usage{
 \method{plot}{dfm}(
   x,
-  method = switch(x$em.method, none = "twostep", "qml"),
+  method = switch(x$em.method, none = "2s", "qml"),
   type = c("joint", "individual", "residual"),
   scale.factors = TRUE,
   ...
@@ -18,7 +18,7 @@
 \arguments{
 \item{x}{an object class 'dfm'.}
 
-\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"}, \code{"pca"} or \code{"all"} to plot all estimates.}
+\item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"2s"}, \code{"pca"} or \code{"all"} to plot all estimates.}
 
 \item{type}{character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.}
 
