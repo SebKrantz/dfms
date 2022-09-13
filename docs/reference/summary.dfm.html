@@ -50,11 +50,7 @@ summary.dfm returns all system matrices and additional residual and goodness of 
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, digits <span class="op">=</span> <span class="fl">4L</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for dfm</span>
-<span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span>
-  <span class="va">object</span>,
-  method <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span><span class="va">object</span><span class="op">$</span><span class="va">em.method</span>, none <span class="op">=</span> <span class="st">"twostep"</span>, <span class="st">"qml"</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">object</span>, method <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span><span class="va">object</span><span class="op">$</span><span class="va">em.method</span>, none <span class="op">=</span> <span class="st">"2s"</span>, <span class="st">"qml"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for dfm_summary</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, digits <span class="op">=</span> <span class="fl">4L</span>, compact <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">info</span><span class="op">[</span><span class="st">"n"</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">15</span>, <span class="va">x</span><span class="op">$</span><span class="va">info</span><span class="op">[</span><span class="st">"n"</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">40</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
@@ -75,7 +71,7 @@ summary.dfm returns all system matrices and additional residual and goodness of 
 
 
 <dt>method</dt>
-<dd><p>character. The factor estimates to use: one of <code>"qml"</code>, <code>"twostep"</code> or <code>"pca"</code>.</p></dd>
+<dd><p>character. The factor estimates to use: one of <code>"qml"</code>, <code>"2s"</code> or <code>"pca"</code>.</p></dd>
 
 
 <dt>compact</dt>

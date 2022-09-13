@@ -50,7 +50,7 @@ with an option to also forecast autocorrelated residuals with a univariate metho
 <span class="fu"><a href="https://rdrr.io/pkg/vars/man/predict.html" class="external-link">predict</a></span><span class="op">(</span>
   <span class="va">object</span>,
   h <span class="op">=</span> <span class="fl">10L</span>,
-  method <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span><span class="va">object</span><span class="op">$</span><span class="va">em.method</span>, none <span class="op">=</span> <span class="st">"twostep"</span>, <span class="st">"qml"</span><span class="op">)</span>,
+  method <span class="op">=</span> <span class="kw"><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch</a></span><span class="op">(</span><span class="va">object</span><span class="op">$</span><span class="va">em.method</span>, none <span class="op">=</span> <span class="st">"2s"</span>, <span class="st">"qml"</span><span class="op">)</span>,
   standardized <span class="op">=</span> <span class="cn">TRUE</span>,
   resFUN <span class="op">=</span> <span class="cn">NULL</span>,
   resAC <span class="op">=</span> <span class="fl">0.1</span>,
@@ -103,7 +103,7 @@ with an option to also forecast autocorrelated residuals with a univariate metho
 
 
 <dt>method</dt>
-<dd><p>character. The factor estimates to use: one of <code>"qml"</code>, <code>"twostep"</code> or <code>"pca"</code>.</p></dd>
+<dd><p>character. The factor estimates to use: one of <code>"qml"</code>, <code>"2s"</code> or <code>"pca"</code>.</p></dd>
 
 
 <dt>standardized</dt>

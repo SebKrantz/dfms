@@ -27,16 +27,16 @@ print.dfm <- function(x, digits = 4L, ...) {
 }
 
 #' @rdname summary.dfm
-#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
+#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param \dots not used.
 #' @return Summary information following a dynamic factor model estimation.
 #' @importFrom stats cov
 #' @importFrom collapse pwcov
 #' @export
-summary.dfm <- function(object, method = switch(object$em.method, none = "twostep", "qml"), ...) {
+summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "qml"), ...) {
 
   X <- object$X_imp
-  F <- switch(method, pca = object$F_pca, twostep = object$F_twostep, qml = object$F_qml, stop("Unkown method", method))
+  F <- switch(method, pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml, stop("Unkown method", method))
   A <- object$A
   r <- dim(A)[1L]
   p <- dim(A)[2L] / r
@@ -111,7 +111,7 @@ print.dfm_summary <- function(x,
 
 #' Plot DFM
 #' @param x an object class 'dfm'.
-#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"}, \code{"pca"} or \code{"all"} to plot all estimates.
+#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"}, \code{"pca"} or \code{"all"} to plot all estimates.
 #' @param type character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.
 #' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
@@ -119,13 +119,13 @@ print.dfm_summary <- function(x,
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
 #' @export
 plot.dfm <- function(x,
-                     method = switch(x$em.method, none = "twostep", "qml"),
+                     method = switch(x$em.method, none = "2s", "qml"),
                      type = c("joint", "individual", "residual"),
                      scale.factors = TRUE, ...) {
   F <- switch(method[1L],
-              all = cbind(x$F_pca, setColnames(x$F_twostep, paste("TwoStep", colnames(x$F_twostep))),
+              all = cbind(x$F_pca, setColnames(x$F_2s, paste("TwoStep", colnames(x$F_2s))),
                           if(length(x$F_qml)) setColnames(x$F_qml, paste("QML", colnames(x$F_qml))) else NULL),
-              pca = x$F_pca, twostep = x$F_twostep, qml = x$F_qml, stop("Unknown method:", method[1L]))
+              pca = x$F_pca, `2s` = x$F_2s, qml = x$F_qml, stop("Unknown method:", method[1L]))
   nf <- dim(F)[2L]
   switch(type[1L],
     joint = {
@@ -173,7 +173,7 @@ plot.dfm <- function(x,
 
 #' Extract Factor Estimates in a Data Frame
 #' @param x an object class 'dfm'.
-#' @param method character. The factor estimates to use: any of \code{"qml"}, \code{"twostep"}, \code{"pca"} (multiple can be supplied) or \code{"all"} for all estimates.
+#' @param method character. The factor estimates to use: any of \code{"qml"}, \code{"2s"}, \code{"pca"} (multiple can be supplied) or \code{"all"} for all estimates.
 #' @param pivot character. The orientation of the frame: \code{"long"}, \code{"wide.factor"} or \code{"wide.method"}, \code{"wide"} or \code{"t.wide"}.
 #' @param time a vector identifying the time dimension, or \code{NULL} to omit a time variable.
 #' @param stringsAsFactors make factors from method and factor identifiers. Same as option to \code{\link{as.data.frame.table}}.
@@ -188,7 +188,7 @@ as.data.frame.dfm <- function(x, ...,
                               time = seq_row(x$F_pca),
                               stringsAsFactors = TRUE) {
 
-  estm <- c(PCA = "pca", TwoStep = "twostep", QML = "qml")
+  estm <- c(PCA = "pca", TwoStep = "2s", QML = "qml")
   if(length(method) > 1L || method != "all")
      estm <- estm[ckmatch(method, estm, e = "Unknown method:")]
   estlist <- x[paste0("F_", estm)]
@@ -237,18 +237,18 @@ as.data.frame.dfm <- function(x, ...,
 #' @title DFM Residuals and Fitted Values
 #'
 #' @param object an object of class 'dfm'.
-#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
+#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param orig.format logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals/fitted values on the original data scale.
 #' @param \dots not used.
 #' @importFrom collapse TRA.matrix mctl setAttrib pad
 #' @export
 residuals.dfm <- function(object,
-                          method = switch(object$em.method, none = "twostep", "qml"),
+                          method = switch(object$em.method, none = "2s", "qml"),
                           orig.format = FALSE,
                           standardized = FALSE, ...) {
   X <- object$X_imp
-  F <- switch(method, pca = object$F_pca, twostep = object$F_twostep, qml = object$F_qml,
+  F <- switch(method, pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
   X_pred <- tcrossprod(F, object$C)
   if(!standardized) {
@@ -268,11 +268,11 @@ residuals.dfm <- function(object,
 #' @rdname residuals.dfm
 #' @export
 fitted.dfm <- function(object,
-                       method = switch(object$em.method, none = "twostep", "qml"),
+                       method = switch(object$em.method, none = "2s", "qml"),
                        orig.format = FALSE,
                        standardized = FALSE, ...) {
   X <- object$X_imp
-  F <- switch(method, pca = object$F_pca, twostep = object$F_twostep, qml = object$F_qml,
+  F <- switch(method, pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
   res <- tcrossprod(F, object$C)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
@@ -297,7 +297,7 @@ fitted.dfm <- function(object,
 #'
 #' @param object an object of class 'dfm'.
 #' @param h integer. The forecast horizon.
-#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"twostep"} or \code{"pca"}.
+#' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param standardized logical. \code{FALSE} will return data forecasts on the original scale.
 #' @param resFUN an (optional) function to compute a univariate forecast of the residuals.
 #' The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.
@@ -313,12 +313,12 @@ fitted.dfm <- function(object,
 # TODO: Option for prediction in original format??
 predict.dfm <- function(object,
                         h = 10L,
-                        method = switch(object$em.method, none = "twostep", "qml"),
+                        method = switch(object$em.method, none = "2s", "qml"),
                         standardized = TRUE,
                         resFUN = NULL,
                         resAC = 0.1, ...) {
 
-  F <- switch(method, pca = object$F_pca, twostep = object$F_twostep, qml = object$F_qml,
+  F <- switch(method, pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
   nf <- dim(F)[2L]
   C <- object$C

@@ -18,7 +18,7 @@
 
 \item{\dots}{not used.}
 
-\item{method}{character. The factor estimates to use: any of \code{"qml"}, \code{"twostep"}, \code{"pca"} (multiple can be supplied) or \code{"all"} for all estimates.}
+\item{method}{character. The factor estimates to use: any of \code{"qml"}, \code{"2s"}, \code{"pca"} (multiple can be supplied) or \code{"all"} for all estimates.}
 
 \item{pivot}{character. The orientation of the frame: \code{"long"}, \code{"wide.factor"} or \code{"wide.method"}, \code{"wide"} or \code{"t.wide"}.}
 
