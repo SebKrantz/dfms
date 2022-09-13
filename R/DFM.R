@@ -281,11 +281,11 @@ DFM <- function(X, r, p = 1L, ...,
   Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
 
   # Initial state and state covariance (P) ------------
-  F_0 <- rep(0, rp) # ar$X[1L, ] #
+  F_0 <- if(isTRUE(BMl)) rep(0, rp) else var$X[1L, ] # BM14 uses zeros, DGR12 uses the first row of PC's. Both give more or less the same...
   # TODO: Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
   # -> cannot be that this influences the twostep estimates. Need to chosse one way to initialize. Better BM14..
-  P_0 <- matrix(ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q), rp, rp)
-  # if(!is.na(BMl) && BMl)  else matrix(apinv(kronecker(A,A)) %*% unattrib(Q), rp, rp)
+  P_0 <- ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q)
+  dim(P_0) <- c(rp, rp)
 
   ## Run standartized data through Kalman filter and smoother once
   kfs_res <- SKFS(X, A, C, Q, R, F_0, P_0, FALSE)
@@ -338,7 +338,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   if(BMl) {
     expr <- .EM_BM
-    dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep
+    dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep, taken out to speed up the algorithm
     dnkron_ind <- whichv(dnkron, 1)
     XW0 <- X_imp
     dgind <- 0:(n-1) * n + 1:n
