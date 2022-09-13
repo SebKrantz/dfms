@@ -57,6 +57,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
   min.iter <span class="op">=</span> <span class="fl">25L</span>,
   max.iter <span class="op">=</span> <span class="fl">100L</span>,
   tol <span class="op">=</span> <span class="fl">1e-04</span>,
+  pos.corr <span class="op">=</span> <span class="cn">TRUE</span>,
   check.increased <span class="op">=</span> <span class="cn">FALSE</span>,
   max.missing <span class="op">=</span> <span class="fl">0.8</span>,
   na.rm.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LE"</span>, <span class="st">"all"</span><span class="op">)</span>,
@@ -107,6 +108,10 @@ This yields significant performance gains over the iterative methods. Final syst
 
 <dt>tol</dt>
 <dd><p>numeric. EM convergence tolerance.</p></dd>
+
+
+<dt>pos.corr</dt>
+<dd><p>logical. Increase the likelihood that factors correlate positively with the data, by scaling the eigenvectors such that the principal components (used to initialize the Kalman Filter) co-vary positively with the row-means of the standardized data.</p></dd>
 
 
 <dt>check.increased</dt>
@@ -416,32 +421,32 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$medium], r = 3, p = 3, em.method = "BM")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean  Median      SD       Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0403  0.4214  2.9848  -17.3578  5.4713</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.0109  0.2687  2.0526   -8.2507  4.8352</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0274  -0.119  1.5727   -6.8234  4.0181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0403   0.4214  2.9848  -17.3578  5.4713</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356  -0.0109  -0.2687  2.0526   -4.8352  8.2507</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0274   -0.119  1.5727   -6.8234  4.0181</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1    L1.f2    L1.f3    L2.f1    L2.f2   L2.f3    L3.f1    L3.f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1 0.74619 -0.08633  0.28267  0.06055 0.045219 -0.1494  0.07457 -0.05102</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 0.01289  0.40113 -0.04716  0.09857 0.104393 -0.1231  0.09578  0.24146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3 0.14844  0.06662  0.41315 -0.01687 0.001667 -0.1762 -0.14472 -0.15933</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      L3.f3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1 0.06631</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 0.02438</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3 0.15381</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       L1.f1    L1.f2   L1.f3    L2.f1     L2.f2   L2.f3    L3.f1   L3.f2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.74619  0.08633 0.28267  0.06055 -0.045219 -0.1494  0.07457 0.05102</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.01289  0.40113 0.04716 -0.09857  0.104393  0.1231 -0.09578 0.24146</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.14844 -0.06662 0.41315 -0.01687 -0.001667 -0.1762 -0.14472 0.15933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       L3.f3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.06631</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.02438</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.15381</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Covariance Matrix [cov(F)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           f1        f2        f3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1   8.9091   -0.2889    0.2680 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  -0.2889    4.2132   -0.0017 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3   0.2680   -0.0017    2.4733 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          f1       f2       f3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  8.9091   0.2889   0.2680 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.2889   4.2132   0.0017 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.2680   0.0017   2.4733 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Error Covariance Matrix [Q]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         u1      u2      u3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u1  2.1176 -1.1526 -0.3597</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u2 -1.1526  1.9879  0.4395</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u3 -0.3597  0.4395  2.0555</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u1  2.1176  1.1526 -0.3597</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u2  1.1526  1.9879 -0.4395</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u3 -0.3597 -0.4395  2.0555</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    N   Mean  Median      SD     Min     Max</span>
@@ -500,52 +505,52 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min      Max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0128   0.6589  4.8593  -22.6273  12.1396</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.1426  -0.1953  3.2924  -17.0049  13.4553</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356   0.0121  -0.0539  2.6158    -7.645  10.0501</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356  -0.1426   0.1953  3.2924  -13.4553  17.0049</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0121   0.0539  2.6158  -10.0501    7.645</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f4  356   0.0532    0.227  3.0551  -17.2138   10.345</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> f5  356  -0.0526  -0.0474  2.6591  -10.8706  11.5097</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6  356   0.0074   0.0276  2.3392  -15.4214   8.0883</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  356  -0.0074  -0.0276  2.3392   -8.0883  15.4214</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1    L1.f2     L1.f3    L1.f4    L1.f5    L1.f6    L2.f1    L2.f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.4892  0.27413 -0.555373 -0.49350  0.33904  0.10227 -0.10721 -0.04923</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.1409  0.42355 -0.119072  0.09760 -0.11595  0.14366 -0.19016 -0.06640</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.2769  0.06985  0.394982 -0.10002  0.12723 -0.11881  0.20734  0.04944</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.2432  0.03345 -0.085401 -0.18619  0.52093  0.04263  0.01735  0.17177</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.2858 -0.01547  0.008841  0.40969  0.07289 -0.01797 -0.01169 -0.16386</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.2178  0.12874 -0.113025  0.03033  0.09462  0.40510 -0.10945 -0.09195</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.4892 -0.27413  0.555373 -0.49350  0.33904 -0.10227 -0.10721  0.04923</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.1409  0.42355 -0.119072 -0.09760  0.11595  0.14366  0.19016 -0.06640</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.2769  0.06985  0.394982  0.10002 -0.12723 -0.11881 -0.20734  0.04944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.2432 -0.03345  0.085401 -0.18619  0.52093 -0.04263  0.01735 -0.17177</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.2858  0.01547 -0.008841  0.40969  0.07289  0.01797 -0.01169  0.16386</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6 -0.2178  0.12874 -0.113025 -0.03033 -0.09462  0.40510  0.10945 -0.09195</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       L2.f3    L2.f4    L2.f5    L2.f6     L3.f1    L3.f2     L3.f3     L3.f4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.23156 -0.14988 -0.06505 -0.50861  0.367040  0.11658 -0.070419  0.008798</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.07793  0.07484 -0.21098 -0.19913 -0.091421  0.22904  0.008526  0.142987</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.32524 -0.23108  0.07323  0.10170  0.004843 -0.10569  0.186417 -0.121418</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.08269 -0.19694  0.05137 -0.11849  0.054295  0.13206  0.029156  0.100593</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.12568 -0.01248 -0.15211  0.01158 -0.145431 -0.01864 -0.038644  0.038082</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.11387  0.08252 -0.14040 -0.19996 -0.015064  0.05480  0.060205  0.111405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1 -0.23156 -0.14988 -0.06505  0.50861  0.367040 -0.11658  0.070419  0.008798</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.07793 -0.07484  0.21098 -0.19913  0.091421  0.22904  0.008526 -0.142987</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.32524  0.23108 -0.07323  0.10170 -0.004843 -0.10569  0.186417  0.121418</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4  0.08269 -0.19694  0.05137  0.11849  0.054295 -0.13206 -0.029156  0.100593</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5 -0.12568 -0.01248 -0.15211 -0.01158 -0.145431  0.01864  0.038644  0.038082</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.11387 -0.08252  0.14040 -0.19996  0.015064  0.05480  0.060205 -0.111405</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       L3.f5    L3.f6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.13116  0.02589</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.02080  0.17876</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.12427 -0.03180</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.05662 -0.06638</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.02519  0.18284</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6 -0.05736  0.10027</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.13116 -0.02589</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.02080  0.17876</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.12427 -0.03180</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.05662  0.06638</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.02519 -0.18284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.05736  0.10027</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Covariance Matrix [cov(F)]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           f1        f2        f3        f4        f5        f6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  23.6126    0.2329   -0.1166    4.0970*  -2.4727*   2.8984*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2   0.2329   10.8399   -1.8458*  -0.6389    1.1282*   2.1751*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  -0.1166   -1.8458*   6.8426    1.6781*  -1.6056*  -1.2712*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4   4.0970*  -0.6389    1.6781*   9.3339   -4.2441*   0.0480 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  -2.4727*   1.1282*  -1.6056*  -4.2441*   7.0708    0.6045 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6   2.8984*   2.1751*  -1.2712*   0.0480    0.6045    5.4720 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  23.6126   -0.2329    0.1166    4.0970*  -2.4727*  -2.8984*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  -0.2329   10.8399   -1.8458*   0.6389   -1.1282*   2.1751*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3   0.1166   -1.8458*   6.8426   -1.6781*   1.6056*  -1.2712*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4   4.0970*   0.6389   -1.6781*   9.3339   -4.2441*  -0.0480 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  -2.4727*  -1.1282*   1.6056*  -4.2441*   7.0708   -0.6045 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  -2.8984*   2.1751*  -1.2712*  -0.0480   -0.6045    5.4720 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Error Covariance Matrix [Q]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         u1      u2      u3      u4      u5      u6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u1  9.4291  0.3199  1.3015  2.2611 -2.0748 -0.0669</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u2  0.3199  5.3107  0.0049 -0.8209  0.5604 -0.0135</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u3  1.3015  0.0049  4.3942  0.5711 -0.4848  0.0342</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u4  2.2611 -0.8209  0.5711  4.8600 -1.6002 -0.1788</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u5 -2.0748  0.5604 -0.4848 -1.6002  4.4129  0.0902</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u6 -0.0669 -0.0135  0.0342 -0.1788  0.0902  3.2699</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u1  9.4291 -0.3199 -1.3015  2.2611 -2.0748  0.0669</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u2 -0.3199  5.3107  0.0049  0.8209 -0.5604 -0.0135</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u3 -1.3015  0.0049  4.3942 -0.5711  0.4848  0.0342</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u4  2.2611  0.8209 -0.5711  4.8600 -1.6002  0.1788</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u5 -2.0748 -0.5604  0.4848 -1.6002  4.4129 -0.0902</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u6  0.0669 -0.0135  0.0342  0.1788 -0.0902  3.2699</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     N    Mean  Median      SD     Min     Max</span>
