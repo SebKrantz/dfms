@@ -1,4 +1,7 @@
- dynFA <- function(X, r, p, max_iter) { # [F_hat,F_pc,F_kal,num_iter]
+library(DFM)
+library(collapse)
+
+dynFA <- function(X, r, p, max_iter) { # [F_hat,F_pc,F_kal,num_iter]
 ########################################################################################################
 # "A Quasi?Maximum Likelihood Approach for Large, Approximate Dynamic Factor Models,"
 # The Review of Economics and Statistics, MIT Press, vol. 94(4), pages 1014-1024, November 2012.
