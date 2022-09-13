@@ -5,7 +5,7 @@
 \alias{BM14_Models}
 \alias{BM14_M}
 \alias{BM14_Q}
-\title{EU Macroeconomic Data from Banbura and Modugno 2014}
+\title{Euro Area Macroeconomic Data from Banbura and Modugno 2014}
 \format{
 \code{BM14_Models} is a data frame with 101 obs. (series) and 8 columns:
 \describe{
