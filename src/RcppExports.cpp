@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // Estep
 Rcpp::List Estep(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F_0, arma::mat P_0);
-RcppExport SEXP _DFM_Estep(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F_0SEXP, SEXP P_0SEXP) {
+RcppExport SEXP _dfms_Estep(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F_0SEXP, SEXP P_0SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -30,7 +30,7 @@ END_RCPP
 }
 // SKF
 Rcpp::List SKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F_0, arma::mat P_0, bool retLL);
-RcppExport SEXP _DFM_SKF(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F_0SEXP, SEXP P_0SEXP, SEXP retLLSEXP) {
+RcppExport SEXP _dfms_SKF(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F_0SEXP, SEXP P_0SEXP, SEXP retLLSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -48,7 +48,7 @@ END_RCPP
 }
 // FIS
 Rcpp::List FIS(arma::mat A, arma::mat ZTf, arma::mat ZTp, Rcpp::NumericVector VTf_v, Rcpp::NumericVector VTp_v, SEXP F_0SEXP, SEXP P_0SEXP);
-RcppExport SEXP _DFM_FIS(SEXP ASEXP, SEXP ZTfSEXP, SEXP ZTpSEXP, SEXP VTf_vSEXP, SEXP VTp_vSEXP, SEXP F_0SEXPSEXP, SEXP P_0SEXPSEXP) {
+RcppExport SEXP _dfms_FIS(SEXP ASEXP, SEXP ZTfSEXP, SEXP ZTpSEXP, SEXP VTf_vSEXP, SEXP VTp_vSEXP, SEXP F_0SEXPSEXP, SEXP P_0SEXPSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -65,7 +65,7 @@ END_RCPP
 }
 // SKFS
 Rcpp::List SKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q, arma::mat R, arma::colvec F_0, arma::mat P_0, bool retLL);
-RcppExport SEXP _DFM_SKFS(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F_0SEXP, SEXP P_0SEXP, SEXP retLLSEXP) {
+RcppExport SEXP _dfms_SKFS(SEXP XSEXP, SEXP ASEXP, SEXP CSEXP, SEXP QSEXP, SEXP RSEXP, SEXP F_0SEXP, SEXP P_0SEXP, SEXP retLLSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -83,7 +83,7 @@ END_RCPP
 }
 // ainv
 SEXP ainv(SEXP x);
-RcppExport SEXP _DFM_ainv(SEXP xSEXP) {
+RcppExport SEXP _dfms_ainv(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -94,7 +94,7 @@ END_RCPP
 }
 // apinv
 SEXP apinv(SEXP x);
-RcppExport SEXP _DFM_apinv(SEXP xSEXP) {
+RcppExport SEXP _dfms_apinv(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;

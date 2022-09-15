@@ -2,26 +2,26 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 Estep <- function(X, A, C, Q, R, F_0, P_0) {
-    .Call(`_DFM_Estep`, X, A, C, Q, R, F_0, P_0)
+    .Call(`_dfms_Estep`, X, A, C, Q, R, F_0, P_0)
 }
 
 SKF <- function(X, A, C, Q, R, F_0, P_0, retLL = FALSE) {
-    .Call(`_DFM_SKF`, X, A, C, Q, R, F_0, P_0, retLL)
+    .Call(`_dfms_SKF`, X, A, C, Q, R, F_0, P_0, retLL)
 }
 
 FIS <- function(A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP) {
-    .Call(`_DFM_FIS`, A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP)
+    .Call(`_dfms_FIS`, A, ZTf, ZTp, VTf_v, VTp_v, F_0SEXP, P_0SEXP)
 }
 
 SKFS <- function(X, A, C, Q, R, F_0, P_0, retLL = FALSE) {
-    .Call(`_DFM_SKFS`, X, A, C, Q, R, F_0, P_0, retLL)
+    .Call(`_dfms_SKFS`, X, A, C, Q, R, F_0, P_0, retLL)
 }
 
 ainv <- function(x) {
-    .Call(`_DFM_ainv`, x)
+    .Call(`_dfms_ainv`, x)
 }
 
 apinv <- function(x) {
-    .Call(`_DFM_apinv`, x)
+    .Call(`_dfms_apinv`, x)
 }
 

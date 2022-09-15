@@ -31,4 +31,21 @@ BM14_Q
 A data extract from BM 2014 replication files. Some proprietary series (mostly PMI's) are excluded. The dataset \code{BM14_Models} provides information about all series
 and their inclusion in the 'small', 'medium' and 'large' sized dynamic factor models estimated by BM 2014. The actual data is contained in \emph{xts} format in \code{BM14_M} for monthly data and \code{BM14_Q} for quarterly data.
 }
+\examples{
+library(magrittr)
+library(xts)
+
+# Constructing the database for the large model
+BM14 = merge(BM14_M, BM14_Q)
+BM14[, BM14_Models$log_trans] \%<>\% log()
+BM14[, BM14_Models$freq == "M"] \%<>\% diff()
+BM14[, BM14_Models$freq == "Q"] \%<>\% diff(3)
+
+# Small Model Database
+head(BM14[, BM14_Models$small])
+
+# Medium-Sized Model Database
+head(BM14[, BM14_Models$medium])
+
+}
 \keyword{datasets}

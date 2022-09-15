@@ -1,4 +1,4 @@
 library(testthat)
-library(DFM)
+library(dfms)
 
-test_check("DFM")
+test_check("dfms")

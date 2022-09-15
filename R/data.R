@@ -22,5 +22,21 @@
 #' }
 #' @source
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160.
+#'
+#' @examples
+#' library(magrittr)
+#' library(xts)
+#'
+#' # Constructing the database for the large model
+#' BM14 = merge(BM14_M, BM14_Q)
+#' BM14[, BM14_Models$log_trans] %<>% log()
+#' BM14[, BM14_Models$freq == "M"] %<>% diff()
+#' BM14[, BM14_Models$freq == "Q"] %<>% diff(3)
+#'
+#' # Small Model Database
+#' head(BM14[, BM14_Models$small])
+#'
+#' # Medium-Sized Model Database
+#' head(BM14[, BM14_Models$medium])
+#'
 "BM14_Models"
-# TODO: Example use (with transformations)

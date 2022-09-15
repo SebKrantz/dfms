@@ -1,5 +1,5 @@
-Package: DFM
-Version: 0.1
+Package: dfms
+Version: 0.1.1
 Title: Dynamic Factor Models
 Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"), email = "sebastian.krantz@graduateinstitute.ch"),
              person("Rytis", "Bagdziunas", role = "aut"))
@@ -19,8 +19,8 @@ Description: Efficient estimation of Dynamic Factor Models using the Expectation
        dynamic factor models. Review of economics and statistics, 94(4), 1014-1024.
   Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary 
        pattern of missing data. Journal of Applied Econometrics, 29(1), 133-160.
-URL: https://sebkrantz.github.io/DFM/
-BugReports: https://github.com/SebKrantz/DFM/issues
+URL: https://sebkrantz.github.io/dfms/
+BugReports: https://github.com/SebKrantz/dfms/issues
 Depends: R (>= 3.0.0)
 Imports: Rcpp, collapse
 LinkingTo: Rcpp, RcppArmadillo
