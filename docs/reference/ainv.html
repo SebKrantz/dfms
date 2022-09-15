@@ -71,6 +71,17 @@
 <p>The matrix-inverse or pseudo-inverse.</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">ainv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">crossprod</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">EuStockMarkets</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                DAX           SMI           CAC          FTSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DAX   1.671464e-06 -5.411415e-07 -7.533943e-07 -3.323765e-07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SMI  -5.411415e-07  8.147114e-07 -1.596419e-07 -1.770041e-07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CAC  -7.533943e-07 -1.596419e-07  2.013654e-06 -4.872422e-07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FTSE -3.323765e-07 -1.770041e-07 -4.872422e-07  1.234721e-06</span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

@@ -72,8 +72,49 @@
 
 <p>A list containing matrices <code>Y = x[-(1:p), ]</code>, <code>X</code> which contains lags 1 - p of <code>x</code> combined column-wise,
 <code>A</code> which is the \(np \times n\) transition matrix, where n is the number of series in <code>x</code>, and the VAR residual matrix <code>res = Y - X %*% A</code>.</p>
-    </div>
 
+
+<p>A list with the following elements:</p><table class="table table"><tr><td><code>Y</code></td><td></td><td><code>x[-(1:p), ]</code>.</td><td></td></tr><tr><td><code>X</code></td><td></td><td>lags 1 - p of <code>x</code> combined column-wise.</td><td></td></tr><tr><td><code>A</code></td><td></td><td>\(np \times n\) transition matrix, where n is the number of series in <code>x</code>.</td><td></td></tr><tr><td><code>res</code></td><td></td><td>VAR residual matrix: <code>Y - X %*% A</code>.</td><td></td></tr></table></div>
+
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">var</span> <span class="op">=</span> <span class="fu">.VAR</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">EuStockMarkets</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">var</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ Y  : num [1:1856, 1:4] -2.88 -7.55 20.14 9.42 -4.7 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "DAX" "SMI" "CAC" "FTSE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ X  : num [1:1856, 1:12] 14.53 -2.88 -7.55 20.14 9.42 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:12] "DAX" "SMI" "CAC" "FTSE" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ A  : num [1:12, 1:4] 0.00946 -0.09901 0.04544 0.09475 0.02456 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:12] "DAX" "SMI" "CAC" "FTSE" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "DAX" "SMI" "CAC" "FTSE"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ res: num [1:1856, 1:4] -3.39 -5.54 21.51 5.04 -4.91 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ : chr [1:4] "DAX" "SMI" "CAC" "FTSE"</span>
+<span class="r-in"><span class="va">var</span><span class="op">$</span><span class="va">A</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               DAX          SMI         CAC         FTSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DAX   0.009458998  0.027283428 -0.01093944  0.025490277</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SMI  -0.099010841 -0.034164357 -0.06651577 -0.094882142</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CAC   0.045444935  0.037822109  0.03972168 -0.018984419</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FTSE  0.094745867  0.143551499  0.09179713  0.196154434</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DAX   0.024559851  0.001705899  0.01593365  0.023913757</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SMI  -0.021282229  0.018452931 -0.02701831 -0.029297417</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CAC   0.063422809  0.109479561  0.08450745  0.026931128</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FTSE -0.076819232 -0.097909530 -0.06820239 -0.022626747</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DAX  -0.053821302 -0.124261943 -0.01894164 -0.040102476</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SMI   0.001254346 -0.018010725  0.01927024 -0.001231464</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> CAC   0.049037401  0.100660797 -0.06168014  0.066430851</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FTSE  0.037908210  0.122676727  0.01831834 -0.004359654</span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">var</span><span class="op">)</span></span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
