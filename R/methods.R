@@ -115,6 +115,12 @@ print.dfm_summary <- function(x,
 #' @param type character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.
 #' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
+#'
+#' @examples
+#' # Fit DFM with 3 factors and 3 lags in the transition equation
+#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#'
+#'
 #' @importFrom graphics boxplot
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
 #' @export
@@ -179,6 +185,27 @@ plot.dfm <- function(x,
 #' @param stringsAsFactors make factors from method and factor identifiers. Same as option to \code{\link{as.data.frame.table}}.
 #' @param \dots not used.
 #'
+#' @return A data frame of factor estimates.
+#'
+#' @examples
+#' library(xts)
+#' # Fit DFM with 3 factors and 3 lags in the transition equation
+#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#'
+#' # Taking a single estimate:
+#' print(head(as.data.frame(mod, method = "qml")))
+#' print(head(as.data.frame(mod, method = "qml", pivot = "wide")))
+#'
+#' # Adding a proper time variable
+#' time = index(BM14_M)[-1L]
+#' print(head(as.data.frame(mod, method = "qml", time = time)))
+#'
+#' # All estimates: different pivoting methods
+#' for (pv in c("long", "wide.factor", "wide.method", "wide", "t.wide")) {
+#'    cat("\npivot = ", pv, "\n")
+#'    print(head(as.data.frame(mod, pivot = pv, time = time), 3))
+#' }
+#'
 #' @importFrom collapse ckmatch na_rm seq_row t_list unattrib
 #' @importFrom stats setNames
 #' @export
@@ -217,8 +244,8 @@ as.data.frame.dfm <- function(x, ...,
                          Time = if(length(time)) rep(time, times = r) else NULL),
                     lapply(estlist, unattrib)),
     # If only one method, do not do combine names e.g. "QML_f1"? -> most of the time people just want a simple frame like this...
-    wide = c(list(Time = time), setNames(unlist(lapply(estlist, mctl), FALSE, FALSE), if(length(nam) == 1L) paste0("f", 1:r) else t(outer(nam, 1:r, paste, sep = "_f")))),
-    t.wide = c(list(Time = time), setNames(unlist(t_list(lapply(estlist, mctl)), FALSE, FALSE), if(length(nam) == 1L) paste0("f", 1:r) else outer(nam, 1:r, paste, sep = "_f"))),
+    wide = c(list(Time = time), setNames(unlist(lapply(estlist, mctl), FALSE, FALSE), if(length(nam) == 1L) paste0("f", 1:r) else outer(paste0("f", 1:r), nam, paste, sep = "_"))),
+    t.wide = c(list(Time = time), setNames(unlist(t_list(lapply(estlist, mctl)), FALSE, FALSE), if(length(nam) == 1L) paste0("f", 1:r) else t(outer(paste0("f", 1:r), nam, paste, sep = "_")))),
     stop("Unknown pivot option:", pivot[1L])
   )
 
@@ -235,12 +262,28 @@ as.data.frame.dfm <- function(x, ...,
 #' @aliases fitted.dfm
 #'
 #' @title DFM Residuals and Fitted Values
+#' @description The residuals \eqn{\textbf{e}_t = \textbf{x}_t - \textbf{C} \textbf{F}_t}{e(t) = x(t) - C F(t)} or fitted values \eqn{\textbf{C} \textbf{F}_t}{C F(t)} of the DFM observation equation.
 #'
 #' @param object an object of class 'dfm'.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param orig.format logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals/fitted values on the original data scale.
 #' @param \dots not used.
+#'
+#' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
+#'
+#' @examples
+#' library(xts)
+#' # Fit DFM with 3 factors and 3 lags in the transition equation
+#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#'
+#' # Residuals
+#' head(resid(mod))
+#' plot(resid(mod, orig.format = TRUE)) # this is an xts object
+#'
+#' # Fitted values
+#' head(fitted(mod))
+#' head(fitted(mod, orig.format = TRUE)) # this is an xts object
 #' @importFrom collapse TRA.matrix mctl setAttrib pad
 #' @export
 residuals.dfm <- function(object,
@@ -303,11 +346,46 @@ fitted.dfm <- function(object,
 #' The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.
 #' @param resAC numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.
 #' @param \dots further arguments to \code{resFUN}.
+#'
+#' @returns A list-like object of class 'dfm_forecast' with the following elements:
+#' \tabular{llll}{
+#'  \code{X_fcst} \tab\tab \eqn{h \times n}{h x n} matrix with the forecasts of the variables. \cr\cr
+#'  \code{F_fcst} \tab\tab \eqn{h \times r}{h x r} matrix with the factor forecasts. \cr\cr
+#'  \code{X} \tab\tab \eqn{T \times n}{T x n} matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
+#'    \itemize{
+#'       \item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}). Only attached if \code{standardized = TRUE}. \cr
+#'       \item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
+#'       \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
+#'    } \cr\cr
+#'  \code{F} \tab\tab \eqn{T \times r}{T x r} matrix of factor estimates. \cr\cr
+#'  \code{method} \tab\tab the factor estimation method used.\cr\cr
+#'  \code{anyNA} \tab\tab logical indicating whether \code{X} contains any missing values.\cr\cr
+#'  \code{h} \tab\tab the forecast horizon.\cr\cr
+#'  \code{resid.fc} \tab\tab logical indicating whether a univariate forecasting function was applied to the residuals.\cr\cr
+#'  \code{resid.fc.ind} \tab\tab indices indicating for which variables (columns of \code{X}) the residuals were forecasted using the univariate function.\cr\cr
+#'  \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
+#' }
 #' @examples
-#' dfm <- DFM(diff(Seatbelts[, 1:7], lag = 12), 3, 3)
-#' predict(dfm)
-#' fcfun <- function(x, h) predict(ar(x), n.ahead = h)$pred
-#' predict(dfm, resFUN = fcfun)
+#' library(xts)
+#' library(collapse)
+#'
+#' # Fit DFM with 3 factors and 3 lags in the transition equation
+#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#'
+#' # 15 period ahead forecast
+#' fc = predict(mod, h = 15)
+#' print(fc)
+#' plot(fc, xlim = c(300, 370))
+#'
+#' # Also forecasting autocorrelated residuals with an AR(1)
+#' fcfun <- function(x, h) predict(ar(na_rm(x)), n.ahead = h)$pred
+#' fcar = predict(mod, resFUN = fcfun, h = 15)
+#' plot(fcar, xlim = c(300, 370))
+#'
+#' # Retrieving a data frame of the forecasts
+#' head(as.data.frame(fcar, pivot = "wide")) # Factors
+#' head(as.data.frame(fcar, use = "data"))   # Data
+#' head(as.data.frame(fcar, use = "both"))   # Both
 #'
 #' @export
 # TODO: Option for prediction in original format??
@@ -356,6 +434,7 @@ predict.dfm <- function(object,
 
   if(!standardized) { # Unstandardize factors with the average mean and SD??
     stats <- attr(X, "stats")
+    attr(X, "stats") <- NULL
     X_fc <- unscale(X_fc, stats)
     X <- unscale(X, stats)
   }
@@ -363,7 +442,10 @@ predict.dfm <- function(object,
   dimnames(X_fc) <- dimnames(X)
   dimnames(F_fc) <- dimnames(F)
 
-  if(object$anyNA) X[attr(X, "missing")] <- NA
+  if(object$anyNA) {
+    X[attr(X, "missing")] <- NA
+    attr(X, "missing") <- NULL
+  }
 
   # model = object, # Better only save essential objects...
   res <- list(X_fcst = X_fc,
@@ -371,6 +453,7 @@ predict.dfm <- function(object,
               X = X,
               F = F,
               method = method,
+              anyNA = object$anyNA,
               h = h,
               resid.fc = !is.null(resFUN), # TODO: Rename list elements??
               resid.fc.ind = fcr,
