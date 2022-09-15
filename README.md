@@ -2,7 +2,10 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/SebKrantz/DFM/workflows/R-CMD-check/badge.svg)](https://github.com/SebKrantz/DFM/actions)
 <!-- badges: end -->
-<!-- **NOTE**: Package is under development. Feel free to contribute. -->
+
+**NOTE**: This is a new package being prepared for [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). It will be sent to CRAN afterwards. Peer review might result in changes to the API, or even the package name. The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrqntz/DFM")` and give feedback. 
+
+***
 
 *DFM* provides efficient estimation of Dynamic Factor Models via the EM Algorithm. Estimation can be done in 3 different ways following:
 

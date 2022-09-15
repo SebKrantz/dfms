@@ -58,7 +58,14 @@
   <a href="reference/index.html">Reference</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/SebKrantz/DFM/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -76,6 +83,8 @@
 </h1></div>
 <!-- badges: start -->
 
+<p><strong>NOTE</strong>: This is a new package being prepared for <a href="https://stats-devguide.ropensci.org/" class="external-link">rOpenSci Statistical Software Peer Review</a>. It will be sent to CRAN afterwards. Peer review might result in changes to the API, or even the package name. The package is fully functional though, and you are very welcome to install it using <code>remotes::install_github("SebKrqntz/DFM")</code> and give feedback.</p>
+<hr>
 <p><em>DFM</em> provides efficient estimation of Dynamic Factor Models via the EM Algorithm. Estimation can be done in 3 different ways following:</p>
 <ul>
 <li><p>Doz, C., Giannone, D., &amp; Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. <em>Journal of Econometrics, 164</em>(1), 188-205.</p></li>
@@ -93,7 +102,7 @@
 <div class="section level3">
 <h3 id="usage-example">Usage Example<a class="anchor" aria-label="anchor" href="#usage-example"></a>
 </h3>
-<pre><code><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">DFM</span><span class="op">)</span>
+<pre><code><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sebkrantz.github.io/DFM/" class="external-link">DFM</a></span><span class="op">)</span>
 
 <span class="co"># Fit DFM with 6 factors and 3 lags in the transition equation</span>
 <span class="va">mod</span> <span class="op">=</span> <span class="fu"><a href="reference/DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">6</span>, p <span class="op">=</span> <span class="fl">3</span>, em.method <span class="op">=</span> <span class="st">"BM"</span><span class="op">)</span>
@@ -122,7 +131,15 @@
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="license">
+    <div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/SebKrantz/DFM/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/SebKrantz/DFM/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></li>

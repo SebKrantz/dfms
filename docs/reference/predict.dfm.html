@@ -26,7 +26,13 @@ with an option to also forecast autocorrelated residuals with a univariate metho
       <ul class="nav navbar-nav"><li>
   <a href="../reference/index.html">Reference</a>
 </li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/SebKrantz/DFM/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -36,7 +42,7 @@ with an option to also forecast autocorrelated residuals with a univariate metho
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>DFM Forecasts</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/SebKrantz/DFM/blob/HEAD/R/methods.R" class="external-link"><code>R/methods.R</code></a></small>
     <div class="hidden name"><code>predict.dfm.Rd</code></div>
     </div>
 
@@ -66,7 +72,7 @@ with an option to also forecast autocorrelated residuals with a univariate metho
   main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">h</span>, <span class="st">"Period Ahead DFM Forecast"</span><span class="op">)</span>,
   xlab <span class="op">=</span> <span class="st">"Time"</span>,
   ylab <span class="op">=</span> <span class="st">"Standardized Data"</span>,
-  factors <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="cn">F</span><span class="op">)</span>,
+  factors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="cn">F</span><span class="op">)</span><span class="op">)</span>,
   scale.factors <span class="op">=</span> <span class="cn">TRUE</span>,
   factor.col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">factors</span><span class="op">)</span><span class="op">)</span>,
   factor.lwd <span class="op">=</span> <span class="fl">1.5</span>,
