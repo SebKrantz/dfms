@@ -29,3 +29,9 @@
 \description{
 Plot DFM
 }
+\examples{
+# Fit DFM with 3 factors and 3 lags in the transition equation
+mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+
+
+}
