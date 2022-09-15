@@ -30,6 +30,19 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #' @returns A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 1 - p of \code{x} combined column-wise,
 #' \code{A} which is the \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
 #'
+#' @returns A list with the following elements:
+#' \tabular{llll}{
+#'  \code{Y} \tab\tab \code{x[-(1:p), ]}. \cr\cr
+#'  \code{X} \tab\tab lags 1 - p of \code{x} combined column-wise. \cr\cr
+#'  \code{A} \tab\tab \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}. \cr\cr
+#'  \code{res} \tab\tab VAR residual matrix: \code{Y - X \%*\% A}. \cr\cr
+#' }
+#' @examples
+#' var = .VAR(diff(EuStockMarkets), 3)
+#' str(var)
+#' var$A
+#' rm(var)
+#'
 #' @export
 .VAR <- function(x, p = 1L) {
   T <- dim(x)[1L]
@@ -66,17 +79,17 @@ em_converged <- function(loglik, previous_loglik, tol = 1e-4, check.increased = 
   # If we are doing MAP estimation (using priors), the likelihood can decrase,
   # even though the mode of the posterior is increasing.
 
- delta_loglik = abs(loglik - previous_loglik)
- avg_loglik = (abs(loglik) + abs(previous_loglik) + .Machine$double.eps)/2
- test = delta_loglik / avg_loglik < tol
- converged = is.finite(test) && test
+ delta_loglik <- abs(loglik - previous_loglik)
+ avg_loglik <- (abs(loglik) + abs(previous_loglik) + .Machine$double.eps)/2
+ test <- delta_loglik / avg_loglik < tol
+ converged <- is.finite(test) && test
 
  if(check.increased) {
     test <- loglik - previous_loglik < -1e-3
     if(is.finite(test) && test) { # allow for a little imprecision
       sprintf('******likelihood decreased from %6.4f to %6.4f!\n', previous_loglik, loglik)
-      decrease = TRUE
-    } else decrease = FALSE
+      decrease <- TRUE
+    } else decrease <- FALSE
     return(c(converged = converged, decrease = decrease))
  }
 
@@ -120,59 +133,69 @@ impNA_spline <- function(X, W, k) {
   sss <- -(1:(k2-1L))
 
   for (i in 1:d[2L]) {
-    x = X[, i]
+    x <- X[, i]
     nnai <- which(!W[, i])
-    ln = length(nnai)
-    t1 = nnai[1L]
-    t2 = nnai[ln]
+    ln <- length(nnai)
+    t1 <- nnai[1L]
+    t2 <- nnai[ln]
     # Cubic spline to interpolate any internal missing values...
-    if(ln != t2-t1+1L) x[t1:t2] = spline(nnai, x[nnai], xout = t1:t2)$y
-    isnanx = which(is.na(x))
-    x[isnanx] = fmedian.default(x)
-    x_MA = filter(c(rep(x[1L], k), x, rep(x[T], k)), weights, sides = 1L)
-    x[isnanx] = x_MA[sss][isnanx]
-    X[, i] = x
+    if(ln != t2-t1+1L) x[t1:t2] <- spline(nnai, x[nnai], xout = t1:t2)$y
+    isnanx <- which(is.na(x))
+    x[isnanx] <- fmedian.default(x)
+    x_MA <- filter(c(rep(x[1L], k), x, rep(x[T], k)), weights, sides = 1L)
+    x[isnanx] <- x_MA[sss][isnanx]
+    X[, i] <- x
   }
   return(X)
 }
 
 #' Remove and Impute Missing Values in a Multivariate Time Series
 #'
-#' This function imputes missing (and infinite) values in a stationary multivariate time series using various
+#' This function imputes missing values in a stationary multivariate time series using various
 #' methods, and removes cases with too many missing values.
 #'
 #' @param X a matrix or multivariate time series where each column is a series.
 #' @inheritParams DFM
 #'
-#' @returns A list with the imputed matrix \code{X_imp}, a missingness matrix \code{W} matching the dimensions of \code{X_imp},
-#' and a vector or cases \code{na.rm} indicating cases with too many missing values that were removed beforehand.
+#' @returns The imputed matrix \code{X_imp}, with attributes:
+#' \tabular{llll}{
+#'  \code{"missing"} \tab\tab a missingness matrix \code{W} matching the dimensions of \code{X_imp}. \cr\cr
+#'  \code{"rm.rows"} \tab\tab and a vector of indices of rows (cases) with too many missing values that were removed. \cr\cr
+#' }
+#'
+#' @examples
+#' library(xts)
+#' str(tsremimpNA(BM14_M))
+#'
 #' @export
 tsremimpNA <- function(X,
                        max.missing = 0.5,
                        na.rm.method = c("LE", "all"),
                        na.impute = c("median", "rnorm", "median.ma", "median.ma.spline"),
                        ma.terms = 3L) {
-  W <- !is.finite(X) # is.na(X)
+  W <- is.na(X)
   n <- dim(X)[2L]
-  na.rm <- NULL
+  rm.rows <- NULL
   if(max.missing < 1) {
     thresh <- switch(na.rm.method[1L],
                      LE = findNA_LE(W, max.missing),
                      all = rowSums(W) > max.missing * n,
                      stop("Unknown na.rm.method:", na.rm.method[1L]))
     if(any(thresh)) {
-      na.rm <- which(thresh)
-      X <- X[-na.rm, ]
-      W <- W[-na.rm, ]
+      rm.rows <- which(thresh)
+      X <- X[-rm.rows, ]
+      W <- W[-rm.rows, ]
     }
   }
-  list(X_imp = switch(na.impute[1L],
-                  median = replace(X, W, fmedian(X, TRA = 1L)[W]),
+  X_imp <- switch(na.impute[1L],
+                  median = fmedian(X, TRA = "replace_NA"), # replace(X, W, fmedian(X, TRA = 1L)[W]),
                   rnorm = replace(X, W, rnorm(sum(W))),
                   median.ma = impNA_MA(X, W, ma.terms),
                   median.ma.spline = impNA_spline(X, W, ma.terms),
-                  stop("Unknown na.impute option:", na.impute[1L])),
-       W = W,
-       na.rm = na.rm)
+                  stop("Unknown na.impute option:", na.impute[1L]))
+
+   attr(X_imp, "missing") <- W
+   attr(X_imp, "rm.rows") <- rm.rows
+   return(X_imp)
 }
 

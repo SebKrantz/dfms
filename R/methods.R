@@ -67,6 +67,12 @@ summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "
 #' @rdname summary.dfm
 #' @param compact integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and covariance matrix [R], and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.
 #' @param \dots not used.
+#'
+#' @examples
+#' mod = DFM(diff(BM14_Q), 2, 3)
+#' print(mod)
+#' summary(mod)
+#'
 #' @export
 print.dfm_summary <- function(x,
                               digits = 4L,
@@ -228,7 +234,7 @@ as.data.frame.dfm <- function(x, ...,
   r <- ncol(estlist[[1L]])
 
   if(!is.null(time) && length(time) != T) {
-    if(length(x$na.rm)) time <- time[-x$na.rm]
+    if(length(x$rm.rows)) time <- time[-x$rm.rows]
     if(length(time) != T) stop(sprintf("time must be a length %s vector or NULL", T))
   }
 
@@ -301,7 +307,7 @@ residuals.dfm <- function(object,
   } else res <- X - X_pred
   if(object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
-    if(length(object$na.rm)) res <- pad(res, object$na.rm, method = "vpos")
+    if(length(object$rm.rows)) res <- pad(res, object$rm.rows, method = "vpos")
     if(attr(X, "is.list")) res <- mctl(res)
     return(setAttrib(res, attr(X, "attributes")))
   }
@@ -321,7 +327,7 @@ fitted.dfm <- function(object,
   if(!standardized) res <- unscale(res, attr(X, "stats"))
   if(object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
-    if(length(object$na.rm)) res <- pad(res, object$na.rm, method = "vpos")
+    if(length(object$rm.rows)) res <- pad(res, object$rm.rows, method = "vpos")
     if(attr(X, "is.list")) res <- mctl(res)
     return(setAttrib(res, attr(X, "attributes")))
   }
@@ -426,7 +432,7 @@ predict.dfm <- function(object,
     # If X is a multivariate time series object for which the univariate forecasting function could have methods.
     ofl <- !attr(X, "is.list") && length(attr(X, "attributes")[["class"]])
     rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE)
-    if(ofl && length(object$na.rm)) rsid <- rsid[-object$na.rm, , drop = FALSE] # drop = FALSE?
+    if(ofl && length(object$rm.rows)) rsid <- rsid[-object$rm.rows, , drop = FALSE] # drop = FALSE?
     ACF <- AC1(rsid, object$anyNA)
     fcr <- which(abs(ACF) >= abs(resAC)) # TODO: Check length of forecast??
     for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(rsid[, i], h, ...))
@@ -657,6 +663,15 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #'
 #' @note To determine the number of lags (\code{p}) in the factor transition equation, use the function \code{vars::VARselect} with r* principle components (also returned by \code{ICr}).
 #'
+#' @examples
+#' library(xts)
+#' library(vars)
+#'
+#' ics = ICr(diff(BM14_M))
+#' print(ics)
+#' plot(ics)
+#' screeplot(ics)
+#'
 #' @references
 #' Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. <doi:10.1111/1468-0262.00273>
 #'
@@ -668,10 +683,12 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
 
   # Converting to matrix and standardizing
   X <- fscale(qM(X))
+  dimnames(X) <- NULL
 
   if(anyNA(X)) {
     message("Missing values detected: imputing data with tsremimpNA() with default settings")
-    X <- tsremimpNA(X)$X_imp
+    X <- tsremimpNA(X)
+    attributes(X) <- list(dim = dim(X))
   }
 
   n <- ncol(X)
@@ -682,9 +699,9 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
   else if(max.r > n) max.r <- n
 
   # Eigen decomposition
-  eigen_decomp = eigen(cov(X), symmetric = TRUE)
-  evs = eigen_decomp$vectors
-  F_pca = X %*% evs
+  eigen_decomp <- eigen(cov(X), symmetric = TRUE)
+  evs <- eigen_decomp$vectors
+  F_pca <- X %*% evs
 
   # Various constant terms, according to the 3 criteria of Bai and Ng (2002)
   Tn <- T * n
@@ -742,15 +759,15 @@ plot.ICr <- function(x, ...) {
 #' @importFrom stats screeplot
 #' @export
 screeplot.ICr <- function(x, type = c("pve", "cum.pve"), show.grid = TRUE, max.r = 30, ...) {
-  ev = x$eigenvalues
-  n = length(ev)
-  pve = (ev / sum(ev)) * 100
-  cs_pve = cumsum(pve)
+  ev <- x$eigenvalues
+  n <- length(ev)
+  pve <- (ev / sum(ev)) * 100
+  cs_pve <- cumsum(pve)
 
   if(length(ev) > max.r) {
-    ev = ev[1:max.r]
-    pve = pve[1:max.r]
-    cs_pve = cs_pve[1:max.r]
+    ev <- ev[1:max.r]
+    pve <- pve[1:max.r]
+    cs_pve <- cs_pve[1:max.r]
   }
 
   ## This is smarter, but less flexible...

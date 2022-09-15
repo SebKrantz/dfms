@@ -55,6 +55,16 @@ In the Screeplot a horizontal dashed line is shown signifying an eigenvalue of 1
 \note{
 To determine the number of lags (\code{p}) in the factor transition equation, use the function \code{vars::VARselect} with r* principle components (also returned by \code{ICr}).
 }
+\examples{
+library(xts)
+library(vars)
+
+ics = ICr(diff(BM14_M))
+print(ics)
+plot(ics)
+screeplot(ics)
+
+}
 \references{
 Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. <doi:10.1111/1468-0262.00273>
 

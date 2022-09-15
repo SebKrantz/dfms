@@ -22,7 +22,7 @@ Description: Efficient estimation of Dynamic Factor Models using the Expectation
 URL: https://sebkrantz.github.io/dfms/
 BugReports: https://github.com/SebKrantz/dfms/issues
 Depends: R (>= 3.0.0)
-Imports: Rcpp, collapse
+Imports: Rcpp (>= 1.0.1), collapse (>= 1.8.0)
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: xts, vars, magrittr, testthat (>= 3.0.0)
 License: GPL-3

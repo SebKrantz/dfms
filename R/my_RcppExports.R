@@ -54,6 +54,7 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #' loglik \tab\tab value of the log likelihood
 #' }
 #' @seealso \code{\link{FIS}} \code{\link{SKFS}}
+#'
 #' @export
 SKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
   .Call(Cpp_SKF, X, A, C, Q, R, F_0, P_0, loglik)
@@ -126,6 +127,9 @@ SKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #' @description Matrix inverse and pseudo-inverse by the Armadillo C++ library.
 #'
 #' @param x a numeric matrix, must be square for \code{ainv}.
+#'
+#' @examples
+#' ainv(crossprod(diff(EuStockMarkets)))
 #'
 #' @returns The matrix-inverse or pseudo-inverse.
 #' @export

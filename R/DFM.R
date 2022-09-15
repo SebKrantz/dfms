@@ -106,7 +106,7 @@
 #'  \code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
 #'  \code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
 #'  \code{anyNA} \tab\tab single logical valued indicating whether there were any missing values in the data. If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
-#'  \code{na.rm} \tab\tab vector of any cases that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
+#'  \code{rm.rows} \tab\tab vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
 #'  \code{em.method} \tab\tab The EM method used.\cr\cr
 #'  \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
 #' }
@@ -240,14 +240,17 @@ DFM <- function(X, r, p = 1L, ...,
   n <- ncol(X)
 
   # Missing values
-  X_imp <- X
-  na.rm <- NULL
+
   anymiss <- anyNA(X)
   if(anymiss) { # Missing value removal / imputation
-    W <- NULL
-    list2env(tsremimpNA(X, max.missing, na.rm.method, na.impute, ma.terms),
-             envir = environment())
-    if(length(na.rm)) X <- X[-na.rm, , drop = FALSE]
+    X_imp <- tsremimpNA(X, max.missing, na.rm.method, na.impute, ma.terms)
+    W <- attr(X_imp, "missing")
+    rm.rows <- attr(X_imp, "rm.rows")
+    attributes(X_imp) <- list(dim = dim(X_imp))
+    if(length(rm.rows)) X <- X[-rm.rows, , drop = FALSE]
+  } else {
+    X_imp <- X
+    rm.rows <- NULL
   }
   T <- nrow(X)
 
@@ -257,11 +260,11 @@ DFM <- function(X, r, p = 1L, ...,
   # TODO: better way to ensure factors correlate positively with data?
   # eigen_decomp$vectors %*=% -1
   if(pos.corr) {
-    PCS = X_imp %*% eigen_decomp$vectors
+    PCS <- X_imp %*% eigen_decomp$vectors
     setop(eigen_decomp$vectors, "*", c(-1,1)[(colSums(PCS %*=% rowMeans(X_imp)) > 0) + 1L], rowwise = TRUE)
   }
-  v = eigen_decomp$vectors[, sr, drop = FALSE]
-  # d = eigen_decomp$values[sr]
+  v <- eigen_decomp$vectors[, sr, drop = FALSE]
+  # d <- eigen_decomp$values[sr]
   F_pc <- X_imp %*% v
 
 
@@ -305,7 +308,7 @@ DFM <- function(X, r, p = 1L, ...,
                        F_2s = setColnames(F_kal, fnam),
                        P_2s = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
                        anyNA = anymiss,
-                       na.rm = na.rm,
+                       rm.rows = rm.rows,
                        em.method = em.method[1L],
                        call = match.call())
 

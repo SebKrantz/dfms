@@ -30,10 +30,18 @@ tsremimpNA(
 \item{ma.terms}{the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"median.ma"} and \code{"median.ma.spline"}.}
 }
 \value{
-A list with the imputed matrix \code{X_imp}, a missingness matrix \code{W} matching the dimensions of \code{X_imp},
-and a vector or cases \code{na.rm} indicating cases with too many missing values that were removed beforehand.
+The imputed matrix \code{X_imp}, with attributes:
+\tabular{llll}{
+ \code{"missing"} \tab\tab a missingness matrix \code{W} matching the dimensions of \code{X_imp}. \cr\cr
+ \code{"rm.rows"} \tab\tab and a vector of indices of rows (cases) with too many missing values that were removed. \cr\cr
+}
 }
 \description{
-This function imputes missing (and infinite) values in a stationary multivariate time series using various
+This function imputes missing values in a stationary multivariate time series using various
 methods, and removes cases with too many missing values.
+}
+\examples{
+library(xts)
+str(tsremimpNA(BM14_M))
+
 }
