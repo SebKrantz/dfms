@@ -24,7 +24,7 @@
   main = paste(x$h, "Period Ahead DFM Forecast"),
   xlab = "Time",
   ylab = "Standardized Data",
-  factors = 1:ncol(x$F),
+  factors = seq_len(ncol(x$F)),
   scale.factors = TRUE,
   factor.col = rainbow(length(factors)),
   factor.lwd = 1.5,
