@@ -3,7 +3,7 @@
 [![R-CMD-check](https://github.com/SebKrantz/DFM/workflows/R-CMD-check/badge.svg)](https://github.com/SebKrantz/DFM/actions)
 <!-- badges: end -->
 
-**NOTE**: This is a new package being prepared for [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). It will be sent to CRAN afterwards. Peer review might result in changes to the API, or even the package name. The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrqntz/DFM")` and give feedback. 
+**NOTE**: This is a new package being prepared for [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). It will be sent to CRAN afterwards. Peer review might result in changes to the API, or even the package name. The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/DFM")` and give feedback. 
 
 ***
 
