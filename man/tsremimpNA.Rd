@@ -31,9 +31,13 @@ tsremimpNA(
 }
 \value{
 A list with the imputed matrix \code{X_imp}, a missingness matrix \code{W} matching the dimensions of \code{X_imp},
-and a vector or cases \code{na.rm} indicating cases with too many missing values that were removed beforehand.
+and a vector or cases \code{rm.rows} indicating cases with too many missing values that were removed beforehand.
 }
 \description{
 This function imputes missing (and infinite) values in a stationary multivariate time series using various
 methods, and removes cases with too many missing values.
+}
+\examples{
+str(tsremimpNA(BM14_M))
+
 }

@@ -18,3 +18,7 @@ The matrix-inverse or pseudo-inverse.
 \description{
 Matrix inverse and pseudo-inverse by the Armadillo C++ library.
 }
+\examples{
+ainv(crossprod(diff(EuStockMarkets)))
+
+}
