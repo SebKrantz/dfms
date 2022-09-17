@@ -9,10 +9,10 @@
 #' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data
 #' with time-invariant system matrices and classical assumptions, while permitting missing data.
 #'
-#' @param X a \code{T x n} data matrix or frame.
+#' @param X a \code{T x n} data matrix or frame. May contain missing values.
 #' @param r number of factors.
 #' @param p number of lags in factor VAR.
-#' @param \dots further arguments to be added here in the future, such as further estimation methods or block-structures.
+#' @param \dots (optional) arguments to \code{\link{tsremimpNA}}.
 #' @param rQ restrictions on the state (transition) covariance matrix (Q).
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
@@ -27,17 +27,7 @@
 #' @param max.iter integer. Maximum number of EM iterations.
 #' @param tol numeric. EM convergence tolerance.
 #' @param pos.corr logical. Increase the likelihood that factors correlate positively with the data, by scaling the eigenvectors such that the principal components (used to initialize the Kalman Filter) co-vary positively with the row-means of the standardized data.
-#' @param check.increased logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}.
-#' @param max.missing numeric. Proportion of series missing for a case to be considered missing.
-#' @param na.rm.method character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
-#' @param na.impute character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
-#'    \tabular{llll}{
-#' \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
-#' \code{"rnorm"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
-#' \code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
-#' \code{"median.ma.spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
-#' }
-#' @param ma.terms the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"median.ma"} and \code{"median.ma.spline"}.
+#' @param check.increased logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}. If \code{TRUE}, the algorithm only terminates if convergence was reached with decreasing likelihood.
 #'
 #' @details
 #' This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:
@@ -216,11 +206,7 @@ DFM <- function(X, r, p = 1L, ...,
                 max.iter = 100L,
                 tol = 1e-4,
                 pos.corr = TRUE,
-                check.increased = FALSE,
-                max.missing = 0.8,
-                na.rm.method = c("LE", "all"),
-                na.impute = c("median.ma.spline", "median.ma", "median", "rnorm"),
-                ma.terms = 3L) {
+                check.increased = FALSE) {
 
   rRi <- switch(rR[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(rQ[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
@@ -240,10 +226,9 @@ DFM <- function(X, r, p = 1L, ...,
   n <- ncol(X)
 
   # Missing values
-
   anymiss <- anyNA(X)
   if(anymiss) { # Missing value removal / imputation
-    X_imp <- tsremimpNA(X, max.missing, na.rm.method, na.impute, ma.terms)
+    X_imp <- tsremimpNA(X, ...)
     W <- attr(X_imp, "missing")
     rm.rows <- attr(X_imp, "rm.rows")
     attributes(X_imp) <- list(dim = dim(X_imp))
@@ -256,7 +241,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   # Run PCA to get initial factor estimates:
   # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v # Not faster than eigen...
-  eigen_decomp = eigen(cov(X_imp), symmetric = TRUE)
+  eigen_decomp <- eigen(cov(X_imp), symmetric = TRUE)
   # TODO: better way to ensure factors correlate positively with data?
   # eigen_decomp$vectors %*=% -1
   if(pos.corr) {
@@ -272,8 +257,7 @@ DFM <- function(X, r, p = 1L, ...,
   # Static predictions (all.equal(unattrib(HDB(X_imp, F_pc)), unattrib(F_pc %*% t(v))))
   C <- cbind(v, matrix(0, n, rp-r))
   if(rRi) {
-    res <- X_imp - tcrossprod(F_pc, v) # residuals from static predictions
-    if(anymiss) res[W] <- NA
+    res <- X - tcrossprod(F_pc, v) # residuals from static predictions
     R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
   } else R <- diag(n)
 
@@ -319,8 +303,7 @@ DFM <- function(X, r, p = 1L, ...,
     beta <- ainv(crossprod(F_kal)) %*% crossprod(F_kal, if(anymiss) replace(X_imp, W, 0) else X_imp) # good??
     Q <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
     if(rRi) {
-      res <- X_imp - F_kal %*% beta
-      if(anymiss) res[W] <- NA
+      res <- X - F_kal %*% beta
       R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
     } else R <- diag(n)
     final_object <- c(object_init[1:6],
@@ -359,8 +342,10 @@ DFM <- function(X, r, p = 1L, ...,
     loglik <- em_res$loglik
 
     ## Iterate at least min.iter times
-    converged <- if(num_iter < min.iter) FALSE else
-        em_converged(loglik, previous_loglik, tol, check.increased)[1L]
+    converged <- if(num_iter < min.iter) FALSE else if(check.increased)
+      sum(em_converged(loglik, previous_loglik, tol, check.increased)) == 1L else
+        em_converged(loglik, previous_loglik, tol, check.increased)
+
     previous_loglik <- loglik
     loglik_all <- c(loglik_all, loglik)
     num_iter <- num_iter + 1L

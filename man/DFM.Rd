@@ -16,21 +16,17 @@ DFM(
   max.iter = 100L,
   tol = 1e-04,
   pos.corr = TRUE,
-  check.increased = FALSE,
-  max.missing = 0.8,
-  na.rm.method = c("LE", "all"),
-  na.impute = c("median.ma.spline", "median.ma", "median", "rnorm"),
-  ma.terms = 3L
+  check.increased = FALSE
 )
 }
 \arguments{
-\item{X}{a \code{T x n} data matrix or frame.}
+\item{X}{a \code{T x n} data matrix or frame. May contain missing values.}
 
 \item{r}{number of factors.}
 
 \item{p}{number of lags in factor VAR.}
 
-\item{\dots}{further arguments to be added here in the future, such as further estimation methods or block-structures.}
+\item{\dots}{(optional) arguments to \code{\link{tsremimpNA}}.}
 
 \item{rQ}{restrictions on the state (transition) covariance matrix (Q).}
 
@@ -53,21 +49,7 @@ This yields significant performance gains over the iterative methods. Final syst
 
 \item{pos.corr}{logical. Increase the likelihood that factors correlate positively with the data, by scaling the eigenvectors such that the principal components (used to initialize the Kalman Filter) co-vary positively with the row-means of the standardized data.}
 
-\item{check.increased}{logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}.}
-
-\item{max.missing}{numeric. Proportion of series missing for a case to be considered missing.}
-
-\item{na.rm.method}{character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.}
-
-\item{na.impute}{character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
-   \tabular{llll}{
-\code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
-\code{"rnorm"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
-\code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
-\code{"median.ma.spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
-}}
-
-\item{ma.terms}{the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"median.ma"} and \code{"median.ma.spline"}.}
+\item{check.increased}{logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}. If \code{TRUE}, the algorithm only terminates if convergence was reached with decreasing likelihood.}
 }
 \value{
 A list-like object of class 'dfm' with the following elements:
