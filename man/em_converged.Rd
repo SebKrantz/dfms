@@ -21,3 +21,9 @@ A logical statement indicating whether EM algorithm has converged. if \code{chec
 \description{
 Convergence Test for EM-Algorithm
 }
+\examples{
+em_converged(1001, 1000)
+em_converged(10001, 10000)
+em_converged(10001, 10000, check = TRUE)
+em_converged(10000, 10001, check = TRUE)
+}
