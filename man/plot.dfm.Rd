@@ -26,6 +26,9 @@
 
 \item{\dots}{for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.}
 }
+\value{
+Nothing.
+}
 \description{
 Plot DFM
 }

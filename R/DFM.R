@@ -342,9 +342,10 @@ DFM <- function(X, r, p = 1L, ...,
     loglik <- em_res$loglik
 
     ## Iterate at least min.iter times
-    converged <- if(num_iter < min.iter) FALSE else if(check.increased)
-      sum(em_converged(loglik, previous_loglik, tol, check.increased)) == 1L else
-        em_converged(loglik, previous_loglik, tol, check.increased)
+    if(num_iter < min.iter) converged <- FALSE else {
+      converged <- em_converged(loglik, previous_loglik, tol, check.increased)
+      if(check.increased) converged <- converged[1L] && !converged[2L]
+    }
 
     previous_loglik <- loglik
     loglik_all <- c(loglik_all, loglik)
