@@ -1,3 +1,4 @@
+library(collapse)
 library(magrittr)
 library(xts)
 
@@ -37,11 +38,20 @@ expect_true(ncol(as.data.frame(dfm_small, pivot = "wide")) == 7L)
 expect_true(ncol(as.data.frame(dfm_small, method = "qml", pivot = "wide")) == 3L)
 expect_true(ncol(as.data.frame(dfm_small, pivot = "t.wide")) == 7L)
 expect_true(is.list(predict(dfm_small)))
+expect_true(is.list(predict(dfm_small, standardized = FALSE)))
+expect_true(is.list(predict(dfm_small, resFUN = function(x, h) predict(ar(na_rm(x)), n.ahead = h)$pred)))
+
 expect_output(print(predict(dfm_small)))
 expect_true(ncol(as.data.frame(predict(dfm_small))) == 4L)
 expect_true(ncol(as.data.frame(predict(dfm_small), pivot = "wide")) == 4L)
 expect_true(ncol(as.data.frame(predict(dfm_small), use = "data", pivot = "wide")) == 16L)
 expect_true(ncol(as.data.frame(predict(dfm_small), use = "both", pivot = "wide")) == 18L)
+
+# Other missing value options
+expect_visible(tsremimpNA(BM14[, BM14_Models$small], na.rm.method = "all"))
+expect_visible(tsremimpNA(BM14[, BM14_Models$small], na.impute = "median.ma"))
+expect_visible(tsremimpNA(BM14[, BM14_Models$small], na.impute = "median"))
+expect_visible(tsremimpNA(BM14[, BM14_Models$small], na.impute = "rnorm"))
 
 ### Medium-Sized Model ---------------------------------
 
