@@ -61,6 +61,10 @@ where \eqn{S_t = (C P_t C' + R)^{-1}}{S(t) = inv(C P(t) C' + R)} and \eqn{e_t = 
 For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Kfilter0}.
 For another fast (C-based) implementation that also allows time-varying system matrices and non-stationary data see \code{FKF::fkf}.
 }
+\examples{
+# See ?SKFS
+
+}
 \references{
 Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
 
