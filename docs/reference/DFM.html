@@ -67,18 +67,14 @@ with time-invariant system matrices and classical assumptions, while permitting 
   max.iter <span class="op">=</span> <span class="fl">100L</span>,
   tol <span class="op">=</span> <span class="fl">1e-04</span>,
   pos.corr <span class="op">=</span> <span class="cn">TRUE</span>,
-  check.increased <span class="op">=</span> <span class="cn">FALSE</span>,
-  max.missing <span class="op">=</span> <span class="fl">0.8</span>,
-  na.rm.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LE"</span>, <span class="st">"all"</span><span class="op">)</span>,
-  na.impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median.ma.spline"</span>, <span class="st">"median.ma"</span>, <span class="st">"median"</span>, <span class="st">"rnorm"</span><span class="op">)</span>,
-  ma.terms <span class="op">=</span> <span class="fl">3L</span>
+  check.increased <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>X</dt>
-<dd><p>a <code>T x n</code> data matrix or frame.</p></dd>
+<dd><p>a <code>T x n</code> data matrix or frame. May contain missing values.</p></dd>
 
 
 <dt>r</dt>
@@ -90,7 +86,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
 
 
 <dt>...</dt>
-<dd><p>further arguments to be added here in the future, such as further estimation methods or block-structures.</p></dd>
+<dd><p>(optional) arguments to <code><a href="tsnarmimp.html">tsnarmimp</a></code>.</p></dd>
 
 
 <dt>rQ</dt>
@@ -124,23 +120,7 @@ This yields significant performance gains over the iterative methods. Final syst
 
 
 <dt>check.increased</dt>
-<dd><p>logical. Check if likelihood has increased. Passed to <code><a href="em_converged.html">em_converged</a></code>.</p></dd>
-
-
-<dt>max.missing</dt>
-<dd><p>numeric. Proportion of series missing for a case to be considered missing.</p></dd>
-
-
-<dt>na.rm.method</dt>
-<dd><p>character. Method to apply concerning missing cases selected through <code>max.missing</code>: <code>"LE"</code> only removes cases at the beginning or end of the sample, whereas <code>"all"</code> always removes missing cases.</p></dd>
-
-
-<dt>na.impute</dt>
-<dd><p>character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:</p><table class="table table"><tr><td><code>"median"</code></td><td></td><td>simple series-wise median imputation.</td><td></td></tr><tr><td><code>"rnorm"</code></td><td></td><td>imputation with random numbers drawn from a standard normal distribution.</td><td></td></tr><tr><td><code>"median.ma"</code></td><td></td><td>values are initially imputed with the median, but then a moving average is applied to smooth the estimates.</td><td></td></tr><tr><td><code>"median.ma.spline"</code></td><td></td><td>"internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.</td><td></td></tr></table></dd>
-
-
-<dt>ma.terms</dt>
-<dd><p>the order of the (2-sided) moving average applied in <code>na.impute</code> methods <code>"median.ma"</code> and <code>"median.ma.spline"</code>.</p></dd>
+<dd><p>logical. Check if likelihood has increased. Passed to <code><a href="em_converged.html">em_converged</a></code>. If <code>TRUE</code>, the algorithm only terminates if convergence was reached with decreasing likelihood.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -199,7 +179,7 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># IC for number of factors</span></span>
 <span class="r-in"><span class="va">IC_small</span> <span class="op">=</span> <span class="fu"><a href="ICr.html">ICr</a></span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">small</span><span class="op">]</span>, max.r <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Missing values detected: imputing data with tsremimpNA() with default settings</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Missing values detected: imputing data with tsnarmimp() with default settings</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">IC_small</span><span class="op">)</span></span>
 <span class="r-plt img"><img src="DFM-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/screeplot.html" class="external-link">screeplot</a></span><span class="op">(</span><span class="va">IC_small</span><span class="op">)</span></span>
@@ -209,19 +189,19 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/VARselect.html" class="external-link">VARselect</a></span><span class="op">(</span><span class="va">IC_small</span><span class="op">$</span><span class="va">F_pca</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $selection</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)  HQ(n)  SC(n) FPE(n) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      8      3      3      8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      6      5      2      6 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                1         2           3           4           5           6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n) 0.4256375 0.2484074 -0.04114001 -0.04320722 -0.04321406 -0.04315230</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)  0.4565449 0.2999196  0.03097715  0.04951484  0.07011289  0.09077955</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)  0.5027285 0.3768924  0.13873901  0.18806580  0.23945295  0.29090872</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 1.5305683 1.2819914  0.95971392  0.95775358  0.95778063  0.95788815</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  7           8           9          10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n) -0.04217882 -0.04883749 -0.02908459 -0.03664317</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)   0.11235793  0.12630416  0.16666197  0.17970829</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)   0.34327620  0.38801154  0.45915845  0.50299387</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n)  0.95888700  0.95260885  0.97172323  0.96454159</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1          2         3          4         5          6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n) -1.5028163 -1.7020957 -1.701093 -1.7021266 -1.782692 -1.7977899</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)  -1.4762557 -1.6578279 -1.639118 -1.6224446 -1.685303 -1.6826936</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)  -1.4361151 -1.5909270 -1.545457 -1.5020229 -1.538121 -1.5087511</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n)  0.2225028  0.1823018  0.182486  0.1822997  0.168192  0.1656763</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 7          8          9         10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n) -1.7892503 -1.7887748 -1.7793434 -1.7708400</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)  -1.6564469 -1.6382643 -1.6111258 -1.5849153</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)  -1.4557440 -1.4108011 -1.3569022 -1.3039313</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n)  0.1671036  0.1671913  0.1687862  0.1702408</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Estimating the model with 2 factors and 3 lags</span></span>
@@ -388,7 +368,7 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># IC for number of factors</span></span>
 <span class="r-in"><span class="va">IC_medium</span> <span class="op">=</span> <span class="fu"><a href="ICr.html">ICr</a></span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">medium</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Missing values detected: imputing data with tsremimpNA() with default settings</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Missing values detected: imputing data with tsnarmimp() with default settings</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">IC_medium</span><span class="op">)</span></span>
 <span class="r-plt img"><img src="DFM-7.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/screeplot.html" class="external-link">screeplot</a></span><span class="op">(</span><span class="va">IC_medium</span><span class="op">)</span></span>
@@ -398,19 +378,19 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/VARselect.html" class="external-link">VARselect</a></span><span class="op">(</span><span class="va">IC_medium</span><span class="op">$</span><span class="va">F_pca</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $selection</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)  HQ(n)  SC(n) FPE(n) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      4      3      3      4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      7      2      1      7 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                1         2         3         4         5         6         7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)  2.874215  2.729238  2.523782  2.494297  2.501059  2.512466  2.530814</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)   2.935865  2.837126  2.677908  2.694661  2.747660  2.805305  2.869890</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)   3.028004  2.998369  2.908255  2.994112  3.116215  3.242964  3.376653</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 17.711606 15.321660 12.476772 12.115522 12.199726 12.342648 12.575329</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                8         9        10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)  2.536151  2.519114  2.547360</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)   2.921464  2.950665  3.025149</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)   3.497332  3.595637  3.739225</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 12.648100 12.441299 12.806492</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               1        2        3        4        5        6        7        8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n) 1.539267 1.492781 1.498671 1.509014 1.486111 1.479450 1.468524 1.490378</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)  1.592388 1.585744 1.631474 1.681659 1.698597 1.731776 1.760691 1.822386</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)  1.672669 1.726236 1.832177 1.942573 2.019721 2.113112 2.202238 2.324143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 4.661186 4.449528 4.475952 4.522752 4.420750 4.391987 4.345059 4.442132</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               9       10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n) 1.500199 1.534401</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)  1.872048 1.946092</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)  2.434016 2.568271</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 4.487352 4.645257</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Estimating the model with 3 factors and 3 lags</span></span>
@@ -470,7 +450,7 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"><span class="co"># \donttest{</span></span>
 <span class="r-in"><span class="co"># IC for number of factors</span></span>
 <span class="r-in"><span class="va">IC_large</span> <span class="op">=</span> <span class="fu"><a href="ICr.html">ICr</a></span><span class="op">(</span><span class="va">BM14</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Missing values detected: imputing data with tsremimpNA() with default settings</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Missing values detected: imputing data with tsnarmimp() with default settings</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">IC_large</span><span class="op">)</span></span>
 <span class="r-plt img"><img src="DFM-13.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/stats/screeplot.html" class="external-link">screeplot</a></span><span class="op">(</span><span class="va">IC_large</span><span class="op">)</span></span>
@@ -480,19 +460,19 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/VARselect.html" class="external-link">VARselect</a></span><span class="op">(</span><span class="va">IC_large</span><span class="op">$</span><span class="va">F_pca</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $selection</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)  HQ(n)  SC(n) FPE(n) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      4      2      1      4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      6      1      1      6 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  1           2           3           4           5           6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)    7.643796    7.389709    7.231934    7.213175    7.227360    7.270454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)     7.859572    7.790436    7.817610    7.983802    8.182938    8.410983</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)     8.182058    8.389338    8.692929    9.135537    9.611090   10.115551</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 2087.777732 1619.851010 1384.538269 1360.880208 1383.738670 1449.967094</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  7           8           9          10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)    7.379692    7.424074    7.542735    7.671673</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)     8.705171    8.934504    9.238116    9.552004</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)    10.686156   11.191905   11.771933   12.362238</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 1625.581824 1710.893843 1943.301686 2235.026114</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 1          2          3          4          5          6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)   6.020768   5.926947   5.883307   5.889824   5.897327   5.845883</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)    6.206692   6.272235   6.387960   6.553841   6.720708   6.828628</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)    6.487677   6.794063   7.150631   7.557355   7.965066   8.313830</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 411.908362 375.087393 359.232802 361.888929 365.116976 347.515300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 7          8          9         10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> AIC(n)   5.908082   5.963699   5.982969   6.111831</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> HQ(n)    7.050191   7.265172   7.443806   7.732032</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> SC(n)    8.776235   9.232061   9.651538  10.180607</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FPE(n) 370.862536 393.546431 403.139879 461.355079</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Estimating the model with 6 factors and 3 lags</span></span>

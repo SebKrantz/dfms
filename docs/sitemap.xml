@@ -4,6 +4,9 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/CONTRIBUTING.html</loc>
+  </url>
+  <url>
     <loc>/LICENSE-text.html</loc>
   </url>
   <url>
@@ -59,6 +62,9 @@
   </url>
   <url>
     <loc>/reference/summary.dfm.html</loc>
+  </url>
+  <url>
+    <loc>/reference/tsnarmimp.html</loc>
   </url>
   <url>
     <loc>/reference/tsremimpNA.html</loc>

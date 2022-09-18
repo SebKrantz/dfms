@@ -38,7 +38,7 @@ reference:
   desc: "Fast VAR, matrix inverses, imputation/removal of missing values in multivariate time series, and convergence check for EM algorithm."
 - contents:
   - .VAR
-  - tsremimpNA
+  - tsnarmimp
   - ainv
   - em_converged
 - title: "Data"
