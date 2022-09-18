@@ -11,7 +11,7 @@ BM14[, BM14_Models$freq == "Q"] %<>% diff(3)
 ### Missing value removal
 for(narm in c("LE", "all")) {
   for(m in c("median", "rnorm", "median.ma", "median.ma.spline"))
-    expect_false(anyNA(tsremimpNA(BM14, na.rm.method = narm, na.impute = m)))
+    expect_false(anyNA(tsnarmimp(BM14, na.rm.method = narm, na.impute = m)))
 }
 
 
@@ -48,10 +48,10 @@ expect_true(ncol(as.data.frame(predict(dfm_small), use = "data", pivot = "wide")
 expect_true(ncol(as.data.frame(predict(dfm_small), use = "both", pivot = "wide")) == 18L)
 
 # Other missing value options
-expect_visible(tsremimpNA(BM14[, BM14_Models$small], na.rm.method = "all"))
-expect_visible(tsremimpNA(BM14[, BM14_Models$small], na.impute = "median.ma"))
-expect_visible(tsremimpNA(BM14[, BM14_Models$small], na.impute = "median"))
-expect_visible(tsremimpNA(BM14[, BM14_Models$small], na.impute = "rnorm"))
+expect_visible(tsnarmimp(BM14[, BM14_Models$small], na.rm.method = "all"))
+expect_visible(tsnarmimp(BM14[, BM14_Models$small], na.impute = "median.ma"))
+expect_visible(tsnarmimp(BM14[, BM14_Models$small], na.impute = "median"))
+expect_visible(tsnarmimp(BM14[, BM14_Models$small], na.impute = "rnorm"))
 
 ### Medium-Sized Model ---------------------------------
 
