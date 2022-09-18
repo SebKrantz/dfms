@@ -33,7 +33,7 @@ DFM(
 \item{rR}{restrictions on the observation (measurement) covariance matrix (R).}
 
 \item{em.method}{character. The implementation of the Expectation Maximization Algorithm used. The options are:
-\tabular{llll}{
+   \tabular{llll}{
 \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
 \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
 \code{"none"} \tab\tab Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
@@ -54,31 +54,31 @@ This yields significant performance gains over the iterative methods. Final syst
 \value{
 A list-like object of class 'dfm' with the following elements:
 \tabular{llll}{
-\code{X_imp} \tab\tab \eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
-\itemize{
-\item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr
-\item \code{"missing"} is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr
-\item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
-\item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
-} \cr\cr
-\code{eigen} \tab\tab \code{eigen(cov(X_imp))}. \cr\cr
-\code{F_pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - \code{X_imp \%*\% eigen$vectors}. \cr\cr
-\code{P_0} \tab\tab \eqn{r \times r}{r x r} initial factor covariance matrix estimate based on PCA results. \cr\cr
-\code{F_2s} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
-\code{P_2s} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. \cr\cr
-\code{F_qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
-\code{P_qml} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of QML factor estimates. \cr\cr
-\code{A} \tab\tab \eqn{r \times rp}{r x rp} factor transition matrix.\cr\cr
-\code{C} \tab\tab \eqn{n \times r}{n x r} observation matrix.\cr\cr
-\code{Q} \tab\tab \eqn{r \times r}{r x r} state (error) covariance matrix.\cr\cr
-\code{R} \tab\tab \eqn{n \times n}{n x n} observation (error) covariance matrix.\cr\cr
-\code{loglik} \tab\tab vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.\cr\cr
-\code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
-\code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
-\code{anyNA} \tab\tab single logical valued indicating whether there were any missing values in the data. If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
-\code{rm.rows} \tab\tab vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
-\code{em.method} \tab\tab The EM method used.\cr\cr
-\code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
+ \code{X_imp} \tab\tab \eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
+   \itemize{
+      \item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr
+      \item \code{"missing"} is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr
+      \item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
+      \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
+   } \cr\cr
+ \code{eigen} \tab\tab \code{eigen(cov(X_imp))}. \cr\cr
+ \code{F_pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - \code{X_imp \%*\% eigen$vectors}. \cr\cr
+ \code{P_0} \tab\tab \eqn{r \times r}{r x r} initial factor covariance matrix estimate based on PCA results. \cr\cr
+ \code{F_2s} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
+ \code{P_2s} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. \cr\cr
+ \code{F_qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
+ \code{P_qml} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of QML factor estimates. \cr\cr
+ \code{A} \tab\tab \eqn{r \times rp}{r x rp} factor transition matrix.\cr\cr
+ \code{C} \tab\tab \eqn{n \times r}{n x r} observation matrix.\cr\cr
+ \code{Q} \tab\tab \eqn{r \times r}{r x r} state (error) covariance matrix.\cr\cr
+ \code{R} \tab\tab \eqn{n \times n}{n x n} observation (error) covariance matrix.\cr\cr
+ \code{loglik} \tab\tab vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.\cr\cr
+ \code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
+ \code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
+ \code{anyNA} \tab\tab single logical valued indicating whether there were any missing values in the data. If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
+ \code{rm.rows} \tab\tab vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
+ \code{em.method} \tab\tab The EM method used.\cr\cr
+ \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
 }
 }
 \description{
@@ -102,14 +102,15 @@ By assumptions 1-4, this translates into the following dynamic form:
 where the first equation is called the measurement or observation equation and the second equation is called transition, state or process equation, and
 
 \tabular{llll}{
-\eqn{n} \tab\tab number of series in \eqn{\textbf{x}_t}{x(t)} (\eqn{r} and \eqn{p} as the arguments to \code{DFM}).\cr\cr
-\eqn{\textbf{x}_t}{x(t)} \tab\tab \eqn{n \times 1}{n x 1} vector of observed series at time \eqn{t}{t}: \eqn{(x_{1t}, \dots, x_{nt})'}{(x1(t), \dots, xn(t))'}. Some observations can be missing.  \cr\cr
-\eqn{\textbf{f}_t}{f(t)} \tab\tab \eqn{r \times 1}{r x 1} vector of factors at time \eqn{t}{t}: \eqn{(f_{1t}, \dots, f_{rt})'}{(f1(t), \dots, fr(t))'}.\cr\cr
-\eqn{\textbf{C}_0}{C0} \tab\tab \eqn{n \times r}{n x r} measurement (observation) matrix.\cr\cr
-\eqn{\textbf{A}_j}{Aj} \tab\tab \eqn{r \times r}{r x r} state transition matrix at lag \eqn{j}{j}. \cr\cr
-\eqn{\textbf{Q}_0}{Q0} \tab\tab \eqn{r \times r}{r x r} state covariance matrix.\cr\cr
-\eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} measurement (observation) covariance matrix. It is diagonal by assumption 2 that \eqn{E[\textbf{x}_{it}|\textbf{x}_{-i,t},\textbf{x}_{i,t-1}, \dots, \textbf{f}_t, \textbf{f}_{t-1}, \dots] = \textbf{Cf}_t \forall i}{E[xi(t)|x(-i)(t), x(t-1), \dots, f(t), f(t-1), \dots] = C f(t)}.\cr\cr  \% This assumption is also referred to as 'Exact DFM' by Stock & Watson (2016), where all correlation between the series is accounted for by the latent factors.
+ \eqn{n} \tab\tab number of series in \eqn{\textbf{x}_t}{x(t)} (\eqn{r} and \eqn{p} as the arguments to \code{DFM}).\cr\cr
+ \eqn{\textbf{x}_t}{x(t)} \tab\tab \eqn{n \times 1}{n x 1} vector of observed series at time \eqn{t}{t}: \eqn{(x_{1t}, \dots, x_{nt})'}{(x1(t), \dots, xn(t))'}. Some observations can be missing.  \cr\cr
+ \eqn{\textbf{f}_t}{f(t)} \tab\tab \eqn{r \times 1}{r x 1} vector of factors at time \eqn{t}{t}: \eqn{(f_{1t}, \dots, f_{rt})'}{(f1(t), \dots, fr(t))'}.\cr\cr
+ \eqn{\textbf{C}_0}{C0} \tab\tab \eqn{n \times r}{n x r} measurement (observation) matrix.\cr\cr
+ \eqn{\textbf{A}_j}{Aj} \tab\tab \eqn{r \times r}{r x r} state transition matrix at lag \eqn{j}{j}. \cr\cr
+ \eqn{\textbf{Q}_0}{Q0} \tab\tab \eqn{r \times r}{r x r} state covariance matrix.\cr\cr
+ \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} measurement (observation) covariance matrix. It is diagonal by assumption 2 that \eqn{E[\textbf{x}_{it}|\textbf{x}_{-i,t},\textbf{x}_{i,t-1}, \dots, \textbf{f}_t, \textbf{f}_{t-1}, \dots] = \textbf{Cf}_t \forall i}{E[xi(t)|x(-i)(t), x(t-1), \dots, f(t), f(t-1), \dots] = C f(t)}.\cr\cr  % This assumption is also referred to as 'Exact DFM' by Stock & Watson (2016), where all correlation between the series is accounted for by the latent factors.
 }
+
 
 This model can be estimated using a classical form of the Kalman Filter and the Expectation Maximization (EM) algorithm, after transforming it to State-Space (stacked, VAR(1)) form:
 
@@ -118,13 +119,13 @@ This model can be estimated using a classical form of the Kalman Filter and the 
 
 where
 \tabular{llll}{
-\eqn{n} \tab\tab number of series in \eqn{\textbf{x}_t}{x(t)} (\eqn{r} and \eqn{p} as the arguments to \code{DFM}).\cr\cr
-\eqn{\textbf{x}_t}{x(t)} \tab\tab \eqn{n \times 1}{n x 1} vector of observed series at time \eqn{t}{t}: \eqn{(x_{1t}, \dots, x_{nt})'}{(x1(t), \dots, xn(t))'}. Some observations can be missing.  \cr\cr
-\eqn{\textbf{F}_t}{F(t)} \tab\tab \eqn{rp \times 1}{rp x 1} vector of stacked factors at time \eqn{t}{t}: \eqn{(f_{1t}, \dots, f_{rt}, f_{1,t-1}, \dots, f_{r,t-1}, \dots, f_{1,t-p}, \dots, f_{r,t-p})'}{(f1(t), \dots, fr(t), f1(t-1), \dots, fr(t-1), \dots, f1(t-p), \dots, fr(t-p))'}.\cr\cr
-\eqn{\textbf{C}}{C} \tab\tab \eqn{n \times rp}{n x rp} observation matrix. Only the first \eqn{n \times r}{n x r} terms are non-zero, by assumption 3 that \eqn{E[\textbf{x}_t|\textbf{F}_t] = E[\textbf{x}_t|\textbf{f}_t]}{E[X(t)|F(t)] = E[X(t)|f(t)]} (no relationship of observed series with lagged factors given contemporaneous factors).\cr\cr
-\eqn{\textbf{A}}{A} \tab\tab stacked \eqn{rp \times rp}{rp x rp} state transition matrix consisting of 3 parts: the top \eqn{r \times rp}{r x rp} part provides the dynamic relationships captured by \eqn{(\textbf{A}_1, \dots, \textbf{A}_p)}{(A1, \dots, Ap)} in the dynamic form, the terms \code{A[(r+1):rp, 1:(rp-r)]} constitute an \eqn{(rp-r) \times (rp-r)}{(rp-r) x (rp-r)} identity matrix mapping all lagged factors to their known values at times t. The remaining part \code{A[(rp-r+1):rp, (rp-r+1):rp]} is an \eqn{r \times r}{r x r} matrix of zeros. \cr\cr
-\eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr \% that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[f(t)|F(t-1)] = E[f(t)|f(t-1)] = A1 f(t-1)} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
-\eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
+ \eqn{n} \tab\tab number of series in \eqn{\textbf{x}_t}{x(t)} (\eqn{r} and \eqn{p} as the arguments to \code{DFM}).\cr\cr
+ \eqn{\textbf{x}_t}{x(t)} \tab\tab \eqn{n \times 1}{n x 1} vector of observed series at time \eqn{t}{t}: \eqn{(x_{1t}, \dots, x_{nt})'}{(x1(t), \dots, xn(t))'}. Some observations can be missing.  \cr\cr
+ \eqn{\textbf{F}_t}{F(t)} \tab\tab \eqn{rp \times 1}{rp x 1} vector of stacked factors at time \eqn{t}{t}: \eqn{(f_{1t}, \dots, f_{rt}, f_{1,t-1}, \dots, f_{r,t-1}, \dots, f_{1,t-p}, \dots, f_{r,t-p})'}{(f1(t), \dots, fr(t), f1(t-1), \dots, fr(t-1), \dots, f1(t-p), \dots, fr(t-p))'}.\cr\cr
+ \eqn{\textbf{C}}{C} \tab\tab \eqn{n \times rp}{n x rp} observation matrix. Only the first \eqn{n \times r}{n x r} terms are non-zero, by assumption 3 that \eqn{E[\textbf{x}_t|\textbf{F}_t] = E[\textbf{x}_t|\textbf{f}_t]}{E[X(t)|F(t)] = E[X(t)|f(t)]} (no relationship of observed series with lagged factors given contemporaneous factors).\cr\cr
+ \eqn{\textbf{A}}{A} \tab\tab stacked \eqn{rp \times rp}{rp x rp} state transition matrix consisting of 3 parts: the top \eqn{r \times rp}{r x rp} part provides the dynamic relationships captured by \eqn{(\textbf{A}_1, \dots, \textbf{A}_p)}{(A1, \dots, Ap)} in the dynamic form, the terms \code{A[(r+1):rp, 1:(rp-r)]} constitute an \eqn{(rp-r) \times (rp-r)}{(rp-r) x (rp-r)} identity matrix mapping all lagged factors to their known values at times t. The remaining part \code{A[(rp-r+1):rp, (rp-r+1):rp]} is an \eqn{r \times r}{r x r} matrix of zeros. \cr\cr
+ \eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr % that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[f(t)|F(t-1)] = E[f(t)|f(t-1)] = A1 f(t-1)} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
+ \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 }
 }
 \examples{

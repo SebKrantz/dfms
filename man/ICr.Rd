@@ -40,7 +40,7 @@ Minimizes 3 information criteria proposed by Bai and Ng (2002) to determine the 
 A Screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
 }
 \details{
-Following Bai and Ng (2002) and De Valk et al. (2019), let NSSR(r) be the normalized sum of squared residuals \link{= SSR(r) / (n x T)} when r factors are estimated using principal components.
+Following Bai and Ng (2002) and De Valk et al. (2019), let NSSR(r) be the normalized sum of squared residuals [= SSR(r) / (n x T)] when r factors are estimated using principal components.
 Then the information criteria can be written as follows:
 
 \deqn{IC_{r1} = \ln(NSSR(r)) + r\left(\frac{n + T}{nT}\right) + \ln\left(\frac{nT}{n + T}\right)}{ICr1 = ln(NSSR(r)) + r * (n + T)/(n * T) + ln((n * T)/(n + T))}
@@ -66,7 +66,7 @@ screeplot(ics)
 
 }
 \references{
-Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. \url{doi:10.1111/1468-0262.00273}
+Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. <doi:10.1111/1468-0262.00273>
 
 Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. \emph{The Review of Economics and Statistics, 92}(4), 1004-1016.
 

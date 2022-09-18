@@ -101,21 +101,21 @@ The function needs to have a second argument providing the forecast horizon (\co
 \value{
 A list-like object of class 'dfm_forecast' with the following elements:
 \tabular{llll}{
-\code{X_fcst} \tab\tab \eqn{h \times n}{h x n} matrix with the forecasts of the variables. \cr\cr
-\code{F_fcst} \tab\tab \eqn{h \times r}{h x r} matrix with the factor forecasts. \cr\cr
-\code{X} \tab\tab \eqn{T \times n}{T x n} matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
-\itemize{
-\item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}). Only attached if \code{standardized = TRUE}. \cr
-\item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
-\item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
-} \cr\cr
-\code{F} \tab\tab \eqn{T \times r}{T x r} matrix of factor estimates. \cr\cr
-\code{method} \tab\tab the factor estimation method used.\cr\cr
-\code{anyNA} \tab\tab logical indicating whether \code{X} contains any missing values.\cr\cr
-\code{h} \tab\tab the forecast horizon.\cr\cr
-\code{resid.fc} \tab\tab logical indicating whether a univariate forecasting function was applied to the residuals.\cr\cr
-\code{resid.fc.ind} \tab\tab indices indicating for which variables (columns of \code{X}) the residuals were forecasted using the univariate function.\cr\cr
-\code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
+ \code{X_fcst} \tab\tab \eqn{h \times n}{h x n} matrix with the forecasts of the variables. \cr\cr
+ \code{F_fcst} \tab\tab \eqn{h \times r}{h x r} matrix with the factor forecasts. \cr\cr
+ \code{X} \tab\tab \eqn{T \times n}{T x n} matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
+   \itemize{
+      \item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}). Only attached if \code{standardized = TRUE}. \cr
+      \item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
+      \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
+   } \cr\cr
+ \code{F} \tab\tab \eqn{T \times r}{T x r} matrix of factor estimates. \cr\cr
+ \code{method} \tab\tab the factor estimation method used.\cr\cr
+ \code{anyNA} \tab\tab logical indicating whether \code{X} contains any missing values.\cr\cr
+ \code{h} \tab\tab the forecast horizon.\cr\cr
+ \code{resid.fc} \tab\tab logical indicating whether a univariate forecasting function was applied to the residuals.\cr\cr
+ \code{resid.fc.ind} \tab\tab indices indicating for which variables (columns of \code{X}) the residuals were forecasted using the univariate function.\cr\cr
+ \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
 }
 }
 \description{
