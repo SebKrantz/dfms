@@ -41,7 +41,7 @@ p <- 3L # 3 Lags
 n <- ncol(X)
 
 ## Initializing the Kalman Filter with PCA results
-X_imp <- tsremimpNA(X)                # Imputing Data
+X_imp <- tsnarmimp(X)                # Imputing Data
 v <- eigen(cov(X_imp))$vectors[, 1:r] # PCA
 F_pc <- X_imp \%*\% v                   # Principal component factor estimates
 C <- cbind(v, matrix(0, n, r*p-r))    # Observation matrix

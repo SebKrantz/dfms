@@ -684,8 +684,8 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
   dimnames(X) <- NULL
 
   if(anyNA(X)) {
-    message("Missing values detected: imputing data with tsremimpNA() with default settings")
-    X <- tsremimpNA(X)
+    message("Missing values detected: imputing data with tsnarmimp() with default settings")
+    X <- tsnarmimp(X)
     attributes(X) <- list(dim = dim(X))
   }
 

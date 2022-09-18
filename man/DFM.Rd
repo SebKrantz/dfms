@@ -26,7 +26,7 @@ DFM(
 
 \item{p}{number of lags in factor VAR.}
 
-\item{\dots}{(optional) arguments to \code{\link{tsremimpNA}}.}
+\item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}.}
 
 \item{rQ}{restrictions on the state (transition) covariance matrix (Q).}
 

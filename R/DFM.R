@@ -12,7 +12,7 @@
 #' @param X a \code{T x n} data matrix or frame. May contain missing values.
 #' @param r number of factors.
 #' @param p number of lags in factor VAR.
-#' @param \dots (optional) arguments to \code{\link{tsremimpNA}}.
+#' @param \dots (optional) arguments to \code{\link{tsnarmimp}}.
 #' @param rQ restrictions on the state (transition) covariance matrix (Q).
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
@@ -210,7 +210,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   rRi <- switch(rR[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(rQ[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
-  BMl <- switch(em.method[1L], DGR = FALSE, BM = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
+  BMl <- switch(tolower(em.method[1L]), dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
 
   rp <- r * p
   sr <- 1:r
@@ -228,7 +228,7 @@ DFM <- function(X, r, p = 1L, ...,
   # Missing values
   anymiss <- anyNA(X)
   if(anymiss) { # Missing value removal / imputation
-    X_imp <- tsremimpNA(X, ...)
+    X_imp <- tsnarmimp(X, ...)
     W <- attr(X_imp, "missing")
     rm.rows <- attr(X_imp, "rm.rows")
     attributes(X_imp) <- list(dim = dim(X_imp))

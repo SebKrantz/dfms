@@ -180,10 +180,10 @@ impNA_spline <- function(X, W, k) {
 #'
 #' @examples
 #' library(xts)
-#' str(tsremimpNA(BM14_M))
+#' str(tsnarmimp(BM14_M))
 #'
 #' @export
-tsremimpNA <- function(X,
+tsnarmimp <- function(X,
                        max.missing = 0.8,
                        na.rm.method = c("LE", "all"),
                        na.impute = c("median.ma.spline", "median.ma", "median", "rnorm"),
