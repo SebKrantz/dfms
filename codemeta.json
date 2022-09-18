@@ -1,0 +1,130 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "dfms",
+  "description": "Efficient estimation of Dynamic Factor Models using the Expectation Maximization (EM) algorithm or Two-Step (2S) estimation, on datasets with missing data. The implementation follows advances in the econometric literature: estimation can be done either by running the Kalman Filter and Smoother once with initial values from PCA - following Doz, Giannone and Reichlin (2011) (2S) - or via iterated Kalman Filtering and Smoothing until EM convergence - following Doz, Giannone and Reichlin (2012) - or using the adapted EM algorithm of Banbura and Modugno (2014), allowing estimation with arbitrary patterns of missing data. The implementation makes heavy use of the Armadillo C++ library and the collapse package, providing for particularly speedy estimation. A comprehensive set of methods supports interpretation/visualization of the model and forecasting. Information criteria to choose the number of factors are also provided - following Bai and Ng (2002). --- Key References: --- Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. Journal of Econometrics, 164(1), 188-205. Doz, C., Giannone, D., & Reichlin, L. (2012). A quasi-maximum likelihood approach for large, approximate dynamic factor models. Review of economics and statistics, 94(4), 1014-1024. Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. Journal of Applied Econometrics, 29(1), 133-160.",
+  "name": "dfms: Dynamic Factor Models",
+  "codeRepository": "https://github.com/SebKrantz/dfms",
+  "issueTracker": "https://github.com/SebKrantz/dfms/issues",
+  "license": "https://spdx.org/licenses/GPL-3.0",
+  "version": "0.1.1",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "R",
+    "url": "https://r-project.org"
+  },
+  "runtimePlatform": "R version 4.1.1 (2021-08-10)",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Sebastian",
+      "familyName": "Krantz",
+      "email": "sebastian.krantz@graduateinstitute.ch"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Rytis",
+      "familyName": "Bagdziunas"
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Sebastian",
+      "familyName": "Krantz",
+      "email": "sebastian.krantz@graduateinstitute.ch"
+    }
+  ],
+  "softwareSuggestions": [
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "xts",
+      "name": "xts",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=xts"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "vars",
+      "name": "vars",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=vars"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "magrittr",
+      "name": "magrittr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=magrittr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "testthat",
+      "name": "testthat",
+      "version": ">= 3.0.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=testthat"
+    }
+  ],
+  "softwareRequirements": {
+    "1": {
+      "@type": "SoftwareApplication",
+      "identifier": "R",
+      "name": "R",
+      "version": ">= 3.0.0"
+    },
+    "2": {
+      "@type": "SoftwareApplication",
+      "identifier": "Rcpp",
+      "name": "Rcpp",
+      "version": ">= 1.0.1",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=Rcpp"
+    },
+    "3": {
+      "@type": "SoftwareApplication",
+      "identifier": "collapse",
+      "name": "collapse",
+      "version": ">= 1.8.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=collapse"
+    },
+    "SystemRequirements": null
+  },
+  "fileSize": "7022.375KB",
+  "relatedLink": "https://sebkrantz.github.io/dfms/",
+  "releaseNotes": "https://github.com/SebKrantz/dfms/blob/master/NEWS.md",
+  "readme": "https://github.com/SebKrantz/dfms/blob/main/README.md",
+  "contIntegration": "https://github.com/SebKrantz/dfms/actions",
+  "keywords": ["dynamic-factor-models", "rstats", "time-series"]
+}
