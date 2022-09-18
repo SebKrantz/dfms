@@ -64,6 +64,12 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #' @param tol the numerical tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.
 #' @param check.increased logical. Check if likelihood has increased.
 #' @return A logical statement indicating whether EM algorithm has converged. if \code{check.increased = TRUE}, a vector with 2 elements indicating the convergence status and whether the likelihood has decreased.
+#'
+#' @examples
+#' em_converged(1001, 1000)
+#' em_converged(10001, 10000)
+#' em_converged(10001, 10000, check = TRUE)
+#' em_converged(10000, 10001, check = TRUE)
 #' @export
 em_converged <- function(loglik, previous_loglik, tol = 1e-4, check.increased = FALSE) { # [converged, decrease]
   # EM_CONVERGED Has EM converged?
@@ -155,7 +161,16 @@ impNA_spline <- function(X, W, k) {
 #' methods, and removes cases with too many missing values.
 #'
 #' @param X a matrix or multivariate time series where each column is a series.
-#' @inheritParams DFM
+#' @param max.missing numeric. Proportion of series missing for a case to be considered missing.
+#' @param na.rm.method character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
+#' @param na.impute character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
+#'    \tabular{llll}{
+#' \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
+#' \code{"rnorm"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
+#' \code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
+#' \code{"median.ma.spline"} \tab\tab "internal" missing values (not at the beginning or end of the sample) are imputed using a cubic spline, whereas missing values at the beginning and end are imputed with the median of the series and smoothed with a moving average.\cr\cr
+#' }
+#' @param ma.terms the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"median.ma"} and \code{"median.ma.spline"}.
 #'
 #' @returns The imputed matrix \code{X_imp}, with attributes:
 #' \tabular{llll}{
@@ -165,13 +180,13 @@ impNA_spline <- function(X, W, k) {
 #'
 #' @examples
 #' library(xts)
-#' str(tsremimpNA(BM14_M))
+#' str(tsnarmimp(BM14_M))
 #'
 #' @export
-tsremimpNA <- function(X,
-                       max.missing = 0.5,
+tsnarmimp <- function(X,
+                       max.missing = 0.8,
                        na.rm.method = c("LE", "all"),
-                       na.impute = c("median", "rnorm", "median.ma", "median.ma.spline"),
+                       na.impute = c("median.ma.spline", "median.ma", "median", "rnorm"),
                        ma.terms = 3L) {
   W <- is.na(X)
   n <- dim(X)[2L]

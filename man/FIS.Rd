@@ -43,6 +43,10 @@ The Kalman Smoother is given by:
 The initial smoothed values for period t = T are set equal to the filtered values. If \code{F_0} and \code{P_0} are supplied, the smoothed initial conditions (t = 0 values) are also calculated and returned.
 For further details see any textbook on time series such as Shumway & Stoffer (2017), which provide an analogous R implementation in \code{astsa::Ksmooth0}.
 }
+\examples{
+# See ?SKFS
+
+}
 \references{
 Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
 

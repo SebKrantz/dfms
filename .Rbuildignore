@@ -7,3 +7,5 @@ LICENSE
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^codemeta\.json$
+^codecov\.yml$

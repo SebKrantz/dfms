@@ -121,7 +121,7 @@ print.dfm_summary <- function(x,
 #' @param type character. The type of plot: \code{"joint"}, \code{"individual"} or \code{"residual"}.
 #' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
-#'
+#' @returns Nothing.
 #' @examples
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
@@ -432,7 +432,7 @@ predict.dfm <- function(object,
     # If X is a multivariate time series object for which the univariate forecasting function could have methods.
     ofl <- !attr(X, "is.list") && length(attr(X, "attributes")[["class"]])
     rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE)
-    if(ofl && length(object$rm.rows)) rsid <- rsid[-object$rm.rows, , drop = FALSE] # drop = FALSE?
+    if(ofl && length(object$rm.rows)) rsid <- rsid[-object$rm.rows, , drop = FALSE]
     ACF <- AC1(rsid, object$anyNA)
     fcr <- which(abs(ACF) >= abs(resAC)) # TODO: Check length of forecast??
     for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(rsid[, i], h, ...))
@@ -469,8 +469,6 @@ predict.dfm <- function(object,
   return(res)
 }
 # forecast.dfm <- predict.dfm
-
-# TODO: data frame method.
 
 #' @rdname predict.dfm
 #' @param x object of type 'dfm_forecast', returned from \code{predict.dfm}.
@@ -686,8 +684,8 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
   dimnames(X) <- NULL
 
   if(anyNA(X)) {
-    message("Missing values detected: imputing data with tsremimpNA() with default settings")
-    X <- tsremimpNA(X)
+    message("Missing values detected: imputing data with tsnarmimp() with default settings")
+    X <- tsnarmimp(X)
     attributes(X) <- list(dim = dim(X))
   }
 

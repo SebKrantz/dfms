@@ -1,6 +1,7 @@
 # **dfms**: Dynamic Factor Models for R
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/SebKrantz/dfms/workflows/R-CMD-check/badge.svg)](https://github.com/SebKrantz/dfms/actions)
+[![Codecov test coverage](https://codecov.io/gh/SebKrantz/dfms/branch/main/graph/badge.svg)](https://app.codecov.io/gh/SebKrantz/dfms?branch=main)
 <!-- badges: end -->
 
 **NOTE**: This is a new package being prepared for [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). It will be sent to CRAN afterwards. Peer review might result in changes to the API, or even the package name. The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/dfms")` and give feedback. 
