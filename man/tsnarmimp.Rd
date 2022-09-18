@@ -20,7 +20,7 @@ tsnarmimp(
 \item{na.rm.method}{character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.}
 
 \item{na.impute}{character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
-   \tabular{llll}{
+\tabular{llll}{
 \code{"median"} \tab\tab simple series-wise median imputation. \cr\cr
 \code{"rnorm"} \tab\tab imputation with random numbers drawn from a standard normal distribution. \cr\cr
 \code{"median.ma"} \tab\tab values are initially imputed with the median, but then a moving average is applied to smooth the estimates. \cr\cr
@@ -32,8 +32,8 @@ tsnarmimp(
 \value{
 The imputed matrix \code{X_imp}, with attributes:
 \tabular{llll}{
- \code{"missing"} \tab\tab a missingness matrix \code{W} matching the dimensions of \code{X_imp}. \cr\cr
- \code{"rm.rows"} \tab\tab and a vector of indices of rows (cases) with too many missing values that were removed. \cr\cr
+\code{"missing"} \tab\tab a missingness matrix \code{W} matching the dimensions of \code{X_imp}. \cr\cr
+\code{"rm.rows"} \tab\tab and a vector of indices of rows (cases) with too many missing values that were removed. \cr\cr
 }
 }
 \description{

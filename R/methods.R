@@ -36,7 +36,7 @@ print.dfm <- function(x, digits = 4L, ...) {
 summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "qml"), ...) {
 
   X <- object$X_imp
-  F <- switch(method, pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml, stop("Unkown method", method))
+  F <- switch(tolower(method), pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml, stop("Unkown method", method))
   A <- object$A
   r <- dim(A)[1L]
   p <- dim(A)[2L] / r
@@ -134,12 +134,12 @@ plot.dfm <- function(x,
                      method = switch(x$em.method, none = "2s", "qml"),
                      type = c("joint", "individual", "residual"),
                      scale.factors = TRUE, ...) {
-  F <- switch(method[1L],
+  F <- switch(tolower(method[1L]),
               all = cbind(x$F_pca, setColnames(x$F_2s, paste("TwoStep", colnames(x$F_2s))),
                           if(length(x$F_qml)) setColnames(x$F_qml, paste("QML", colnames(x$F_qml))) else NULL),
               pca = x$F_pca, `2s` = x$F_2s, qml = x$F_qml, stop("Unknown method:", method[1L]))
   nf <- dim(F)[2L]
-  switch(type[1L],
+  switch(tolower(type[1L]),
     joint = {
       Xr <- frange(x$X_imp)
       if(scale.factors) F <- fscale(F)
@@ -238,7 +238,7 @@ as.data.frame.dfm <- function(x, ...,
     if(length(time) != T) stop(sprintf("time must be a length %s vector or NULL", T))
   }
 
-  res <- switch(pivot[1L],
+  res <- switch(tolower(pivot[1L]),
     long = list(Method = if(stringsAsFactors) setAttrib(rep(1:m, each = T*r), list(levels = nam, class = "factor")) else rep(nam, each = T*r),
                 Factor = if(stringsAsFactors) setAttrib(rep(1:r, times = m, each = T), list(levels = paste0("f", 1:r), class = "factor")) else rep(paste0("f", 1:r), times = m, each = T),
                 Time = if(length(time)) rep(time, times = m*r) else NULL,
@@ -297,7 +297,8 @@ residuals.dfm <- function(object,
                           orig.format = FALSE,
                           standardized = FALSE, ...) {
   X <- object$X_imp
-  F <- switch(method, pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
+  F <- switch(tolower(method),
+              pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
   X_pred <- tcrossprod(F, object$C)
   if(!standardized) {
@@ -321,7 +322,8 @@ fitted.dfm <- function(object,
                        orig.format = FALSE,
                        standardized = FALSE, ...) {
   X <- object$X_imp
-  F <- switch(method, pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
+  F <- switch(tolower(method),
+              pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
   res <- tcrossprod(F, object$C)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
@@ -402,7 +404,8 @@ predict.dfm <- function(object,
                         resFUN = NULL,
                         resAC = 0.1, ...) {
 
-  F <- switch(method, pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
+  F <- switch(tolower(method),
+              pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
   nf <- dim(F)[2L]
   C <- object$C
@@ -586,7 +589,7 @@ as.data.frame.dfm_forecast <- function(x, ...,
                               time = seq_len(nrow(x$F) + x$h),
                               stringsAsFactors = TRUE) {
 
-  mat <- switch(use[1L],
+  mat <- switch(tolower(use[1L]),
                 factors = rbind(x$F, x$F_fcst),
                 data = rbind(x$X, x$X_fcst),
                 both = cbind(rbind(x$F, x$F_fcst), rbind(x$X, x$X_fcst)),
@@ -597,7 +600,7 @@ as.data.frame.dfm_forecast <- function(x, ...,
   r <- ncol(mat)
   if(!is.null(time) && length(time) != T) stop(sprintf("time must be a length %s vector or NULL", T))
 
-  res <- switch(pivot[1L],
+  res <- switch(tolower(pivot[1L]),
       long = list(Variable = if(stringsAsFactors) setAttrib(rep(1:r, each = T), list(levels = dimnames(mat)[[2L]], class = "factor")) else
                                                 rep(dimnames(mat)[[2L]], each = T),
                   Time = if(length(time)) rep(time, r) else NULL,
