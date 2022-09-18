@@ -188,12 +188,17 @@ tsnarmimp <- function(X,
                        na.rm.method = c("LE", "all"),
                        na.impute = c("median.ma.spline", "median.ma", "median", "rnorm"),
                        ma.terms = 3L) {
+
+  if(length(max.missing) + length(ma.terms) != 2L) stop("Parameters max.missing and ma.terms must be length 1")
+  if(!is.numeric(max.missing) || max.missing < 0 || max.missing > 1) stop("max.missing must be a proportion between 0 and 1")
+  if(!is.integer(ma.terms)) ma.terms <- as.integer(ma.terms)
+
   W <- is.na(X)
   n <- dim(X)[2L]
   rm.rows <- NULL
   if(max.missing < 1) {
-    thresh <- switch(na.rm.method[1L],
-                     LE = findNA_LE(W, max.missing),
+    thresh <- switch(tolower(na.rm.method[1L]),
+                     le = findNA_LE(W, max.missing),
                      all = rowSums(W) > max.missing * n,
                      stop("Unknown na.rm.method:", na.rm.method[1L]))
     if(any(thresh)) {
@@ -202,7 +207,7 @@ tsnarmimp <- function(X,
       W <- W[-rm.rows, ]
     }
   }
-  X_imp <- switch(na.impute[1L],
+  X_imp <- switch(tolower(na.impute[1L]),
                   median = fmedian(X, TRA = "replace_NA"), # replace(X, W, fmedian(X, TRA = 1L)[W]),
                   rnorm = replace(X, W, rnorm(sum(W))),
                   median.ma = impNA_MA(X, W, ma.terms),

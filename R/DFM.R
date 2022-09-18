@@ -208,9 +208,18 @@ DFM <- function(X, r, p = 1L, ...,
                 pos.corr = TRUE,
                 check.increased = FALSE) {
 
-  rRi <- switch(rR[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
-  rQi <- switch(rQ[1L], identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
+  rRi <- switch(tolower(rR[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
+  rQi <- switch(tolower(rQ[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
   BMl <- switch(tolower(em.method[1L]), dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
+  if(sum(length(r), length(p), length(min.iter), length(max.iter), length(tol), length(pos.corr), length(check.increased)) != 7L)
+    stop("Parameters r, p, min.iter, max.iter, tol, pos.corr and check.increased need to be length 1")
+  if(!is.integer(r)) r <- as.integer(r)
+  if(!is.integer(p)) p <- as.integer(p)
+  if(!is.integer(min.iter)) min.iter <- as.integer(min.iter)
+  if(!is.integer(max.iter)) max.iter <- as.integer(max.iter)
+  if(!is.double(tol)) tol <- as.double(tol)
+  if(!is.logical(pos.corr)) pos.corr <- as.logical(pos.corr)
+  if(!is.logical(check.increased)) check.increased <- as.logical(check.increased)
 
   rp <- r * p
   sr <- 1:r
