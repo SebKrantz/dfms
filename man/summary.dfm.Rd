@@ -21,13 +21,13 @@
 
 \item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.}
 
-\item{compact}{integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix \link{C} and covariance matrix \link{R}, and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.}
+\item{compact}{integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and covariance matrix [R], and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.}
 }
 \value{
 Summary information following a dynamic factor model estimation.
 }
 \description{
-Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic model information and the factor transition matrix \link{A},
+Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic model information and the factor transition matrix [A],
 \code{summary.dfm} returns all system matrices and additional residual and goodness of fit statistics - with a print method allowing full or compact printout.
 }
 \examples{

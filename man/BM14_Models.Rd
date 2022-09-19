@@ -9,14 +9,14 @@
 \format{
 \code{BM14_Models} is a data frame with 101 obs. (series) and 8 columns:
 \describe{
-\item{series}{BM14 series code (converted to snake case for R)}
-\item{label}{BM14 series label}
-\item{code}{original series code from data source}
-\item{freq}{series frequency}
-\item{log_trans}{logical indicating whether the series was transformed by the natural log before differencing. Note that all data are provided in untransformed levels, and all data was (log-)differenced by BM14 before estimation.}
-\item{small}{logical indicating series included in the 'small' model of BM14. Proprietary series are excluded.}
-\item{medium}{logical indicating series included in the 'medium' model of BM14. Proprietary series are excluded.}
-\item{large}{logical indicating series included in the 'large' model of BM14. This comprises all series, thus the variable is redundant but included for completeness. Proprietary series are excluded.}
+  \item{series}{BM14 series code (converted to snake case for R)}
+  \item{label}{BM14 series label}
+  \item{code}{original series code from data source}
+  \item{freq}{series frequency}
+  \item{log_trans}{logical indicating whether the series was transformed by the natural log before differencing. Note that all data are provided in untransformed levels, and all data was (log-)differenced by BM14 before estimation.}
+  \item{small}{logical indicating series included in the 'small' model of BM14. Proprietary series are excluded.}
+  \item{medium}{logical indicating series included in the 'medium' model of BM14. Proprietary series are excluded.}
+  \item{large}{logical indicating series included in the 'large' model of BM14. This comprises all series, thus the variable is redundant but included for completeness. Proprietary series are excluded.}
 }
 }
 \source{

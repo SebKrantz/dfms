@@ -17,10 +17,10 @@ A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 
 
 A list with the following elements:
 \tabular{llll}{
-\code{Y} \tab\tab \code{x[-(1:p), ]}. \cr\cr
-\code{X} \tab\tab lags 1 - p of \code{x} combined column-wise. \cr\cr
-\code{A} \tab\tab \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}. \cr\cr
-\code{res} \tab\tab VAR residual matrix: \code{Y - X \%*\% A}. \cr\cr
+ \code{Y} \tab\tab \code{x[-(1:p), ]}. \cr\cr
+ \code{X} \tab\tab lags 1 - p of \code{x} combined column-wise. \cr\cr
+ \code{A} \tab\tab \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}. \cr\cr
+ \code{res} \tab\tab VAR residual matrix: \code{Y - X \%*\% A}. \cr\cr
 }
 }
 \description{
