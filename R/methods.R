@@ -759,7 +759,7 @@ plot.ICr <- function(x, ...) {
 #' @param show.grid logical. \code{TRUE} shows gridlines in each plot.
 #' @importFrom stats screeplot
 #' @export
-screeplot.ICr <- function(x, type = c("pve", "cum.pve"), show.grid = TRUE, max.r = 30, ...) {
+screeplot.ICr <- function(x, type = "pve", show.grid = TRUE, max.r = 30, ...) {
   ev <- x$eigenvalues
   n <- length(ev)
   pve <- (ev / sum(ev)) * 100
