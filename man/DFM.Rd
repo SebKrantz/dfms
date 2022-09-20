@@ -11,7 +11,7 @@ DFM(
   ...,
   rQ = c("none", "diagonal", "identity"),
   rR = c("diagonal", "identity", "none"),
-  em.method = c("DGR", "BM", "none"),
+  em.method = c("auto", "DGR", "BM", "none"),
   min.iter = 25L,
   max.iter = 100L,
   tol = 1e-04,
@@ -34,6 +34,7 @@ DFM(
 
 \item{em.method}{character. The implementation of the Expectation Maximization Algorithm used. The options are:
    \tabular{llll}{
+\code{"auto"} \tab\tab Automatic selection: \code{"BM"} if \code{anyNA(X)}, else \code{"DGR"}. \cr\cr
 \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
 \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
 \code{"none"} \tab\tab Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in

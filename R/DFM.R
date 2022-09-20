@@ -17,6 +17,7 @@
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
 #'    \tabular{llll}{
+#' \code{"auto"} \tab\tab Automatic selection: \code{"BM"} if \code{anyNA(X)}, else \code{"DGR"}. \cr\cr
 #' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
 #' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
 #' \code{"none"} \tab\tab Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
@@ -201,7 +202,7 @@
 DFM <- function(X, r, p = 1L, ...,
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
-                em.method = c("DGR", "BM", "none"),
+                em.method = c("auto", "DGR", "BM", "none"),
                 min.iter = 25L,
                 max.iter = 100L,
                 tol = 1e-4,
@@ -210,7 +211,6 @@ DFM <- function(X, r, p = 1L, ...,
 
   rRi <- switch(tolower(rR[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(tolower(rQ[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
-  BMl <- switch(tolower(em.method[1L]), dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
   if(sum(length(r), length(p), length(min.iter), length(max.iter), length(tol), length(pos.corr), length(check.increased)) != 7L)
     stop("Parameters r, p, min.iter, max.iter, tol, pos.corr and check.increased need to be length 1")
   if(!is.integer(r)) r <- as.integer(r)
@@ -236,7 +236,10 @@ DFM <- function(X, r, p = 1L, ...,
 
   # Missing values
   anymiss <- anyNA(X)
+  BMl <- switch(tolower(em.method[1L]), auto = anymiss, dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
   if(anymiss) { # Missing value removal / imputation
+    # TODO: Should the data be scaled and centered again after missing value imputation?
+    # I think no because we just use it to initialize the filter, and the filter runs on the standardized data with missing values
     X_imp <- tsnarmimp(X, ...)
     W <- attr(X_imp, "missing")
     rm.rows <- attr(X_imp, "rm.rows")
