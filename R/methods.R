@@ -129,8 +129,10 @@ print.dfm_summary <- function(x,
 #' @returns Nothing.
 #' @examples
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
-#'
+#' mod = DFM(diff(BM14_M), r = 3, p = 3)
+#' plot(mod)
+#' plot(mod, type = "individual", method = "all")
+#' plot(mod, type = "residual")
 #'
 #' @importFrom graphics boxplot axis box mtext plot.default
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
@@ -223,7 +225,7 @@ plot.dfm <- function(x,
 #' @examples
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#' mod = DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # Taking a single estimate:
 #' print(head(as.data.frame(mod, method = "qml")))
@@ -308,7 +310,7 @@ as.data.frame.dfm <- function(x, ...,
 #' @examples
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#' mod = DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # Residuals
 #' head(resid(mod))
@@ -405,7 +407,7 @@ fitted.dfm <- function(object,
 #' library(collapse)
 #'
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#' mod = DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # 15 period ahead forecast
 #' fc = predict(mod, h = 15)

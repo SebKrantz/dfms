@@ -152,7 +152,7 @@ screeplot(IC_small)
 VARselect(IC_small$F_pca[, 1:2])
 
 # Estimating the model with 2 factors and 3 lags
-dfm_small = DFM(BM14[, BM14_Models$small], 2, 3, em.method = "BM")
+dfm_small = DFM(BM14[, BM14_Models$small], 2, 3)
 
 # Inspecting the model
 summary(dfm_small)
@@ -175,7 +175,7 @@ screeplot(IC_medium)
 VARselect(IC_medium$F_pca[, 1:3])
 
 # Estimating the model with 3 factors and 3 lags
-dfm_medium = DFM(BM14[, BM14_Models$medium], 3, 3, em.method = "BM")
+dfm_medium = DFM(BM14[, BM14_Models$medium], 3, 3)
 
 # Inspecting the model
 summary(dfm_medium)
@@ -198,7 +198,7 @@ screeplot(IC_large)
 VARselect(IC_large$F_pca[, 1:6])
 
 # Estimating the model with 6 factors and 3 lags
-dfm_large = DFM(BM14, 6, 3, em.method = "BM")
+dfm_large = DFM(BM14, 6, 3)
 
 # Inspecting the model
 summary(dfm_large)
