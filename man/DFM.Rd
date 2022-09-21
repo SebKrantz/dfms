@@ -76,7 +76,7 @@ A list-like object of class 'dfm' with the following elements:
  \code{loglik} \tab\tab vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.\cr\cr
  \code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
  \code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
- \code{anyNA} \tab\tab single logical valued indicating whether there were any missing values in the data. If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
+ \code{anyNA} \tab\tab single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
  \code{rm.rows} \tab\tab vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
  \code{em.method} \tab\tab The EM method used.\cr\cr
  \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr

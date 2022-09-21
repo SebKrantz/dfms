@@ -96,7 +96,7 @@
 #'  \code{loglik} \tab\tab vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.\cr\cr
 #'  \code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
 #'  \code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
-#'  \code{anyNA} \tab\tab single logical valued indicating whether there were any missing values in the data. If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
+#'  \code{anyNA} \tab\tab single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
 #'  \code{rm.rows} \tab\tab vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
 #'  \code{em.method} \tab\tab The EM method used.\cr\cr
 #'  \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
@@ -236,7 +236,6 @@ DFM <- function(X, r, p = 1L, ...,
 
   # Missing values
   anymiss <- anyNA(X)
-  BMl <- switch(tolower(em.method[1L]), auto = anymiss, dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
   if(anymiss) { # Missing value removal / imputation
     # TODO: Should the data be scaled and centered again after missing value imputation?
     # I think no because we just use it to initialize the filter, and the filter runs on the standardized data with missing values
@@ -250,6 +249,10 @@ DFM <- function(X, r, p = 1L, ...,
     rm.rows <- NULL
   }
   T <- nrow(X)
+
+  # This is because after removing missing rows, the data could be complete, e.g. differencing data with diff.xts() of collapse::fdiff() just gives a NA row
+  if(anymiss && length(rm.rows)) anymiss <- any(W)
+  BMl <- switch(tolower(em.method[1L]), auto = anymiss, dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
 
   # Run PCA to get initial factor estimates:
   # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v # Not faster than eigen...
@@ -303,7 +306,7 @@ DFM <- function(X, r, p = 1L, ...,
                        P_0 = setDimnames(P_0[sr, sr, drop = FALSE], list(fnam, fnam)),
                        F_2s = setColnames(F_kal, fnam),
                        P_2s = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
-                       anyNA = anymiss,
+                       anyNA = anymiss, # || length(rm.rows), # This is for internal missing values only
                        rm.rows = rm.rows,
                        em.method = if(is.na(BMl)) "none" else if(BMl) "BM" else "DGR",
                        call = match.call())
