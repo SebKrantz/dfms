@@ -6,6 +6,12 @@ home:
 # template:
 #  bootstrap: 5
 
+articles:
+  - title: Introduction to dfms
+    desc: Provides a walk-through of all main features
+    contents:
+    - introduction
+
 right:
    - icon: fa-github
      href: https://github.com/SebKrantz/dfms

@@ -18,13 +18,16 @@ summary.dfm returns all system matrices and additional residual and goodness of 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dfms</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.2</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../articles/index.html">Articles</a>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -84,7 +87,7 @@ summary.dfm returns all system matrices and additional residual and goodness of 
 
 
 <dt>compact</dt>
-<dd><p>integer. Display a more compact printout: <code>0</code> prints everything, <code>1</code> omits the observation matrix [C] and covariance matrix [R], and <code>2</code> omits all disaggregated information - yielding a summary of only the factor estimates.</p></dd>
+<dd><p>integer. Display a more compact printout: <code>0</code> prints everything, <code>1</code> omits the observation matrix [C] and residual covariance matrix [cov(resid(model))], and <code>2</code> omits all disaggregated information on the input data. Sensible default are chosen for different sizes of the input dataset so as to limit large printouts.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -102,89 +105,93 @@ summary.dfm returns all system matrices and additional residual and goodness of 
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Factor Model: n = 9, T = 117, r = 2, p = 3, %NA = 7.5973</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1  L1.f2  L2.f1   L2.f2   L3.f1  L3.f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.6426 0.5214 0.6945 -1.8621 -0.6978 1.1665</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.2663 1.0482 0.4616 -0.8371 -0.4214 0.4514</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     L1.f1  L1.f2  L2.f1   L2.f2   L3.f1   L3.f2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1 0.6789 0.2413 -0.034 -0.4640 -0.0012 -0.1988</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 0.0353 0.2270 -0.026  0.0645 -0.0744  0.1802</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Factor Model: n = 9, T = 117, r = 2, p = 3, %NA = 7.5973</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = diff(BM14_Q), r = 2, p = 3)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  117  -0.0118   0.4768  2.8397  -18.1449  4.4612</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  117  -0.0088  -0.0481  1.3171   -5.1039  2.5317</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean  Median      SD      Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  117  -0.0084  0.3469  2.2931  -14.408  3.7167</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  117    0.003  0.0867  0.8146  -2.4636  2.1071</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1  L1.f2  L2.f1   L2.f2   L3.f1  L3.f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.6426 0.5214 0.6945 -1.8621 -0.6978 1.1665</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.2663 1.0482 0.4616 -0.8371 -0.4214 0.4514</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1  L1.f2    L2.f1    L2.f2     L3.f1   L3.f2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1 0.67890 0.2413 -0.03401 -0.46403 -0.001235 -0.1988</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 0.03533 0.2270 -0.02598  0.06451 -0.074449  0.1802</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Covariance Matrix [cov(F)]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          f1       f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  8.0641   0.8894*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.8894*  1.7349 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  5.2584   0.1622 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.1622   0.6636 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Error Covariance Matrix [Q]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        u1     u2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u1 2.9293 0.9844</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u2 0.9844 0.6969</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u1 2.7065 0.2039</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u2 0.2039 0.6618</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observation Matrix [C]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 f1      f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp         0.3192  0.0170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> priv_cons   0.2211 -0.1466</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> invest      0.3019 -0.0710</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> export      0.2995  0.1821</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> import      0.3199  0.0628</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl        0.3069 -0.4699</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> prductivity 0.1683  0.1787</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity    0.2330 -0.0046</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us      0.1972  0.1042</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp         0.4094 -0.1237</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> priv_cons   0.2755 -0.4353</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> invest      0.3810 -0.3022</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> export      0.3842  0.4215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> import      0.3911  0.2106</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl        0.3072 -0.3443</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> prductivity 0.2894  0.0222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity    0.2933  0.0157</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us      0.2511  0.1259</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observation Error Covariance Matrix [diag(R) - Restricted]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         gdp   priv_cons      invest      export      import        empl </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.1583      0.6148      0.2842      0.1094      0.1221      0.0829 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.0953      0.4616      0.1685      0.0301      0.1232      0.4160 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> prductivity    capacity      gdp_us </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.1380      0.3888      0.6212 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.2317      0.4737      0.6360 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observation Residual Covariance Matrix [cov(resid(DFM))]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   gdp priv_cons    invest    export    import      empl</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp           0.1345    0.1126*   0.0883*  -0.0497*  -0.0594*  -0.0064 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> priv_cons     0.1126*   0.6103    0.0935*  -0.0814*  -0.0329   -0.0460*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> invest        0.0883*   0.0935*   0.2678   -0.0759*  -0.0583*  -0.0150 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> export       -0.0497*  -0.0814*  -0.0759*   0.0742    0.0083    0.0084 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> import       -0.0594*  -0.0329   -0.0583*   0.0083    0.0953   -0.0061 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl         -0.0064   -0.0460*  -0.0150    0.0084   -0.0061    0.0457 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> prductivity   0.0898*   0.0925*   0.0790*  -0.0414*  -0.0824*  -0.0280*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity     -0.0526*  -0.0951   -0.0354   -0.0438*   0.0243   -0.0007 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us       -0.0354   -0.0044   -0.0065   -0.0209   -0.0418    0.0109 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp           0.0670   -0.0046   -0.0096   -0.0038*  -0.0357*  -0.0679*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> priv_cons    -0.0046    0.4173   -0.0735*   0.0059    0.0060   -0.0777*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> invest       -0.0096   -0.0735*   0.1263   -0.0010   -0.0210   -0.0620*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> export       -0.0038*   0.0059   -0.0010    0.0061   -0.0119*   0.0058 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> import       -0.0357*   0.0060   -0.0210   -0.0119*   0.1090    0.0367 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl         -0.0679*  -0.0777*  -0.0620*   0.0058    0.0367    0.3816 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> prductivity   0.0683*   0.0273    0.0173   -0.0024   -0.0748*  -0.2119*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity     -0.0470*  -0.0978*  -0.0320   -0.0201*   0.0624*   0.0628 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us       -0.0209   -0.0023    0.0045   -0.0095   -0.0252   -0.0236 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             prductivity  capacity    gdp_us</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp             0.0898*  -0.0526*  -0.0354 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> priv_cons       0.0925*  -0.0951   -0.0044 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> invest          0.0790*  -0.0354   -0.0065 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> export         -0.0414*  -0.0438*  -0.0209 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> import         -0.0824*   0.0243   -0.0418 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl           -0.0280*  -0.0007    0.0109 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> prductivity     0.1712   -0.0768*  -0.0540 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity       -0.0768*   0.4291   -0.0252 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us         -0.0540   -0.0252    0.6118 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp             0.0683*  -0.0470*  -0.0209 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> priv_cons       0.0273   -0.0978*  -0.0023 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> invest          0.0173   -0.0320    0.0045 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> export         -0.0024   -0.0201*  -0.0095 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> import         -0.0748*   0.0624*  -0.0252 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl           -0.2119*   0.0628   -0.0236 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> prductivity     0.2215   -0.1119*  -0.0496 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity       -0.1119*   0.4666   -0.0059 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us         -0.0496   -0.0059    0.6353 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Residual AR(1) Serial Correlation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         gdp   priv_cons      invest      export      import        empl </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    -0.14502    -0.16018    -0.13384    -0.01411    -0.04152    -0.23173 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   -0.149924   -0.272110   -0.206251   -0.215038   -0.007949    0.434361 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> prductivity    capacity      gdp_us </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    -0.09700     0.11880     0.15130 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    0.053696    0.091852    0.179658 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Residual AR(1) Serial Correlations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   N     Mean   Median      SD      Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   9  -0.0102  -0.0079  0.2282  -0.2721  0.4344</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Goodness of Fit: R-Squared</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         gdp   priv_cons      invest      export      import        empl </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.8655      0.3897      0.7322      0.9258      0.9047      0.9543 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.9330      0.5827      0.8737      0.9939      0.8910      0.6184 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> prductivity    capacity      gdp_us </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.8288      0.5709      0.3882 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      0.7785      0.5334      0.3647 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   N    Mean  Median      SD     Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   9  0.7289  0.8288  0.2251  0.3882  0.9543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   9  0.7299  0.7785  0.2139  0.3647  0.9939</span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>
