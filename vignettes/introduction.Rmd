@@ -49,11 +49,13 @@ BM14_Models_M <- subset(BM14_Models, freq == "M")
 Prior to estimation, all data is differenced by BM14, and some series are log, differenced, as indicated by the `log_trans` column in `BM14_Models`. In general, *dfms* uses a stationary Kalman Filter with time-invariant system matrices, and therefore expects data to be stationary. Data is also scaled and centered^[Data must be scaled and centered because the Kalman Filter has no intercept term.] in the main `DFM()` function, thus this does not need to be done by the user. 
 
 ```{r}
+library(magrittr)
 # log-transforming and first-differencing the data
 BM14_M[, BM14_Models_M$log_trans] %<>% log()
 BM14_M_diff = diff(BM14_M)
 plot(scale(BM14_M_diff), lwd = 1)
 ```
+
 ## Determining the Structure of the Model
 
 Before estimating a model, the `ICr()` function can be applied to determine the number of factors. It computes 3 information criteria proposed in Bai and NG (2002)^[Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. *Econometrica, 70*(1), 191-221. <doi:10.1111/1468-0262.00273>], whereby the second criteria generally suggests the most parsimonious model. 
