@@ -305,7 +305,7 @@ DFM <- function(X, r, p = 1L, ...,
                        P_2s = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
                        anyNA = anymiss,
                        rm.rows = rm.rows,
-                       em.method = em.method[1L],
+                       em.method = if(is.na(BMl)) "none" else if(BMl) "BM" else "DGR",
                        call = match.call())
 
   # We only report two-step solution
