@@ -132,7 +132,7 @@ print.dfm_summary <- function(x,
 #' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
 #'
 #'
-#' @importFrom graphics boxplot
+#' @importFrom graphics boxplot axis box mtext plot.default
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
 #' @export
 plot.dfm <- function(x,
