@@ -127,7 +127,7 @@ library(xts)
 library(collapse)
 
 # Fit DFM with 3 factors and 3 lags in the transition equation
-mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+mod = DFM(diff(BM14_M), r = 3, p = 3)
 
 # 15 period ahead forecast
 fc = predict(mod, h = 15)

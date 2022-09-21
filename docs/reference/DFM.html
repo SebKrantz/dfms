@@ -18,13 +18,16 @@ with time-invariant system matrices and classical assumptions, while permitting 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dfms</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.2</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li>
   <a href="../reference/index.html">Reference</a>
+</li>
+<li>
+  <a href="../articles/index.html">Articles</a>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
@@ -62,7 +65,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
   <span class="va">...</span>,
   rQ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"diagonal"</span>, <span class="st">"identity"</span><span class="op">)</span>,
   rR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"diagonal"</span>, <span class="st">"identity"</span>, <span class="st">"none"</span><span class="op">)</span>,
-  em.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DGR"</span>, <span class="st">"BM"</span>, <span class="st">"none"</span><span class="op">)</span>,
+  em.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"DGR"</span>, <span class="st">"BM"</span>, <span class="st">"none"</span><span class="op">)</span>,
   min.iter <span class="op">=</span> <span class="fl">25L</span>,
   max.iter <span class="op">=</span> <span class="fl">100L</span>,
   tol <span class="op">=</span> <span class="fl">1e-04</span>,
@@ -98,7 +101,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
 
 
 <dt>em.method</dt>
-<dd><p>character. The implementation of the Expectation Maximization Algorithm used. The options are:</p><table class="table table"><tr><td><code>"DGR"</code></td><td></td><td>The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations.</td><td></td></tr><tr><td><code>"BM"</code></td><td></td><td>The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.</td><td></td></tr><tr><td><code>"none"</code></td><td></td><td>Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
+<dd><p>character. The implementation of the Expectation Maximization Algorithm used. The options are:</p><table class="table table"><tr><td><code>"auto"</code></td><td></td><td>Automatic selection: <code>"BM"</code> if <code>anyNA(X)</code>, else <code>"DGR"</code>.</td><td></td></tr><tr><td><code>"DGR"</code></td><td></td><td>The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations.</td><td></td></tr><tr><td><code>"BM"</code></td><td></td><td>The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.</td><td></td></tr><tr><td><code>"none"</code></td><td></td><td>Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
 Doz, Giannone and Reichlin (2011) (the Kalman Filter is Initialized with system matrices obtained from a regression and VAR on PCA factor estimates).
 This yields significant performance gains over the iterative methods. Final system matrices are estimated by running a regression and a VAR on the smoothed factors.</td><td></td></tr></table></dd>
 
@@ -132,7 +135,7 @@ This yields significant performance gains over the iterative methods. Final syst
 <li><p><code>"missing"</code> is a \(T \times n\) logical matrix indicating missing or infinite values in the original data (which are imputed in <code>X_imp</code>).<br></p></li>
 <li><p><code>"attributes"</code> contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.<br></p></li>
 <li><p><code>"is.list"</code> is a logical value indicating whether the original data input was a list / data frame. <br></p></li>
-</ul></td><td></td></tr><tr><td><code>eigen</code></td><td></td><td><code>eigen(cov(X_imp))</code>.</td><td></td></tr><tr><td><code>F_pca</code></td><td></td><td>\(T \times r\) matrix of principal component factor estimates - <code>X_imp %*% eigen$vectors</code>.</td><td></td></tr><tr><td><code>P_0</code></td><td></td><td>\(r \times r\) initial factor covariance matrix estimate based on PCA results.</td><td></td></tr><tr><td><code>F_2s</code></td><td></td><td>\(T \times r\) matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA.</td><td></td></tr><tr><td><code>P_2s</code></td><td></td><td>\(r \times r \times T\) covariance matrices of two-step factor estimates.</td><td></td></tr><tr><td><code>F_qml</code></td><td></td><td>\(T \times r\) matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence.</td><td></td></tr><tr><td><code>P_qml</code></td><td></td><td>\(r \times r \times T\) covariance matrices of QML factor estimates.</td><td></td></tr><tr><td><code>A</code></td><td></td><td>\(r \times rp\) factor transition matrix.</td><td></td></tr><tr><td><code>C</code></td><td></td><td>\(n \times r\) observation matrix.</td><td></td></tr><tr><td><code>Q</code></td><td></td><td>\(r \times r\) state (error) covariance matrix.</td><td></td></tr><tr><td><code>R</code></td><td></td><td>\(n \times n\) observation (error) covariance matrix.</td><td></td></tr><tr><td><code>loglik</code></td><td></td><td>vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.</td><td></td></tr><tr><td><code>tol</code></td><td></td><td>The numeric convergence tolerance used.</td><td></td></tr><tr><td><code>converged</code></td><td></td><td>single logical valued indicating whether the EM algorithm converged (within <code>max.iter</code> iterations subject to <code>tol</code>).</td><td></td></tr><tr><td><code>anyNA</code></td><td></td><td>single logical valued indicating whether there were any missing values in the data. If <code>FALSE</code>, <code>X_imp</code> is simply the original data in matrix form, and does not have the <code>"missing"</code> attribute attached.</td><td></td></tr><tr><td><code>rm.rows</code></td><td></td><td>vector of any cases (rows) that were removed beforehand (subject to <code>max.missing</code> and <code>na.rm.method</code>). If no cases were removed the slot is <code>NULL</code>.</td><td></td></tr><tr><td><code>em.method</code></td><td></td><td>The EM method used.</td><td></td></tr><tr><td><code>call</code></td><td></td><td>call object obtained from <code><a href="https://rdrr.io/r/base/match.call.html" class="external-link">match.call()</a></code>.</td><td></td></tr></table></div>
+</ul></td><td></td></tr><tr><td><code>eigen</code></td><td></td><td><code>eigen(cov(X_imp))</code>.</td><td></td></tr><tr><td><code>F_pca</code></td><td></td><td>\(T \times r\) matrix of principal component factor estimates - <code>X_imp %*% eigen$vectors</code>.</td><td></td></tr><tr><td><code>P_0</code></td><td></td><td>\(r \times r\) initial factor covariance matrix estimate based on PCA results.</td><td></td></tr><tr><td><code>F_2s</code></td><td></td><td>\(T \times r\) matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA.</td><td></td></tr><tr><td><code>P_2s</code></td><td></td><td>\(r \times r \times T\) covariance matrices of two-step factor estimates.</td><td></td></tr><tr><td><code>F_qml</code></td><td></td><td>\(T \times r\) matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence.</td><td></td></tr><tr><td><code>P_qml</code></td><td></td><td>\(r \times r \times T\) covariance matrices of QML factor estimates.</td><td></td></tr><tr><td><code>A</code></td><td></td><td>\(r \times rp\) factor transition matrix.</td><td></td></tr><tr><td><code>C</code></td><td></td><td>\(n \times r\) observation matrix.</td><td></td></tr><tr><td><code>Q</code></td><td></td><td>\(r \times r\) state (error) covariance matrix.</td><td></td></tr><tr><td><code>R</code></td><td></td><td>\(n \times n\) observation (error) covariance matrix.</td><td></td></tr><tr><td><code>loglik</code></td><td></td><td>vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.</td><td></td></tr><tr><td><code>tol</code></td><td></td><td>The numeric convergence tolerance used.</td><td></td></tr><tr><td><code>converged</code></td><td></td><td>single logical valued indicating whether the EM algorithm converged (within <code>max.iter</code> iterations subject to <code>tol</code>).</td><td></td></tr><tr><td><code>anyNA</code></td><td></td><td>single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If <code>FALSE</code>, <code>X_imp</code> is simply the original data in matrix form, and does not have the <code>"missing"</code> attribute attached.</td><td></td></tr><tr><td><code>rm.rows</code></td><td></td><td>vector of any cases (rows) that were removed beforehand (subject to <code>max.missing</code> and <code>na.rm.method</code>). If no cases were removed the slot is <code>NULL</code>.</td><td></td></tr><tr><td><code>em.method</code></td><td></td><td>The EM method used.</td><td></td></tr><tr><td><code>call</code></td><td></td><td>call object obtained from <code><a href="https://rdrr.io/r/base/match.call.html" class="external-link">match.call()</a></code>.</td><td></td></tr></table></div>
     <div id="details">
     <h2>Details</h2>
     <p>This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:</p><ol><li><p>Linearity</p></li>
@@ -205,14 +208,14 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Estimating the model with 2 factors and 3 lags</span></span>
-<span class="r-in"><span class="va">dfm_small</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">small</span><span class="op">]</span>, <span class="fl">2</span>, <span class="fl">3</span>, em.method <span class="op">=</span> <span class="st">"BM"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">dfm_small</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">small</span><span class="op">]</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 26 iterations.</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Inspecting the model</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_small</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Factor Model: n = 14, T = 356, r = 2, p = 3, %NA = 38.3628</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$small], r = 2, p = 3, em.method = "BM")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$small], r = 2, p = 3)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD      Min     Max</span>
@@ -337,6 +340,10 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span>               capacity                 gdp_us </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     NA                     NA </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Residual AR(1) Serial Correlations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    N     Mean   Median      SD      Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   10  -0.1723  -0.2515  0.3086  -0.5237  0.2672</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Goodness of Fit: R-Squared</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            ip_tot_cstr               new_cars                 orders </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 0.3874                 0.0057                 0.2173 </span>
@@ -394,14 +401,14 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Estimating the model with 3 factors and 3 lags</span></span>
-<span class="r-in"><span class="va">dfm_medium</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">medium</span><span class="op">]</span>, <span class="fl">3</span>, <span class="fl">3</span>, em.method <span class="op">=</span> <span class="st">"BM"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">dfm_medium</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">medium</span><span class="op">]</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 26 iterations.</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Inspecting the model</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_medium</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Factor Model: n = 48, T = 356, r = 3, p = 3, %NA = 32.6135</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$medium], r = 3, p = 3, em.method = "BM")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$medium], r = 3, p = 3)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min     Max</span>
@@ -430,6 +437,10 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> u1  2.1176  1.1526 -0.3597</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> u2  1.1526  1.9879 -0.4395</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> u3 -0.3597 -0.4395  2.0555</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Residual AR(1) Serial Correlations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    N     Mean   Median      SD      Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   39  -0.0879  -0.1043  0.2624  -0.5417  0.4481</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    N   Mean  Median      SD     Min     Max</span>
@@ -476,14 +487,14 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Estimating the model with 6 factors and 3 lags</span></span>
-<span class="r-in"><span class="va">dfm_large</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span>, <span class="fl">6</span>, <span class="fl">3</span>, em.method <span class="op">=</span> <span class="st">"BM"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">dfm_large</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span>, <span class="fl">6</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 42 iterations.</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Inspecting the model</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_large</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Factor Model: n = 101, T = 356, r = 6, p = 3, %NA = 29.7363</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14, r = 6, p = 3, em.method = "BM")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14, r = 6, p = 3)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min      Max</span>
@@ -534,6 +545,10 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> u4  2.2611  0.8209 -0.5711  4.8600 -1.6002  0.1788</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> u5 -2.0748 -0.5604  0.4848 -1.6002  4.4129 -0.0902</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> u6  0.0669 -0.0135  0.0342  0.1788 -0.0902  3.2699</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Residual AR(1) Serial Correlations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    N     Mean   Median      SD      Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   92  -0.0706  -0.0965  0.2712  -0.5567  0.6628</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     N    Mean  Median      SD     Min     Max</span>

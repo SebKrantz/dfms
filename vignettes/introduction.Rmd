@@ -1,0 +1,167 @@
+---
+title: "Introduction to dfms"
+author: "Sebastian Krantz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to dfms}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  cache = TRUE,
+  fig.width = 7,
+  fig.height = 5,
+  comment = "#>"
+)
+
+options(max.print = 70)
+```
+
+*dfms* provides a user friendly and computationally efficient approach to estimate linear Gaussian Dynamic Factor Models in R. The package is not geared at any specific application, and can be used for dimensionality reduction, forecasting and nowcasting systems of time series. The use of the package is facilitated by a comprehensive set of methods to explore/plot models and extract results.
+
+```{r setup, message=FALSE}
+library(dfms)
+library(xts)
+```
+
+This vignette walks through the main features of the package a simple, single frequency dataset of monthly time series. The data provided in the package in *xts* format is taken from Banbura and Modugno (2014)^[Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. *Journal of Applied Econometrics, 29*(1), 133-160.], henceforth BM14, and covers the Euro Area from January 1980 through September 2009.
+
+```{r}
+dim(BM14_M)
+range(index(BM14_M))
+head(colnames(BM14_M))
+plot(scale(BM14_M), lwd = 1)
+```
+
+The data frame `BM14_Models` provides information about the series^[Both about the monthly ones and quarterly series contained in `BM14_Q`. The order of rows in `BM14_Models` matches the column order of series in `merge(BM14_M, BM14_Q)`.], and the various models estimated by BM14. 
+
+```{r}
+head(BM14_Models, 3)
+
+# Using only monthly data
+BM14_Models_M <- subset(BM14_Models, freq == "M")
+```
+
+Prior to estimation, all data is differenced by BM14, and some series are log, differenced, as indicated by the `log_trans` column in `BM14_Models`. In general, *dfms* uses a stationary Kalman Filter with time-invariant system matrices, and therefore expects data to be stationary. Data is also scaled and centered^[Data must be scaled and centered because the Kalman Filter has no intercept term.] in the main `DFM()` function, thus this does not need to be done by the user. 
+
+```{r}
+library(magrittr)
+# log-transforming and first-differencing the data
+BM14_M[, BM14_Models_M$log_trans] %<>% log()
+BM14_M_diff = diff(BM14_M)
+plot(scale(BM14_M_diff), lwd = 1)
+```
+
+## Determining the Structure of the Model
+
+Before estimating a model, the `ICr()` function can be applied to determine the number of factors. It computes 3 information criteria proposed in Bai and NG (2002)^[Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. *Econometrica, 70*(1), 191-221. <doi:10.1111/1468-0262.00273>], whereby the second criteria generally suggests the most parsimonious model. 
+
+```{r}
+ic = ICr(BM14_M_diff)
+print(ic)
+plot(ic)
+```
+
+Another option is to use a Screeplot to gauge the number of factors by looking for a kink in the plot. A mathematical procedure for finding the kink was suggested by Onatski (2010)^[Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. *The Review of Economics and Statistics, 92*(4), 1004-1016.], but this is currently not implemented in `ICr()`. 
+
+```{r}
+screeplot(ic)
+```
+
+Based on both the information criteria and the Screeplot, I gauge that a model with 4 factors should be estimated, as factors, 5, 6 and 7 do not add much to the explanatory power of the model. Next to the number of factors, the lag order of the factor-VAR of the transition equation should be estimated (the default is 1 lag). This can be done using the `VARselect()` function from the *vars* package, with PCA factor estimates reported by `ICr()`.
+
+```{r}
+# Using vars::VARselect() with 4 principal components to estimate the VAR lag order
+vars::VARselect(ic$F_pca[, 1:4])
+```
+
+The selection thus suggests we should estimate a factor model with ` r = 4` factors and `p = 3` lags^[Some authors like Doz, Giannone, and Reichlin (2012) additionally allow the number of transition error processes, termed 'dynamic factors' and given an extra parameter `q`, to be less than the number of 'static factors' `r`. I find this terminology confusing and the feature not very useful for most practical purposes, thus I have not implemented it in *dfms*.]. Before estimating the model I note that *dfms* does not deal with seasonality in series, thus it is recommended to also seasonally adjust data, e.g. using the *seasonal* package before estimation. BM14 only use seasonally adjusted series, thus this is not necessary with the example data provided. 
+
+## Estimation and Exploration
+
+Estimation can then simply be done using the `DFM()` function with parameters `r` and `p`^[Users can also choose from two different implementations of the EM algorithm using the argument `em.method`. The default is `em.method = "auto"`, which chooses the modified EM algorithm proposed by BM14 for missing data if `anyNA(X)`, and the plain EM implementation of Dos, Giannone and Reichlin (2012), henceforth DGR12, otherwise. The basline implementation of DGR12 is typically more than 2x faster than BM14's method, and can also be used with data that has a few random missing values (< 5%), but gives wrong results with many and systematically missing data, such as ragged edges at the beginning of end of the sample or series at different frequencies. With complete datasets, both `em.method = "DGR"` and `em.method = "BM"` gives identical factor estimates, and in this case `em.method = "DGR"` should be used.]. 
+
+```{r}
+# Estimating the model with 4 factors and 3 lags using BM14's EM algorithm
+model1 = DFM(BM14_M_diff, r = 4, p = 3)
+print(model1)
+plot(model1)
+```
+
+The model can be investigated using `summary()`, which returns an object of class 'dfm_summary' containing the system matrices and summary statistics of the factors and the residuals in the measurement equation, as well as the R-Squared of the factor model for individual series. The print method automatically adjusts the amount of information printed to the data size. For large databases with more than 40 series, no series-level statistics are printed. 
+
+```{r}
+dfm_summary <- summary(model1)
+print(dfm_summary) # Large model with > 40 series: defaults to compact = 2
+
+# Can request more detailed printouts
+# print(dfm_summary, compact = 1)
+# print(dfm_summary, compact = 0) 
+```
+
+Apart from the model summary, the *dfm* methods `residuals()` and `fitted()` return observation residuals and fitted values from the model. The default format is a plain matrix, but the se functions also have an argument to return data in the original (input) format.
+
+```{r}
+plot(resid(model1, orig.format = TRUE))
+plot(fitted(model1, orig.format = TRUE))
+```
+
+
+
+Another way to examine the factor model visually is to plot the Quasi-Maximum-Likelihood (QML) factor estimates against PCA and Two-Step estimates following Doz, Giannone and Reichlin (2011)^[Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. *Journal of Econometrics, 164*(1), 188-205.], where the Kalman Filter and Smoother is run only once. Both estimates are also computed by `DFM()` during EM estimation and can also be visualized with `plot.dfm`.
+
+```{r}
+plot(model1, method = "all", type = "individual")
+```
+
+The plot with the various estimates shows that the QML estimates are more volatile in the initial periods where there are many missing series, but less volatile in the latter periods. In general, QML estimates may now always be superior across the entire data range to Two-Step and PCA estimates. Often, Two-Step estimates also provide similar forecasting performance, and are much faster to estimate using `DFM(BM14_M_diff, r = 4, p = 3, em.method = "none")`.  
+
+The factor estimates themselves can be extracted in a data frame using `as.data.frame()`, which also provides various options regarding the estimates retained and teh format of the frame. It is also possible to add a time variable from the original data (the default is a sequency of integers).
+
+```{r}
+# Default: all estimates in long format
+head(as.data.frame(model1, time = index(BM14_M_diff)))
+```
+
+## Forecasting
+
+DFM forecasts can be obtained with the `predict()` method, which dynamically forecasts the factors using the transition equation (default 10 periods), and then also predicts data forecasts using the observation equation. Objects are of class 'dfm_forecast'
+
+```{r}
+# 12-period ahead DFM forecast
+fc = predict(model1, h = 12)
+print(fc)
+```
+
+These forecasts can also be visualized using a plot method. By default the entire series history is plotted along with the forecasts, thus it is often helpful to restrict the plot range. As with any stationary autoregressive model, the forecasts tend to zero quite quickly^[Depending also on the lag-order of the factor-VAR. Higher lag-orders product more interesting forecast dynamics.].  
+```{r}
+# Setting an appropriate plot range to see the forecast
+plot(fc, xlim = c(320, 370))
+# Predicting with Two-Step estimates
+# plot(predict(model1, h = 12, method = "2s"), xlim = c(320, 370))
+```
+
+
+The forecasts can also be retrieved in data frame using `as.data.frame()`. Again the method has various arguments to control the forecasts retained (factors, data or both, default factors), and the format of the frame. 
+
+```{r}
+# Factor forecasts in wide format
+head(as.data.frame(fc, pivot = "wide"))
+```
+
+## Notes About Estimation with Mixed Frequency
+
+TBA: basically duplicate quarterly series in the dataset to increase their weight. 
+
+
+## Additional Functions
+
+*dfms* also exports central functions that help with DFM estimation, such as imputing missing values with `tsnarmimp()`, estimating a VAR with `.VAR()`, or Kalman Filtering and Smoothing with `SKFS()`, or separately with `SKF()` followed by `FIS()`. I note here that to my knowledge these are the fastest routines for simple stationary Kalman Filtering and Smoothing available in R. *dfms* also exports a matrix inverse and pseudo-iverse from the Armadillo C++ library through the functions `ainv()` and `apinv()`. This is because I have found them to be often faster than `solve()`, and also more robust in borderline cases. 
+
+
+
+

@@ -17,6 +17,7 @@
 #' @param rR restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
 #'    \tabular{llll}{
+#' \code{"auto"} \tab\tab Automatic selection: \code{"BM"} if \code{anyNA(X)}, else \code{"DGR"}. \cr\cr
 #' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
 #' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
 #' \code{"none"} \tab\tab Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
@@ -95,7 +96,7 @@
 #'  \code{loglik} \tab\tab vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.\cr\cr
 #'  \code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
 #'  \code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
-#'  \code{anyNA} \tab\tab single logical valued indicating whether there were any missing values in the data. If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
+#'  \code{anyNA} \tab\tab single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
 #'  \code{rm.rows} \tab\tab vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
 #'  \code{em.method} \tab\tab The EM method used.\cr\cr
 #'  \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
@@ -139,7 +140,7 @@
 #' VARselect(IC_small$F_pca[, 1:2])
 #'
 #' # Estimating the model with 2 factors and 3 lags
-#' dfm_small = DFM(BM14[, BM14_Models$small], 2, 3, em.method = "BM")
+#' dfm_small = DFM(BM14[, BM14_Models$small], 2, 3)
 #'
 #' # Inspecting the model
 #' summary(dfm_small)
@@ -162,7 +163,7 @@
 #' VARselect(IC_medium$F_pca[, 1:3])
 #'
 #' # Estimating the model with 3 factors and 3 lags
-#' dfm_medium = DFM(BM14[, BM14_Models$medium], 3, 3, em.method = "BM")
+#' dfm_medium = DFM(BM14[, BM14_Models$medium], 3, 3)
 #'
 #' # Inspecting the model
 #' summary(dfm_medium)
@@ -185,7 +186,7 @@
 #' VARselect(IC_large$F_pca[, 1:6])
 #'
 #' # Estimating the model with 6 factors and 3 lags
-#' dfm_large = DFM(BM14, 6, 3, em.method = "BM")
+#' dfm_large = DFM(BM14, 6, 3)
 #'
 #' # Inspecting the model
 #' summary(dfm_large)
@@ -201,7 +202,7 @@
 DFM <- function(X, r, p = 1L, ...,
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
-                em.method = c("DGR", "BM", "none"),
+                em.method = c("auto", "DGR", "BM", "none"),
                 min.iter = 25L,
                 max.iter = 100L,
                 tol = 1e-4,
@@ -210,7 +211,6 @@ DFM <- function(X, r, p = 1L, ...,
 
   rRi <- switch(tolower(rR[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(tolower(rQ[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
-  BMl <- switch(tolower(em.method[1L]), dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
   if(sum(length(r), length(p), length(min.iter), length(max.iter), length(tol), length(pos.corr), length(check.increased)) != 7L)
     stop("Parameters r, p, min.iter, max.iter, tol, pos.corr and check.increased need to be length 1")
   if(!is.integer(r)) r <- as.integer(r)
@@ -237,6 +237,8 @@ DFM <- function(X, r, p = 1L, ...,
   # Missing values
   anymiss <- anyNA(X)
   if(anymiss) { # Missing value removal / imputation
+    # TODO: Should the data be scaled and centered again after missing value imputation?
+    # I think no because we just use it to initialize the filter, and the filter runs on the standardized data with missing values
     X_imp <- tsnarmimp(X, ...)
     W <- attr(X_imp, "missing")
     rm.rows <- attr(X_imp, "rm.rows")
@@ -247,6 +249,10 @@ DFM <- function(X, r, p = 1L, ...,
     rm.rows <- NULL
   }
   T <- nrow(X)
+
+  # This is because after removing missing rows, the data could be complete, e.g. differencing data with diff.xts() of collapse::fdiff() just gives a NA row
+  if(anymiss && length(rm.rows)) anymiss <- any(W)
+  BMl <- switch(tolower(em.method[1L]), auto = anymiss, dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
 
   # Run PCA to get initial factor estimates:
   # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v # Not faster than eigen...
@@ -300,9 +306,9 @@ DFM <- function(X, r, p = 1L, ...,
                        P_0 = setDimnames(P_0[sr, sr, drop = FALSE], list(fnam, fnam)),
                        F_2s = setColnames(F_kal, fnam),
                        P_2s = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
-                       anyNA = anymiss,
+                       anyNA = anymiss, # || length(rm.rows), # This is for internal missing values only
                        rm.rows = rm.rows,
-                       em.method = em.method[1L],
+                       em.method = if(is.na(BMl)) "none" else if(BMl) "BM" else "DGR",
                        call = match.call())
 
   # We only report two-step solution

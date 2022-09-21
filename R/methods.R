@@ -58,6 +58,7 @@ summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "
                R_diag = diag(object$R),
                res_cov = rescov,
                res_ACF = ACF,
+               res_ACF_stats = msum(ACF),
                R2 = R2,
                R2_stats = msum(R2))
   class(summ) <- "dfm_summary"
@@ -65,7 +66,7 @@ summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "
 }
 
 #' @rdname summary.dfm
-#' @param compact integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and covariance matrix [R], and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.
+#' @param compact integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and residual covariance matrix [cov(resid(model))], and \code{2} omits all disaggregated information on the input data. Sensible default are chosen for different sizes of the input dataset so as to limit large printouts.
 #' @param \dots not used.
 #'
 #' @examples
@@ -107,6 +108,10 @@ print.dfm_summary <- function(x,
   if(compact < 2L) {
   cat("\nResidual AR(1) Serial Correlation\n")
   print(x$res_ACF, digits) # TODO: Add P-Value
+  }
+  cat("\nSummary of Residual AR(1) Serial Correlations\n")
+  print(x$res_ACF_stats, digits)
+  if(compact < 2L) {
   cat("\nGoodness of Fit: R-Squared\n")
   print(x$R2, digits)
   }
@@ -124,10 +129,12 @@ print.dfm_summary <- function(x,
 #' @returns Nothing.
 #' @examples
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#' mod = DFM(diff(BM14_M), r = 3, p = 3)
+#' plot(mod)
+#' plot(mod, type = "individual", method = "all")
+#' plot(mod, type = "residual")
 #'
-#'
-#' @importFrom graphics boxplot
+#' @importFrom graphics boxplot axis box mtext plot.default
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
 #' @export
 plot.dfm <- function(x,
@@ -138,45 +145,67 @@ plot.dfm <- function(x,
               all = cbind(x$F_pca, setColnames(x$F_2s, paste("TwoStep", colnames(x$F_2s))),
                           if(length(x$F_qml)) setColnames(x$F_qml, paste("QML", colnames(x$F_qml))) else NULL),
               pca = x$F_pca, `2s` = x$F_2s, qml = x$F_qml, stop("Unknown method:", method[1L]))
+
   nf <- dim(F)[2L]
+  allests <- tolower(method[1L]) == "all"
+  dots <- list(...)
+
   switch(tolower(type[1L]),
     joint = {
       Xr <- frange(x$X_imp)
       if(scale.factors) F <- fscale(F)
       Fr <- frange(F)
       ts.plot(x$X_imp, col = "grey85", ylim = c(min(Xr[1L], Fr[1L]), max(Xr[2L], Fr[2L])),
-              ylab = "Value", main = "Standardized Series and Factor Estimates", ...)
+              ylab = if(is.null(dots$ylab)) "Value" else dots$ylab,
+              main = if(is.null(dots$main)) "Standardized Series and Factor Estimates" else dots$main, ...)
       cols <- rainbow(nf)
       for (i in seq_len(nf)) lines(F[, i], col = cols[i])
-      legend("topleft", colnames(F), col = cols, lty = 1, bty = "n", ncol = if(method[1L] == "all") 3L else 1L)
+      legend("topleft", colnames(F), col = cols, lty = 1, bty = "n", ncol = if(allests) 3L else 1L)
     },
-    individual = { # TODO: Reduce plot margins
-      if(method[1L] == "all") {
-        qml <- !is.null(x$F_qml)
-        nf <- nf / (2L + qml)
-        oldpar <- par(mfrow = c(nf, 1L))
-        on.exit(par(oldpar))
-        for (i in seq_len(nf)) {
-          plot(F[, i], type = 'l', main = paste("Factor", i), col = "red", ylab = "Value",
-               xlab = if(i == nf) "Time" else "", ...)
-          lines(F[, i + nf], type = 'l', col = "orange")
-          if(qml) lines(F[, i + 2L * nf], type = 'l', col = "blue")
+    individual = {
+      # if(allests) {
+      if(scale.factors) F <- fscale(F)
+      qml <- !is.null(x$F_qml)
+      if(allests) nf <- nf / (2L + qml)
+
+      # Extracted from plot.ts()...
+      cex.lab = par("cex.lab")
+      col.lab = par("col.lab")
+      font.lab = par("font.lab")
+      oldpar <- par(mar = c(0, 5.1, 0, 2.1), oma = c(6, 0, 5, 0), mfrow = c(nf, 1L))
+      on.exit(par(oldpar))
+
+      for(i in seq_len(nf)) {
+        plot.default(F[, i], axes = FALSE, xlab = "", ylab = "", type = "n")
+        lines(F[, i], type = 'l', col = if(allests) "red" else "black", ...)
+        if(allests) {
+          lines(F[, i + nf], type = 'l', col = "orange", ...)
+          if(qml) lines(F[, i + 2L * nf], type = 'l', col = "blue", ...)
           if(i == 1L) legend("topleft", c("PCA", "TwoStep", if(qml) "QML"),
                              col = c("red", "orange", "blue"), lty = 1, bty = "n")
         }
-      } else {
-        oldpar <- par(mfrow = c(nf, 1L))
-        on.exit(par(oldpar))
-        cnF <- colnames(F)
-        for (i in seq_len(nf)) plot(F[, i], type = 'l', main = cnF[i], ylab = "Value",
-                                    xlab = if(i == nf) "Time" else "" , ...)
+        box(...)
+        axis(2, xpd = NA, ...)
+        if(i == nf) axis(1, xpd = NA, ...)
+        mtext(paste("f", i), 2, line = 3, cex = cex.lab, col = col.lab, font = font.lab, ...)
+        if(i == nf) mtext(if(is.null(dots$xlab)) "Time" else dots$xlab, side = 1, line = 3, cex = cex.lab, col = col.lab, font = font.lab, ...)
       }
+      par(mfrow = c(1, 1))
+      mtext(if(is.null(dots$main)) paste(if(scale.factors) "Standardized", "Factor Estimates") else dots$main,
+            side = 3, line = 3, cex = par("cex.main"), font = par("font.main"), col = par("col.main"), ...)
+      # } else {
+      #   oldpar <- par(mfrow = c(nf, 1L))
+      #   on.exit(par(oldpar))
+      #   cnF <- colnames(F)
+      #   for (i in seq_len(nf)) plot(F[, i], type = 'l', main = cnF[i], ylab = "Value",
+      #                               xlab = if(i == nf) "Time" else "" , ...)
+      # }
     },
     residual = {
-      if(method[1L] == "all") stop("Need to choose a specific method for residual plots")
+      if(allests) stop("Need to choose a specific method for residual plots")
       oldpar <- par(mar = c(11.5, 4.1, 4.1, 2.1))
       on.exit(par(oldpar))
-      boxplot(x$X_imp - tcrossprod(F, x$C), main = "Residuals by input variable", las = 2, ...)
+      boxplot(x$X_imp - tcrossprod(F, x$C), main = if(is.null(dots$main)) "Residuals by input variable" else dots$main, las = 2, ...)
     },
     stop("Unknown plot type: ", type[1L])
   )
@@ -196,7 +225,7 @@ plot.dfm <- function(x,
 #' @examples
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#' mod = DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # Taking a single estimate:
 #' print(head(as.data.frame(mod, method = "qml")))
@@ -281,7 +310,7 @@ as.data.frame.dfm <- function(x, ...,
 #' @examples
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#' mod = DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # Residuals
 #' head(resid(mod))
@@ -378,7 +407,7 @@ fitted.dfm <- function(object,
 #' library(collapse)
 #'
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+#' mod = DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # 15 period ahead forecast
 #' fc = predict(mod, h = 15)
@@ -759,7 +788,7 @@ plot.ICr <- function(x, ...) {
 #' @param show.grid logical. \code{TRUE} shows gridlines in each plot.
 #' @importFrom stats screeplot
 #' @export
-screeplot.ICr <- function(x, type = c("pve", "cum.pve"), show.grid = TRUE, max.r = 30, ...) {
+screeplot.ICr <- function(x, type = "pve", show.grid = TRUE, max.r = 30, ...) {
   ev <- x$eigenvalues
   n <- length(ev)
   pve <- (ev / sum(ev)) * 100

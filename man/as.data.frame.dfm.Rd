@@ -35,7 +35,7 @@ Extract Factor Estimates in a Data Frame
 \examples{
 library(xts)
 # Fit DFM with 3 factors and 3 lags in the transition equation
-mod = DFM(diff(BM14_M), r = 3, p = 3, em.method = "BM")
+mod = DFM(diff(BM14_M), r = 3, p = 3)
 
 # Taking a single estimate:
 print(head(as.data.frame(mod, method = "qml")))

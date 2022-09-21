@@ -13,7 +13,7 @@ ICr(X, max.r = min(20, ncol(X) - 1))
 
 \method{plot}{ICr}(x, ...)
 
-\method{screeplot}{ICr}(x, type = c("pve", "cum.pve"), show.grid = TRUE, max.r = 30, ...)
+\method{screeplot}{ICr}(x, type = "pve", show.grid = TRUE, max.r = 30, ...)
 }
 \arguments{
 \item{X}{a \code{T x n} data matrix or frame.}

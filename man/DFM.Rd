@@ -11,7 +11,7 @@ DFM(
   ...,
   rQ = c("none", "diagonal", "identity"),
   rR = c("diagonal", "identity", "none"),
-  em.method = c("DGR", "BM", "none"),
+  em.method = c("auto", "DGR", "BM", "none"),
   min.iter = 25L,
   max.iter = 100L,
   tol = 1e-04,
@@ -34,6 +34,7 @@ DFM(
 
 \item{em.method}{character. The implementation of the Expectation Maximization Algorithm used. The options are:
    \tabular{llll}{
+\code{"auto"} \tab\tab Automatic selection: \code{"BM"} if \code{anyNA(X)}, else \code{"DGR"}. \cr\cr
 \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
 \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
 \code{"none"} \tab\tab Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
@@ -75,7 +76,7 @@ A list-like object of class 'dfm' with the following elements:
  \code{loglik} \tab\tab vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.\cr\cr
  \code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
  \code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
- \code{anyNA} \tab\tab single logical valued indicating whether there were any missing values in the data. If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
+ \code{anyNA} \tab\tab single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
  \code{rm.rows} \tab\tab vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
  \code{em.method} \tab\tab The EM method used.\cr\cr
  \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
@@ -151,7 +152,7 @@ screeplot(IC_small)
 VARselect(IC_small$F_pca[, 1:2])
 
 # Estimating the model with 2 factors and 3 lags
-dfm_small = DFM(BM14[, BM14_Models$small], 2, 3, em.method = "BM")
+dfm_small = DFM(BM14[, BM14_Models$small], 2, 3)
 
 # Inspecting the model
 summary(dfm_small)
@@ -174,7 +175,7 @@ screeplot(IC_medium)
 VARselect(IC_medium$F_pca[, 1:3])
 
 # Estimating the model with 3 factors and 3 lags
-dfm_medium = DFM(BM14[, BM14_Models$medium], 3, 3, em.method = "BM")
+dfm_medium = DFM(BM14[, BM14_Models$medium], 3, 3)
 
 # Inspecting the model
 summary(dfm_medium)
@@ -197,7 +198,7 @@ screeplot(IC_large)
 VARselect(IC_large$F_pca[, 1:6])
 
 # Estimating the model with 6 factors and 3 lags
-dfm_large = DFM(BM14, 6, 3, em.method = "BM")
+dfm_large = DFM(BM14, 6, 3)
 
 # Inspecting the model
 summary(dfm_large)
