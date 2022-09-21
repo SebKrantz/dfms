@@ -21,7 +21,7 @@
 
 \item{method}{character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.}
 
-\item{compact}{integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and covariance matrix [R], and \code{2} omits all disaggregated information - yielding a summary of only the factor estimates.}
+\item{compact}{integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and residual covariance matrix [cov(resid(model))], and \code{2} omits all disaggregated information on the input data. Sensible default are chosen for different sizes of the input dataset so as to limit large printouts.}
 }
 \value{
 Summary information following a dynamic factor model estimation.
