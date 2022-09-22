@@ -160,7 +160,9 @@ TBA: basically duplicate quarterly series in the dataset to increase their weigh
 
 ## Additional Functions
 
-*dfms* also exports central functions that help with DFM estimation, such as imputing missing values with `tsnarmimp()`, estimating a VAR with `.VAR()`, or Kalman Filtering and Smoothing with `SKFS()`, or separately with `SKF()` followed by `FIS()`. I note here that to my knowledge these are the fastest routines for simple stationary Kalman Filtering and Smoothing available in R. *dfms* also exports a matrix inverse and pseudo-iverse from the Armadillo C++ library through the functions `ainv()` and `apinv()`. This is because I have found them to be often faster than `solve()`, and also more robust in borderline cases. 
+*dfms* also exports central functions that help with DFM estimation, such as imputing missing values with `tsnarmimp()`, estimating a VAR with `.VAR()`, or Kalman Filtering and Smoothing with `SKFS()`, or separately with `SKF()` followed by `FIS()`. To my knowledge these are the fastest routines for simple stationary Kalman Filtering and Smoothing currently available in R. The function `em_converged()` can be used to check convergence of the log-likelihood in EM estimation. 
+
+*dfms* also exports a matrix inverse and pseudo-iverse from the Armadillo C++ library through the functions `ainv()` and `apinv()`. These are often faster than `solve()`, and somewhat more robust in near-singularity cases. 
 
 
 
