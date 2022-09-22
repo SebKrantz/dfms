@@ -125,7 +125,7 @@ FIS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
 #' n <- ncol(X)
 #'
 #' ## Initializing the Kalman Filter with PCA results
-#' X_imp <- tsnarmimp(X)                # Imputing Data
+#' X_imp <- tsnarmimp(X)                 # Imputing Data
 #' v <- eigen(cov(X_imp))$vectors[, 1:r] # PCA
 #' F_pc <- X_imp %*% v                   # Principal component factor estimates
 #' C <- cbind(v, matrix(0, n, r*p-r))    # Observation matrix
