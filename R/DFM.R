@@ -10,11 +10,11 @@
 #' with time-invariant system matrices and classical assumptions, while permitting missing data.
 #'
 #' @param X a \code{T x n} data matrix or frame. May contain missing values.
-#' @param r number of factors.
-#' @param p number of lags in factor VAR.
+#' @param r integer. number of factors.
+#' @param p integer. number of lags in factor VAR.
 #' @param \dots (optional) arguments to \code{\link{tsnarmimp}}.
-#' @param rQ restrictions on the state (transition) covariance matrix (Q).
-#' @param rR restrictions on the observation (measurement) covariance matrix (R).
+#' @param rQ character. restrictions on the state (transition) covariance matrix (Q).
+#' @param rR character. restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
 #'    \tabular{llll}{
 #' \code{"auto"} \tab\tab Automatic selection: \code{"BM"} if \code{anyNA(X)}, else \code{"DGR"}. \cr\cr
@@ -209,17 +209,22 @@ DFM <- function(X, r, p = 1L, ...,
                 pos.corr = TRUE,
                 check.increased = FALSE) {
 
+  # Strict checking of inputs: as demanded by rOpenSci
   rRi <- switch(tolower(rR[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(tolower(rQ[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
   if(sum(length(r), length(p), length(min.iter), length(max.iter), length(tol), length(pos.corr), length(check.increased)) != 7L)
     stop("Parameters r, p, min.iter, max.iter, tol, pos.corr and check.increased need to be length 1")
+  if(!is.numeric(r) || r <= 0L) stop("r needs to be integer > 0")
   if(!is.integer(r)) r <- as.integer(r)
+  if(!is.numeric(p) || p <= 0L) stop("p needs to be integer > 0")
   if(!is.integer(p)) p <- as.integer(p)
+  if(!is.numeric(min.iter) || min.iter < 0L) stop("min.iter needs to be integer >= 0")
   if(!is.integer(min.iter)) min.iter <- as.integer(min.iter)
+  if(!is.numeric(max.iter) || max.iter < min.iter) stop("max.iter needs to be integer >= min.iter")
   if(!is.integer(max.iter)) max.iter <- as.integer(max.iter)
-  if(!is.double(tol)) tol <- as.double(tol)
-  if(!is.logical(pos.corr)) pos.corr <- as.logical(pos.corr)
-  if(!is.logical(check.increased)) check.increased <- as.logical(check.increased)
+  if(!is.numeric(tol) || tol <= 0) stop("tol needs to be numeric > 0")
+  if(!is.logical(pos.corr) || is.na(pos.corr)) stop("pos.corr needs to be logical")
+  if(!is.logical(check.increased) || is.na(check.increased)) stop("check.increased needs to be logical")
 
   rp <- r * p
   sr <- 1:r
@@ -311,9 +316,9 @@ DFM <- function(X, r, p = 1L, ...,
                        em.method = if(is.na(BMl)) "none" else if(BMl) "BM" else "DGR",
                        call = match.call())
 
-  # We only report two-step solution
+  # em.method = "none": only report two-step solution
   if(is.na(BMl)) {
-  # TODO: Better solution for system matrix estimation after Kalman Filtering and Smoothing? (could take matrices from Kalman Filter, but that would be before smoothing)
+    # Better solution for system matrix estimation after Kalman Filtering and Smoothing?
     var <- .VAR(F_kal, p)
     beta <- ainv(crossprod(F_kal)) %*% crossprod(F_kal, if(anymiss) replace(X_imp, W, 0) else X_imp) # good??
     Q <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))

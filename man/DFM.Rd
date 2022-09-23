@@ -22,15 +22,15 @@ DFM(
 \arguments{
 \item{X}{a \code{T x n} data matrix or frame. May contain missing values.}
 
-\item{r}{number of factors.}
+\item{r}{integer. number of factors.}
 
-\item{p}{number of lags in factor VAR.}
+\item{p}{integer. number of lags in factor VAR.}
 
 \item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}.}
 
-\item{rQ}{restrictions on the state (transition) covariance matrix (Q).}
+\item{rQ}{character. restrictions on the state (transition) covariance matrix (Q).}
 
-\item{rR}{restrictions on the observation (measurement) covariance matrix (R).}
+\item{rR}{character. restrictions on the observation (measurement) covariance matrix (R).}
 
 \item{em.method}{character. The implementation of the Expectation Maximization Algorithm used. The options are:
    \tabular{llll}{

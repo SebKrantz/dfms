@@ -725,8 +725,8 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
   T <- nrow(X)
 
   # defining rmax and checking if it is a positive integer
-  if(max.r < 1L || max.r != as.integer(max.r)) stop("rmax needs to be a positive integer")
-  else if(max.r > n) max.r <- n
+  if(!is.numeric(max.r) || max.r < 1) stop("max.r needs to be a positive integer")
+  max.r <- if(max.r > n) n else as.integer(max.r)
 
   # Eigen decomposition
   eigen_decomp <- eigen(cov(X), symmetric = TRUE)
