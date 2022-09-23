@@ -7,11 +7,11 @@
 em_converged(loglik, previous_loglik, tol = 1e-04, check.increased = FALSE)
 }
 \arguments{
-\item{loglik}{current value of the log-likelihood function.}
+\item{loglik}{numeric. Current value of the log-likelihood function.}
 
-\item{previous_loglik}{value of the log-likelihood function at the previous iteration.}
+\item{previous_loglik}{numeric. Value of the log-likelihood function at the previous iteration.}
 
-\item{tol}{the numerical tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.}
+\item{tol}{numerical. The tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.}
 
 \item{check.increased}{logical. Check if likelihood has increased.}
 }

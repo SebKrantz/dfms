@@ -25,7 +25,7 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #' Quickly estimate a VAR(p) model using Armadillo's inverse function.
 #'
 #' @param x data matrix with time series in columns - without missing values.
-#' @param p integer. The lag order of the VAR.
+#' @param p positive integer. The lag order of the VAR.
 #'
 #' @returns A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 1 - p of \code{x} combined column-wise,
 #' \code{A} which is the \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
@@ -59,9 +59,9 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 
 #' Convergence Test for EM-Algorithm
 #'
-#' @param loglik current value of the log-likelihood function.
-#' @param previous_loglik value of the log-likelihood function at the previous iteration.
-#' @param tol the numerical tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.
+#' @param loglik numeric. Current value of the log-likelihood function.
+#' @param previous_loglik numeric. Value of the log-likelihood function at the previous iteration.
+#' @param tol numerical. The tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.
 #' @param check.increased logical. Check if likelihood has increased.
 #' @return A logical statement indicating whether EM algorithm has converged. if \code{check.increased = TRUE}, a vector with 2 elements indicating the convergence status and whether the likelihood has decreased.
 #'
@@ -191,6 +191,7 @@ tsnarmimp <- function(X,
 
   if(length(max.missing) + length(ma.terms) != 2L) stop("Parameters max.missing and ma.terms must be length 1")
   if(!is.numeric(max.missing) || max.missing < 0 || max.missing > 1) stop("max.missing must be a proportion between 0 and 1")
+  if(!is.numeric(ma.terms) || ma.terms <= 0) stop("ma.terms needs to be a positive integer")
   if(!is.integer(ma.terms)) ma.terms <- as.integer(ma.terms)
 
   W <- is.na(X)

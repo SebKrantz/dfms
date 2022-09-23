@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{data matrix with time series in columns - without missing values.}
 
-\item{p}{integer. The lag order of the VAR.}
+\item{p}{positive integer. The lag order of the VAR.}
 }
 \value{
 A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 1 - p of \code{x} combined column-wise,
