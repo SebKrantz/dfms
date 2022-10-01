@@ -5,13 +5,13 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #' (Fast) Stationary Kalman Filter
 #'
 #' @description A simple and fast C++ implementation of the Kalman Filter for stationary data with time-invariant system matrices and missing data.
-#' @param X Data matrix (\eqn{T \times n}{T x n})
-#' @param A Transition matrix (\eqn{rp \times rp}{rp x rp})
-#' @param C Observation matrix (\eqn{n \times rp}{n x rp})
-#' @param Q State covariance (\eqn{rp \times rp}{rp x rp})
-#' @param R Observation covariance (\eqn{n \times n}{n x n})
-#' @param F_0 Initial state vector (\eqn{rp \times 1}{rp x 1})
-#' @param P_0 Initial state covariance (\eqn{rp \times rp}{rp x rp})
+#' @param X numeric data matrix (\eqn{T \times n}{T x n}).
+#' @param A transition matrix (\eqn{rp \times rp}{rp x rp}).
+#' @param C observation matrix (\eqn{n \times rp}{n x rp}).
+#' @param Q state covariance (\eqn{rp \times rp}{rp x rp}).
+#' @param R observation covariance (\eqn{n \times n}{n x n}).
+#' @param F_0 initial state vector (\eqn{rp \times 1}{rp x 1}).
+#' @param P_0 initial state covariance (\eqn{rp \times rp}{rp x rp}).
 #' @param loglik logical. Compute log-likelihood?
 #'
 #' @details The underlying state space model is:
@@ -62,13 +62,13 @@ SKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 }
 
 #' (Fast) Fixed-Interval Smoother (Kalman Smoother)
-#' @param A Transition matrix (\eqn{rp \times rp}{rp x rp})
-#' @param F State estimates (\eqn{T \times rp}{T x rp})
-#' @param F_pred State predicted estimates (\eqn{T \times rp}{T x rp})
-#' @param P Variance estimates (\eqn{rp \times rp \times T}{rp x rp x T})
-#' @param P_pred Predicted variance estimates (\eqn{rp \times rp \times T}{rp x rp x T})
-#' @param F_0 Initial state vector (\eqn{rp \times 1}{rp x 1}) or empty (\code{NULL})
-#' @param P_0 Initial state covariance (\eqn{rp \times rp}{rp x rp}) or empty (\code{NULL})
+#' @param A transition matrix (\eqn{rp \times rp}{rp x rp}).
+#' @param F state estimates (\eqn{T \times rp}{T x rp}).
+#' @param F_pred state predicted estimates (\eqn{T \times rp}{T x rp}).
+#' @param P variance estimates (\eqn{rp \times rp \times T}{rp x rp x T}).
+#' @param P_pred predicted variance estimates (\eqn{rp \times rp \times T}{rp x rp x T}).
+#' @param F_0 initial state vector (\eqn{rp \times 1}{rp x 1}) or empty (\code{NULL}).
+#' @param P_0 initial state covariance (\eqn{rp \times rp}{rp x rp}) or empty (\code{NULL}).
 #'
 #' @details The Kalman Smoother is given by:
 #'

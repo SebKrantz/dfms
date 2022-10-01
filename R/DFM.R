@@ -9,7 +9,7 @@
 #' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data
 #' with time-invariant system matrices and classical assumptions, while permitting missing data.
 #'
-#' @param X a \code{T x n} data matrix or frame. May contain missing values.
+#' @param X a \code{T x n} numeric data matrix or frame. May contain missing values.
 #' @param r integer. number of factors.
 #' @param p integer. number of lags in factor VAR.
 #' @param \dots (optional) arguments to \code{\link{tsnarmimp}}.

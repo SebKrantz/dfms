@@ -42,7 +42,7 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #'
 #' Quickly estimate a VAR(p) model using Armadillo's inverse function.
 #'
-#' @param x data matrix with time series in columns - without missing values.
+#' @param x data numeric matrix with time series in columns - without missing values.
 #' @param p positive integer. The lag order of the VAR.
 #'
 #' @returns A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 1 - p of \code{x} combined column-wise,
@@ -187,7 +187,7 @@ impNA_spline <- function(X, W, k) {
 #' This function imputes missing values in a stationary multivariate time series using various
 #' methods, and removes cases with too many missing values.
 #'
-#' @param X a matrix or multivariate time series where each column is a series.
+#' @param X a \code{T x n} numeric data matrix (incl. time series) or data frame.
 #' @param max.missing numeric. Proportion of series missing for a case to be considered missing.
 #' @param na.rm.method character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
 #' @param na.impute character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:
