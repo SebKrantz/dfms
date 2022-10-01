@@ -1,4 +1,8 @@
-
+#' Expectation Maximization Algorithm following Banbura and Modungo (2014)
+#' @inheritParams SKF
+#' @inheritParams impNA_MA
+#' @param XWO \code{X} with missing values set to 0.
+#' @noRd
 EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind, rQi, rRi) {
 
   kfs_res = SKFS(X, A, C, Q, R, F_0, P_0, TRUE)

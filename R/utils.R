@@ -1,6 +1,12 @@
-
+#' Generates Dimension names for the Factor Transition Matrix A
+#' @param nam a vector of names.
+#' @param p integer. The lag order.
+#' @noRd
 lagnam <- function(nam, p) list(nam, as.vector(t(outer(paste0("L", seq_len(p)), nam, paste, sep = "."))))
 
+#' Computes Summary Statistics: collapse::qsu() + median
+#' @param x a numeric vector, matrix or data frame like object.
+#' @noRd
 msum <- function(x) {
   stats <- qsu(x)
   med <- fmedian(x)
@@ -10,14 +16,26 @@ msum <- function(x) {
   res
 }
 
+#' Computes AR(1) Autocorrelation Coefficient (of DFM residuals)
+#' @param res a numeric matrix.
+#' @param anymiss logical indicating whether \code{res} contains any missing values.
+#' @noRd
 AC1 <- function(res, anymiss) {
   ACF <- cov(res[-1L, ], res[-nrow(res), ],
              use = if(anymiss) "pairwise.complete.obs" else "everything")
   diag(ACF) / fvar(res)
 }
 
+#' Undo Standardizing
+#' @param x a vector, matrix or data frame like object.
+#' @param stats a statistics matrix of class 'qsu'.
+#' @noRd
 unscale <- function(x, stats) TRA.matrix(TRA.matrix(x, stats[, "SD"], "*"), stats[, "Mean"], "+", set = TRUE)
 
+#' Faster tail() Function: For use in forecast.dfm()
+#' @param x a matrix.
+#' @param p the number of last rows to take from \code{x}.
+#' @noRd
 ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 
 #' (Fast) Barebones Vector-Autoregression
@@ -102,7 +120,10 @@ em_converged <- function(loglik, previous_loglik, tol = 1e-4, check.increased = 
  converged
 }
 
-
+#' Detect Missing Values at the Beginning and End of the Sample
+#' @param W a logical matrix indicating missingness: the result of \code{\link{is.na}}.
+#' @param threshold the proportion of values missing in a row for the case to be considered missing.
+#' @noRd
 findNA_LE <- function(W, threshold) {
   d <- dim(W)
   st <- 1:d[1L]
@@ -112,7 +133,11 @@ findNA_LE <- function(W, threshold) {
   return(nanLead | nanEnd)
 }
 
-
+#' Impute Time Series with Moving Average
+#' @param X numeric matrix representing a multivariate time series.
+#' @param W a logical matrix indicating missingness: the result of \code{\link{is.na}}.
+#' @param k integer indicating order of MA.
+#' @noRd
 impNA_MA <- function(X, W, k) {
   d <- dim(X)
   T <- d[1L]
@@ -130,7 +155,9 @@ impNA_MA <- function(X, W, k) {
   return(X)
 }
 
-
+#' Impute Time Series with Moving Average and Cubic Spline for Internal Missing Value
+#' @inheritParams impNA_MA
+#' @noRd
 impNA_spline <- function(X, W, k) {
   d <- dim(X)
   T <- d[1L]

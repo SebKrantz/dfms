@@ -1,4 +1,6 @@
-
+#' Expectation Maximization Algorithm following Doz, Giannone and Reichlin (2012)
+#' @inheritParams SKF
+#' @noRd
 EMstepDGR <- function(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi) {
 
   ## E-step will return a list of sufficient statistics, namely second
