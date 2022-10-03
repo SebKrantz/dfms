@@ -85,94 +85,94 @@
 #' @srrstats {G5.12} *Any conditions necessary to run extended tests such as platform requirements, memory, expected runtime, and artefacts produced that may need manual inspection, should be described in developer documentation such as a `CONTRIBUTING.md` or `tests/README.md` file.*
 #' -> I have translated the authors original matlab code into R and run tests with that code (see misc/ directory in the repo). These comparisons yielded that my implementation is equivalent to the original Matlab code.
 #'  testing can be improved upon in general, an idea would be to run tests against the r-translations of those Matlab codes in the testthat framework, but I have not come round to do that yet and I would first like to gather some more substantive feedback on the software.
-#' @srrstatsTODO {UL1.0} *Unsupervised Learning Software should explicitly document expected format (types or classes) for input data, including descriptions of types or classes which are not accepted; for example, specification that software accepts only numeric inputs in `vector` or `matrix` form, or that all inputs must be in `data.frame` form with both column and row names.*
-#' @srrstatsTODO {UL1.1} *Unsupervised Learning Software should provide distinct sub-routines to assert that all input data is of the expected form, and issue informative error messages when incompatible data are submitted.*
-#' @srrstatsTODO {UL1.2} *Unsupervised learning which uses row or column names to label output objects should assert that input data have non-default row or column names, and issue an informative message when these are not provided.*
-#' @srrstatsTODO {UL1.3} *Unsupervised Learning Software should transfer all relevant aspects of input data, notably including row and column names, and potentially information from other `attributes()`, to corresponding aspects of return objects.*
-#' @srrstatsTODO {UL1.3a} *Where otherwise relevant information is not transferred, this should be explicitly documented.*
-#' @srrstatsTODO {UL1.4} *Unsupervised Learning Software should document any assumptions made with regard to input data; for example assumptions about distributional forms or locations (such as that data are centred or on approximately equivalent distributional scales). Implications of violations of these assumptions should be both documented and tested, in particular:*
-#' @srrstatsTODO {UL1.4a} *Software which responds qualitatively differently to input data which has components on markedly different scales should explicitly document such differences, and implications of submitting such data.*
-#' @srrstatsTODO {UL1.4b} *Examples or other documentation should not use `scale()` or equivalent transformations without explaining why scale is applied, and explicitly illustrating and contrasting the consequences of not applying such transformations.*
-#' @srrstatsTODO {UL2.0} *Routines likely to give unreliable or irreproducible results in response to violations of assumptions regarding input data (see UL1.6) should implement pre-processing steps to diagnose potential violations, and issue appropriately informative messages, and/or include parameters to enable suitable transformations to be applied.*
-#' @srrstatsTODO {UL2.1} *Unsupervised Learning Software should document any transformations applied to input data, for example conversion of label-values to `factor`, and should provide ways to explicitly avoid any default transformations (with error or warning conditions where appropriate).*
-#' @srrstatsTODO {UL2.2} *Unsupervised Learning Software which accepts missing values in input data should implement explicit parameters controlling the processing of missing values, ideally distinguishing `NA` or `NaN` values from `Inf` values.*
-#' @srrstatsTODO {UL2.3} *Unsupervised Learning Software should implement pre-processing routines to identify whether aspects of input data are perfectly collinear.*
-#' @srrstatsTODO {UL3.0} *Algorithms which apply sequential labels to input data (such as clustering or partitioning algorithms) should ensure that the sequence follows decreasing group sizes (so labels of "1", "a", or "A" describe the largest group, "2", "b", or "B" the second largest, and so on.)*
-#' @srrstatsTODO {UL3.1} *Dimensionality reduction or equivalent algorithms which label dimensions should ensure that that sequences of labels follows decreasing "importance" (for example, eigenvalues or variance contributions).*
-#' @srrstatsTODO {UL3.2} *Unsupervised Learning Software for which input data does not generally include labels (such as `array`-like data with no row names) should provide an additional parameter to enable cases to be labelled.*
-#' @srrstatsTODO {UL3.3} *Where applicable, Unsupervised Learning Software should implement routines to predict the properties (such as numerical ordinates, or cluster memberships) of additional new data without re-running the entire algorithm.*
-#' @srrstatsTODO {UL3.4} *Objects returned from Unsupervised Learning Software which labels, categorise, or partitions data into discrete groups should include, or provide immediate access to, quantitative information on intra-group variances or equivalent, as well as on inter-group relationships where applicable.*
-#' @srrstatsTODO {UL4.0} *Unsupervised Learning Software should return some form of "model" object, generally through using or modifying existing class structures for model objects, or creating a new class of model objects.*
-#' @srrstatsTODO {UL4.1} *Unsupervised Learning Software may enable an ability to generate a model object without actually fitting values. This may be useful for controlling batch processing of computationally intensive fitting algorithms.*
-#' @srrstatsTODO {UL4.2} *The return object from Unsupervised Learning Software should include, or otherwise enable immediate extraction of, all parameters used to control the algorithm used.*
-#' @srrstatsTODO {UL4.3} *Model objects returned by Unsupervised Learning Software should implement or appropriately extend a default `print` method which provides an on-screen summary of model (input) parameters and methods used to generate results. The `print` method may also summarise statistical aspects of the output data or results.*
-#' @srrstatsTODO {UL4.3a} *The default `print` method should always ensure only a restricted number of rows of any result matrices or equivalent are printed to the screen.*
-#' @srrstatsTODO {UL4.4} *Unsupervised Learning Software should also implement `summary` methods for model objects which should summarise the primary statistics used in generating the model (such as numbers of observations, parameters of methods applied). The `summary` method may also provide summary statistics from the resultant model.*
-#' @srrstatsTODO {UL6.0} *Objects returned by Unsupervised Learning Software should have default `plot` methods, either through explicit implementation, extension of methods for existing model objects, through ensuring default methods work appropriately, or through explicit reference to helper packages such as [`factoextra`](https://github.com/kassambara/factoextra) and associated functions.*
-#' @srrstatsTODO {UL6.1} *Where the default `plot` method is **NOT** a generic `plot` method dispatched on the class of return objects (that is, through an S3-type `plot.<myclass>` function or equivalent), that method dispatch (or equivalent) should nevertheless exist in order to explicitly direct users to the appropriate function.*
-#' @srrstatsTODO {UL6.2} *Where default plot methods include labelling components of return objects (such as cluster labels), routines should ensure that labels are automatically placed to ensure readability, and/or that appropriate diagnostic messages are issued where readability is likely to be compromised (for example, through attempting to place too many labels).*
-#' @srrstatsTODO {UL7.0} *Inappropriate types of input data are rejected with expected error messages.*
-#' @srrstatsTODO {UL7.1} *Tests should demonstrate that violations of assumed input properties yield unreliable or invalid outputs, and should clarify how such unreliability or invalidity is manifest through the properties of returned objects.*
-#' @srrstatsTODO {UL7.2} *Demonstrate that labels placed on output data follow decreasing group sizes (**UL3.0**)*
-#' @srrstatsTODO {UL7.3} *Demonstrate that labels on input data are propagated to, or may be recovered from, output data.
-#' @srrstatsTODO {UL7.4} *Demonstrate that submission of new data to a previously fitted model can generate results more efficiently than initial model fitting.*
-#' @srrstatsTODO {UL7.5} *Batch processing routines should be explicitly tested, commonly via extended tests (see **G4.10**--**G4.12**).*
-#' @srrstatsTODO {UL7.5a} *Tests of batch processing routines should demonstrate that equivalent results are obtained from direct (non-batch) processing.*
-#' @srrstatsTODO {TS1.0} *Time Series Software should use and rely on explicit class systems developed for representing time series data, and should not permit generic, non-time-series input*
-#' @srrstatsTODO {TS1.1} *Time Series Software should explicitly document the types and classes of input data able to be passed to each function.*
-#' @srrstatsTODO {TS1.2} *Time Series Software should implement validation routines to confirm that inputs are of acceptable classes (or represented in otherwise appropriate ways for software which does not use class systems).*
-#' @srrstatsTODO {TS1.3} *Time Series Software should implement a single pre-processing routine to validate input data, and to appropriately transform it to a single uniform type to be passed to all subsequent data-processing functions (the [`tsbox` package](https://www.tsbox.help/) provides one convenient approach for this).*
-#' @srrstatsTODO {TS1.4} *The pre-processing function described above should maintain all time- or date-based components or attributes of input data.*
-#' @srrstatsTODO {TS1.5} *The software should ensure strict ordering of the time, frequency, or equivalent ordering index variable.*
-#' @srrstatsTODO {TS1.6} *Any violations of ordering should be caught in the pre-processing stages of all functions.*
-#' @srrstatsTODO {TS1.7} *Accept inputs defined via the [`units` package](https://github.com/r-quantities/units/) for attributing SI units to R vectors.*
-#' @srrstatsTODO {TS1.8} *Where time intervals or periods may be days or months, be explicit about the system used to represent such, particularly regarding whether a calendar system is used, or whether a year is presumed to have 365 days, 365.2422 days, or some other value.*
-#' @srrstatsTODO {TS2.0} *Time Series Software which presumes or requires regular data should only allow **explicit** missing values, and should issue appropriate diagnostic messages, potentially including errors, in response to any **implicit** missing values.*
-#' @srrstatsTODO {TS2.1} *Where possible, all functions should provide options for users to specify how to handle missing data, with options minimally including:*
-#' @srrstatsTODO {TS2.1a} *error on missing data; or.
-#' @srrstatsTODO {TS2.1b} *warn or ignore missing data, and proceed to analyse irregular data, ensuring that results from function calls with regular yet missing data return identical values to submitting equivalent irregular data with no missing values; or*
-#' @srrstatsTODO {TS2.1c} *replace missing data with appropriately imputed values.*
-#' @srrstatsTODO {TS2.2} *Consider stationarity of all relevant moments - typically first (mean) and second (variance) order, or otherwise document why such consideration may be restricted to lower orders only.*
-#' @srrstatsTODO {TS2.3} *Explicitly document all assumptions and/or requirements of stationarity*
-#' @srrstatsTODO {TS2.4} *Implement appropriate checks for all relevant forms of stationarity, and either:*
-#' @srrstatsTODO {TS2.4a} *issue diagnostic messages or warnings; or*
-#' @srrstatsTODO {TS2.4b} *enable or advise on appropriate transformations to ensure stationarity.*
-#' @srrstatsTODO {TS2.5} *Incorporate a system to ensure that both row and column orders follow the same ordering as the underlying time series data. This may, for example, be done by including the `index` attribute of the time series data as an attribute of the auto-covariance matrix.*
-#' @srrstatsTODO {TS2.6} *Where applicable, auto-covariance matrices should also include specification of appropriate units.*
-#' @srrstatsTODO {TS3.0} *Provide tests to demonstrate at least one case in which errors widen appropriately with forecast horizon.*
-#' @srrstatsTODO {TS3.1} *If possible, provide at least one test which violates TS3.0*
-#' @srrstatsTODO {TS3.2} *Document the general drivers of forecast errors or horizons, as demonstrated via the particular cases of TS3.0 and TS3.1*
-#' @srrstatsTODO {TS3.3} *Either:*
-#' @srrstatsTODO {TS3.3a} *Document, preferable via an example, how to trim forecast values based on a specified error margin or equivalent; or*
-#' @srrstatsTODO {TS3.3b} *Provide an explicit mechanism to trim forecast values to a specified error margin, either via an explicit post-processing function, or via an input parameter to a primary analytic function.*
-#' @srrstatsTODO {TS4.0} *Return values should either:*
-#' @srrstatsTODO {TS4.0a} *Be in same class as input data, for example by using the [`tsbox` package](https://www.tsbox.help/) to re-convert from standard internal format (see 1.4, above); or*
-#' @srrstatsTODO {TS4.0b} *Be in a unique, preferably class-defined, format.*
-#' @srrstatsTODO {TS4.1} *Any units included as attributes of input data should also be included within return values.*
-#' @srrstatsTODO {TS4.2} *The type and class of all return values should be explicitly documented.*
-#' @srrstatsTODO {TS4.3} *Return values should explicitly include all appropriate units and/or time scales*
-#' @srrstatsTODO {TS4.4} *Document the effect of any such transformations on forecast data, including potential effects on both first- and second-order estimates.*
-#' @srrstatsTODO {TS4.5} *In decreasing order of preference, either:*
-#' @srrstatsTODO {TS4.5a} *Provide explicit routines or options to back-transform data commensurate with original, non-stationary input data*
-#' @srrstatsTODO {TS4.5b} *Demonstrate how data may be back-transformed to a form commensurate with original, non-stationary input data.*
-#' @srrstatsTODO {TS4.5c} *Document associated limitations on forecast values*
-#' @srrstatsTODO {TS4.6} *Time Series Software which implements or otherwise enables forecasting should return either:*
-#' @srrstatsTODO {TS4.6a} *A distribution object, for example via one of the many packages described in the CRAN Task View on [Probability Distributions](https://cran.r-project.org/web/views/Distributions.html) (or the new [`distributional` package](https://pkg.mitchelloharawild.com/distributional/) as used in the [`fable` package](https://fable.tidyverts.org) for time-series forecasting).*
-#' @srrstatsTODO {TS4.6b} *For each variable to be forecast, predicted values equivalent to first- and second-order moments (for example, mean and standard error values).*
-#' @srrstatsTODO {TS4.6c} *Some more general indication of error associated with forecast estimates.*
-#' @srrstatsTODO {TS4.7} *Ensure that forecast (modelled) values are clearly distinguished from observed (model or input) values, either (in this case in no order of preference) by*
-#' @srrstatsTODO {TS4.7a} *Returning forecast values alone*
-#' @srrstatsTODO {TS4.7b} *Returning distinct list items for model and forecast values*
-#' @srrstatsTODO {TS4.7c} *Combining model and forecast values into a single return object with an appropriate additional column clearly distinguishing the two kinds of data.*
-#' @srrstatsTODO {TS5.0} *Implement default `plot` methods for any implemented class system.*
-#' @srrstatsTODO {TS5.1} *When representing results in temporal domain(s), ensure that one axis is clearly labelled "time" (or equivalent), with continuous units.*
-#' @srrstatsTODO {TS5.2} *Default to placing the "time" (or equivalent) variable on the horizontal axis.*
-#' @srrstatsTODO {TS5.3} *Ensure that units of the time, frequency, or index variable are printed by default on the axis.*
-#' @srrstatsTODO {TS5.4} *For frequency visualization, abscissa spanning $[-\pi, \pi]$ should be avoided in favour of positive units of $[0, 2\pi]$ or $[0, 0.5]$, in all cases with appropriate additional explanation of units.*
-#' @srrstatsTODO {TS5.5} *Provide options to determine whether plots of data with missing values should generate continuous or broken lines.*
-#' @srrstatsTODO {TS5.6} *By default indicate distributional limits of forecast on plot*
-#' @srrstatsTODO {TS5.7} *By default include model (input) values in plot, as well as forecast (output) values*
-#' @srrstatsTODO {TS5.8} *By default provide clear visual distinction between model (input) values and forecast (output) values.*
+#' @srrstats {UL1.0} *Unsupervised Learning Software should explicitly document expected format (types or classes) for input data, including descriptions of types or classes which are not accepted; for example, specification that software accepts only numeric inputs in `vector` or `matrix` form, or that all inputs must be in `data.frame` form with both column and row names.*
+#' @srrstats {UL1.1} *Unsupervised Learning Software should provide distinct sub-routines to assert that all input data is of the expected form, and issue informative error messages when incompatible data are submitted.*
+#' @srrstats {UL1.2} *Unsupervised learning which uses row or column names to label output objects should assert that input data have non-default row or column names, and issue an informative message when these are not provided.*
+#' @srrstats {UL1.3} *Unsupervised Learning Software should transfer all relevant aspects of input data, notably including row and column names, and potentially information from other `attributes()`, to corresponding aspects of return objects.*
+#' @srrstats {UL1.3a} *Where otherwise relevant information is not transferred, this should be explicitly documented.*
+#' @srrstats {UL1.4} *Unsupervised Learning Software should document any assumptions made with regard to input data; for example assumptions about distributional forms or locations (such as that data are centred or on approximately equivalent distributional scales). Implications of violations of these assumptions should be both documented and tested, in particular:*
+#' @srrstats {UL1.4a} *Software which responds qualitatively differently to input data which has components on markedly different scales should explicitly document such differences, and implications of submitting such data.*
+#' @srrstats {UL1.4b} *Examples or other documentation should not use `scale()` or equivalent transformations without explaining why scale is applied, and explicitly illustrating and contrasting the consequences of not applying such transformations.*
+#' -> Data is always scaled and centered before estimation to remove the need for intercept terms in the Kalman Filter and Smoother. This is stated in the documentatio e.g. ?DFM
+#' @srrstats {UL2.0} *Routines likely to give unreliable or irreproducible results in response to violations of assumptions regarding input data (see UL1.6) should implement pre-processing steps to diagnose potential violations, and issue appropriately informative messages, and/or include parameters to enable suitable transformations to be applied.*
+#' @srrstats {UL2.1} *Unsupervised Learning Software should document any transformations applied to input data, for example conversion of label-values to `factor`, and should provide ways to explicitly avoid any default transformations (with error or warning conditions where appropriate).*
+#' @srrstats {UL2.2} *Unsupervised Learning Software which accepts missing values in input data should implement explicit parameters controlling the processing of missing values, ideally distinguishing `NA` or `NaN` values from `Inf` values.*
+#' @srrstats {UL2.3} *Unsupervised Learning Software should implement pre-processing routines to identify whether aspects of input data are perfectly collinear.*
+#' -> It does not matter for DFMs if series are collinear. Users may deliberately choose to duplicate quarterly series to increase their weight in mixed-frequency estimations.
+#' @srrstats {UL3.0} *Algorithms which apply sequential labels to input data (such as clustering or partitioning algorithms) should ensure that the sequence follows decreasing group sizes (so labels of "1", "a", or "A" describe the largest group, "2", "b", or "B" the second largest, and so on.)*
+#' @srrstats {UL3.1} *Dimensionality reduction or equivalent algorithms which label dimensions should ensure that that sequences of labels follows decreasing "importance" (for example, eigenvalues or variance contributions).*
+#' @srrstats {UL3.2} *Unsupervised Learning Software for which input data does not generally include labels (such as `array`-like data with no row names) should provide an additional parameter to enable cases to be labelled.*
+#' @srrstats {UL4.0} *Unsupervised Learning Software should return some form of "model" object, generally through using or modifying existing class structures for model objects, or creating a new class of model objects.*
+#' @srrstats {UL4.2} *The return object from Unsupervised Learning Software should include, or otherwise enable immediate extraction of, all parameters used to control the algorithm used.*
+#' @srrstats {UL4.3} *Model objects returned by Unsupervised Learning Software should implement or appropriately extend a default `print` method which provides an on-screen summary of model (input) parameters and methods used to generate results. The `print` method may also summarise statistical aspects of the output data or results.*
+#' @srrstats {UL4.3a} *The default `print` method should always ensure only a restricted number of rows of any result matrices or equivalent are printed to the screen.*
+#' @srrstats {UL4.4} *Unsupervised Learning Software should also implement `summary` methods for model objects which should summarise the primary statistics used in generating the model (such as numbers of observations, parameters of methods applied). The `summary` method may also provide summary statistics from the resultant model.*
+#' @srrstats {UL6.0} *Objects returned by Unsupervised Learning Software should have default `plot` methods, either through explicit implementation, extension of methods for existing model objects, through ensuring default methods work appropriately, or through explicit reference to helper packages such as [`factoextra`](https://github.com/kassambara/factoextra) and associated functions.*
+#' @srrstats {UL6.2} *Where default plot methods include labelling components of return objects (such as cluster labels), routines should ensure that labels are automatically placed to ensure readability, and/or that appropriate diagnostic messages are issued where readability is likely to be compromised (for example, through attempting to place too many labels).*
+#' @srrstats {UL7.0} *Inappropriate types of input data are rejected with expected error messages.*
+#' @srrstats {UL7.1} *Tests should demonstrate that violations of assumed input properties yield unreliable or invalid outputs, and should clarify how such unreliability or invalidity is manifest through the properties of returned objects.*
+#' @srrstats {UL7.2} *Demonstrate that labels placed on output data follow decreasing group sizes (**UL3.0**)*
+#' @srrstats {UL7.3} *Demonstrate that labels on input data are propagated to, or may be recovered from, output data.
+#' @srrstats {UL7.4} *Demonstrate that submission of new data to a previously fitted model can generate results more efficiently than initial model fitting.*
+#' @srrstats {TS1.0} *Time Series Software should use and rely on explicit class systems developed for representing time series data, and should not permit generic, non-time-series input*
+#' @srrstats {TS1.1} *Time Series Software should explicitly document the types and classes of input data able to be passed to each function.*
+#' @srrstats {TS1.2} *Time Series Software should implement validation routines to confirm that inputs are of acceptable classes (or represented in otherwise appropriate ways for software which does not use class systems).*
+#' @srrstats {TS1.3} *Time Series Software should implement a single pre-processing routine to validate input data, and to appropriately transform it to a single uniform type to be passed to all subsequent data-processing functions (the [`tsbox` package](https://www.tsbox.help/) provides one convenient approach for this).*
+#' @srrstats {TS1.4} *The pre-processing function described above should maintain all time- or date-based components or attributes of input data.*
+#' @srrstats {TS1.5} *The software should ensure strict ordering of the time, frequency, or equivalent ordering index variable.*
+#' @srrstats {TS1.6} *Any violations of ordering should be caught in the pre-processing stages of all functions.*
+#' -> This software is at the intersection of dimensionality reduction and time series, and does not require input objects to have a certain class.
+#' For all practical purposes it is convenient to not require certain object types, although certain input object attributes such as the
+#' time scale of 'ts' or 'xts' objects could be used in model plots. This is an area where I still want to improve the software.
+#' @srrstats {TS1.7} *Accept inputs defined via the [`units` package](https://github.com/r-quantities/units/) for attributing SI units to R vectors.*
+#' @srrstats {TS1.8} *Where time intervals or periods may be days or months, be explicit about the system used to represent such, particularly regarding whether a calendar system is used, or whether a year is presumed to have 365 days, 365.2422 days, or some other value.*
+#' @srrstats {TS2.0} *Time Series Software which presumes or requires regular data should only allow **explicit** missing values, and should issue appropriate diagnostic messages, potentially including errors, in response to any **implicit** missing values.*
+#' @srrstats {TS2.1} *Where possible, all functions should provide options for users to specify how to handle missing data, with options minimally including:*
+#' @srrstats {TS2.1a} *error on missing data; or.
+#' @srrstats {TS2.1b} *warn or ignore missing data, and proceed to analyse irregular data, ensuring that results from function calls with regular yet missing data return identical values to submitting equivalent irregular data with no missing values; or*
+#' @srrstats {TS2.1c} *replace missing data with appropriately imputed values.*
+#' @srrstats {TS2.2} *Consider stationarity of all relevant moments - typically first (mean) and second (variance) order, or otherwise document why such consideration may be restricted to lower orders only.*
+#' @srrstats {TS2.3} *Explicitly document all assumptions and/or requirements of stationarity*
+#' @srrstats {TS2.4} *Implement appropriate checks for all relevant forms of stationarity, and either:*
+#' @srrstats {TS2.4a} *issue diagnostic messages or warnings; or*
+#' @srrstats {TS2.4b} *enable or advise on appropriate transformations to ensure stationarity.*
+#' -> it is possible to run DFM() on non-stationary data and obtain convergent results, although this is strongly discouraged.
+#' @srrstats {TS2.5} *Incorporate a system to ensure that both row and column orders follow the same ordering as the underlying time series data. This may, for example, be done by including the `index` attribute of the time series data as an attribute of the auto-covariance matrix.*
+#' @srrstats {TS2.6} *Where applicable, auto-covariance matrices should also include specification of appropriate units.*
+#' @srrstats {TS3.0} *Provide tests to demonstrate at least one case in which errors widen appropriately with forecast horizon.*
+#' @srrstats {TS3.1} *If possible, provide at least one test which violates TS3.0*
+#' -> currently I don't forecast the covariance metrices. This could be implemented in the future.
+#' @srrstats {TS3.2} *Document the general drivers of forecast errors or horizons, as demonstrated via the particular cases of TS3.0 and TS3.1*
+#' @srrstats {TS3.3} *Either:*
+#' @srrstats {TS3.3a} *Document, preferable via an example, how to trim forecast values based on a specified error margin or equivalent; or*
+#' @srrstats {TS3.3b} *Provide an explicit mechanism to trim forecast values to a specified error margin, either via an explicit post-processing function, or via an input parameter to a primary analytic function.*
+#' @srrstats {TS4.0} *Return values should either:*
+#' @srrstats {TS4.0a} *Be in same class as input data, for example by using the [`tsbox` package](https://www.tsbox.help/) to re-convert from standard internal format (see 1.4, above); or*
+#' @srrstats {TS4.0b} *Be in a unique, preferably class-defined, format.*
+#' @srrstats {TS4.1} *Any units included as attributes of input data should also be included within return values.*
+#' @srrstats {TS4.2} *The type and class of all return values should be explicitly documented.*
+#' @srrstats {TS4.3} *Return values should explicitly include all appropriate units and/or time scales*
+#' @srrstats {TS4.4} *Document the effect of any such transformations on forecast data, including potential effects on both first- and second-order estimates.*
+#' @srrstats {TS4.5} *In decreasing order of preference, either:*
+#' @srrstats {TS4.5a} *Provide explicit routines or options to back-transform data commensurate with original, non-stationary input data*
+#' @srrstats {TS4.5b} *Demonstrate how data may be back-transformed to a form commensurate with original, non-stationary input data.*
+#' @srrstats {TS4.5c} *Document associated limitations on forecast values*
+#' @srrstats {TS4.6} *Time Series Software which implements or otherwise enables forecasting should return either:*
+#' @srrstats {TS4.6a} *A distribution object, for example via one of the many packages described in the CRAN Task View on [Probability Distributions](https://cran.r-project.org/web/views/Distributions.html) (or the new [`distributional` package](https://pkg.mitchelloharawild.com/distributional/) as used in the [`fable` package](https://fable.tidyverts.org) for time-series forecasting).*
+#' @srrstats {TS4.6b} *For each variable to be forecast, predicted values equivalent to first- and second-order moments (for example, mean and standard error values).*
+#' @srrstats {TS4.6c} *Some more general indication of error associated with forecast estimates.*
+#' @srrstats {TS4.7} *Ensure that forecast (modelled) values are clearly distinguished from observed (model or input) values, either (in this case in no order of preference) by*
+#' @srrstats {TS4.7a} *Returning forecast values alone*
+#' @srrstats {TS4.7b} *Returning distinct list items for model and forecast values*
+#' @srrstats {TS4.7c} *Combining model and forecast values into a single return object with an appropriate additional column clearly distinguishing the two kinds of data.*
+#' @srrstats {TS5.0} *Implement default `plot` methods for any implemented class system.*
+#' @srrstats {TS5.1} *When representing results in temporal domain(s), ensure that one axis is clearly labelled "time" (or equivalent), with continuous units.*
+#' @srrstats {TS5.2} *Default to placing the "time" (or equivalent) variable on the horizontal axis.*
+#' @srrstats {TS5.3} *Ensure that units of the time, frequency, or index variable are printed by default on the axis.*
+#' @srrstats {TS5.5} *Provide options to determine whether plots of data with missing values should generate continuous or broken lines.*
+#' @srrstats {TS5.6} *By default indicate distributional limits of forecast on plot*
+#' @srrstats {TS5.7} *By default include model (input) values in plot, as well as forecast (output) values*
+#' @srrstats {TS5.8} *By default provide clear visual distinction between model (input) values and forecast (output) values.*
 #' @noRd
 NULL
 
@@ -184,6 +184,15 @@ NULL
 #' (These comments may also be deleted at any time.)
 #'
 #' @srrstatsNA {G1.5} *Software should include all code necessary to reproduce results which form the basis of performance claims made in associated publications.*
+#' -> No publications.
 #' @srrstatsNA {G4.0} *Statistical Software which enables outputs to be written to local files should parse parameters specifying file names to ensure appropriate file suffices are automatically generated where not provided.*
+#' @srrstatsNA {UL3.3} *Where applicable, Unsupervised Learning Software should implement routines to predict the properties (such as numerical ordinates, or cluster memberships) of additional new data without re-running the entire algorithm.*
+#' -> DFMs are always used to reduce or forecast the data at hand.
+#' @srrstatsNA {UL3.4} *Objects returned from Unsupervised Learning Software which labels, categorise, or partitions data into discrete groups should include, or provide immediate access to, quantitative information on intra-group variances or equivalent, as well as on inter-group relationships where applicable.*
+#' @srrstatsNA {UL4.1} *Unsupervised Learning Software may enable an ability to generate a model object without actually fitting values. This may be useful for controlling batch processing of computationally intensive fitting algorithms.*
+#' @srrstatsNA {UL6.1} *Where the default `plot` method is **NOT** a generic `plot` method dispatched on the class of return objects (that is, through an S3-type `plot.<myclass>` function or equivalent), that method dispatch (or equivalent) should nevertheless exist in order to explicitly direct users to the appropriate function.*
+#' @srrstatsNA {UL7.5} *Batch processing routines should be explicitly tested, commonly via extended tests (see **G4.10**--**G4.12**).*
+#' @srrstatsNA {UL7.5a} *Tests of batch processing routines should demonstrate that equivalent results are obtained from direct (non-batch) processing.*
+#' @srrstatsNA {TS5.4} *For frequency visualization, abscissa spanning $[-\pi, \pi]$ should be avoided in favour of positive units of $[0, 2\pi]$ or $[0, 0.5]$, in all cases with appropriate additional explanation of units.*
 #' @noRd
 NULL
