@@ -83,7 +83,7 @@ The selection thus suggests we should estimate a factor model with ` r = 4` fact
 
 ## Estimation and Exploration
 
-Estimation can then simply be done using the `DFM()` function with parameters `r` and `p`^[Users can also choose from two different implementations of the EM algorithm using the argument `em.method`. The default is `em.method = "auto"`, which chooses the modified EM algorithm proposed by BM14 for missing data if `anyNA(X)`, and the plain EM implementation of Dos, Giannone and Reichlin (2012), henceforth DGR12, otherwise. The basline implementation of DGR12 is typically more than 2x faster than BM14's method, and can also be used with data that has a few random missing values (< 5%), but gives wrong results with many and systematically missing data, such as ragged edges at the beginning of end of the sample or series at different frequencies. With complete datasets, both `em.method = "DGR"` and `em.method = "BM"` gives identical factor estimates, and in this case `em.method = "DGR"` should be used.]. 
+Estimation can then simply be done using the `DFM()` function with parameters `r` and `p`^[Users can also choose from two different implementations of the EM algorithm using the argument `em.method`. The default is `em.method = "auto"`, which chooses the modified EM algorithm proposed by BM14 for missing data if `anyNA(X)`, and the plain EM implementation of Dos, Giannone and Reichlin (2012), henceforth DGR12, otherwise. The baseline implementation of DGR12 is typically more than 2x faster than BM14's method, and can also be used with data that has a few random missing values (< 5%), but gives wrong results with many and systematically missing data, such as ragged edges at the beginning of end of the sample or series at different frequencies. With complete datasets, both `em.method = "DGR"` and `em.method = "BM"` gives identical factor estimates, and in this case `em.method = "DGR"` should be used.]. 
 
 ```{r}
 # Estimating the model with 4 factors and 3 lags using BM14's EM algorithm
@@ -103,7 +103,7 @@ print(dfm_summary) # Large model with > 40 series: defaults to compact = 2
 # print(dfm_summary, compact = 0) 
 ```
 
-Apart from the model summary, the *dfm* methods `residuals()` and `fitted()` return observation residuals and fitted values from the model. The default format is a plain matrix, but the se functions also have an argument to return data in the original (input) format.
+Apart from the model summary, the *dfm* methods `residuals()` and `fitted()` return observation residuals and fitted values from the model. The default format is a plain matrix, but the functions also have an argument to return data in the original (input) format.
 
 ```{r}
 plot(resid(model1, orig.format = TRUE))
@@ -120,7 +120,7 @@ plot(model1, method = "all", type = "individual")
 
 The plot with the various estimates shows that the QML estimates are more volatile in the initial periods where there are many missing series, but less volatile in the latter periods. In general, QML estimates may now always be superior across the entire data range to Two-Step and PCA estimates. Often, Two-Step estimates also provide similar forecasting performance, and are much faster to estimate using `DFM(BM14_M_diff, r = 4, p = 3, em.method = "none")`.  
 
-The factor estimates themselves can be extracted in a data frame using `as.data.frame()`, which also provides various options regarding the estimates retained and teh format of the frame. It is also possible to add a time variable from the original data (the default is a sequency of integers).
+The factor estimates themselves can be extracted in a data frame using `as.data.frame()`, which also provides various options regarding the estimates retained and the format of the frame. It is also possible to add a time variable from the original data (the default is a sequence of integers).
 
 ```{r}
 # Default: all estimates in long format
@@ -162,7 +162,7 @@ TBA: basically duplicate quarterly series in the dataset to increase their weigh
 
 *dfms* also exports central functions that help with DFM estimation, such as imputing missing values with `tsnarmimp()`, estimating a VAR with `.VAR()`, or Kalman Filtering and Smoothing with `SKFS()`, or separately with `SKF()` followed by `FIS()`. To my knowledge these are the fastest routines for simple stationary Kalman Filtering and Smoothing currently available in R. The function `em_converged()` can be used to check convergence of the log-likelihood in EM estimation. 
 
-*dfms* also exports a matrix inverse and pseudo-iverse from the Armadillo C++ library through the functions `ainv()` and `apinv()`. These are often faster than `solve()`, and somewhat more robust in near-singularity cases. 
+*dfms* also exports a matrix inverse and pseudo-inverse from the Armadillo C++ library through the functions `ainv()` and `apinv()`. These are often faster than `solve()`, and somewhat more robust in near-singularity cases. 
 
 
 
