@@ -187,7 +187,7 @@ impNA_spline <- function(X, W, k) {
 #' This function imputes missing values in a stationary multivariate time series using various
 #' methods, and removes cases with too many missing values.
 #'
-#' @param X a \code{T x n} numeric data matrix (incl. time series) or data frame.
+#' @param X a \code{T x n} numeric data matrix (incl. ts or xts objects) or data frame of stationary time series.
 #' @param max.missing numeric. Proportion of series missing for a case to be considered missing.
 #' @param na.rm.method character. Method to apply concerning missing cases selected through \code{max.missing}: \code{"LE"} only removes cases at the beginning or end of the sample, whereas \code{"all"} always removes missing cases.
 #' @param na.impute character. Method to impute missing values for the PCA estimates used to initialize the EM algorithm. Note that data are standardized (scaled and centered) beforehand. Available options are:

@@ -119,7 +119,7 @@ FIS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
 #' library(collapse)
 #'
 #' ## Two-Step factor estimates from monthly BM (2014) data
-#' X <- fscale(diff(qM(BM14_M)))
+#' X <- fscale(diff(qM(BM14_M))) # Standardizing as KF has no intercept
 #' r <- 5L # 5 Factors
 #' p <- 3L # 3 Lags
 #' n <- ncol(X)

@@ -668,7 +668,7 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #' @title Information Criteria to Determine the Number of Factors (r)
 #' @description Minimizes 3 information criteria proposed by Bai and Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
 #' A Screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
-#' @param X a \code{T x n} numeric data matrix or frame.
+#' @param X a \code{T x n} numeric data matrix or frame of stationary time series.
 #' @param max.r integer. The maximum number of factors for which IC should be computed (or eigenvalues to be displayed in the screeplot).
 #' @param x an object of type 'ICr'.
 #' @param \dots further arguments to \code{\link{ts.plot}} or \code{\link{plot}}.
