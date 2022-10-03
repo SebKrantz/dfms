@@ -73,7 +73,7 @@ A Screeplot can also be computed to eyeball the number of factors in the spirit 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>X</dt>
-<dd><p>a <code>T x n</code> data matrix or frame.</p></dd>
+<dd><p>a <code>T x n</code> numeric data matrix or frame of stationary time series.</p></dd>
 
 
 <dt>max.r</dt>
@@ -116,7 +116,7 @@ A Screeplot can also be computed to eyeball the number of factors in the spirit 
 </dl></div>
     <div id="details">
     <h2>Details</h2>
-    <p>Following Bai and Ng (2002) and De Valk et al. (2019), let NSSR(r) be the normalized sum of squared residuals [= SSR(r) / (n x T)] when r factors are estimated using principal components.
+    <p>Following Bai and Ng (2002) and De Valk et al. (2019), let \(NSSR(r)\) be the normalized sum of squared residuals \(SSR(r) / (n \times T)\) when r factors are estimated using principal components.
 Then the information criteria can be written as follows:</p>
 <p>$$IC_{r1} = \ln(NSSR(r)) + r\left(\frac{n + T}{nT}\right) + \ln\left(\frac{nT}{n + T}\right)$$
 $$IC_{r2} = \ln(NSSR(r)) + r\left(\frac{n + T}{nT}\right) + \ln(\min(n, T))$$
@@ -131,7 +131,7 @@ different results for finite samples. The penalty in \(IC_{r2}\) is highest in f
     </div>
     <div id="references">
     <h2>References</h2>
-    <p>Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. <em>Econometrica, 70</em>(1), 191-221. &lt;doi:10.1111/1468-0262.00273&gt;</p>
+    <p>Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. <em>Econometrica, 70</em>(1), 191-221. <a href="doi:10.1111/1468-0262.00273">doi:10.1111/1468-0262.00273</a></p>
 <p>Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. <em>The Review of Economics and Statistics, 92</em>(4), 1004-1016.</p>
 <p>De Valk, S., de Mattos, D., &amp; Ferreira, P. (2019). Nowcasting: An R package for predicting economic variables using dynamic factor models. <em>The R Journal, 11</em>(1), 230-244.</p>
     </div>
