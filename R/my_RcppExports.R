@@ -47,11 +47,11 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #'
 #' @returns Predicted and filtered state vectors and covariances.
 #' \tabular{lll}{
-#' F \tab\tab \eqn{T \times rp}{T x rp} filtered state vectors \cr\cr
-#' P \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} filtered state covariances \cr\cr
-#' F_pred \tab\tab \eqn{T \times rp}{T x rp} predicted state vectors \cr\cr
-#' P_pred \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances \cr\cr
-#' loglik \tab\tab value of the log likelihood
+#' F \tab\tab \eqn{T \times rp}{T x rp} filtered state vectors \cr
+#' P \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} filtered state covariances \cr
+#' F_pred \tab\tab \eqn{T \times rp}{T x rp} predicted state vectors \cr
+#' P_pred \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances \cr
+#' loglik \tab\tab value of the log likelihood \cr
 #' }
 #' @seealso \code{\link{FIS}} \code{\link{SKFS}}
 #' @examples # See ?SKFS
@@ -82,10 +82,10 @@ SKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #'
 #' @returns Smoothed state and covariance estimates, including initial (t = 0) values.
 #' \tabular{lll}{
-#' F_smooth \tab\tab \eqn{T \times rp}{T x rp} smoothed state vectors, equal to the filtered state in period \eqn{T} \cr\cr
-#' P_smooth \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} smoothed state covariance, equal to the filtered covariance in period \eqn{T} \cr\cr
-#' F_smooth_0 \tab\tab \eqn{1 \times rp}{1 x rp} initial smoothed state vectors, based on \code{F_0} \cr\cr
-#' P_smooth_0 \tab\tab \eqn{rp \times rp}{rp x rp} initial smoothed state covariance, based on \code{P_0}
+#' F_smooth \tab\tab \eqn{T \times rp}{T x rp} smoothed state vectors, equal to the filtered state in period \eqn{T} \cr
+#' P_smooth \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} smoothed state covariance, equal to the filtered covariance in period \eqn{T} \cr
+#' F_smooth_0 \tab\tab \eqn{1 \times rp}{1 x rp} initial smoothed state vectors, based on \code{F_0} \cr
+#' P_smooth_0 \tab\tab \eqn{rp \times rp}{rp x rp} initial smoothed state covariance, based on \code{P_0} \cr
 #' }
 #'
 #' @references
