@@ -5,7 +5,7 @@
 #'
 #' @title DFM Summary Methods
 #'
-#' @description Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic model information and the factor transition matrix [A],
+#' @description Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic model information and the factor transition matrix \eqn{\textbf{A}}{A},
 #' \code{summary.dfm} returns all system matrices and additional residual and goodness of fit statistics - with a print method allowing full or compact printout.
 #'
 #' @param x,object an object class 'dfm'.
@@ -66,7 +66,7 @@ summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "
 }
 
 #' @rdname summary.dfm
-#' @param compact integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix [C] and residual covariance matrix [cov(resid(model))], and \code{2} omits all disaggregated information on the input data. Sensible default are chosen for different sizes of the input dataset so as to limit large printouts.
+#' @param compact integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix \eqn{\textbf{C}}{C} and residual covariance matrix \code{cov(resid(model))}, and \code{2} omits all disaggregated information on the input data. Sensible default are chosen for different sizes of the input dataset so as to limit large printouts.
 #' @param \dots not used.
 #'
 #' @examples
@@ -668,7 +668,7 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #' @title Information Criteria to Determine the Number of Factors (r)
 #' @description Minimizes 3 information criteria proposed by Bai and Ng (2002) to determine the optimal number of factors r* to be used in an approximate factor model.
 #' A Screeplot can also be computed to eyeball the number of factors in the spirit of Onatski (2010).
-#' @param X a \code{T x n} data matrix or frame.
+#' @param X a \code{T x n} numeric data matrix or frame of stationary time series.
 #' @param max.r integer. The maximum number of factors for which IC should be computed (or eigenvalues to be displayed in the screeplot).
 #' @param x an object of type 'ICr'.
 #' @param \dots further arguments to \code{\link{ts.plot}} or \code{\link{plot}}.
@@ -679,7 +679,7 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #' \item{IC}{\code{r.max x 3} 'table' containing the 3 information criteria of Bai and Ng (2002), computed for all values of \code{r} from \code{1:r.max}.}
 #' \item{r.star}{vector of length 3 containing the number of factors (\code{r}) minimizing each information criterion.}
 #'
-#' @details Following Bai and Ng (2002) and De Valk et al. (2019), let NSSR(r) be the normalized sum of squared residuals [= SSR(r) / (n x T)] when r factors are estimated using principal components.
+#' @details Following Bai and Ng (2002) and De Valk et al. (2019), let \eqn{NSSR(r)}{NSSR(r)} be the normalized sum of squared residuals \eqn{SSR(r) / (n \times T)}{SSR(r) / (n x T)} when r factors are estimated using principal components.
 #' Then the information criteria can be written as follows:
 #'
 #' \deqn{IC_{r1} = \ln(NSSR(r)) + r\left(\frac{n + T}{nT}\right) + \ln\left(\frac{nT}{n + T}\right)}{ICr1 = ln(NSSR(r)) + r * (n + T)/(n * T) + ln((n * T)/(n + T))}

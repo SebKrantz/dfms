@@ -62,31 +62,31 @@
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>X</dt>
-<dd><p>Data matrix (\(T \times n\))</p></dd>
+<dd><p>numeric data matrix (\(T \times n\)).</p></dd>
 
 
 <dt>A</dt>
-<dd><p>Transition matrix (\(rp \times rp\))</p></dd>
+<dd><p>transition matrix (\(rp \times rp\)).</p></dd>
 
 
 <dt>C</dt>
-<dd><p>Observation matrix (\(n \times rp\))</p></dd>
+<dd><p>observation matrix (\(n \times rp\)).</p></dd>
 
 
 <dt>Q</dt>
-<dd><p>State covariance (\(rp \times rp\))</p></dd>
+<dd><p>state covariance (\(rp \times rp\)).</p></dd>
 
 
 <dt>R</dt>
-<dd><p>Observation covariance (\(n \times n\))</p></dd>
+<dd><p>observation covariance (\(n \times n\)).</p></dd>
 
 
 <dt>F_0</dt>
-<dd><p>Initial state vector (\(rp \times 1\))</p></dd>
+<dd><p>initial state vector (\(rp \times 1\)).</p></dd>
 
 
 <dt>P_0</dt>
-<dd><p>Initial state covariance (\(rp \times rp\))</p></dd>
+<dd><p>initial state covariance (\(rp \times rp\)).</p></dd>
 
 
 <dt>loglik</dt>
@@ -124,13 +124,13 @@ See 'Property 6.3: The Lag-One Covariance Smoother' in Shumway &amp; Stoffer (20
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     D</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Two-Step factor estimates from monthly BM (2014) data</span></span>
-<span class="r-in"><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://sebkrantz.github.io/collapse/reference/fscale.html" class="external-link">fscale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://sebkrantz.github.io/collapse/reference/quick-conversion.html" class="external-link">qM</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://sebkrantz.github.io/collapse/reference/fscale.html" class="external-link">fscale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://sebkrantz.github.io/collapse/reference/quick-conversion.html" class="external-link">qM</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># Standardizing as KF has no intercept</span></span>
 <span class="r-in"><span class="va">r</span> <span class="op">&lt;-</span> <span class="fl">5L</span> <span class="co"># 5 Factors</span></span>
 <span class="r-in"><span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">3L</span> <span class="co"># 3 Lags</span></span>
 <span class="r-in"><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Initializing the Kalman Filter with PCA results</span></span>
-<span class="r-in"><span class="va">X_imp</span> <span class="op">&lt;-</span> <span class="fu"><a href="tsnarmimp.html">tsnarmimp</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>                <span class="co"># Imputing Data</span></span>
+<span class="r-in"><span class="va">X_imp</span> <span class="op">&lt;-</span> <span class="fu"><a href="tsnarmimp.html">tsnarmimp</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>                 <span class="co"># Imputing Data</span></span>
 <span class="r-in"><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cov</a></span><span class="op">(</span><span class="va">X_imp</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">vectors</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="va">r</span><span class="op">]</span> <span class="co"># PCA</span></span>
 <span class="r-in"><span class="va">F_pc</span> <span class="op">&lt;-</span> <span class="va">X_imp</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">v</span>                   <span class="co"># Principal component factor estimates</span></span>
 <span class="r-in"><span class="va">C</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">v</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">n</span>, <span class="va">r</span><span class="op">*</span><span class="va">p</span><span class="op">-</span><span class="va">r</span><span class="op">)</span><span class="op">)</span>    <span class="co"># Observation matrix</span></span>

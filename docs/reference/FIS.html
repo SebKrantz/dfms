@@ -62,38 +62,38 @@
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>A</dt>
-<dd><p>Transition matrix (\(rp \times rp\))</p></dd>
+<dd><p>transition matrix (\(rp \times rp\)).</p></dd>
 
 
 <dt>F</dt>
-<dd><p>State estimates (\(T \times rp\))</p></dd>
+<dd><p>state estimates (\(T \times rp\)).</p></dd>
 
 
 <dt>F_pred</dt>
-<dd><p>State predicted estimates (\(T \times rp\))</p></dd>
+<dd><p>state predicted estimates (\(T \times rp\)).</p></dd>
 
 
 <dt>P</dt>
-<dd><p>Variance estimates (\(rp \times rp \times T\))</p></dd>
+<dd><p>variance estimates (\(rp \times rp \times T\)).</p></dd>
 
 
 <dt>P_pred</dt>
-<dd><p>Predicted variance estimates (\(rp \times rp \times T\))</p></dd>
+<dd><p>predicted variance estimates (\(rp \times rp \times T\)).</p></dd>
 
 
 <dt>F_0</dt>
-<dd><p>Initial state vector (\(rp \times 1\)) or empty (<code>NULL</code>)</p></dd>
+<dd><p>initial state vector (\(rp \times 1\)) or empty (<code>NULL</code>).</p></dd>
 
 
 <dt>P_0</dt>
-<dd><p>Initial state covariance (\(rp \times rp\)) or empty (<code>NULL</code>)</p></dd>
+<dd><p>initial state covariance (\(rp \times rp\)) or empty (<code>NULL</code>).</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     
 
-<p>Smoothed state and covariance estimates, including initial (t = 0) values.</p><table class="table table"><tr><td>F_smooth</td><td></td><td>\(T \times rp\) smoothed state vectors, equal to the filtered state in period \(T\)</td></tr><tr><td></td><td>P_smooth</td><td></td></tr><tr><td>\(rp \times rp \times T\) smoothed state covariance, equal to the filtered covariance in period \(T\)</td><td></td><td>F_smooth_0</td></tr><tr><td></td><td>\(1 \times rp\) initial smoothed state vectors, based on <code>F_0</code></td><td></td></tr><tr><td>P_smooth_0</td><td></td><td>\(rp \times rp\) initial smoothed state covariance, based on <code>P_0</code></td></tr></table></div>
+<p>Smoothed state and covariance estimates, including initial (t = 0) values.</p><table class="table table"><tr><td>F_smooth</td><td></td><td>\(T \times rp\) smoothed state vectors, equal to the filtered state in period \(T\)</td></tr><tr><td>P_smooth</td><td></td><td>\(rp \times rp \times T\) smoothed state covariance, equal to the filtered covariance in period \(T\)</td></tr><tr><td>F_smooth_0</td><td></td><td>\(1 \times rp\) initial smoothed state vectors, based on <code>F_0</code></td></tr><tr><td>P_smooth_0</td><td></td><td>\(rp \times rp\) initial smoothed state covariance, based on <code>P_0</code></td></tr></table></div>
     <div id="details">
     <h2>Details</h2>
     <p>The Kalman Smoother is given by:</p>

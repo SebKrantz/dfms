@@ -62,31 +62,31 @@
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>X</dt>
-<dd><p>Data matrix (\(T \times n\))</p></dd>
+<dd><p>numeric data matrix (\(T \times n\)).</p></dd>
 
 
 <dt>A</dt>
-<dd><p>Transition matrix (\(rp \times rp\))</p></dd>
+<dd><p>transition matrix (\(rp \times rp\)).</p></dd>
 
 
 <dt>C</dt>
-<dd><p>Observation matrix (\(n \times rp\))</p></dd>
+<dd><p>observation matrix (\(n \times rp\)).</p></dd>
 
 
 <dt>Q</dt>
-<dd><p>State covariance (\(rp \times rp\))</p></dd>
+<dd><p>state covariance (\(rp \times rp\)).</p></dd>
 
 
 <dt>R</dt>
-<dd><p>Observation covariance (\(n \times n\))</p></dd>
+<dd><p>observation covariance (\(n \times n\)).</p></dd>
 
 
 <dt>F_0</dt>
-<dd><p>Initial state vector (\(rp \times 1\))</p></dd>
+<dd><p>initial state vector (\(rp \times 1\)).</p></dd>
 
 
 <dt>P_0</dt>
-<dd><p>Initial state covariance (\(rp \times rp\))</p></dd>
+<dd><p>initial state covariance (\(rp \times rp\)).</p></dd>
 
 
 <dt>loglik</dt>
@@ -97,7 +97,7 @@
     <h2>Value</h2>
     
 
-<p>Predicted and filtered state vectors and covariances.</p><table class="table table"><tr><td>F</td><td></td><td>\(T \times rp\) filtered state vectors</td></tr><tr><td></td><td>P</td><td></td></tr><tr><td>\(rp \times rp \times T\) filtered state covariances</td><td></td><td>F_pred</td></tr><tr><td></td><td>\(T \times rp\) predicted state vectors</td><td></td></tr><tr><td>P_pred</td><td></td><td>\(rp \times rp \times T\) predicted state covariances</td></tr><tr><td></td><td>loglik</td><td></td></tr></table></div>
+<p>Predicted and filtered state vectors and covariances.</p><table class="table table"><tr><td>F</td><td></td><td>\(T \times rp\) filtered state vectors</td></tr><tr><td>P</td><td></td><td>\(rp \times rp \times T\) filtered state covariances</td></tr><tr><td>F_pred</td><td></td><td>\(T \times rp\) predicted state vectors</td></tr><tr><td>P_pred</td><td></td><td>\(rp \times rp \times T\) predicted state covariances</td></tr><tr><td>loglik</td><td></td><td>value of the log likelihood</td></tr></table></div>
     <div id="details">
     <h2>Details</h2>
     <p>The underlying state space model is:</p>

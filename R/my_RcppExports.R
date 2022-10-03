@@ -5,13 +5,13 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #' (Fast) Stationary Kalman Filter
 #'
 #' @description A simple and fast C++ implementation of the Kalman Filter for stationary data with time-invariant system matrices and missing data.
-#' @param X Data matrix (\eqn{T \times n}{T x n})
-#' @param A Transition matrix (\eqn{rp \times rp}{rp x rp})
-#' @param C Observation matrix (\eqn{n \times rp}{n x rp})
-#' @param Q State covariance (\eqn{rp \times rp}{rp x rp})
-#' @param R Observation covariance (\eqn{n \times n}{n x n})
-#' @param F_0 Initial state vector (\eqn{rp \times 1}{rp x 1})
-#' @param P_0 Initial state covariance (\eqn{rp \times rp}{rp x rp})
+#' @param X numeric data matrix (\eqn{T \times n}{T x n}).
+#' @param A transition matrix (\eqn{rp \times rp}{rp x rp}).
+#' @param C observation matrix (\eqn{n \times rp}{n x rp}).
+#' @param Q state covariance (\eqn{rp \times rp}{rp x rp}).
+#' @param R observation covariance (\eqn{n \times n}{n x n}).
+#' @param F_0 initial state vector (\eqn{rp \times 1}{rp x 1}).
+#' @param P_0 initial state covariance (\eqn{rp \times rp}{rp x rp}).
 #' @param loglik logical. Compute log-likelihood?
 #'
 #' @details The underlying state space model is:
@@ -47,11 +47,11 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #'
 #' @returns Predicted and filtered state vectors and covariances.
 #' \tabular{lll}{
-#' F \tab\tab \eqn{T \times rp}{T x rp} filtered state vectors \cr\cr
-#' P \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} filtered state covariances \cr\cr
-#' F_pred \tab\tab \eqn{T \times rp}{T x rp} predicted state vectors \cr\cr
-#' P_pred \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances \cr\cr
-#' loglik \tab\tab value of the log likelihood
+#' F \tab\tab \eqn{T \times rp}{T x rp} filtered state vectors \cr
+#' P \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} filtered state covariances \cr
+#' F_pred \tab\tab \eqn{T \times rp}{T x rp} predicted state vectors \cr
+#' P_pred \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances \cr
+#' loglik \tab\tab value of the log likelihood \cr
 #' }
 #' @seealso \code{\link{FIS}} \code{\link{SKFS}}
 #' @examples # See ?SKFS
@@ -62,13 +62,13 @@ SKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 }
 
 #' (Fast) Fixed-Interval Smoother (Kalman Smoother)
-#' @param A Transition matrix (\eqn{rp \times rp}{rp x rp})
-#' @param F State estimates (\eqn{T \times rp}{T x rp})
-#' @param F_pred State predicted estimates (\eqn{T \times rp}{T x rp})
-#' @param P Variance estimates (\eqn{rp \times rp \times T}{rp x rp x T})
-#' @param P_pred Predicted variance estimates (\eqn{rp \times rp \times T}{rp x rp x T})
-#' @param F_0 Initial state vector (\eqn{rp \times 1}{rp x 1}) or empty (\code{NULL})
-#' @param P_0 Initial state covariance (\eqn{rp \times rp}{rp x rp}) or empty (\code{NULL})
+#' @param A transition matrix (\eqn{rp \times rp}{rp x rp}).
+#' @param F state estimates (\eqn{T \times rp}{T x rp}).
+#' @param F_pred state predicted estimates (\eqn{T \times rp}{T x rp}).
+#' @param P variance estimates (\eqn{rp \times rp \times T}{rp x rp x T}).
+#' @param P_pred predicted variance estimates (\eqn{rp \times rp \times T}{rp x rp x T}).
+#' @param F_0 initial state vector (\eqn{rp \times 1}{rp x 1}) or empty (\code{NULL}).
+#' @param P_0 initial state covariance (\eqn{rp \times rp}{rp x rp}) or empty (\code{NULL}).
 #'
 #' @details The Kalman Smoother is given by:
 #'
@@ -82,10 +82,10 @@ SKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #'
 #' @returns Smoothed state and covariance estimates, including initial (t = 0) values.
 #' \tabular{lll}{
-#' F_smooth \tab\tab \eqn{T \times rp}{T x rp} smoothed state vectors, equal to the filtered state in period \eqn{T} \cr\cr
-#' P_smooth \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} smoothed state covariance, equal to the filtered covariance in period \eqn{T} \cr\cr
-#' F_smooth_0 \tab\tab \eqn{1 \times rp}{1 x rp} initial smoothed state vectors, based on \code{F_0} \cr\cr
-#' P_smooth_0 \tab\tab \eqn{rp \times rp}{rp x rp} initial smoothed state covariance, based on \code{P_0}
+#' F_smooth \tab\tab \eqn{T \times rp}{T x rp} smoothed state vectors, equal to the filtered state in period \eqn{T} \cr
+#' P_smooth \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} smoothed state covariance, equal to the filtered covariance in period \eqn{T} \cr
+#' F_smooth_0 \tab\tab \eqn{1 \times rp}{1 x rp} initial smoothed state vectors, based on \code{F_0} \cr
+#' P_smooth_0 \tab\tab \eqn{rp \times rp}{rp x rp} initial smoothed state covariance, based on \code{P_0} \cr
 #' }
 #'
 #' @references
@@ -119,7 +119,7 @@ FIS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
 #' library(collapse)
 #'
 #' ## Two-Step factor estimates from monthly BM (2014) data
-#' X <- fscale(diff(qM(BM14_M)))
+#' X <- fscale(diff(qM(BM14_M))) # Standardizing as KF has no intercept
 #' r <- 5L # 5 Factors
 #' p <- 3L # 3 Lags
 #' n <- ncol(X)
