@@ -1,5 +1,7 @@
 #' Expectation Maximization Algorithm following Doz, Giannone and Reichlin (2012)
 #' @inheritParams SKF
+#' @param rQi,rRi restrictions on Q and R passed to DFM(), and turned into integers such that identity = 0L, diagonal = 1L, none = 2L.
+#' The other parameters are matrix dimensions, which do not need to be recalculated every iteration. see DFM() code where they are generated.
 #' @noRd
 EMstepDGR <- function(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi) {
 

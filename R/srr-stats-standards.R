@@ -53,7 +53,7 @@
 #' @srrstats {G3.0} *Statistical software should never compare floating point numbers for equality. All numeric equality comparisons should either ensure that they are made between integers, or use appropriate tolerances for approximate equality.*
 #' @srrstats {G3.1} *Statistical software which relies on covariance calculations should enable users to choose between different algorithms for calculating covariances, and should not rely solely on covariances from the `stats::cov` function.*
 #' @srrstats {G3.1a} *The ability to use arbitrarily specified covariance methods should be documented (typically in examples or vignettes).*
-#' -> All PCA routines I know of use Pearsons Covariance for the eigen decomposition, and I currently see no reason to provide alternatives in *dfms*.
+#' -> All PCA routines I know of, including the authors original Matlab code, use Pearsons Covariance for the eigen decomposition, and I currently see no reason to provide alternatives in *dfms*.
 #' @srrstats {G5.0} *Where applicable or practicable, tests should use standard data sets with known properties (for example, the [NIST Standard Reference Datasets](https://www.itl.nist.gov/div898/strd/), or data sets provided by other widely-used R packages).*
 #' @srrstats {G5.1} *Data sets created within, and used to test, a package should be exported (or otherwise made generally available) so that users can confirm tests and run examples.*
 #' @srrstats {G5.2} *Appropriate error and warning behaviour of all functions should be explicitly demonstrated through tests. In particular,*
@@ -62,7 +62,7 @@
 #' @srrstats {G5.3} *For functions which are expected to return objects containing no missing (`NA`) or undefined (`NaN`, `Inf`) values, the absence of any such values in return objects should be explicitly tested.*
 #' @srrstats {G5.4} **Correctness tests** *to test that statistical algorithms produce expected results to some fixed test data sets (potentially through comparisons using binding frameworks such as [RStata](https://github.com/lbraglia/RStata)).*
 #' -> I have translated the authors original matlab code into R and run tests with that code (see misc/ directory in the repo). These comparisons yielded that my implementation is equivalent to the original Matlab code.
-#'  testing can be improved upon in general, an idea would be ru run tests against the r-translations of those Matlab codes, but I have not come round to do that yet and I would first like to gather some more substantive feedback on the software.
+#'  testing can be improved upon in general, an idea would be to run tests against the r-translations of those Matlab codes in the testthat framework, but I have not come round to do that yet and I would first like to gather some more substantive feedback on the software.
 #' @srrstats {G5.4a} *For new methods, it can be difficult to separate out correctness of the method from the correctness of the implementation, as there may not be reference for comparison. In this case, testing may be implemented against simple, trivial cases or against multiple implementations such as an initial R implementation compared with results from a C/C++ implementation.*
 #' @srrstats {G5.4b} *For new implementations of existing methods, correctness tests should include tests against previous implementations. Such testing may explicitly call those implementations in testing, preferably from fixed-versions of other software, or use stored outputs from those where that is not possible.*
 #' @srrstats {G5.4c} *Where applicable, stored values may be drawn from published paper outputs when applicable and where code from original implementations is not available*
@@ -83,8 +83,6 @@
 #' @srrstats {G5.11} *Where extended tests require large data sets or other assets, these should be provided for downloading and fetched as part of the testing workflow.*
 #' @srrstats {G5.11a} *When any downloads of additional data necessary for extended tests fail, the tests themselves should not fail, rather be skipped and implicitly succeed with an appropriate diagnostic message.*
 #' @srrstats {G5.12} *Any conditions necessary to run extended tests such as platform requirements, memory, expected runtime, and artefacts produced that may need manual inspection, should be described in developer documentation such as a `CONTRIBUTING.md` or `tests/README.md` file.*
-#' -> I have translated the authors original matlab code into R and run tests with that code (see misc/ directory in the repo). These comparisons yielded that my implementation is equivalent to the original Matlab code.
-#'  testing can be improved upon in general, an idea would be to run tests against the r-translations of those Matlab codes in the testthat framework, but I have not come round to do that yet and I would first like to gather some more substantive feedback on the software.
 #' @srrstats {UL1.0} *Unsupervised Learning Software should explicitly document expected format (types or classes) for input data, including descriptions of types or classes which are not accepted; for example, specification that software accepts only numeric inputs in `vector` or `matrix` form, or that all inputs must be in `data.frame` form with both column and row names.*
 #' @srrstats {UL1.1} *Unsupervised Learning Software should provide distinct sub-routines to assert that all input data is of the expected form, and issue informative error messages when incompatible data are submitted.*
 #' @srrstats {UL1.2} *Unsupervised learning which uses row or column names to label output objects should assert that input data have non-default row or column names, and issue an informative message when these are not provided.*
@@ -122,8 +120,9 @@
 #' @srrstats {TS1.5} *The software should ensure strict ordering of the time, frequency, or equivalent ordering index variable.*
 #' @srrstats {TS1.6} *Any violations of ordering should be caught in the pre-processing stages of all functions.*
 #' -> This software is at the intersection of dimensionality reduction and time series, and does not require input objects to have a certain class.
-#' For all practical purposes it is convenient to not require certain object types, although certain input object attributes such as the
-#' time scale of 'ts' or 'xts' objects could be used in model plots. This is an area where I still want to improve the software.
+#' For all practical purposes I believe it is convenient to not require certain object types, although certain input object attributes such as the
+#' time scale of 'ts' or 'xts' objects could be used in model plots. This is an area where I still want to improve the software e.g. keeping it class
+#' agnostic but using some of the information contained in time series objects passed as inputs.
 #' @srrstats {TS1.7} *Accept inputs defined via the [`units` package](https://github.com/r-quantities/units/) for attributing SI units to R vectors.*
 #' @srrstats {TS1.8} *Where time intervals or periods may be days or months, be explicit about the system used to represent such, particularly regarding whether a calendar system is used, or whether a year is presumed to have 365 days, 365.2422 days, or some other value.*
 #' @srrstats {TS2.0} *Time Series Software which presumes or requires regular data should only allow **explicit** missing values, and should issue appropriate diagnostic messages, potentially including errors, in response to any **implicit** missing values.*
@@ -141,7 +140,7 @@
 #' @srrstats {TS2.6} *Where applicable, auto-covariance matrices should also include specification of appropriate units.*
 #' @srrstats {TS3.0} *Provide tests to demonstrate at least one case in which errors widen appropriately with forecast horizon.*
 #' @srrstats {TS3.1} *If possible, provide at least one test which violates TS3.0*
-#' -> currently I don't forecast the covariance metrices. This could be implemented in the future.
+#' -> currently I don't forecast the covariance matrices. This could be implemented in the future.
 #' @srrstats {TS3.2} *Document the general drivers of forecast errors or horizons, as demonstrated via the particular cases of TS3.0 and TS3.1*
 #' @srrstats {TS3.3} *Either:*
 #' @srrstats {TS3.3a} *Document, preferable via an example, how to trim forecast values based on a specified error margin or equivalent; or*
@@ -187,7 +186,7 @@ NULL
 #' -> No publications.
 #' @srrstatsNA {G4.0} *Statistical Software which enables outputs to be written to local files should parse parameters specifying file names to ensure appropriate file suffices are automatically generated where not provided.*
 #' @srrstatsNA {UL3.3} *Where applicable, Unsupervised Learning Software should implement routines to predict the properties (such as numerical ordinates, or cluster memberships) of additional new data without re-running the entire algorithm.*
-#' -> DFMs are always used to reduce or forecast the data at hand.
+#' -> DFMs are always used to reduce or forecast the data used to estimate them.
 #' @srrstatsNA {UL3.4} *Objects returned from Unsupervised Learning Software which labels, categorise, or partitions data into discrete groups should include, or provide immediate access to, quantitative information on intra-group variances or equivalent, as well as on inter-group relationships where applicable.*
 #' @srrstatsNA {UL4.1} *Unsupervised Learning Software may enable an ability to generate a model object without actually fitting values. This may be useful for controlling batch processing of computationally intensive fitting algorithms.*
 #' @srrstatsNA {UL6.1} *Where the default `plot` method is **NOT** a generic `plot` method dispatched on the class of return objects (that is, through an S3-type `plot.<myclass>` function or equivalent), that method dispatch (or equivalent) should nevertheless exist in order to explicitly direct users to the appropriate function.*

@@ -2,6 +2,11 @@
 #' @inheritParams SKF
 #' @inheritParams impNA_MA
 #' @param XWO \code{X} with missing values set to 0.
+#' @param rQi,rRi restrictions on Q and R passed to DFM(), and turned into integers such that identity = 0L, diagonal = 1L, none = 2L.
+#' The other parameters are matrix dimensions, which do not need to be recalculated every iteration, and inputs to avoid repeated computations of
+#' kronecker products in the EM loop. see DFM() code where these objects are generated.
+#'
+#' where
 #' @noRd
 EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind, rQi, rRi) {
 
