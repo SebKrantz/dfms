@@ -7,30 +7,30 @@
 SKF(X, A, C, Q, R, F_0, P_0, loglik = FALSE)
 }
 \arguments{
-\item{X}{Data matrix (\eqn{T \times n}{T x n})}
+\item{X}{numeric data matrix (\eqn{T \times n}{T x n}).}
 
-\item{A}{Transition matrix (\eqn{rp \times rp}{rp x rp})}
+\item{A}{transition matrix (\eqn{rp \times rp}{rp x rp}).}
 
-\item{C}{Observation matrix (\eqn{n \times rp}{n x rp})}
+\item{C}{observation matrix (\eqn{n \times rp}{n x rp}).}
 
-\item{Q}{State covariance (\eqn{rp \times rp}{rp x rp})}
+\item{Q}{state covariance (\eqn{rp \times rp}{rp x rp}).}
 
-\item{R}{Observation covariance (\eqn{n \times n}{n x n})}
+\item{R}{observation covariance (\eqn{n \times n}{n x n}).}
 
-\item{F_0}{Initial state vector (\eqn{rp \times 1}{rp x 1})}
+\item{F_0}{initial state vector (\eqn{rp \times 1}{rp x 1}).}
 
-\item{P_0}{Initial state covariance (\eqn{rp \times rp}{rp x rp})}
+\item{P_0}{initial state covariance (\eqn{rp \times rp}{rp x rp}).}
 
 \item{loglik}{logical. Compute log-likelihood?}
 }
 \value{
 Predicted and filtered state vectors and covariances.
 \tabular{lll}{
-F \tab\tab \eqn{T \times rp}{T x rp} filtered state vectors \cr\cr
-P \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} filtered state covariances \cr\cr
-F_pred \tab\tab \eqn{T \times rp}{T x rp} predicted state vectors \cr\cr
-P_pred \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances \cr\cr
-loglik \tab\tab value of the log likelihood
+F \tab\tab \eqn{T \times rp}{T x rp} filtered state vectors \cr
+P \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} filtered state covariances \cr
+F_pred \tab\tab \eqn{T \times rp}{T x rp} predicted state vectors \cr
+P_pred \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances \cr
+loglik \tab\tab value of the log likelihood \cr
 }
 }
 \description{
