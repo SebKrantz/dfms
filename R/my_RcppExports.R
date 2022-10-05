@@ -17,7 +17,7 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #' @details The underlying state space model is:
 #'
 #' \deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \sim N(\textbf{0}, \textbf{R})}{x(t) = C F(t) + e(t) ~ N(0, R)}
-#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \sim N(0, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
+#' \deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \sim N(\textbf{0}, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
 #'
 #' where \eqn{x_t}{x(t)} is \code{X[t, ]}. The filter then first performs a time update (prediction)
 #'
