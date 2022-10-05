@@ -5,7 +5,9 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 <!-- badges: end -->
 
-**NOTE**: This is a new package being prepared for [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). It will be sent to CRAN afterwards. Peer review might result in changes to the API, or even the package name. The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/dfms")` and give feedback. 
+**NOTE**: This package is under [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). Peer review might result in changes to the API. 
+<!--
+The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/dfms")` and give feedback. -->
 
 ***
 

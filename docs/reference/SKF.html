@@ -102,7 +102,7 @@
     <h2>Details</h2>
     <p>The underlying state space model is:</p>
 <p>$$\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \sim N(\textbf{0}, \textbf{R})$$
-$$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \sim N(0, \textbf{Q})$$</p>
+$$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \sim N(\textbf{0}, \textbf{Q})$$</p>
 <p>where \(x_t\) is <code>X[t, ]</code>. The filter then first performs a time update (prediction)</p>
 <p>$$\textbf{F}_t = \textbf{A F}_{t-1}$$
 $$\textbf{P}_t = \textbf{A P}_{t-1}\textbf{A}' + \textbf{Q}$$</p>
