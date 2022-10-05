@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Sebastian
 Krantz</h4>
             
-            <h4 data-toc-skip class="date">2022-10-03</h4>
+            <h4 data-toc-skip class="date">2022-10-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/HEAD/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="hidden name"><code>introduction.Rmd</code></div>
@@ -91,13 +91,13 @@ methods to explore/plot models and extract results.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sebkrantz.github.io/dfms/" class="external-link">dfms</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/joshuaulrich/xts" class="external-link">xts</a></span><span class="op">)</span></code></pre></div>
-<p>This vignette walks through the main features of the package a
-simple, single frequency dataset of monthly time series. The data
-provided in the package in <em>xts</em> format is taken from Banbura and
-Modugno (2014)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, henceforth BM14, and covers the Euro Area
+<p>This vignette walks through the main features of the package. The
+data provided in the package in <em>xts</em> format is taken from
+Banbura and Modugno (2014)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, henceforth BM14, and covers the Euro Area
 from January 1980 through September 2009.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>
+<code class="sourceCode R"><span class="co"># Using the monthly series from BM14</span>
+<span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>
 <span class="co">#&gt; [1] 357  92</span>
 <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/index.html" class="external-link">index</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; [1] "1980-01-31" "2009-09-30"</span>
@@ -401,8 +401,68 @@ and the format of the frame.</p>
 <div class="section level2">
 <h2 id="notes-about-estimation-with-mixed-frequency">Notes About Estimation with Mixed Frequency<a class="anchor" aria-label="anchor" href="#notes-about-estimation-with-mixed-frequency"></a>
 </h2>
-<p>TBA: basically duplicate quarterly series in the dataset to increase
-their weight.</p>
+<p><em>dfms</em> currently provides no specific adjustments for data at
+different frequencies. The baseline algorithm of BM14, being designed
+for arbitrary patterns of missing data, allows lower frequency series to
+be included in the estimation. The problem here is that series at lower
+frequency contain many missing values, which effectively lets these
+series have less weight in the estimation.</p>
+<p>BM14 use the approximation of Mariano and Murasawa (2003) to
+construct a monthly equivalent for each quarterly series, with
+appropriate factor loadings in the estimation.</p>
+<p>In the absence of such adjustments to the algorithm, or other methods
+of interpolating quarterly data, a very simple way to increase the
+weight of these series in the estimation is to duplicate them in the
+dataset. Such duplication can be mechanical (e.g. duplicate quarterly
+series 2 times in monthly dataset), but should ideally be based on
+considerations about the quality of the signal stemming from different
+quarterly series (i.e. informative series should be duplicated
+more).</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Quarterly series from BM14</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">BM14_Q</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt;                gdp priv_cons   invest   export   import     empl prductivity</span>
+<span class="co">#&gt; 1980-03-31 1092266  639100.2 238798.3 212326.1 208414.9 118296.6          NA</span>
+<span class="co">#&gt; 1980-06-30 1087137  635191.5 234788.5 203062.0 202807.3 118366.6          NA</span>
+<span class="co">#&gt; 1980-09-30 1086518  639791.6 233879.2 200720.5 204375.7 118370.7          NA</span>
+<span class="co">#&gt;            capacity gdp_us</span>
+<span class="co">#&gt; 1980-03-31       NA 5908.5</span>
+<span class="co">#&gt; 1980-06-30       NA 5787.4</span>
+<span class="co">#&gt; 1980-09-30       NA 5776.6</span>
+<span class="co"># Pre-processing the data</span>
+<span class="va">BM14_Q</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">[</span><span class="va">BM14_Models</span><span class="op">$</span><span class="va">freq</span> <span class="op">==</span> <span class="st">"Q"</span>, <span class="op">]</span><span class="op">$</span><span class="va">log_trans</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/compound.html" class="external-link">%&lt;&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">BM14_Q_diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_Q</span><span class="op">)</span>
+<span class="co"># Merging to monthly data and duplicating 2 times</span>
+<span class="va">BM14_diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">BM14_M_diff</span>, <span class="va">BM14_Q_diff</span>, <span class="va">BM14_Q_diff</span>, <span class="va">BM14_Q_diff</span><span class="op">)</span>
+
+<span class="co"># Estimating the model with 5 factors and 3 lags using BM14's EM algorithm</span>
+<span class="va">model2</span> <span class="op">=</span> <span class="fu"><a href="../reference/DFM.html">DFM</a></span><span class="op">(</span><span class="va">BM14_diff</span>, r <span class="op">=</span> <span class="fl">5</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>
+<span class="co">#&gt; Converged after 26 iterations.</span>
+<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model2</span><span class="op">)</span>
+<span class="co">#&gt; Dynamic Factor Model: n = 119, T = 352, r = 5, p = 3, %NA = 35.2464</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Factor Transition Matrix [A]</span>
+<span class="co">#&gt;      L1.f1   L1.f2   L1.f3   L1.f4   L1.f5   L2.f1   L2.f2   L2.f3   L2.f4</span>
+<span class="co">#&gt; f1  0.3853  0.2380  0.3625 -0.3556  0.3172  0.0957 -0.0846 -0.1698 -0.1609</span>
+<span class="co">#&gt; f2  0.0708  0.3741  0.1319 -0.4202  0.2317 -0.1449 -0.0590  0.0459 -0.2377</span>
+<span class="co">#&gt; f3  0.0857  0.0129  0.3406  0.0926 -0.0222 -0.0859 -0.0465 -0.1961  0.0881</span>
+<span class="co">#&gt; f4 -0.0950 -0.2895 -0.0019 -0.4933  0.5706  0.0161  0.0813  0.1038 -0.4260</span>
+<span class="co">#&gt;      L2.f5   L3.f1  L3.f2   L3.f3   L3.f4   L3.f5</span>
+<span class="co">#&gt; f1 -0.1466  0.3742 0.0302  0.1324 -0.1763  0.0037</span>
+<span class="co">#&gt; f2 -0.2075 -0.1134 0.3895 -0.0243 -0.0012  0.1343</span>
+<span class="co">#&gt; f3 -0.0678 -0.0139 0.1125  0.1968  0.0666  0.0041</span>
+<span class="co">#&gt; f4  0.1149 -0.0079 0.0317  0.0104 -0.0639 -0.1434</span>
+<span class="co">#&gt;  [ reached getOption("max.print") -- omitted 1 row ]</span>
+<span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model2</span><span class="op">)</span></code></pre></div>
+<p><img src="introduction_files/figure-html/unnamed-chunk-16-1.png" width="672"></p>
+<p>Another possibility is to estimate different factor models for
+monthly and quarterly series, and combine them for the final prediction
+(e.g. by aggregating or blocking the monthly factor estimates).</p>
+<p>If performance is not critical, I also refer the user to the <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and
+<a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>
+packages, which provide elaborate models for mixed-frequency nowcasting,
+and handle mixed frequencies like BM14 (i.e. drawing on Mariano and
+Murasawa (2003)).</p>
 </div>
 <div class="section level2">
 <h2 id="additional-functions">Additional Functions<a class="anchor" aria-label="anchor" href="#additional-functions"></a>
@@ -420,6 +480,31 @@ log-likelihood in EM estimation.</p>
 the Armadillo C++ library through the functions <code><a href="../reference/ainv.html">ainv()</a></code> and
 <code><a href="../reference/ainv.html">apinv()</a></code>. These are often faster than <code><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve()</a></code>,
 and somewhat more robust in near-singularity cases.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Doz, C., Giannone, D., &amp; Reichlin, L. (2011). A two-step
+estimator for large approximate dynamic factor models based on Kalman
+filtering. <em>Journal of Econometrics, 164</em>(1), 188-205.</p>
+<p>Doz, C., Giannone, D., &amp; Reichlin, L. (2012). A quasi-maximum
+likelihood approach for large, approximate dynamic factor models.
+<em>Review of Economics and Statistics, 94</em>(4), 1014-1024.</p>
+<p>Banbura, M., &amp; Modugno, M. (2014). Maximum likelihood estimation
+of factor models on datasets with arbitrary pattern of missing data.
+<em>Journal of Applied Econometrics, 29</em>(1), 133-160.</p>
+<p>Mariano, R. S., &amp; Murasawa, Y. (2003). A new coincident index of
+business cycles based on monthly and quarterly series. <em>Journal of
+Applied Econometrics, 18</em>(4), 427-443.</p>
+<p>Bai, J., Ng, S. (2002). Determining the Number of Factors in
+Approximate Factor Models. <em>Econometrica, 70</em>(1), 191-221. <a href="doi:10.1111/1468-0262.00273" class="uri">doi:10.1111/1468-0262.00273</a></p>
+<p>Onatski, A. (2010). Determining the number of factors from empirical
+distribution of eigenvalues. <em>The Review of Economics and Statistics,
+92</em>(4), 1004-1016.</p>
+<p>Stock, J. H., &amp; Watson, M. W. (2016). Dynamic Factor Models,
+Factor-Augmented Vector Autoregressions, and Structural Vector
+Autoregressions in Macroeconomics. <em>Handbook of Macroeconomics,
+2</em>, 415–525. <a href="https://doi.org/10.1016/bs.hesmac.2016.04.002" class="external-link uri">https://doi.org/10.1016/bs.hesmac.2016.04.002</a></p>
 </div>
 <div class="footnotes footnotes-end-of-document">
 <hr>
