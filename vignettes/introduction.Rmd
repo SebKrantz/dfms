@@ -28,9 +28,10 @@ library(dfms)
 library(xts)
 ```
 
-This vignette walks through the main features of the package a simple, single frequency dataset of monthly time series. The data provided in the package in *xts* format is taken from Banbura and Modugno (2014)^[Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. *Journal of Applied Econometrics, 29*(1), 133-160.], henceforth BM14, and covers the Euro Area from January 1980 through September 2009.
+This vignette walks through the main features of the package. The data provided in the package in *xts* format is taken from Banbura and Modugno (2014)^[Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. *Journal of Applied Econometrics, 29*(1), 133-160.], henceforth BM14, and covers the Euro Area from January 1980 through September 2009.
 
 ```{r}
+# Using the monthly series from BM14
 dim(BM14_M)
 range(index(BM14_M))
 head(colnames(BM14_M))
@@ -155,8 +156,30 @@ head(as.data.frame(fc, pivot = "wide"))
 
 ## Notes About Estimation with Mixed Frequency
 
-TBA: basically duplicate quarterly series in the dataset to increase their weight. 
+*dfms* currently provides no specific adjustments for data at different frequencies. The baseline algorithm of BM14, being designed for arbitrary patterns of missing data, allows lower frequency series to be included in the estimation. The problem here is that series at lower frequency contain many missing values, which effectively lets these series have less weight in the estimation.
 
+BM14 use the approximation of Mariano and Murasawa (2003) to construct a monthly equivalent for each quarterly series, with appropriate factor loadings in the estimation. 
+
+In the absence of such adjustments to the algorithm, or other methods of interpolating quarterly data, a very simple way to increase the weight of these series in the estimation is to duplicate them in the dataset. Such duplication can be mechanical (e.g. duplicate quarterly series 2 times in monthly dataset), but should ideally be based on considerations about the quality of the signal stemming from different quarterly series (i.e. informative series should be duplicated more).  
+
+```{r}
+# Quarterly series from BM14
+head(BM14_Q, 3)
+# Pre-processing the data
+BM14_Q[, BM14_Models[BM14_Models$freq == "Q", ]$log_trans] %<>% log()
+BM14_Q_diff = diff(BM14_Q)
+# Merging to monthly data and duplicating 2 times
+BM14_diff = cbind(BM14_M_diff, BM14_Q_diff, BM14_Q_diff, BM14_Q_diff)
+
+# Estimating the model with 5 factors and 3 lags using BM14's EM algorithm
+model2 = DFM(BM14_diff, r = 5, p = 3)
+print(model2)
+plot(model2)
+```
+
+Another possibility is to estimate different factor models for monthly and quarterly series, and combine them for the final prediction (e.g. by aggregating or blocking the monthly factor estimates). 
+
+If performance is not critical, I also refer the user to the [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>) packages, which provide elaborate models for mixed-frequency nowcasting, and handle mixed frequencies like BM14 (i.e. drawing on Mariano and Murasawa (2003)). 
 
 ## Additional Functions
 
@@ -164,6 +187,19 @@ TBA: basically duplicate quarterly series in the dataset to increase their weigh
 
 *dfms* also exports a matrix inverse and pseudo-inverse from the Armadillo C++ library through the functions `ainv()` and `apinv()`. These are often faster than `solve()`, and somewhat more robust in near-singularity cases. 
 
+## References
 
+Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. *Journal of Econometrics, 164*(1), 188-205.
 
+Doz, C., Giannone, D., & Reichlin, L. (2012). A quasi-maximum likelihood approach for large, approximate dynamic factor models. *Review of Economics and Statistics, 94*(4), 1014-1024.
+
+Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. *Journal of Applied Econometrics, 29*(1), 133-160.
+
+Mariano, R. S., & Murasawa, Y. (2003). A new coincident index of business cycles based on monthly and quarterly series. *Journal of Applied Econometrics, 18*(4), 427-443.
+
+Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. *Econometrica, 70*(1), 191-221. doi:10.1111/1468-0262.00273
+
+Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. *The Review of Economics and Statistics, 92*(4), 1004-1016.
+
+Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. *Handbook of Macroeconomics, 2*, 415–525. https://doi.org/10.1016/bs.hesmac.2016.04.002
 
