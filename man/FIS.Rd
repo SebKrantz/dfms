@@ -23,12 +23,10 @@ FIS(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL)
 }
 \value{
 Smoothed state and covariance estimates, including initial (t = 0) values.
-\tabular{lll}{
-F_smooth \tab\tab \eqn{T \times rp}{T x rp} smoothed state vectors, equal to the filtered state in period \eqn{T} \cr
-P_smooth \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} smoothed state covariance, equal to the filtered covariance in period \eqn{T} \cr
-F_smooth_0 \tab\tab \eqn{1 \times rp}{1 x rp} initial smoothed state vectors, based on \code{F_0} \cr
-P_smooth_0 \tab\tab \eqn{rp \times rp}{rp x rp} initial smoothed state covariance, based on \code{P_0} \cr
-}
+\item{\code{F_smooth}}{\eqn{T \times rp}{T x rp} smoothed state vectors, equal to the filtered state in period \eqn{T}.}
+\item{\code{P_smooth}}{\eqn{rp \times rp \times T}{rp x rp x T} smoothed state covariance, equal to the filtered covariance in period \eqn{T}.}
+\item{\code{F_smooth_0}}{\eqn{1 \times rp}{1 x rp} initial smoothed state vectors, based on \code{F_0}.}
+\item{\code{P_smooth_0}}{\eqn{rp \times rp}{rp x rp} initial smoothed state covariance, based on \code{P_0}.}
 }
 \description{
 (Fast) Fixed-Interval Smoother (Kalman Smoother)

@@ -127,12 +127,13 @@ print.dfm_summary <- function(x,
 #' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
 #' @returns Nothing.
-#' @examples
+#' @examples \donttest{
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3)
 #' plot(mod)
 #' plot(mod, type = "individual", method = "all")
 #' plot(mod, type = "residual")
+#' }
 #'
 #' @importFrom graphics boxplot axis box mtext plot.default
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
@@ -222,7 +223,7 @@ plot.dfm <- function(x,
 #'
 #' @return A data frame of factor estimates.
 #'
-#' @examples
+#' @examples \donttest{
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3)
@@ -239,6 +240,7 @@ plot.dfm <- function(x,
 #' for (pv in c("long", "wide.factor", "wide.method", "wide", "t.wide")) {
 #'    cat("\npivot = ", pv, "\n")
 #'    print(head(as.data.frame(mod, pivot = pv, time = time), 3))
+#' }
 #' }
 #'
 #' @importFrom collapse ckmatch na_rm seq_row t_list unattrib
@@ -307,7 +309,7 @@ as.data.frame.dfm <- function(x, ...,
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
 #'
-#' @examples
+#' @examples \donttest{
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3)
@@ -319,6 +321,8 @@ as.data.frame.dfm <- function(x, ...,
 #' # Fitted values
 #' head(fitted(mod))
 #' head(fitted(mod, orig.format = TRUE)) # this is an xts object
+#' }
+#'
 #' @importFrom collapse TRA.matrix mctl setAttrib pad
 #' @export
 residuals.dfm <- function(object,
@@ -385,24 +389,24 @@ fitted.dfm <- function(object,
 #' @param \dots further arguments to \code{resFUN}.
 #'
 #' @returns A list-like object of class 'dfm_forecast' with the following elements:
-#' \tabular{llll}{
-#'  \code{X_fcst} \tab\tab \eqn{h \times n}{h x n} matrix with the forecasts of the variables. \cr\cr
-#'  \code{F_fcst} \tab\tab \eqn{h \times r}{h x r} matrix with the factor forecasts. \cr\cr
-#'  \code{X} \tab\tab \eqn{T \times n}{T x n} matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
-#'    \itemize{
-#'       \item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}). Only attached if \code{standardized = TRUE}. \cr
-#'       \item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
-#'       \item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
-#'    } \cr\cr
-#'  \code{F} \tab\tab \eqn{T \times r}{T x r} matrix of factor estimates. \cr\cr
-#'  \code{method} \tab\tab the factor estimation method used.\cr\cr
-#'  \code{anyNA} \tab\tab logical indicating whether \code{X} contains any missing values.\cr\cr
-#'  \code{h} \tab\tab the forecast horizon.\cr\cr
-#'  \code{resid.fc} \tab\tab logical indicating whether a univariate forecasting function was applied to the residuals.\cr\cr
-#'  \code{resid.fc.ind} \tab\tab indices indicating for which variables (columns of \code{X}) the residuals were forecasted using the univariate function.\cr\cr
-#'  \code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
-#' }
-#' @examples
+#'  \item{\code{X_fcst}}{\eqn{h \times n}{h x n} matrix with the forecasts of the variables. }
+#'  \item{\code{F_fcst}}{\eqn{h \times r}{h x r} matrix with the factor forecasts. }
+#'  \item{\code{X}}{\eqn{T \times n}{T x n} matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
+#'       \tabular{llll}{
+#'       \code{"stats"} \tab\tab is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}). Only attached if \code{standardized = TRUE}. \cr\cr
+#'       \code{"attributes"} \tab\tab contains the \code{\link{attributes}} of the original data input.\cr\cr
+#'       \code{"is.list"} \tab\tab is a logical value indicating whether the original data input was a list / data frame. \cr\cr
+#'       }
+#'      }
+#'  \item{\code{F}}{\eqn{T \times r}{T x r} matrix of factor estimates. }
+#'  \item{\code{method}}{the factor estimation method used.}
+#'  \item{\code{anyNA}}{logical indicating whether \code{X} contains any missing values.}
+#'  \item{\code{h}}{the forecast horizon.}
+#'  \item{\code{resid.fc}}{logical indicating whether a univariate forecasting function was applied to the residuals.}
+#'  \item{\code{resid.fc.ind}}{indices indicating for which variables (columns of \code{X}) the residuals were forecasted using the univariate function.}
+#'  \item{\code{call}}{call object obtained from \code{match.call()}.}
+#'
+#' @examples \donttest{
 #' library(xts)
 #' library(collapse)
 #'
@@ -423,7 +427,7 @@ fitted.dfm <- function(object,
 #' head(as.data.frame(fcar, pivot = "wide")) # Factors
 #' head(as.data.frame(fcar, use = "data"))   # Data
 #' head(as.data.frame(fcar, use = "both"))   # Both
-#'
+#' }
 #' @export
 # TODO: Option for prediction in original format??
 predict.dfm <- function(object,
@@ -703,7 +707,7 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #' screeplot(ics)
 #'
 #' @references
-#' Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. <doi:10.1111/1468-0262.00273>
+#' Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. \doi{10.1111/1468-0262.00273}
 #'
 #' Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. \emph{The Review of Economics and Statistics, 92}(4), 1004-1016.
 #'

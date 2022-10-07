@@ -25,13 +25,11 @@ SKF(X, A, C, Q, R, F_0, P_0, loglik = FALSE)
 }
 \value{
 Predicted and filtered state vectors and covariances.
-\tabular{lll}{
-F \tab\tab \eqn{T \times rp}{T x rp} filtered state vectors \cr
-P \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} filtered state covariances \cr
-F_pred \tab\tab \eqn{T \times rp}{T x rp} predicted state vectors \cr
-P_pred \tab\tab \eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances \cr
-loglik \tab\tab value of the log likelihood \cr
-}
+\item{\code{F}}{\eqn{T \times rp}{T x rp} filtered state vectors. }
+\item{\code{P}}{\eqn{rp \times rp \times T}{rp x rp x T} filtered state covariances. }
+\item{\code{F_pred}}{\eqn{T \times rp}{T x rp} predicted state vectors. }
+\item{\code{P_pred}}{\eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances. }
+\item{\code{loglik}}{value of the log likelihood. }
 }
 \description{
 A simple and fast C++ implementation of the Kalman Filter for stationary data with time-invariant system matrices and missing data.

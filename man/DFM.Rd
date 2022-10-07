@@ -54,33 +54,31 @@ This yields significant performance gains over the iterative methods. Final syst
 }
 \value{
 A list-like object of class 'dfm' with the following elements:
+\item{\code{X_imp}}{\eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
 \tabular{llll}{
-\code{X_imp} \tab\tab \eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
-\itemize{
-\item \code{"stats"} is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr
-\item \code{"missing"} is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr
-\item \code{"attributes"} contains the \code{\link{attributes}} of the original data input.\cr
-\item \code{"is.list"} is a logical value indicating whether the original data input was a list / data frame. \cr
-} \cr\cr
-\code{eigen} \tab\tab \code{eigen(cov(X_imp))}. \cr\cr
-\code{F_pca} \tab\tab \eqn{T \times r}{T x r} matrix of principal component factor estimates - \code{X_imp \%*\% eigen$vectors}. \cr\cr
-\code{P_0} \tab\tab \eqn{r \times r}{r x r} initial factor covariance matrix estimate based on PCA results. \cr\cr
-\code{F_2s} \tab\tab \eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. \cr\cr
-\code{P_2s} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. \cr\cr
-\code{F_qml} \tab\tab \eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence. \cr\cr
-\code{P_qml} \tab\tab \eqn{r \times r \times T}{r x r x T} covariance matrices of QML factor estimates. \cr\cr
-\code{A} \tab\tab \eqn{r \times rp}{r x rp} factor transition matrix.\cr\cr
-\code{C} \tab\tab \eqn{n \times r}{n x r} observation matrix.\cr\cr
-\code{Q} \tab\tab \eqn{r \times r}{r x r} state (error) covariance matrix.\cr\cr
-\code{R} \tab\tab \eqn{n \times n}{n x n} observation (error) covariance matrix.\cr\cr
-\code{loglik} \tab\tab vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.\cr\cr
-\code{tol} \tab\tab The numeric convergence tolerance used.\cr\cr
-\code{converged} \tab\tab single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).\cr\cr
-\code{anyNA} \tab\tab single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.\cr\cr
-\code{rm.rows} \tab\tab vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. \cr\cr
-\code{em.method} \tab\tab The EM method used.\cr\cr
-\code{call} \tab\tab call object obtained from \code{match.call()}.\cr\cr
+\code{"stats"} \tab\tab is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr\cr
+\code{"missing"} \tab\tab is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr\cr
+\code{"attributes"} \tab\tab contains the \code{\link{attributes}} of the original data input.\cr\cr
+\code{"is.list"} \tab\tab is a logical value indicating whether the original data input was a list / data frame. \cr\cr }
 }
+\item{\code{eigen}}{\code{eigen(cov(X_imp))}. }
+\item{\code{F_pca}}{\eqn{T \times r}{T x r} matrix of principal component factor estimates - \code{X_imp \%*\% eigen$vectors}. }
+\item{\code{P_0}}{\eqn{r \times r}{r x r} initial factor covariance matrix estimate based on PCA results. }
+\item{\code{F_2s}}{\eqn{T \times r}{T x r} matrix two-step factor estimates as in Doz, Giannone and Reichlin (2011) - obtained from running the data through the Kalman Filter and Smoother once, where the Filter is initialized with results from PCA. }
+\item{\code{P_2s}}{\eqn{r \times r \times T}{r x r x T} covariance matrices of two-step factor estimates. }
+\item{\code{F_qml}}{\eqn{T \times r}{T x r} matrix of quasi-maximum likelihood factor estimates - obtained by iteratively Kalman Filtering and Smoothing the factor estimates until EM convergence. }
+\item{\code{P_qml}}{\eqn{r \times r \times T}{r x r x T} covariance matrices of QML factor estimates. }
+\item{\code{A}}{\eqn{r \times rp}{r x rp} factor transition matrix.}
+\item{\code{C}}{\eqn{n \times r}{n x r} observation matrix.}
+\item{\code{Q}}{\eqn{r \times r}{r x r} state (error) covariance matrix.}
+\item{\code{R}}{\eqn{n \times n}{n x n} observation (error) covariance matrix.}
+\item{\code{loglik}}{vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.}
+\item{\code{tol}}{The numeric convergence tolerance used.}
+\item{\code{converged}}{single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).}
+\item{\code{anyNA}}{single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.}
+\item{\code{rm.rows}}{vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. }
+\item{\code{em.method}}{The EM method used.}
+\item{\code{call}}{call object obtained from \code{match.call()}.}
 }
 \description{
 Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data

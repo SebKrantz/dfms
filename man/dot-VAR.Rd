@@ -16,12 +16,10 @@ A list containing matrices \code{Y = x[-(1:p), ]}, \code{X} which contains lags 
 \code{A} which is the \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
 
 A list with the following elements:
-\tabular{llll}{
-\code{Y} \tab\tab \code{x[-(1:p), ]}. \cr\cr
-\code{X} \tab\tab lags 1 - p of \code{x} combined column-wise. \cr\cr
-\code{A} \tab\tab \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}. \cr\cr
-\code{res} \tab\tab VAR residual matrix: \code{Y - X \%*\% A}. \cr\cr
-}
+\item{\code{Y}}{\code{x[-(1:p), ]}. }
+\item{\code{X}}{lags 1 - p of \code{x} combined column-wise. }
+\item{\code{A}}{\eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}. }
+\item{\code{res}}{VAR residual matrix: \code{Y - X \%*\% A}. }
 }
 \description{
 Quickly estimate a VAR(p) model using Armadillo's inverse function.

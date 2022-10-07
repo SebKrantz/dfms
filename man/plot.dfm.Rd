@@ -33,10 +33,12 @@ Nothing.
 Plot DFM
 }
 \examples{
+\donttest{
 # Fit DFM with 3 factors and 3 lags in the transition equation
 mod = DFM(diff(BM14_M), r = 3, p = 3)
 plot(mod)
 plot(mod, type = "individual", method = "all")
 plot(mod, type = "residual")
+}
 
 }
