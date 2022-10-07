@@ -122,6 +122,7 @@ This function produces h-step ahead forecasts of both the factors and the data,
 with an option to also forecast autocorrelated residuals with a univariate method and produce a combined forecast.
 }
 \examples{
+\donttest{
 library(xts)
 library(collapse)
 
@@ -142,5 +143,5 @@ plot(fcar, xlim = c(300, 370))
 head(as.data.frame(fcar, pivot = "wide")) # Factors
 head(as.data.frame(fcar, use = "data"))   # Data
 head(as.data.frame(fcar, use = "both"))   # Both
-
+}
 }

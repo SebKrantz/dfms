@@ -127,12 +127,13 @@ print.dfm_summary <- function(x,
 #' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
 #' @returns Nothing.
-#' @examples
+#' @examples \donttest{
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3)
 #' plot(mod)
 #' plot(mod, type = "individual", method = "all")
 #' plot(mod, type = "residual")
+#' }
 #'
 #' @importFrom graphics boxplot axis box mtext plot.default
 #' @importFrom collapse unlist2d ckmatch na_rm seq_row
@@ -222,7 +223,7 @@ plot.dfm <- function(x,
 #'
 #' @return A data frame of factor estimates.
 #'
-#' @examples
+#' @examples \donttest{
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3)
@@ -239,6 +240,7 @@ plot.dfm <- function(x,
 #' for (pv in c("long", "wide.factor", "wide.method", "wide", "t.wide")) {
 #'    cat("\npivot = ", pv, "\n")
 #'    print(head(as.data.frame(mod, pivot = pv, time = time), 3))
+#' }
 #' }
 #'
 #' @importFrom collapse ckmatch na_rm seq_row t_list unattrib
@@ -307,7 +309,7 @@ as.data.frame.dfm <- function(x, ...,
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
 #'
-#' @examples
+#' @examples \donttest{
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3)
@@ -319,6 +321,8 @@ as.data.frame.dfm <- function(x, ...,
 #' # Fitted values
 #' head(fitted(mod))
 #' head(fitted(mod, orig.format = TRUE)) # this is an xts object
+#' }
+#'
 #' @importFrom collapse TRA.matrix mctl setAttrib pad
 #' @export
 residuals.dfm <- function(object,
@@ -402,7 +406,7 @@ fitted.dfm <- function(object,
 #'  \item{\code{resid.fc.ind}}{indices indicating for which variables (columns of \code{X}) the residuals were forecasted using the univariate function.}
 #'  \item{\code{call}}{call object obtained from \code{match.call()}.}
 #'
-#' @examples
+#' @examples \donttest{
 #' library(xts)
 #' library(collapse)
 #'
@@ -423,7 +427,7 @@ fitted.dfm <- function(object,
 #' head(as.data.frame(fcar, pivot = "wide")) # Factors
 #' head(as.data.frame(fcar, use = "data"))   # Data
 #' head(as.data.frame(fcar, use = "both"))   # Both
-#'
+#' }
 #' @export
 # TODO: Option for prediction in original format??
 predict.dfm <- function(object,

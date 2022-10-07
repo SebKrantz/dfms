@@ -40,6 +40,7 @@ A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the for
 The residuals \eqn{\textbf{e}_t = \textbf{x}_t - \textbf{C} \textbf{F}_t}{e(t) = x(t) - C F(t)} or fitted values \eqn{\textbf{C} \textbf{F}_t}{C F(t)} of the DFM observation equation.
 }
 \examples{
+\donttest{
 library(xts)
 # Fit DFM with 3 factors and 3 lags in the transition equation
 mod = DFM(diff(BM14_M), r = 3, p = 3)
@@ -51,4 +52,6 @@ plot(resid(mod, orig.format = TRUE)) # this is an xts object
 # Fitted values
 head(fitted(mod))
 head(fitted(mod, orig.format = TRUE)) # this is an xts object
+}
+
 }

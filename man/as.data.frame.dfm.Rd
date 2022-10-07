@@ -33,6 +33,7 @@ A data frame of factor estimates.
 Extract Factor Estimates in a Data Frame
 }
 \examples{
+\donttest{
 library(xts)
 # Fit DFM with 3 factors and 3 lags in the transition equation
 mod = DFM(diff(BM14_M), r = 3, p = 3)
@@ -49,6 +50,7 @@ print(head(as.data.frame(mod, method = "qml", time = time)))
 for (pv in c("long", "wide.factor", "wide.method", "wide", "t.wide")) {
    cat("\npivot = ", pv, "\n")
    print(head(as.data.frame(mod, pivot = pv, time = time), 3))
+}
 }
 
 }
