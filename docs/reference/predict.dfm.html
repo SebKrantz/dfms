@@ -207,11 +207,38 @@ The function needs to have a second argument providing the forecast horizon (<co
     <h2>Value</h2>
     
 
-<p>A list-like object of class 'dfm_forecast' with the following elements:</p><table class="table table"><tr><td><code>X_fcst</code></td><td></td><td>\(h \times n\) matrix with the forecasts of the variables.</td><td></td></tr><tr><td><code>F_fcst</code></td><td></td><td>\(h \times r\) matrix with the factor forecasts.</td><td></td></tr><tr><td><code>X</code></td><td></td><td>\(T \times n\) matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
-<ul><li><p><code>"stats"</code> is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://sebkrantz.github.io/collapse/reference/qsu.html" class="external-link">qsu</a></code>). Only attached if <code>standardized = TRUE</code>. <br></p></li>
-<li><p><code>"attributes"</code> contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.<br></p></li>
-<li><p><code>"is.list"</code> is a logical value indicating whether the original data input was a list / data frame. <br></p></li>
-</ul></td><td></td></tr><tr><td><code>F</code></td><td></td><td>\(T \times r\) matrix of factor estimates.</td><td></td></tr><tr><td><code>method</code></td><td></td><td>the factor estimation method used.</td><td></td></tr><tr><td><code>anyNA</code></td><td></td><td>logical indicating whether <code>X</code> contains any missing values.</td><td></td></tr><tr><td><code>h</code></td><td></td><td>the forecast horizon.</td><td></td></tr><tr><td><code>resid.fc</code></td><td></td><td>logical indicating whether a univariate forecasting function was applied to the residuals.</td><td></td></tr><tr><td><code>resid.fc.ind</code></td><td></td><td>indices indicating for which variables (columns of <code>X</code>) the residuals were forecasted using the univariate function.</td><td></td></tr><tr><td><code>call</code></td><td></td><td>call object obtained from <code><a href="https://rdrr.io/r/base/match.call.html" class="external-link">match.call()</a></code>.</td><td></td></tr></table></div>
+<p>A list-like object of class 'dfm_forecast' with the following elements:</p>
+<dl><dt><code>X_fcst</code></dt>
+<dd><p>\(h \times n\) matrix with the forecasts of the variables.</p></dd>
+
+<dt><code>F_fcst</code></dt>
+<dd><p>\(h \times r\) matrix with the factor forecasts.</p></dd>
+
+<dt><code>X</code></dt>
+<dd><p>\(T \times n\) matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:</p><table class="table table"><tr><td><code>"stats"</code></td><td></td><td>is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://sebkrantz.github.io/collapse/reference/qsu.html" class="external-link">qsu</a></code>). Only attached if <code>standardized = TRUE</code>.</td><td></td></tr><tr><td><code>"attributes"</code></td><td></td><td>contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.</td><td></td></tr><tr><td><code>"is.list"</code></td><td></td><td>is a logical value indicating whether the original data input was a list / data frame.</td><td></td></tr></table></dd>
+
+<dt><code>F</code></dt>
+<dd><p>\(T \times r\) matrix of factor estimates.</p></dd>
+
+<dt><code>method</code></dt>
+<dd><p>the factor estimation method used.</p></dd>
+
+<dt><code>anyNA</code></dt>
+<dd><p>logical indicating whether <code>X</code> contains any missing values.</p></dd>
+
+<dt><code>h</code></dt>
+<dd><p>the forecast horizon.</p></dd>
+
+<dt><code>resid.fc</code></dt>
+<dd><p>logical indicating whether a univariate forecasting function was applied to the residuals.</p></dd>
+
+<dt><code>resid.fc.ind</code></dt>
+<dd><p>indices indicating for which variables (columns of <code>X</code>) the residuals were forecasted using the univariate function.</p></dd>
+
+<dt><code>call</code></dt>
+<dd><p>call object obtained from <code><a href="https://rdrr.io/r/base/match.call.html" class="external-link">match.call()</a></code>.</p></dd>
+
+</dl></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>

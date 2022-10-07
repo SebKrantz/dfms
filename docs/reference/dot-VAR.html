@@ -77,7 +77,20 @@
 <code>A</code> which is the \(np \times n\) transition matrix, where n is the number of series in <code>x</code>, and the VAR residual matrix <code>res = Y - X %*% A</code>.</p>
 
 
-<p>A list with the following elements:</p><table class="table table"><tr><td><code>Y</code></td><td></td><td><code>x[-(1:p), ]</code>.</td><td></td></tr><tr><td><code>X</code></td><td></td><td>lags 1 - p of <code>x</code> combined column-wise.</td><td></td></tr><tr><td><code>A</code></td><td></td><td>\(np \times n\) transition matrix, where n is the number of series in <code>x</code>.</td><td></td></tr><tr><td><code>res</code></td><td></td><td>VAR residual matrix: <code>Y - X %*% A</code>.</td><td></td></tr></table></div>
+<p>A list with the following elements:</p>
+<dl><dt><code>Y</code></dt>
+<dd><p><code>x[-(1:p), ]</code>.</p></dd>
+
+<dt><code>X</code></dt>
+<dd><p>lags 1 - p of <code>x</code> combined column-wise.</p></dd>
+
+<dt><code>A</code></dt>
+<dd><p>\(np \times n\) transition matrix, where n is the number of series in <code>x</code>.</p></dd>
+
+<dt><code>res</code></dt>
+<dd><p>VAR residual matrix: <code>Y - X %*% A</code>.</p></dd>
+
+</dl></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
