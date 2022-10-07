@@ -31,6 +31,13 @@ The package is currently not intended to fit more general forms of the state spa
 
 <!-- Estimation with *dfms* also requires stationary data of a single frequency, and assumes time-invariant system matrices and classical assumptions (i.e. the 'exact factor model', assuming away residual autocorrelation in the observation equation). -->
 
+### Installation 
+
+```
+# Development Version
+remotes::install_github("SebKrantz/dfms")
+
+```
 ### Usage Example 
 ```
 library(dfms)
