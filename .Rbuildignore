@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 misc
 .RData
+.Rprofile
 LICENSE
 ^\.github$
 ^_pkgdown\.yml$
