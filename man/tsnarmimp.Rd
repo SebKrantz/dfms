@@ -31,10 +31,8 @@ tsnarmimp(
 }
 \value{
 The imputed matrix \code{X_imp}, with attributes:
-\tabular{llll}{
-\code{"missing"} \tab\tab a missingness matrix \code{W} matching the dimensions of \code{X_imp}. \cr\cr
-\code{"rm.rows"} \tab\tab and a vector of indices of rows (cases) with too many missing values that were removed. \cr\cr
-}
+\item{\code{"missing"}}{a missingness matrix \code{W} matching the dimensions of \code{X_imp}. }
+\item{\code{"rm.rows"}}{and a vector of indices of rows (cases) with too many missing values that were removed. }
 }
 \description{
 This function imputes missing values in a stationary multivariate time series using various

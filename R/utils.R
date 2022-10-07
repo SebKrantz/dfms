@@ -49,12 +49,11 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #' \code{A} which is the \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}, and the VAR residual matrix \code{res = Y - X \%*\% A}.
 #'
 #' @returns A list with the following elements:
-#' \tabular{llll}{
-#'  \code{Y} \tab\tab \code{x[-(1:p), ]}. \cr\cr
-#'  \code{X} \tab\tab lags 1 - p of \code{x} combined column-wise. \cr\cr
-#'  \code{A} \tab\tab \eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}. \cr\cr
-#'  \code{res} \tab\tab VAR residual matrix: \code{Y - X \%*\% A}. \cr\cr
-#' }
+#'  \item{\code{Y}}{\code{x[-(1:p), ]}. }
+#'  \item{\code{X}}{lags 1 - p of \code{x} combined column-wise. }
+#'  \item{\code{A}}{\eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}. }
+#'  \item{\code{res}}{VAR residual matrix: \code{Y - X \%*\% A}. }
+#'
 #' @examples
 #' var = .VAR(diff(EuStockMarkets), 3)
 #' str(var)
@@ -200,10 +199,9 @@ impNA_spline <- function(X, W, k) {
 #' @param ma.terms the order of the (2-sided) moving average applied in \code{na.impute} methods \code{"median.ma"} and \code{"median.ma.spline"}.
 #'
 #' @returns The imputed matrix \code{X_imp}, with attributes:
-#' \tabular{llll}{
-#'  \code{"missing"} \tab\tab a missingness matrix \code{W} matching the dimensions of \code{X_imp}. \cr\cr
-#'  \code{"rm.rows"} \tab\tab and a vector of indices of rows (cases) with too many missing values that were removed. \cr\cr
-#' }
+#'  \item{\code{"missing"}}{a missingness matrix \code{W} matching the dimensions of \code{X_imp}. }
+#'  \item{\code{"rm.rows"}}{and a vector of indices of rows (cases) with too many missing values that were removed. }
+#'
 #'
 #' @examples
 #' library(xts)
