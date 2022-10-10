@@ -191,8 +191,7 @@ plot.dfm <- function(x,
         mtext(paste("f", i), 2, line = 3, cex = cex.lab, col = col.lab, font = font.lab, ...)
         if(i == nf) mtext(if(is.null(dots$xlab)) "Time" else dots$xlab, side = 1, line = 3, cex = cex.lab, col = col.lab, font = font.lab, ...)
       }
-      oldpar <- par(mfrow = c(1, 1))
-      on.exit(par(oldpar))
+      par(mfrow = c(1, 1)) # on.exit above takes care of changes to parameters.
       mtext(if(is.null(dots$main)) paste(if(scale.factors) "Standardized", "Factor Estimates") else dots$main,
             side = 3, line = 3, cex = par("cex.main"), font = par("font.main"), col = par("col.main"), ...)
       # } else {
