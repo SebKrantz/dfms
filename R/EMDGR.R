@@ -3,7 +3,7 @@
 #' @param rQi,rRi restrictions on Q and R passed to DFM(), and turned into integers such that identity = 0L, diagonal = 1L, none = 2L.
 #' The other parameters are matrix dimensions, which do not need to be recalculated every iteration. see DFM() code where they are generated.
 #' @noRd
-EMstepDGR <- function(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi) {
+EMstepDGR <- function(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, TT, rQi, rRi) {
 
   ## E-step will return a list of sufficient statistics, namely second
   ## (cross)-moments for latent and observed data. This is then plugged back
@@ -22,12 +22,12 @@ EMstepDGR <- function(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi) {
   A_update <- betasr %*% ainv(gamma1)
   A[sr, ] <- A_update
   if(rQi) {
-    Qsr <- (gamma2[sr, sr] - tcrossprod(A_update, betasr)) / (T-1L)
+    Qsr <- (gamma2[sr, sr] - tcrossprod(A_update, betasr)) / (TT-1L)
     Q[sr, sr] <- if(rQi == 2L) Qsr else diag(diag(Qsr))
   } else Q[sr, sr] <- diag(r)
 
   if(rRi) {
-    R <- (cpX - tcrossprod(C, delta)) / T
+    R <- (cpX - tcrossprod(C, delta)) / TT
     if(rRi == 2L) R[R < 1e-7] <- 1e-7 else {
       RR <- diag(R)
       RR[RR < 1e-7] <- 1e-7

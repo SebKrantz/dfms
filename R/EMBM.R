@@ -8,7 +8,7 @@
 #'
 #' where
 #' @noRd
-EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind, rQi, rRi) {
+EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, TT, dgind, dnkron, dnkron_ind, rQi, rRi) {
 
   kfs_res = SKFS(X, A, C, Q, R, F_0, P_0, TRUE)
   # kfs_res = tryCatch(SKFS(X, A, C, Q, R, F_0, P_0), error = function(e) return(list(NULL, X, A, C, Q, R, F_0, P_0)))
@@ -20,17 +20,17 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
   Vsmooth0 = kfs_res$P_smooth_0
   # return(kfs_res[.c(F_smooth, P_smooth, F_smooth_0, P_smooth_0, PPm_smooth)])
 
-  tmp = rbind(Zsmooth0, Zsmooth[-T,, drop = FALSE])
+  tmp = rbind(Zsmooth0, Zsmooth[-TT,, drop = FALSE])
   EZZ = crossprod(Zsmooth) %+=% rowSums(Vsmooth, dims = 2L)                                     # E(Z'Z)
-  EZZ_BB = crossprod(tmp) %+=% (rowSums(Vsmooth[,, -T, drop = FALSE], dims = 2L) + Vsmooth0)    # E(Z(-1)'Z_(-1))
+  EZZ_BB = crossprod(tmp) %+=% (rowSums(Vsmooth[,, -TT, drop = FALSE], dims = 2L) + Vsmooth0)    # E(Z(-1)'Z_(-1))
   EZZ_FB = crossprod(Zsmooth, tmp) %+=% rowSums(VVsmooth, dims = 2L)                            # E(Z'Z_(-1))
 
   A_new = A
   A_new[sr, ] = EZZ_FB[sr, , drop = FALSE] %*% ainv(EZZ_BB)
   Q_new = Q
-  # Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
+  # Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / TT
   if(rQi) {
-    Qsr = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / T
+    Qsr = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / TT
     Q_new[sr, sr] = if(rQi == 2L) Qsr else diag(diag(Qsr))
   } else Q_new[sr, sr] = diag(r)
 
@@ -38,7 +38,7 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
   # E(X'X) & E(X'Z)
   denom = numeric(n*r^2)
   nom = matrix(0, n, r)
-  for (t in 1:T) {
+  for (t in 1:TT) {
     tmp = Zsmooth[t, sr]
     nom %+=% tcrossprod(XW0[t, ], tmp)
     tmp2 = tcrossprod(tmp) + Vsmooth[sr, sr, t]
@@ -54,7 +54,7 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
   if(rRi) {
     R_new = matrix(0, n, n)
     Rdg = R[dgind]
-    for (t in 1:T) {
+    for (t in 1:TT) {
       nanYt = W[t, ]
       tmp = C_new * !nanYt
       R[dgind] = Rdg * nanYt # If R is not diagonal
@@ -65,11 +65,11 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnk
       R_new %+=% tmp2
     }
     if(rRi == 2L) { # Unrestricted
-      R_new %/=% T
+      R_new %/=% TT
       R_new[R_new < 1e-7] = 1e-7
     } else { # Diagonal
-      # R_new = diag(R_new[dgind] / T)
-      RR = R_new[dgind] / T
+      # R_new = diag(R_new[dgind] / TT)
+      RR = R_new[dgind] / TT
       RR[RR < 1e-7] = 1e-7 # RR(RR<1e-2) = 1e-2;
       R_new = diag(RR)
     }

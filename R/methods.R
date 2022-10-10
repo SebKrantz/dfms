@@ -36,12 +36,12 @@ print.dfm <- function(x, digits = 4L, ...) {
 summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "qml"), ...) {
 
   X <- object$X_imp
-  F <- switch(tolower(method), pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml, stop("Unkown method", method))
+  Fa <- switch(tolower(method), pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml, stop("Unkown method", method))
   A <- object$A
   r <- dim(A)[1L]
   p <- dim(A)[2L] / r
   C <- object$C
-  res <- X - tcrossprod(F, C)
+  res <- X - tcrossprod(Fa, C)
   anymissing <- object$anyNA
   if(anymissing) res[attr(X, "missing")] <- NA
   rescov <- pwcov(res, use = if(anymissing) "pairwise.complete.obs" else "everything", P = TRUE)
@@ -50,9 +50,9 @@ summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "
   summ <- list(info = c(n = dim(X)[2L], T = dim(X)[1L], r = r, p = p,
                         `%NA` = if(anymissing) sum(attr(X, "missing")) / prod(dim(X)) * 100 else 0),
                call = object$call,
-               F_stats = msum(F),
+               F_stats = msum(Fa),
                A = A,
-               F_cov = pwcov(F, P = TRUE),
+               F_cov = pwcov(Fa, P = TRUE),
                Q = object$Q,
                C = C,
                R_diag = diag(object$R),
@@ -142,30 +142,30 @@ plot.dfm <- function(x,
                      method = switch(x$em.method, none = "2s", "qml"),
                      type = c("joint", "individual", "residual"),
                      scale.factors = TRUE, ...) {
-  F <- switch(tolower(method[1L]),
+  Fa <- switch(tolower(method[1L]),
               all = cbind(x$F_pca, setColnames(x$F_2s, paste("TwoStep", colnames(x$F_2s))),
                           if(length(x$F_qml)) setColnames(x$F_qml, paste("QML", colnames(x$F_qml))) else NULL),
               pca = x$F_pca, `2s` = x$F_2s, qml = x$F_qml, stop("Unknown method:", method[1L]))
 
-  nf <- dim(F)[2L]
+  nf <- dim(Fa)[2L]
   allests <- tolower(method[1L]) == "all"
   dots <- list(...)
 
   switch(tolower(type[1L]),
     joint = {
       Xr <- frange(x$X_imp)
-      if(scale.factors) F <- fscale(F)
-      Fr <- frange(F)
+      if(scale.factors) Fa <- fscale(Fa)
+      Fr <- frange(Fa)
       ts.plot(x$X_imp, col = "grey85", ylim = c(min(Xr[1L], Fr[1L]), max(Xr[2L], Fr[2L])),
               ylab = if(is.null(dots$ylab)) "Value" else dots$ylab,
               main = if(is.null(dots$main)) "Standardized Series and Factor Estimates" else dots$main, ...)
       cols <- rainbow(nf)
-      for (i in seq_len(nf)) lines(F[, i], col = cols[i])
-      legend("topleft", colnames(F), col = cols, lty = 1, bty = "n", ncol = if(allests) 3L else 1L)
+      for (i in seq_len(nf)) lines(Fa[, i], col = cols[i])
+      legend("topleft", colnames(Fa), col = cols, lty = 1, bty = "n", ncol = if(allests) 3L else 1L)
     },
     individual = {
       # if(allests) {
-      if(scale.factors) F <- fscale(F)
+      if(scale.factors) Fa <- fscale(Fa)
       qml <- !is.null(x$F_qml)
       if(allests) nf <- nf / (2L + qml)
 
@@ -177,11 +177,11 @@ plot.dfm <- function(x,
       on.exit(par(oldpar))
 
       for(i in seq_len(nf)) {
-        plot.default(F[, i], axes = FALSE, xlab = "", ylab = "", type = "n")
-        lines(F[, i], type = 'l', col = if(allests) "red" else "black", ...)
+        plot.default(Fa[, i], axes = FALSE, xlab = "", ylab = "", type = "n")
+        lines(Fa[, i], type = 'l', col = if(allests) "red" else "black", ...)
         if(allests) {
-          lines(F[, i + nf], type = 'l', col = "orange", ...)
-          if(qml) lines(F[, i + 2L * nf], type = 'l', col = "blue", ...)
+          lines(Fa[, i + nf], type = 'l', col = "orange", ...)
+          if(qml) lines(Fa[, i + 2L * nf], type = 'l', col = "blue", ...)
           if(i == 1L) legend("topleft", c("PCA", "TwoStep", if(qml) "QML"),
                              col = c("red", "orange", "blue"), lty = 1, bty = "n")
         }
@@ -197,8 +197,8 @@ plot.dfm <- function(x,
       # } else {
       #   oldpar <- par(mfrow = c(nf, 1L))
       #   on.exit(par(oldpar))
-      #   cnF <- colnames(F)
-      #   for (i in seq_len(nf)) plot(F[, i], type = 'l', main = cnF[i], ylab = "Value",
+      #   cnF <- colnames(Fa)
+      #   for (i in seq_len(nf)) plot(Fa[, i], type = 'l', main = cnF[i], ylab = "Value",
       #                               xlab = if(i == nf) "Time" else "" , ...)
       # }
     },
@@ -206,7 +206,7 @@ plot.dfm <- function(x,
       if(allests) stop("Need to choose a specific method for residual plots")
       oldpar <- par(mar = c(11.5, 4.1, 4.1, 2.1))
       on.exit(par(oldpar))
-      boxplot(x$X_imp - tcrossprod(F, x$C), main = if(is.null(dots$main)) "Residuals by input variable" else dots$main, las = 2, ...)
+      boxplot(x$X_imp - tcrossprod(Fa, x$C), main = if(is.null(dots$main)) "Residuals by input variable" else dots$main, las = 2, ...)
     },
     stop("Unknown plot type: ", type[1L])
   )
@@ -261,23 +261,23 @@ as.data.frame.dfm <- function(x, ...,
 
   nam <- names(estlist)
   m <- length(estlist)
-  T <- nrow(estlist[[1L]])
+  TT <- nrow(estlist[[1L]])
   r <- ncol(estlist[[1L]])
 
-  if(!is.null(time) && length(time) != T) {
+  if(!is.null(time) && length(time) != TT) {
     if(length(x$rm.rows)) time <- time[-x$rm.rows]
-    if(length(time) != T) stop(sprintf("time must be a length %s vector or NULL", T))
+    if(length(time) != TT) stop(sprintf("time must be a length %s vector or NULL", TT))
   }
 
   res <- switch(tolower(pivot[1L]),
-    long = list(Method = if(stringsAsFactors) setAttrib(rep(1:m, each = T*r), list(levels = nam, class = "factor")) else rep(nam, each = T*r),
-                Factor = if(stringsAsFactors) setAttrib(rep(1:r, times = m, each = T), list(levels = paste0("f", 1:r), class = "factor")) else rep(paste0("f", 1:r), times = m, each = T),
+    long = list(Method = if(stringsAsFactors) setAttrib(rep(1:m, each = TT*r), list(levels = nam, class = "factor")) else rep(nam, each = TT*r),
+                Factor = if(stringsAsFactors) setAttrib(rep(1:r, times = m, each = TT), list(levels = paste0("f", 1:r), class = "factor")) else rep(paste0("f", 1:r), times = m, each = TT),
                 Time = if(length(time)) rep(time, times = m*r) else NULL,
                 Value = unlist(estlist, use.names = FALSE)),
-    wide.factor = c(list(Method = if(stringsAsFactors) setAttrib(rep(1:m, each = T), list(levels = nam, class = "factor")) else rep(nam, each = T),
+    wide.factor = c(list(Method = if(stringsAsFactors) setAttrib(rep(1:m, each = TT), list(levels = nam, class = "factor")) else rep(nam, each = TT),
                          Time = if(length(time)) rep(time, times = m) else NULL),
                     setNames(lapply(t_list(unattrib(lapply(estlist, mctl))), unlist, FALSE, FALSE), paste0("f", 1:r))),
-    wide.method = c(list(Factor = if(stringsAsFactors) setAttrib(rep(1:r, each = T), list(levels = paste0("f", 1:r), class = "factor")) else rep(paste0("f", 1:r), each = T),
+    wide.method = c(list(Factor = if(stringsAsFactors) setAttrib(rep(1:r, each = TT), list(levels = paste0("f", 1:r), class = "factor")) else rep(paste0("f", 1:r), each = TT),
                          Time = if(length(time)) rep(time, times = r) else NULL),
                     lapply(estlist, unattrib)),
     # If only one method, do not do combine names e.g. "QML_f1"? -> most of the time people just want a simple frame like this...
@@ -330,10 +330,10 @@ residuals.dfm <- function(object,
                           orig.format = FALSE,
                           standardized = FALSE, ...) {
   X <- object$X_imp
-  F <- switch(tolower(method),
+  Fa <- switch(tolower(method),
               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
-  X_pred <- tcrossprod(F, object$C)
+  X_pred <- tcrossprod(Fa, object$C)
   if(!standardized) {
     stats <- attr(X, "stats")
     X_pred <- unscale(X_pred, stats)
@@ -355,10 +355,10 @@ fitted.dfm <- function(object,
                        orig.format = FALSE,
                        standardized = FALSE, ...) {
   X <- object$X_imp
-  F <- switch(tolower(method),
+  Fa <- switch(tolower(method),
               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
-  res <- tcrossprod(F, object$C)
+  res <- tcrossprod(Fa, object$C)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
   if(object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
@@ -437,10 +437,10 @@ predict.dfm <- function(object,
                         resFUN = NULL,
                         resAC = 0.1, ...) {
 
-  F <- switch(tolower(method),
+  Fa <- switch(tolower(method),
               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
-  nf <- dim(F)[2L]
+  nf <- dim(Fa)[2L]
   C <- object$C
   ny <- dim(C)[1L]
   A <- object$A
@@ -450,7 +450,7 @@ predict.dfm <- function(object,
 
   F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
   X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
-  F_last <- ftail(F, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
+  F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
   spi <- p:1
 
   # DFM forecasting loop
@@ -482,7 +482,7 @@ predict.dfm <- function(object,
   }
 
   dimnames(X_fc) <- dimnames(X)
-  dimnames(F_fc) <- dimnames(F)
+  dimnames(F_fc) <- dimnames(Fa)
 
   if(object$anyNA) {
     X[attr(X, "missing")] <- NA
@@ -493,7 +493,7 @@ predict.dfm <- function(object,
   res <- list(X_fcst = X_fc,
               F_fcst = F_fc,
               X = X,
-              F = F,
+              F = Fa,
               method = method,
               anyNA = object$anyNA,
               h = h,
@@ -562,18 +562,18 @@ plot.dfm_forecast <- function(x,
   ffl <- length(factors) && !is.na(factors[1L]) && factors[1L] > 0L
   nyliml <- !(...length() && any(names(list(...)) == "ylim")) # ...names() -> Added after R 3.3.0
   if(!ffl) factors <- 1L
-  F <- x$F[, factors, drop = FALSE]
-  r <- ncol(F)
-  T <- nrow(F)
+  Fa <- x$F[, factors, drop = FALSE]
+  r <- ncol(Fa)
+  TT <- nrow(Fa)
   if(ffl) {
     F_fcst <- x$F_fcst[, factors, drop = FALSE]
     if(scale.factors) {
-      fcstat <- qsu(F)
+      fcstat <- qsu(Fa)
       F_fcst <- setop(TRA.matrix(F_fcst, fcstat[, "Mean"], "-"), "/", fcstat[, "SD"], rowwise = TRUE)
-      F <- fscale(F)
+      Fa <- fscale(Fa)
     }
-    if(nyliml) Fr <- frange(F)
-    F <- rbind(F, matrix(NA_real_, x$h, r))
+    if(nyliml) Fr <- frange(Fa)
+    Fa <- rbind(Fa, matrix(NA_real_, x$h, r))
   } else Fr <- NULL
   if(dcl) {
     X <- x$X
@@ -582,14 +582,14 @@ plot.dfm_forecast <- function(x,
       Xr <- frange(X, na.rm = TRUE)
       Pr <- frange(if(ffl) c(F_fcst, x$X_fcst) else x$X_fcst)
     }
-    X_fcst <- rbind(matrix(NA_real_, T-1L, n), X[T, , drop = FALSE], x$X_fcst)
+    X_fcst <- rbind(matrix(NA_real_, TT-1L, n), X[TT, , drop = FALSE], x$X_fcst)
     X <- rbind(X, matrix(NA_real_, x$h, n))
   } else {
     data.col <- Xr <- NULL
-    X <- F[, 1L]
+    X <- Fa[, 1L]
     if(nyliml) Pr <- frange(F_fcst)
   }
-  if(ffl) F_fcst <- rbind(matrix(NA_real_, T-1L, r), F[T, , drop = FALSE], F_fcst)
+  if(ffl) F_fcst <- rbind(matrix(NA_real_, TT-1L, r), Fa[TT, , drop = FALSE], F_fcst)
   if(nyliml) {
     ts.plot(X, col = data.col[1L],
             ylim = c(min(Xr[1L], Fr[1L], Pr[1L]), max(Xr[2L], Fr[2L], Pr[1L])),
@@ -598,12 +598,12 @@ plot.dfm_forecast <- function(x,
   if(grid) grid()
   if(dcl) for (i in seq_len(n)) lines(X_fcst[, i], col = data.col[2L], lty = fcst.lty)
   if(ffl) for (i in seq_len(r)) {
-    lines(F[, i], col = factor.col[i], lwd = factor.lwd)
+    lines(Fa[, i], col = factor.col[i], lwd = factor.lwd)
     lines(F_fcst[, i], col = factor.col[i], lwd = factor.lwd, lty = fcst.lty)
   }
   if(ffl && legend) legend("topleft", legend.items, col = factor.col,
                            lwd = factor.lwd, lty = 1L, bty = "n")
-  if(vline) abline(v = T, col = vline.col, lwd = 1L, lty = vline.lty)
+  if(vline) abline(v = TT, col = vline.col, lwd = 1L, lty = vline.lty)
 }
 
 
@@ -629,13 +629,13 @@ as.data.frame.dfm_forecast <- function(x, ...,
                 stop("Unknown use option:", use[1L]))
 
   fcvec <- c(rep(FALSE, nrow(x$F)), rep(TRUE, x$h))
-  T <- nrow(mat)
+  TT <- nrow(mat)
   r <- ncol(mat)
-  if(!is.null(time) && length(time) != T) stop(sprintf("time must be a length %s vector or NULL", T))
+  if(!is.null(time) && length(time) != TT) stop(sprintf("time must be a length %s vector or NULL", TT))
 
   res <- switch(tolower(pivot[1L]),
-      long = list(Variable = if(stringsAsFactors) setAttrib(rep(1:r, each = T), list(levels = dimnames(mat)[[2L]], class = "factor")) else
-                                                rep(dimnames(mat)[[2L]], each = T),
+      long = list(Variable = if(stringsAsFactors) setAttrib(rep(1:r, each = TT), list(levels = dimnames(mat)[[2L]], class = "factor")) else
+                                                rep(dimnames(mat)[[2L]], each = TT),
                   Time = if(length(time)) rep(time, r) else NULL,
                   Forecast = rep(fcvec, r),
                   Value = unattrib(mat)),
@@ -726,7 +726,7 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
   }
 
   n <- ncol(X)
-  T <- nrow(X)
+  TT <- nrow(X)
 
   # defining rmax and checking if it is a positive integer
   if(!is.numeric(max.r) || max.r < 1) stop("max.r needs to be a positive integer")
@@ -738,9 +738,9 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
   F_pca <- X %*% evs
 
   # Various constant terms, according to the 3 criteria of Bai and Ng (2002)
-  Tn <- T * n
-  npTdTn <- (n + T) / Tn
-  minnT <- min(n, T)
+  Tn <- TT * n
+  npTdTn <- (n + TT) / Tn
+  minnT <- min(n, TT)
   c1 <- npTdTn * log(1/npTdTn)
   c2 <- npTdTn * log(minnT)
   c3 <- log(minnT) / minnT
