@@ -1,3 +1,7 @@
+# dfms 0.1.3
+
+* Implemented some minor CRAN comments, no changes to functionality. 
+
 # dfms 0.1.2
 
 * New default `em.method = "auto"`, which uses `"BM"` if the data has any missing values and `"DGR"` otherwise. 
