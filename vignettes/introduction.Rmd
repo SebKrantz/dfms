@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-options(max.print = 70)
+opt <- options(max.print = 70)
 ```
 
 *dfms* provides a user friendly and computationally efficient approach to estimate linear Gaussian Dynamic Factor Models in R. The package is not geared at any specific application, and can be used for dimensionality reduction, forecasting and nowcasting systems of time series. The use of the package is facilitated by a comprehensive set of methods to explore/plot models and extract results.
@@ -202,4 +202,8 @@ Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor 
 Onatski, A. (2010). Determining the number of factors from empirical distribution of eigenvalues. *The Review of Economics and Statistics, 92*(4), 1004-1016.
 
 Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. *Handbook of Macroeconomics, 2*, 415–525. 
+
+```{r, include=FALSE}
+options(opt)
+```
 

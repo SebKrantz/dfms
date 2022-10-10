@@ -1,6 +1,6 @@
 # Quoting some functions that need to be evaluated iteratively
-.EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, T, rQi, rRi))
-.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, T, dgind, dnkron, dnkron_ind, rQi, rRi))
+.EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, TT, rQi, rRi))
+.EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, TT, dgind, dnkron, dnkron_ind, rQi, rRi))
 .KFS <- quote(SKFS(X, A, C, Q, R, F_0, P_0))
 
 
@@ -252,14 +252,14 @@ DFM <- function(X, r, p = 1L, ...,
     X_imp <- X
     rm.rows <- NULL
   }
-  T <- nrow(X)
+  TT <- nrow(X)
 
   # This is because after removing missing rows, the data could be complete, e.g. differencing data with diff.xts() of collapse::fdiff() just gives a NA row
   if(anymiss && length(rm.rows)) anymiss <- any(W)
   BMl <- switch(tolower(em.method[1L]), auto = anymiss, dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
 
   # Run PCA to get initial factor estimates:
-  # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, T))$v # Not faster than eigen...
+  # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, TT))$v # Not faster than eigen...
   eigen_decomp <- eigen(cov(X_imp), symmetric = TRUE)
   # TODO: better way to ensure factors correlate positively with data?
   # eigen_decomp$vectors %*=% -1

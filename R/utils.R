@@ -62,9 +62,9 @@ ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 #'
 #' @export
 .VAR <- function(x, p = 1L) {
-  T <- dim(x)[1L]
-  Y <- x[(p + 1L):T, ]
-  X <- do.call(cbind, lapply(1:p, function(i) x[(p + 1L - i):(T - i), ]))
+  TT <- dim(x)[1L]
+  Y <- x[(p + 1L):TT, ]
+  X <- do.call(cbind, lapply(1:p, function(i) x[(p + 1L - i):(TT - i), ]))
   # A <- qr.coef(qr(X), Y) # solve(t(X) %*% X) %*% t(X) %*% Y
   A <- ainv(crossprod(X)) %*% crossprod(X, Y) # Faster !!!
 
@@ -139,7 +139,7 @@ findNA_LE <- function(W, threshold) {
 #' @noRd
 impNA_MA <- function(X, W, k) {
   d <- dim(X)
-  T <- d[1L]
+  TT <- d[1L]
   k2 <- 2L * k + 1L
   weights <- rep(1, k2)/k2
   sss <- -(1:(k2-1L))
@@ -147,7 +147,7 @@ impNA_MA <- function(X, W, k) {
     x <- X[, i]
     nai <- which(W[, i])
     x[nai] <- fmedian.default(x)
-    x_MA <- filter(c(rep(x[1L], k), x, rep(x[T], k)), weights, sides = 1L)
+    x_MA <- filter(c(rep(x[1L], k), x, rep(x[TT], k)), weights, sides = 1L)
     x[nai] <- x_MA[sss][nai]
     X[, i] <- x
   }
@@ -159,7 +159,7 @@ impNA_MA <- function(X, W, k) {
 #' @noRd
 impNA_spline <- function(X, W, k) {
   d <- dim(X)
-  T <- d[1L]
+  TT <- d[1L]
   k2 <- 2L * k + 1L
   weights <- rep(1, k2)/k2
   sss <- -(1:(k2-1L))
@@ -174,7 +174,7 @@ impNA_spline <- function(X, W, k) {
     if(ln != t2-t1+1L) x[t1:t2] <- spline(nnai, x[nnai], xout = t1:t2)$y
     isnanx <- which(is.na(x))
     x[isnanx] <- fmedian.default(x)
-    x_MA <- filter(c(rep(x[1L], k), x, rep(x[T], k)), weights, sides = 1L)
+    x_MA <- filter(c(rep(x[1L], k), x, rep(x[TT], k)), weights, sides = 1L)
     x[isnanx] <- x_MA[sss][isnanx]
     X[, i] <- x
   }
