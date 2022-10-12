@@ -4,10 +4,10 @@ Title: Dynamic Factor Models
 Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"), email = "sebastian.krantz@graduateinstitute.ch"),
              person("Rytis", "Bagdziunas", role = "aut"))
 Description: Efficient estimation of Dynamic Factor Models using the Expectation Maximization (EM) algorithm 
-  or Two-Step (2S) estimation, supporting datasets with missing data. The implementation follows advances in the 
-  econometric literature: estimation can be done either by running the Kalman Filter and Smoother once with initial 
-  values from PCA - 2S estimation following Doz, Giannone and Reichlin (2011) <doi:10.1016/j.jeconom.2011.02.012> - 
-  or via iterated Kalman Filtering and Smoothing until EM convergence - following Doz, Giannone and Reichlin (2012) 
+  or Two-Step (2S) estimation, supporting datasets with missing data. The estimation options follow advances in the 
+  econometric literature: either running the Kalman Filter and Smoother once with initial values from PCA - 
+  2S estimation as in Doz, Giannone and Reichlin (2011) <doi:10.1016/j.jeconom.2011.02.012> - or via iterated 
+  Kalman Filtering and Smoothing until EM convergence - following Doz, Giannone and Reichlin (2012) 
   <doi:10.1162/REST_a_00225> - or using the adapted EM algorithm of Banbura and Modugno (2014) <doi:10.1002/jae.2306>, 
   allowing arbitrary patterns of missing data. The implementation makes heavy use of the 'Armadillo' 'C++' library and 
   the 'collapse' package, providing for particularly speedy estimation. A comprehensive set of methods supports 
@@ -15,7 +15,7 @@ Description: Efficient estimation of Dynamic Factor Models using the Expectation
   of factors are also provided - following Bai and Ng (2002) <doi:10.1111/1468-0262.00273>.
 URL: https://sebkrantz.github.io/dfms/
 BugReports: https://github.com/SebKrantz/dfms/issues
-Depends: R (>= 3.0.0)
+Depends: R (>= 3.3.0)
 Imports: Rcpp (>= 1.0.1), collapse (>= 1.8.0)
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: xts, vars, magrittr, testthat (>= 3.0.0), knitr, rmarkdown, covr

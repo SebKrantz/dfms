@@ -569,7 +569,7 @@ plot.dfm_forecast <- function(x,
     F_fcst <- x$F_fcst[, factors, drop = FALSE]
     if(scale.factors) {
       fcstat <- qsu(Fa)
-      F_fcst <- setop(TRA.matrix(F_fcst, fcstat[, "Mean"], "-"), "/", fcstat[, "SD"], rowwise = TRUE)
+      F_fcst <- setop(TRA.matrix(F_fcst, fcstat[, "Mean"], "-"), "/", fcstat[, "SD"], rowwise = TRUE) # Unscale ??
       Fa <- fscale(Fa)
     }
     if(nyliml) Fr <- frange(Fa)
@@ -705,6 +705,9 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #' print(ics)
 #' plot(ics)
 #' screeplot(ics)
+#'
+#' # Optimal lag-order with 6 factors chosen
+#' VARselect(ics$F_pca[, 1:6])
 #'
 #' @references
 #' Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. \doi{10.1111/1468-0262.00273}

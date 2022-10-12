@@ -64,6 +64,9 @@ print(ics)
 plot(ics)
 screeplot(ics)
 
+# Optimal lag-order with 6 factors chosen
+VARselect(ics$F_pca[, 1:6])
+
 }
 \references{
 Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. \emph{Econometrica, 70}(1), 191-221. \doi{10.1111/1468-0262.00273}
