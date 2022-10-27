@@ -19,7 +19,7 @@
 #'    \tabular{llll}{
 #' \code{"auto"} \tab\tab Automatic selection: \code{"BM"} if \code{anyNA(X)}, else \code{"DGR"}. \cr\cr
 #' \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
-#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
+#' \code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with systematically missing data e.g. datasets with ragged edges or series at different frequencies.  \cr\cr
 #' \code{"none"} \tab\tab Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
 #' Doz, Giannone and Reichlin (2011) (the Kalman Filter is Initialized with system matrices obtained from a regression and VAR on PCA factor estimates).
 #' This yields significant performance gains over the iterative methods. Final system matrices are estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
@@ -42,7 +42,7 @@
 #' By assumptions 1-4, this translates into the following dynamic form:
 #'
 #' \deqn{\textbf{x}_t = \textbf{C}_0 \textbf{f}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})}{x(t) = C0 f(t) + e(t) ~ N(0, R)}
-#' \deqn{\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q}_0)}{f(t) = A1 f(t-1) + \dots + Ap f(t-p) + u(t) ~ N(0, Q0)}
+#' \deqn{\textbf{f}_t = \sum_{j=1}^p \textbf{A}_j \textbf{f}_{t-j} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q}_0)}{f(t) = A1 f(t-1) + \dots + Ap f(t-p) + u(t) ~ N(0, Q0)}
 #'
 #' where the first equation is called the measurement or observation equation and the second equation is called transition, state or process equation, and
 #'
@@ -336,7 +336,7 @@ DFM <- function(X, r, p = 1L, ...,
   }
 
   previous_loglik <- -Inf # .Machine$double.xmax
-  loglik_all <- NULL
+  loglik_all <- integer(max.iter)
   num_iter <- 0L
   converged <- FALSE
 
@@ -367,8 +367,9 @@ DFM <- function(X, r, p = 1L, ...,
     }
 
     previous_loglik <- loglik
-    loglik_all <- c(loglik_all, loglik)
     num_iter <- num_iter + 1L
+    loglik_all[num_iter] <- loglik
+
   }
 
   if(converged) message("Converged after ", num_iter, " iterations.")
@@ -385,7 +386,7 @@ DFM <- function(X, r, p = 1L, ...,
                     C = setDimnames(em_res$C[, sr, drop = FALSE], list(Xnam, fnam)),
                     Q = setDimnames(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
                     R = setDimnames(em_res$R, list(Xnam, Xnam)),
-                    loglik = loglik_all,
+                    loglik = if(num_iter == max.iter) loglik_all else loglik_all[seq_len(num_iter)],
                     tol = tol,
                     converged = converged),
                     object_init[-(1:6)])
