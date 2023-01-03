@@ -3,7 +3,7 @@
 [![Status at rOpenSci Software Peer Review](https://badges.ropensci.org/556_status.svg)](https://github.com/ropensci/software-review/issues/556)
 [![R-CMD-check](https://github.com/SebKrantz/dfms/workflows/R-CMD-check/badge.svg)](https://github.com/SebKrantz/dfms/actions)
 [![CRAN status](https://www.r-pkg.org/badges/version/dfms)](https://cran.r-project.org/package=dfms) 
-[![cran checks](https://cranchecks.info/badges/worst/dfms)](https://cran.r-project.org/web/checks/check_results_dfms.html)
+[![cran checks](https://badges.cranchecks.info/worst/dfms.svg)](https://cran.r-project.org/web/checks/check_results_dfms.html)
 ![downloads per month](http://cranlogs.r-pkg.org/badges/dfms?color=blue)
 ![downloads](http://cranlogs.r-pkg.org/badges/grand-total/dfms?color=blue)
 [![Codecov test coverage](https://codecov.io/gh/SebKrantz/dfms/branch/main/graph/badge.svg)](https://app.codecov.io/gh/SebKrantz/dfms?branch=main)
