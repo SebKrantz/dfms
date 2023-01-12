@@ -1,5 +1,5 @@
 Package: dfms
-Version: 0.1.3
+Version: 0.1.4
 Title: Dynamic Factor Models
 Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"), email = "sebastian.krantz@graduateinstitute.ch"),
              person("Rytis", "Bagdziunas", role = "aut"))
