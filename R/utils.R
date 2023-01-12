@@ -10,7 +10,8 @@ lagnam <- function(nam, p) list(nam, as.vector(t(outer(paste0("L", seq_len(p)), 
 msum <- function(x) {
   stats <- qsu(x)
   med <- fmedian(x)
-  res <- if(is.matrix(x)) cbind(stats[, 1:2], Median = med, stats[, -(1:2)]) else
+  res <- if(is.matrix(stats))
+    cbind(stats[, 1:2, drop = FALSE], Median = med, stats[, -(1:2), drop = FALSE]) else
     c(stats[1:2], Median = med, stats[-(1:2)])
   class(res) <- "qsu"
   res
