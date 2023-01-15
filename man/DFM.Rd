@@ -36,7 +36,7 @@ DFM(
 \tabular{llll}{
 \code{"auto"} \tab\tab Automatic selection: \code{"BM"} if \code{anyNA(X)}, else \code{"DGR"}. \cr\cr
 \code{"DGR"} \tab\tab The classical EM implementation of Doz, Giannone and Reichlin (2012). This implementation is efficient and quite robust, missing values are removed on a casewise basis in the Kalman Filter and Smoother, but not explicitly accounted for in EM iterations. \cr\cr
-\code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with arbitrary patterns of missing data e.g. datasets with series at different frequencies.  \cr\cr
+\code{"BM"} \tab\tab The modified EM algorithm of Banbura and Modugno (2014) which also accounts for missing data in the EM iterations. Optimal for datasets with systematically missing data e.g. datasets with ragged edges or series at different frequencies.  \cr\cr
 \code{"none"} \tab\tab Performs no EM iterations and just returns the Two-Step estimates from running the data through the Kalman Filter and Smoother once as in
 Doz, Giannone and Reichlin (2011) (the Kalman Filter is Initialized with system matrices obtained from a regression and VAR on PCA factor estimates).
 This yields significant performance gains over the iterative methods. Final system matrices are estimated by running a regression and a VAR on the smoothed factors.  \cr\cr
@@ -96,7 +96,7 @@ Factors are allowed to evolve in a \eqn{VAR(p)} process, and data is internally 
 By assumptions 1-4, this translates into the following dynamic form:
 
 \deqn{\textbf{x}_t = \textbf{C}_0 \textbf{f}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})}{x(t) = C0 f(t) + e(t) ~ N(0, R)}
-\deqn{\textbf{f}_t = \sum_{i=1}^p \textbf{A}_p \textbf{f}_{t-p} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q}_0)}{f(t) = A1 f(t-1) + \dots + Ap f(t-p) + u(t) ~ N(0, Q0)}
+\deqn{\textbf{f}_t = \sum_{j=1}^p \textbf{A}_j \textbf{f}_{t-j} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q}_0)}{f(t) = A1 f(t-1) + \dots + Ap f(t-p) + u(t) ~ N(0, Q0)}
 
 where the first equation is called the measurement or observation equation and the second equation is called transition, state or process equation, and
 

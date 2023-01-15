@@ -1,3 +1,7 @@
+# dfms 0.1.4
+
+* Fixed minor bug in `summary.dfm` occurring if only one factor was estimated (basically an issue with dropping matrix dimensions which lead the factor summary statistics to be displayed without names).
+
 # dfms 0.1.3
 
 * Implemented some minor CRAN comments, no changes to functionality. 
