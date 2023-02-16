@@ -2,6 +2,7 @@
 <!-- badges: start -->
 [![Status at rOpenSci Software Peer Review](https://badges.ropensci.org/556_status.svg)](https://github.com/ropensci/software-review/issues/556)
 [![R-CMD-check](https://github.com/SebKrantz/dfms/workflows/R-CMD-check/badge.svg)](https://github.com/SebKrantz/dfms/actions)
+[![dfms status badge](https://sebkrantz.r-universe.dev/badges/dfms)](https://sebkrantz.r-universe.dev)
 [![CRAN status](https://www.r-pkg.org/badges/version/dfms)](https://cran.r-project.org/package=dfms) 
 [![cran checks](https://badges.cranchecks.info/worst/dfms.svg)](https://cran.r-project.org/web/checks/check_results_dfms.html)
 ![downloads per month](http://cranlogs.r-pkg.org/badges/dfms?color=blue)
@@ -10,6 +11,7 @@
 [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.3.0-6666ff.svg)](https://cran.r-project.org/)
 [![status](https://tinyverse.netlify.com/badge/dfms)](https://CRAN.R-project.org/package=dfms)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![R-CMD-check](https://github.com/SebKrantz/dfms/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SebKrantz/dfms/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 **NOTE**: This package is under [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). Peer review might result in changes to the API. 
@@ -42,7 +44,7 @@ The package is currently not intended to fit more general forms of the state spa
 
 ```
 # Development Version
-remotes::install_github("SebKrantz/dfms")
+install.packages('dfms', repos = c('https://sebkrantz.r-universe.dev', 'https://cloud.r-project.org'))
 
 ```
 ### Usage Example 
