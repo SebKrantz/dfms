@@ -11,6 +11,7 @@
   method = switch(object$em.method, none = "2s", "qml"),
   orig.format = FALSE,
   standardized = FALSE,
+  na.keep = TRUE,
   ...
 )
 
@@ -19,6 +20,7 @@
   method = switch(object$em.method, none = "2s", "qml"),
   orig.format = FALSE,
   standardized = FALSE,
+  na.keep = TRUE,
   ...
 )
 }
@@ -30,6 +32,8 @@
 \item{orig.format}{logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.}
 
 \item{standardized}{logical. \code{FALSE} will put residuals/fitted values on the original data scale.}
+
+\item{na.keep}{logical. \code{TRUE} inserts missing values where \code{X} is missing (default \code{TRUE} as residuals/fitted values are only defined for observed data). \code{FALSE} returns the raw prediction, which can be used to interpolate data based on the DFM. For residuals, \code{FALSE} returns the difference between the prediction and the initial imputed version of \code{X} use for PCA to initialize the Kalman Filter.}
 
 \item{\dots}{not used.}
 }
