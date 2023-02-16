@@ -305,6 +305,7 @@ as.data.frame.dfm <- function(x, ...,
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param orig.format logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals/fitted values on the original data scale.
+#' @param na.keep logical. \code{TRUE} inserts missing values where \code{X} is missing (default \code{TRUE} as residuals/fitted values are only defined for observed data). \code{FALSE} returns the raw prediction, which can be used to interpolate data based on the DFM. For residuals, \code{FALSE} returns the difference between the prediction and the initial imputed version of \code{X} use for PCA to initialize the Kalman Filter.
 #' @param \dots not used.
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
@@ -328,7 +329,8 @@ as.data.frame.dfm <- function(x, ...,
 residuals.dfm <- function(object,
                           method = switch(object$em.method, none = "2s", "qml"),
                           orig.format = FALSE,
-                          standardized = FALSE, ...) {
+                          standardized = FALSE,
+                          na.keep = TRUE, ...) {
   X <- object$X_imp
   Fa <- switch(tolower(method),
               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
@@ -339,7 +341,7 @@ residuals.dfm <- function(object,
     X_pred <- unscale(X_pred, stats)
     res <- unscale(X, stats) - X_pred
   } else res <- X - X_pred
-  if(object$anyNA) res[attr(X, "missing")] <- NA
+  if(na.keep && object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
     if(length(object$rm.rows)) res <- pad(res, object$rm.rows, method = "vpos")
     if(attr(X, "is.list")) res <- mctl(res)
@@ -353,14 +355,15 @@ residuals.dfm <- function(object,
 fitted.dfm <- function(object,
                        method = switch(object$em.method, none = "2s", "qml"),
                        orig.format = FALSE,
-                       standardized = FALSE, ...) {
+                       standardized = FALSE,
+                       na.keep = TRUE, ...) {
   X <- object$X_imp
   Fa <- switch(tolower(method),
               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
   res <- tcrossprod(Fa, object$C)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
-  if(object$anyNA) res[attr(X, "missing")] <- NA
+  if(na.keep && object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
     if(length(object$rm.rows)) res <- pad(res, object$rm.rows, method = "vpos")
     if(attr(X, "is.list")) res <- mctl(res)
@@ -719,7 +722,7 @@ as.data.frame.dfm_forecast <- function(x, ...,
 ICr <- function(X, max.r = min(20, ncol(X)-1)) {
 
   # Converting to matrix and standardizing
-  X <- fscale(qM(X))
+  X <- fscale(qM(X), na.rm = TRUE)
   dimnames(X) <- NULL
 
   if(anyNA(X)) {

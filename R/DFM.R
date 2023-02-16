@@ -233,7 +233,7 @@ DFM <- function(X, r, p = 1L, ...,
   ax <- attributes(X)
   ilX <- is.list(X)
   Xstat <- qsu(X)
-  X <- fscale(qM(X))
+  X <- fscale(qM(X), na.rm = TRUE)
   Xnam <- dimnames(X)[[2L]]
   dimnames(X) <- NULL
   n <- ncol(X)
@@ -277,7 +277,7 @@ DFM <- function(X, r, p = 1L, ...,
   C <- cbind(v, matrix(0, n, rp-r))
   if(rRi) {
     res <- X - tcrossprod(F_pc, v) # residuals from static predictions
-    R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
+    R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res, na.rm = TRUE))
   } else R <- diag(n)
 
   # Transition equation -------------------------------
@@ -323,7 +323,7 @@ DFM <- function(X, r, p = 1L, ...,
     Q <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
     if(rRi) {
       res <- X - F_kal %*% beta
-      R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res))
+      R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res, na.rm = TRUE))
     } else R <- diag(n)
     final_object <- c(object_init[1:6],
                       list(A = setDimnames(t(var$A), lagnam(fnam, p)), # A[sr, , drop = FALSE],

@@ -9,7 +9,7 @@ lagnam <- function(nam, p) list(nam, as.vector(t(outer(paste0("L", seq_len(p)), 
 #' @noRd
 msum <- function(x) {
   stats <- qsu(x)
-  med <- fmedian(x)
+  med <- fmedian(x, na.rm = TRUE)
   res <- if(is.matrix(stats))
     cbind(stats[, 1:2, drop = FALSE], Median = med, stats[, -(1:2), drop = FALSE]) else
     c(stats[1:2], Median = med, stats[-(1:2)])
@@ -24,7 +24,7 @@ msum <- function(x) {
 AC1 <- function(res, anymiss) {
   ACF <- cov(res[-1L, ], res[-nrow(res), ],
              use = if(anymiss) "pairwise.complete.obs" else "everything")
-  diag(ACF) / fvar(res)
+  diag(ACF) / fvar(res, na.rm = TRUE)
 }
 
 #' Undo Standardizing
@@ -147,7 +147,7 @@ impNA_MA <- function(X, W, k) {
   for (i in 1:d[2L]) {
     x <- X[, i]
     nai <- which(W[, i])
-    x[nai] <- fmedian.default(x)
+    x[nai] <- fmedian.default(x, na.rm = TRUE)
     x_MA <- filter(c(rep(x[1L], k), x, rep(x[TT], k)), weights, sides = 1L)
     x[nai] <- x_MA[sss][nai]
     X[, i] <- x
@@ -174,7 +174,7 @@ impNA_spline <- function(X, W, k) {
     # Cubic spline to interpolate any internal missing values...
     if(ln != t2-t1+1L) x[t1:t2] <- spline(nnai, x[nnai], xout = t1:t2)$y
     isnanx <- which(is.na(x))
-    x[isnanx] <- fmedian.default(x)
+    x[isnanx] <- fmedian.default(x, na.rm = TRUE)
     x_MA <- filter(c(rep(x[1L], k), x, rep(x[TT], k)), weights, sides = 1L)
     x[isnanx] <- x_MA[sss][isnanx]
     X[, i] <- x
@@ -235,7 +235,7 @@ tsnarmimp <- function(X,
     }
   }
   X_imp <- switch(tolower(na.impute[1L]),
-                  median = fmedian(X, TRA = "replace_NA"), # replace(X, W, fmedian(X, TRA = 1L)[W]),
+                  median = fmedian(X, na.rm = TRUE, TRA = "replace_NA"), # replace(X, W, fmedian(X, TRA = 1L)[W]),
                   rnorm = replace(X, W, rnorm(sum(W))),
                   median.ma = impNA_MA(X, W, ma.terms),
                   median.ma.spline = impNA_spline(X, W, ma.terms),
