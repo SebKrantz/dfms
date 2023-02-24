@@ -19,15 +19,16 @@
 \usepackage{booktabs}
 % If you use \tableofcontents, this adjusts the name
 %\addto\captionsenglish{\renewcommand*\contentsname{Table of Contents}}
+\setcounter{MaxMatrixCols}{20} % https://tex.stackexchange.com/questions/436646/matrix-extra-alignment-tab-has-been-changed-to-cr
 
 
-\title{\textbf{Dynamic Factor Models}\\ A Short Introduction}
+\title{\textbf{Dynamic Factor Models}\\ A Very Short Introduction}
 \author{Sebastian Krantz}
 
 \begin{document}
 \maketitle
 
-Dynamic factor models (DFM) postulate that a small number of unobserved "factors" can be used to explain a substantial portion of the variation and dynamics in a larger number of observed time series. In addition to producing estimates of the unobserved factors, dynamic factor models have many uses in forecasting and macroeconomic monitoring. One popular application for these models is "nowcasting", in which higher-frequency data is used to produce "nowcasts" of series that are only published at a lower frequency (Fulton, 2020). \newline
+Dynamic factor models (DFM) postulate that a small number of unobserved "factors" can be used to explain a substantial portion of the variation and dynamics in a larger number of observed time series. In addition to producing estimates of the unobserved factors, dynamic factor models have many uses in forecasting and macroeconomic monitoring. One popular application for these models is "nowcasting", in which higher-frequency data is used to produce "nowcasts" of series that are only published at a lower frequency (Chad Fulton, 2020). \newline
 
 Dynamic Factor Models are set up in State-Space form and can be estimated using the Kalman Filter and a number of solution algorithms, the most popular one in the economics literature being the Expectation Maximization (EM) algorithm, due to it's robust numerical properties and the mixed frequency modification of \citet{banbura2014maximum}. \newline
 
@@ -93,7 +94,7 @@ Particularly assumption 4 is quite restrictive since it stipulates that all time
 \textbf{x}_t = \sum_{i=0}^q \textbf{C}_i \textbf{f}_{t-i} + \textbf{e}_t, \qquad \textbf{e}_t\sim N(\textbf{0}, \textbf{R}).
 \end{equation}
 In this case the stacked notation remains the same as long as $q < r-1$, with observation matrix 
-\begin{equation}
+\begin{equation} \label{eq:Clags}
 \textbf{C}_{(n \times rp)}  = (\textbf{C}_0, \textbf{C}_1, \dots, \textbf{C}_q, \textbf{0}, \dots, \textbf{0})
 \end{equation}
 modified to estimate the lagged loadings $\textbf{C}_i$. However, because of the profileration of parameters, this extension has not received much attention. Furthermore, in the presence of significant lagged dynamics, increasing the number of factors $r$ is often successful in capturing these dynamics, with certain factors loading strongly on the lagged indicators and others on the contemporaneous ones. \newline
@@ -127,6 +128,9 @@ where $\textbf{x}_t$ is as in Eq. \ref{eq:do}, and the other matrices are
 \textbf{F}^a_{t\ (rp+n \times 1)}  &= (\textbf{f}_t', \textbf{f}_{t-1}', \dots, \textbf{f}_{t-p}', \textbf{e}_t')', \text{where $\textbf{e}_t$ is $n\times 1$ as in Eq. \ref{eq:ar1}} \\[1em]
 \textbf{C}^a_{(n \times rp+n)}  &= (\textbf{C}_0, \textbf{0}, \dots, \textbf{0}, \textbf{I}), \text{where \textbf{0} is $n\times r$ and \textbf{I} is $n\times n$} \\[1em]
 \textbf{A}^a_{(rp+n \times rp+n)}  &= \begin{pmatrix}
+\textbf{A} & \textbf{0} \\
+\textbf{0} & \mathbf{\Phi}
+\end{pmatrix} = \begin{pmatrix}
 \textbf{A}_1 & \textbf{A}_2 & \cdots & \textbf{A}_{p-1}  & \textbf{A}_p & \textbf{0}\\
 \textbf{I}_1 & \textbf{0} & \cdots & \textbf{0} & \textbf{0} & \textbf{0} \\
 \textbf{0} & \textbf{I}_2 & \cdots & \textbf{0} & \textbf{0} & \textbf{0} \\ 
@@ -136,6 +140,9 @@ where $\textbf{x}_t$ is as in Eq. \ref{eq:do}, and the other matrices are
 \end{pmatrix}, \text{where $\mathbf{\Phi}$ is $n\times n$ as in Eq. \ref{eq:ar1}} \\[1em]
 \textbf{u}^a_{t\ (rp+n \times 1)}  &= (\textbf{u}_t', \textbf{0}', \dots, \textbf{0}', \textbf{v}_t')', \text{with $\textbf{v}_t$ $n \times 1$ as in Eq. \ref{eq:ar1}}  \\[1em]
 \textbf{Q}^a_{(rp+n \times rp+n)}  &= \begin{pmatrix}
+\textbf{Q} & \textbf{0} \\
+\textbf{0} & \textbf{R}
+\end{pmatrix} = \begin{pmatrix}
 \textbf{Q}_0 & \textbf{0} & \cdots &  \textbf{0} \\
 \textbf{0} & \textbf{0}& \cdots  & \textbf{0} \\ 
 \vdots & \vdots & \ddots  & \vdots \\
@@ -143,7 +150,7 @@ where $\textbf{x}_t$ is as in Eq. \ref{eq:do}, and the other matrices are
 \end{pmatrix}, \text{where \textbf{R} is $n\times n$ as in Eq. \ref{eq:ar1}.} 
 \end{align}
 
-To still be able estimate this model using a classical form of the Kalman Filter, \citet{banbura2014maximum} introduce an error term $\mathbf{\epsilon} \sim N(\textbf{0}, \tilde{\textbf{R}})$ in Eq. \ref{eq:doar1}, with covariance $\tilde{\textbf{R}} = \kappa \textbf{I}$ for $\kappa$ a very small number. \newline
+To still be able estimate this model using a classical form of the Kalman Filter, \citet{banbura2014maximum} introduce an error term $\textbf{z}_t \sim N(\textbf{0}, \kappa \textbf{I})$ in Eq. \ref{eq:doar1}, with $\kappa$ a very small number. \newline
 
 Like the \emph{exact} DFM, this model can also easily be extended to allow for $q$ factor lags in the observation equation, by estimating an observation matrix
 \begin{equation}
@@ -177,12 +184,66 @@ x^q_t &= \frac{1}{3}[\tilde{x}^m_t + \tilde{x}^m_{t-1} + \tilde{x}^m_{t-2}] + \f
  &= \frac{1}{3}\tilde{x}^m_t + \frac{2}{3}\tilde{x}^m_{t-1} + \tilde{x}^m_{t-2} + \frac{2}{3}\tilde{x}^m_{t-3} + \frac{1}{3}\tilde{x}^m_{t-4}.
 \end{align}
 This is the result of \citet{mariano2003new}. \citet{banbura2014maximum} consider instead the quarterly series to be the product of the unobserved monthly series, i.e. starting from $X^q_t = \tilde{X}^m_t\tilde{X}^m_{t-1}\tilde{X}^m_{t-2}$, the final expression is
-\begin{equation}
+\begin{equation} \label{eq:MMBM}
 x^q_t = \tilde{x}^m_t + 2\tilde{x}^m_{t-1} + 3\tilde{x}^m_{t-2} + 2\tilde{x}^m_{t-3} + \tilde{x}^m_{t-4}.
 \end{equation}
-Since $\tilde{X}^{m\frac{1}{3}}_t$ (and thus $\tilde{x}^m_t$) is unobserved, this approach is equivalent, as only the relative weights on the lags of the unobserved series matter. 
+Since $\tilde{X}^m_t$ (and thus $\tilde{x}^m_t$) is unobserved, this approach is equivalent, as only the relative weights on the lags of the unobserved series matter. We now assume that there exist $n_Q$ quarterly variables, whose vector of unobserved monthly counterparts $\tilde{\textbf{x}}^m_t$ admits the same DFM representation as the observed monthly variables, i.e. $\tilde{\textbf{x}}^m_t = \textbf{C}_0^q\textbf{f}_t + \textbf{e}^q_t$. Inserting in a vectorized version of Eq. \ref{eq:MMBM} yields
+\begin{align} 
+\textbf{x}^q_t &= \textbf{C}_0^q\textbf{f}_t + \textbf{e}^q_t + 2(\textbf{C}_0^q\textbf{f}_{t-1} + \textbf{e}^q_{t-1}) + 3(\textbf{C}_0^q\textbf{f}_{t-2} + \textbf{e}^q_{t-2}) + 2(\textbf{C}_0^q\textbf{f}_{t-3} + \textbf{e}^q_{t-3}) + \textbf{C}_0^q\textbf{f}_{t-4} + \textbf{e}^q_{t-4} \\
+&= \textbf{C}_0^q (\textbf{I}\ 2\textbf{I}\ 3\textbf{I}\ 2\textbf{I}\ \textbf{I})(\textbf{f}_t'\ \textbf{f}_{t-1}'\ \textbf{f}_{t-2}'\ \textbf{f}_{t-3}'\ \textbf{f}_{t-4}')' + (\textbf{I}\ 2\textbf{I}\ 3\textbf{I}\ 2\textbf{I}\ \textbf{I})(\textbf{e}^{q\prime}_t\ \textbf{e}^{q\prime}_{t-1}\ \textbf{e}^{q\prime}_{t-2}\ \textbf{e}^{q\prime}_{t-3}\ \textbf{e}^{q\prime}_{t-4})' \\
+&= \textbf{C}_0^q\textbf{J}\textbf{F}^5_t + \textbf{J}\textbf{E}^5_t \\
+&= \textbf{C}^q\textbf{F}^q_t,
+\end{align}
+where the latter is a stacked representation similar to the \emph{approximate} DFM case, with matrices
+\begin{align} \label{eq:Ftmf}
+\textbf{F}^q_{t\ (5r+5n_Q \times 1)}  &= (\textbf{F}^{5\prime}_t, \textbf{E}_t^{5\prime})' = (\textbf{f}_t', \dots, \textbf{f}_{t-4}', \textbf{e}^{q\prime}_t, \dots, \textbf{e}^{q\prime}_{t-4})', \text{where $\textbf{f}_t$ is $r\times 1$ and $\textbf{e}^q_t$ is $n_Q\times 1$} \\[1em]
+\textbf{C}^q_{(n \times 5r+5n_Q)}  &= (\textbf{C}_0^q\textbf{J}, \textbf{J}) = (\textbf{C}_0^q, 2\textbf{C}_0^q, 3\textbf{C}_0^q, 2\textbf{C}_0^q, \textbf{C}_0^q, \textbf{I}, 2\textbf{I}, 3\textbf{I}, 2\textbf{I}, \textbf{I}), \text{where \textbf{I} is $n_Q\times n_Q$.}
+\end{align}
+In other words, mixed frequency estimation amounts to modelling the error process of unobserved variables as part of the state vector and placing restrictions on the observation matrix. Provided that the number of lags in the transition equation is $p > 4$, and assuming that quarterly series $\textbf{x}_t^q$ are observed every 3rd month and missing otherwise, the joint monthly-quarterly state space representation can be modelled as 
+\begin{align} \label{eq:domf}
+\tilde{\textbf{x}}_t &= \tilde{\textbf{C}} \tilde{\textbf{F}}_t + \tilde{\textbf{e}}_t, \ \qquad\ \tilde{\textbf{e}}_t\sim  N(\textbf{0}, \tilde{\textbf{R}}) \\
+\tilde{\textbf{F}}_t &= \tilde{\textbf{A}}\tilde{\textbf{F}}_{t-1} + \tilde{\textbf{u}}_t, \quad\ \tilde{\textbf{u}}_t\sim  N(\textbf{0}, \tilde{\textbf{Q}}),
+\end{align}
+with system matrices
+\begin{align}
+\tilde{\textbf{x}}_{t\ (n \times 1)} &= (\textbf{x}_t^{m\prime},\ \textbf{x}_t^{q\prime})', \text{where $\textbf{x}_t^m$ is $n_M\times 1$ and $\textbf{x}_t^q$ is $n_Q\times 1$} \\[1em]
+\tilde{\textbf{F}}_{t\ (rp+5n_Q \times 1)}  &= (\textbf{f}_t', \dots, \textbf{f}_{t-p}', \textbf{e}^{q\prime}_t, \dots, \textbf{e}^{q\prime}_{t-4})', \text{where $\textbf{e}^q_t$ is $n_Q\times 1$ as in Eq. \ref{eq:Ftmf}} \\[1em] \label{eq:Cmf}
+\tilde{\textbf{C}}_{(n \times rp+5n_Q)}  &= \begin{pmatrix}
+\textbf{C}^m & \textbf{0} & \textbf{0} \\
+\textbf{C}_0^q\textbf{J} & \textbf{0} & \textbf{J}
+\end{pmatrix} = \begin{pmatrix}
+\textbf{C}_0^m & \textbf{0} & \textbf{0} & \textbf{0} & \textbf{0} & \textbf{0} & \textbf{0} & \textbf{0} & \textbf{0} & \textbf{0} & \textbf{0} \\
+\textbf{C}_0^q & 2\textbf{C}_0^q & 3\textbf{C}_0^q & 2\textbf{C}_0^q & \textbf{C}_0^q & \textbf{0} & \textbf{I} & 2\textbf{I} & 3\textbf{I} & 2\textbf{I} & \textbf{I}
+\end{pmatrix} \\
+\tilde{\textbf{e}}_{t\ (n \times 1)}  &= (\textbf{e}^{m\prime}_t, \textbf{z}^{q\prime}_t)', \text{where $\textbf{e}^m_t$ is $n_M \times 1$, and $\textbf{z}^q_t$ is $n_Q \times 1$ and very small}  \\[1em]
+\tilde{\textbf{R}}_{(n \times n)}  &= \begin{pmatrix}
+\textbf{R}^m & \textbf{0} \\
+\textbf{0} & \kappa\textbf{I}
+\end{pmatrix}, \text{where $\textbf{R}^m$ is $n_M\times n_M$, \textbf{I} is $n_Q\times n_Q$, and $\kappa$ very small} \\[1em]
+\tilde{\textbf{A}}_{(rp+5n_Q \times rp+5n_Q)}  &= \begin{pmatrix}
+\textbf{A} & \textbf{0} \\
+\textbf{0} & \textbf{I}^q
+\end{pmatrix} = \begin{pmatrix}
+\textbf{A}_1 & \textbf{A}_2 & \cdots & \textbf{A}_{p-1}  & \textbf{A}_p & \textbf{0}\\
+\textbf{I}_1 & \textbf{0} & \cdots & \textbf{0} & \textbf{0} & \textbf{0} \\
+\textbf{0} & \textbf{I}_2 & \cdots & \textbf{0} & \textbf{0} & \textbf{0} \\ 
+\vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
+\textbf{0} & \textbf{0} & \cdots & \textbf{I}_{p-1} & \textbf{0} & \textbf{0} \\
+\textbf{0} & \textbf{0} & \cdots & \textbf{0} & \textbf{0} & \textbf{I}^q
+\end{pmatrix}, \text{where $\textbf{I}^q$ is $5n_Q\times 5n_Q$} \\
+\tilde{\textbf{u}}_{t\ (rp+5n_Q \times 1)}  &= (\textbf{u}_t', \textbf{0}', \dots, \textbf{0}', \textbf{e}^{q\prime}_t, \textbf{0}', \dots, \textbf{0}')', \text{where $\textbf{e}^q_t$ is $n_Q \times 1$} \\[1em]
+\tilde{\textbf{Q}}_{(rp+5n_Q \times rp+5n_Q)}  &= \begin{pmatrix}
+\textbf{Q}_0 & \textbf{0} & \textbf{0} & \textbf{0} \\
+\textbf{0} & \textbf{0} & \textbf{0} & \textbf{0} \\
+\textbf{0} & \textbf{0} & \textbf{R}^q & \textbf{0} \\ 
+\textbf{0} & \textbf{0} & \textbf{0} & \textbf{0}
+\end{pmatrix}, \text{where $\textbf{R}^q$ is $n_Q\times n_Q$.} 
+\end{align}
 
-\newpage
+This representation can easily be extended to allow additional lags of monthly variables in the observation equation, by replacing $\textbf{C}^m$ in Eq. \ref{eq:Cmf} by a suitably altered version as in Eq. \ref{eq:Clags}. It is also possible to estimate autoregressive parameters, by also including $\textbf{e}^m_t$ into the state vector $\tilde{\textbf{F}}$, replacing $\tilde{\textbf{e}}_t$ by a very small amplitude process $\tilde{\textbf{z}}_t$ with covariance $\kappa\textbf{I}$, adding autoregressive parameters $\mathbf{\Phi}^m$ and $\mathbf{\Phi}^q$ to $\tilde{\textbf{A}}$, and estimating both $\textbf{R}^m$ and $\textbf{R}^q$ inside $\tilde{\textbf{Q}}$. The modified EM algorithm that respects the restrictions placed on $\tilde{\textbf{C}}$ is detailed in \citet{banbura2014maximum}.
+
+
+% \newpage
 
 \bibliographystyle{apacite}
 \bibliography{dynamic_factor_models} % This links to a file bibliography.bib with the citations
