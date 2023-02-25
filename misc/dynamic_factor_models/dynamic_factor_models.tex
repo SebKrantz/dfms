@@ -79,13 +79,15 @@ where $\textbf{x}_t$, $\textbf{e}_t$ and \textbf{R} are as in Eq. \ref{eq:do}, a
 \end{pmatrix}, \text{where \textbf{0} are $r\times r$ zero matrices.} 
 \end{align}
 
-The estimation of this model via quasi-maximum likelihood using the EM algorithm, with initial system matrices determined through Principal Components Analysis (suitable for large $n$), is described in \citet{doz2012quasi}. This \emph{exact} DFM is quite restrictive as it assumes that all correlation in the data is explained by the unobserved common factors. In particular, it assumes:
+The estimation of this model via quasi-maximum likelihood using the EM algorithm, with initial system matrices determined through Principal Components Analysis (suitable for large $n$), is described in \citet{doz2012quasi}. \newline
+
+This \emph{exact} DFM specification is quite restrictive as it assumes that all correlation in the data is explained by the unobserved common factors. In particular, it assumes
 
 \begin{enumerate}
 \item Linearity and constant relationships (no structural breaks)
 \item Idiosynchratic measurement (observation) errors (\textbf{R} is diagonal)
 \item No direct relationship between series and lagged factors (can be relaxed)
-\item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation)
+\item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation).
 \end{enumerate}
 
 Particularly assumption 4 is quite restrictive since it stipulates that all time dynamics in $\textbf{x}_t$ need to be accounted for by the factors. \newline
@@ -98,10 +100,10 @@ In this case, the stacked notation remains the same as long as $q < r-1$, with o
 \begin{equation} \label{eq:Clags}
 \textbf{C}_{(n \times rp)}  = (\textbf{C}_0, \textbf{C}_1, \dots, \textbf{C}_q, \textbf{0}, \dots, \textbf{0})
 \end{equation}
-modified to estimate the lagged loadings $\textbf{C}_i$. However, because of the proliferation of parameters, this extension has not received much attention. Furthermore, in the presence of significant lagged dynamics, increasing the number of factors $r$ is often successful in capturing these dynamics, with certain factors loading strongly on the lagged indicators and others on the contemporaneous ones. \newline
+modified to estimate the lagged loadings $\textbf{C}_i$. However, because of the proliferation of parameters, this extension has not received much attention in frequentist estimation approaches. Furthermore, in the presence of significant lagged dynamics, increasing the number of factors $r$ is often successful in capturing these dynamics, with certain factors loading strongly on the lagged indicators and others on the contemporaneous ones. \newline
 
 
-In the current practice of estimating large DFMs of economic time series, series for a given sector often have unmodeled sector-specific dynamics. Most of the economics literature on DFMs has thus focused on relaxing restrictions about the error structure in factor models, introducing the notion of \emph{approximate} factor models \citep{stock2016dynamic}. A particular emphasis has been placed on relaxing assumption 4, i.e. allowing some of the dynamics of the time series to be unexplained by the common factors. 
+In the current practice of estimating large DFMs of economic time series, series for a given sector often have unmodeled sector-specific dynamics. Most of the economics literature on DFMs has thus focused on relaxing restrictions about the error structure in factor models, introducing the notion of \emph{approximate} factor models \citep{stock2016dynamic}. A particular emphasis has been placed on relaxing assumption 4, i.e. allowing some of the idiosynchratic dynamics of the time series to be unexplained by the common factors. 
 % doz2020dynamic
 
 
