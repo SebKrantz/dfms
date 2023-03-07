@@ -5,12 +5,10 @@
 
 # Installation and loading
 # using Pkg
-# Pkg.add("XLSX")
 # Pkg.add("NaNStatistics") # nanmean etc.
 # Pkg.add("DSP") # filt()
 # Pkg.add("DataInterpolations") # CubicSpline()
 # Pkg.add("BlockDiagonals") # BlockDiagonal()
-using XLSX
 using Statistics
 using NaNStatistics
 using DSP
