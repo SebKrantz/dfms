@@ -50,7 +50,7 @@ init_cond_idio_ar1 <- function(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss) {
   var <- .VAR(F_pc, p)
   P_0 <- A <- Q <- matrix(0, rp+n, rp+n)
   A[sr, srp] <- t(var$A)
-  A[(r+1L):rp, srp] <- diag(1, rp-r, rp)
+  if(p > 1L) A[(r+1L):rp, srp] <- diag(1, rp-r, rp)
   A[end, end] <- diag(res_AC1) # Estimates of residual autocorrelation
   Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
   Q[end, end] <- R # Observation covariance is estimated in State Equation
