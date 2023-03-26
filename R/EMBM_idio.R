@@ -47,7 +47,7 @@ EMstepBMidio = function(X, A, C, Q, R, Z_0, V_0, XW0, W, dgind, dnkron, dnkron_i
   tmp2 = sum3(Vsmooth[rp1nr, rp1nr, -TT, drop = FALSE])
   EZZ_u = diag(crossprod(Zsmooth[, rp1nr, drop = FALSE])) + diag(tmp2 + Vsmooth[rp1nr, rp1nr, TT])                     # E(Z'Z)
   EZZ_BB_u = diag(crossprod(tmp)) + diag(tmp2 + Vsmooth0[rp1nr, rp1nr])                                                # E(Z(-1)'Z(-1))
-  EZZ_FB_u = diag(diag(crossprod(Zsmooth[, rp1nr, drop = FALSE], tmp)) + diag(matrix(sum3(VVsmooth[rp1nr, rp1nr,, drop = FALSE]), ncol = 9L)))  # E(Z'Z(-1))
+  EZZ_FB_u = diag(diag(crossprod(Zsmooth[, rp1nr, drop = FALSE], tmp)) + diag(rowSums(VVsmooth[rp1nr, rp1nr,, drop = FALSE], dims = 2L)))  # E(Z'Z(-1))
 
   # Update matrices A and Q
   A_new = A
@@ -121,7 +121,7 @@ EMstepBMidio = function(X, A, C, Q, R, Z_0, V_0, XW0, W, dgind, dnkron, dnkron_i
   # Set initial conditions
   V_0_new = V_0
   V_0_new[srp, srp] = Vsmooth0[srp, srp]
-  V_0_new[rp1nr, rp1nr] = diag(diag(Vsmooth0[rp1nr, rp1nr]))
+  V_0_new[rp1nr, rp1nr] = diag(diag(Vsmooth0[rp1nr, rp1nr, drop = FALSE]))
 
   return(list(A = A_new,
               C = C_new,

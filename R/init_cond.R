@@ -59,7 +59,8 @@ init_cond_idio_ar1 <- function(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss) {
   # BM14 uses zeros, DGR12 uses the first row of PC's. Both give more or less the same...
   F_0 <- c(if(isTRUE(BMl)) rep(0, rp) else var$X[1L, ], rep(0, n))
   # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  P_0[srp, srp] <- ainv(diag(rp^2) - kronecker(A[srp, srp], A[srp, srp])) %*% unattrib(Q[srp, srp])
+  tmp = A[srp, srp, drop = FALSE]
+  P_0[srp, srp] <- ainv(diag(rp^2) - kronecker(tmp, tmp)) %*% unattrib(Q[srp, srp, drop = FALSE])
   P_0[end, end] <- diag(1/(1-res_AC1^2) * diag(R))
   if(rRi == 2L) R <- diag(n)
   diag(R) <- 1e-4 # The actual observation covariance is a very small fixed number (kappa)
