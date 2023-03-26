@@ -1,6 +1,7 @@
 # Quoting some functions that need to be evaluated iteratively
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, TT, rQi, rRi))
 .EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, TT, dgind, dnkron, dnkron_ind, rQi, rRi))
+.EM_BM_idio <- quote(EMstepBMidio(X, A, C, Q, R, F_0, P_0, XW0, W, dgind, dnkron, dnkron_ind, r, p))
 .KFS <- quote(SKFS(X, A, C, Q, R, F_0, P_0))
 
 
@@ -13,6 +14,7 @@
 #' @param r integer. number of factors.
 #' @param p integer. number of lags in factor VAR.
 #' @param \dots (optional) arguments to \code{\link{tsnarmimp}}.
+#' @param idio.ar1 logical. model observation residuals as AR(1) processes.
 #' @param rQ character. restrictions on the state (transition) covariance matrix (Q).
 #' @param rR character. restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
@@ -111,7 +113,7 @@
 #' Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. \emph{Handbook of Macroeconomics, 2}, 415–525. https://doi.org/10.1016/bs.hesmac.2016.04.002
 #'
 #' @useDynLib dfms, .registration = TRUE
-#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %+=% %/=% %*=% whichv setColnames setDimnames
+#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %-=% %+=% %/=% %*=% %r*% whichv setColnames setDimnames
 #' @importFrom grDevices rainbow
 #' @importFrom graphics abline legend lines par
 #' @importFrom stats filter residuals rnorm spline ts.plot
@@ -199,6 +201,7 @@
 #' @export
 
 DFM <- function(X, r, p = 1L, ...,
+                idio.ar1 = FALSE, # quarterly.vars = c(), blocks = c(),
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
                 em.method = c("auto", "DGR", "BM", "none"),
@@ -211,8 +214,8 @@ DFM <- function(X, r, p = 1L, ...,
   # Strict checking of inputs: as demanded by rOpenSci
   rRi <- switch(tolower(rR[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rR option:", rR[1L]))
   rQi <- switch(tolower(rQ[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
-  if(sum(length(r), length(p), length(min.iter), length(max.iter), length(tol), length(pos.corr), length(check.increased)) != 7L)
-    stop("Parameters r, p, min.iter, max.iter, tol, pos.corr and check.increased need to be length 1")
+  if(sum(length(r), length(p), length(idio.ar1), length(min.iter), length(max.iter), length(tol), length(pos.corr), length(check.increased)) != 8L)
+    stop("Parameters r, p, idio.ar1, min.iter, max.iter, tol, pos.corr and check.increased need to be length 1")
   if(!is.numeric(r) || r <= 0L) stop("r needs to be integer > 0")
   if(!is.integer(r)) r <- as.integer(r)
   if(!is.numeric(p) || p <= 0L) stop("p needs to be integer > 0")
@@ -222,14 +225,14 @@ DFM <- function(X, r, p = 1L, ...,
   if(!is.numeric(max.iter) || max.iter < min.iter) stop("max.iter needs to be integer >= min.iter")
   if(!is.integer(max.iter)) max.iter <- as.integer(max.iter)
   if(!is.numeric(tol) || tol <= 0) stop("tol needs to be numeric > 0")
+  if(!is.logical(idio.ar1) || is.na(idio.ar1)) stop("idio.ar1 needs to be logical")
   if(!is.logical(pos.corr) || is.na(pos.corr)) stop("pos.corr needs to be logical")
   if(!is.logical(check.increased) || is.na(check.increased)) stop("check.increased needs to be logical")
 
   rp <- r * p
-  sr <- 1:r
+  sr <- seq_len(r)
   fnam <- paste0("f", sr)
   unam <- paste0("u", sr)
-  # srp <- 1:rp
   ax <- attributes(X)
   ilX <- is.list(X)
   Xstat <- qsu(X)
@@ -257,43 +260,28 @@ DFM <- function(X, r, p = 1L, ...,
   # This is because after removing missing rows, the data could be complete, e.g. differencing data with diff.xts() of collapse::fdiff() just gives a NA row
   if(anymiss && length(rm.rows)) anymiss <- any(W)
   BMl <- switch(tolower(em.method[1L]), auto = anymiss, dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
+  if(idio.ar1 && !is.na(BMl)) BMl <- TRUE
 
   # Run PCA to get initial factor estimates:
   # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, TT))$v # Not faster than eigen...
   eigen_decomp <- eigen(cov(X_imp), symmetric = TRUE)
   # TODO: better way to ensure factors correlate positively with data?
-  # eigen_decomp$vectors %*=% -1
   if(pos.corr) {
     PCS <- X_imp %*% eigen_decomp$vectors
     setop(eigen_decomp$vectors, "*", c(-1,1)[(colSums(PCS %*=% rowMeans(X_imp)) > 0) + 1L], rowwise = TRUE)
   }
   v <- eigen_decomp$vectors[, sr, drop = FALSE]
-  # d <- eigen_decomp$values[sr]
   F_pc <- X_imp %*% v
 
-
-  # Observation equation -------------------------------
-  # Static predictions (all.equal(unattrib(HDB(X_imp, F_pc)), unattrib(F_pc %*% t(v))))
-  C <- cbind(v, matrix(0, n, rp-r))
-  if(rRi) {
-    res <- X - tcrossprod(F_pc, v) # residuals from static predictions
-    R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res, na.rm = TRUE))
-  } else R <- diag(n)
-
-  # Transition equation -------------------------------
-  var <- .VAR(F_pc, p)
-  A <- rbind(t(var$A), diag(1, rp-r, rp)) # var$A is rp x r matrix
-  Q <- matrix(0, rp, rp)
-  Q[sr, sr] <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
-
-  # Initial state and state covariance (P) ------------
-  F_0 <- if(isTRUE(BMl)) rep(0, rp) else var$X[1L, ] # BM14 uses zeros, DGR12 uses the first row of PC's. Both give more or less the same...
-  # Kalman gain is normally A %*% t(A) + Q, but here A is somewhat tricky...
-  P_0 <- ainv(diag(rp^2) - kronecker(A,A)) %*% unattrib(Q)
-  dim(P_0) <- c(rp, rp)
+  ## Initial System Matrices
+  init <- if(idio.ar1) init_cond_idio_ar1(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss) else
+                                init_cond(X, F_pc, v, n, r, p, BMl, rRi, rQi)
+  # return(init)
+  A <- init$A; C <- init$C; Q <- init$Q; R <- init$R; F_0 <- init$F_0; P_0 <- init$P_0
 
   ## Run standartized data through Kalman filter and smoother once
   kfs_res <- SKFS(X, A, C, Q, R, F_0, P_0, FALSE)
+  # return(kfs_res)
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- kfs_res$F_smooth[, sr, drop = FALSE]
@@ -317,6 +305,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   # em.method = "none": only report two-step solution
   if(is.na(BMl)) {
+    # TODO: Do with idio.ar1 = TRUE
     # Better solution for system matrix estimation after Kalman Filtering and Smoothing?
     var <- .VAR(F_kal, p)
     beta <- ainv(crossprod(F_kal)) %*% crossprod(F_kal, if(anymiss) replace(X_imp, W, 0) else X_imp) # good??
@@ -341,7 +330,7 @@ DFM <- function(X, r, p = 1L, ...,
   converged <- FALSE
 
   if(BMl) {
-    expr <- .EM_BM
+    expr <- if(idio.ar1) .EM_BM_idio else .EM_BM
     dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep, taken out to speed up the algorithm
     dnkron_ind <- whichv(dnkron, 1)
     XW0 <- X_imp
@@ -379,13 +368,17 @@ DFM <- function(X, r, p = 1L, ...,
   ## with optimal estimates
   kfs_res <- eval(.KFS, em_res, encl)
 
+  # return(kfs_res)
+
   final_object <- c(object_init[1:6],
                list(F_qml = setColnames(kfs_res$F_smooth[, sr, drop = FALSE], fnam),
                     P_qml = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
-                    A = setDimnames(em_res$A[sr, , drop = FALSE], lagnam(fnam, p)),
+                    A = setDimnames(em_res$A[sr, seq_len(rp), drop = FALSE], lagnam(fnam, p)),
                     C = setDimnames(em_res$C[, sr, drop = FALSE], list(Xnam, fnam)),
                     Q = setDimnames(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
-                    R = setDimnames(em_res$R, list(Xnam, Xnam)),
+                    R = setDimnames(if(idio.ar1) em_res$Q[-seq_len(rp), -seq_len(rp), drop = FALSE] else em_res$R, list(Xnam, Xnam)),
+                    e = if(idio.ar1) setColnames(kfs_res$F_smooth[, -seq_len(rp), drop = FALSE], paste0("e", seq_len(n))) else NULL,
+                    rho = if(idio.ar1) setNames(diag(em_res$A)[-seq_len(rp)], paste0("e", seq_len(n))) else NULL,
                     loglik = if(num_iter == max.iter) loglik_all else loglik_all[seq_len(num_iter)],
                     tol = tol,
                     converged = converged),

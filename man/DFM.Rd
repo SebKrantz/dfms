@@ -9,6 +9,7 @@ DFM(
   r,
   p = 1L,
   ...,
+  idio.ar1 = FALSE,
   rQ = c("none", "diagonal", "identity"),
   rR = c("diagonal", "identity", "none"),
   em.method = c("auto", "DGR", "BM", "none"),
@@ -27,6 +28,8 @@ DFM(
 \item{p}{integer. number of lags in factor VAR.}
 
 \item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}.}
+
+\item{idio.ar1}{logical. model observation residuals as AR(1) processes.}
 
 \item{rQ}{character. restrictions on the state (transition) covariance matrix (Q).}
 
@@ -87,7 +90,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
 \details{
 This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:
 \enumerate{
-\item Linearity and constant relationships (no structural breaks)
+\item Linearity
 \item Idiosynchratic measurement (observation) errors (\emph{R} is diagonal)
 \item No direct relationship between series and lagged factors (\emph{ceteris paribus} contemporaneous factors)
 \item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation)
@@ -113,7 +116,7 @@ where the first equation is called the measurement or observation equation and t
 This model can be estimated using a classical form of the Kalman Filter and the Expectation Maximization (EM) algorithm, after transforming it to State-Space (stacked, VAR(1)) form:
 
 \deqn{\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})}{x(t) = C F(t) + e(t) ~ N(0, R)}
-\deqn{\textbf{F}_t = \textbf{AF}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
+\deqn{\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q})}{F(t) = A F(t-1) + u(t) ~ N(0, Q)}
 
 where
 \tabular{llll}{
