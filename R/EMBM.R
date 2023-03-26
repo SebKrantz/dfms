@@ -51,7 +51,7 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, TT, dgind, dn
 
   dim(denom) = c(r, r, n)
   dnkron[dnkron_ind] = aperm(denom, c(1L, 3L, 2L))
-  C_new = solve.default(dnkron) %*% unattrib(nom) # ainv -> slower...
+  C_new = solve.default(dnkron, unattrib(nom)) # ainv -> slower...
   dim(C_new) = c(n, r)
 
   if(rRi) {
