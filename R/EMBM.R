@@ -21,34 +21,37 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, TT, dgind, dn
   # return(kfs_res[.c(F_smooth, P_smooth, F_smooth_0, P_smooth_0, PPm_smooth)])
 
   tmp = rbind(Zsmooth0, Zsmooth[-TT,, drop = FALSE])
-  EZZ = crossprod(Zsmooth) %+=% rowSums(Vsmooth, dims = 2L)                                     # E(Z'Z)
-  EZZ_BB = crossprod(tmp) %+=% (rowSums(Vsmooth[,, -TT, drop = FALSE], dims = 2L) + Vsmooth0)    # E(Z(-1)'Z_(-1))
-  EZZ_FB = crossprod(Zsmooth, tmp) %+=% rowSums(VVsmooth, dims = 2L)                            # E(Z'Z_(-1))
+  tmp2 = sum3(Vsmooth[,, -TT, drop = FALSE])
+  EZZ = crossprod(Zsmooth) %+=% (tmp2 + Vsmooth[,, TT]) # E(Z'Z)
+  EZZ_BB = crossprod(tmp) %+=% (tmp2 + Vsmooth0)        # E(Z(-1)'Z_(-1))
+  EZZ_FB = crossprod(Zsmooth, tmp) %+=% sum3(VVsmooth)  # E(Z'Z_(-1))
 
   A_new = A
   A_new[sr, ] = EZZ_FB[sr, , drop = FALSE] %*% ainv(EZZ_BB)
   Q_new = Q
-  # Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / TT
+
   if(rQi) {
     Qsr = (EZZ[sr, sr] - tcrossprod(A_new[sr, , drop = FALSE], EZZ_FB[sr, , drop = FALSE])) / TT
     Q_new[sr, sr] = if(rQi == 2L) Qsr else diag(diag(Qsr))
   } else Q_new[sr, sr] = diag(r)
 
+  Zsmooth = Zsmooth[, sr, drop = FALSE]
+  Vsmooth = Vsmooth[sr, sr,, drop = FALSE]
 
   # E(X'X) & E(X'Z)
   denom = numeric(n*r^2)
   nom = matrix(0, n, r)
   for (t in 1:TT) {
-    tmp = Zsmooth[t, sr]
+    tmp = Zsmooth[t, ]
     nom %+=% tcrossprod(XW0[t, ], tmp)
-    tmp2 = tcrossprod(tmp) + Vsmooth[sr, sr, t]
+    tmp2 = tcrossprod(tmp) + Vsmooth[,, t]
     dim(tmp2) = NULL
     denom %+=% tcrossprod(tmp2, !W[t, ])
   }
 
   dim(denom) = c(r, r, n)
-  dnkron[dnkron_ind] = aperm(denom, c(1L, 3L, 2L))
-  C_new = solve.default(dnkron) %*% unattrib(nom) # ainv -> slower...
+  dnkron[dnkron_ind] = aperm.default(denom, c(1L, 3L, 2L))
+  C_new = solve.default(dnkron, unattrib(nom)) # ainv -> slower...
   dim(C_new) = c(n, r)
 
   if(rRi) {
@@ -58,8 +61,8 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, TT, dgind, dn
       nanYt = W[t, ]
       tmp = C_new * !nanYt
       R[dgind] = Rdg * nanYt # If R is not diagonal
-      tmp2 = tmp %*% tcrossprod(Vsmooth[sr, sr, t], tmp)
-      tmp2 %+=% tcrossprod(XW0[t, ] - tmp %*% Zsmooth[t, sr])
+      tmp2 = tmp %*% tcrossprod(Vsmooth[,, t], tmp)
+      tmp2 %+=% tcrossprod(XW0[t, ] - tmp %*% Zsmooth[t, ])
       tmp2 %+=% R # If R is not diagonal
       # tmp2[dgind] = tmp2[dgind] + (Rdg * nanYt) # If R is diagonal...
       R_new %+=% tmp2
@@ -76,14 +79,6 @@ EMstepBMOPT <- function(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, TT, dgind, dn
   } else R_new = diag(n)
 
   C[, sr] = C_new
-
-  # A = A_new
-  # C = C
-  # Q = Q_new
-  # R = R_new
-  # F_0 = drop(Zsmooth0)
-  # P_0 = Vsmooth0
-  # A; C; Q; diag(R); F_0; P_0
 
   return(list(A = A_new,
               C = C,

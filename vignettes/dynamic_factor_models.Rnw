@@ -1,0 +1,6 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{Dynamic Factor Models: A Very Short Introduction}
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{dynamic_factor_models_paper.pdf}
+\end{document}

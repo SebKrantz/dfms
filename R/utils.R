@@ -1,3 +1,13 @@
+
+
+
+# Sum the 3rd dimension of a 3D array
+sum3 <- function(x) {
+  d <- dim(x)
+  .rowSums(x, d[1L]*d[2L], d[3L])
+}
+
+
 #' Generates Dimension names for the Factor Transition Matrix A
 #' @param nam a vector of names.
 #' @param p integer. The lag order.

@@ -10,3 +10,6 @@ LICENSE
 ^codemeta\.json$
 ^codecov\.yml$
 _cache$
+.log$
+.gz$
+.tex$
