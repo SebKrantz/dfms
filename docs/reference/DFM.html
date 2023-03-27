@@ -18,7 +18,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dfms</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
       </span>
     </div>
 
@@ -63,6 +63,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
   <span class="va">r</span>,
   p <span class="op">=</span> <span class="fl">1L</span>,
   <span class="va">...</span>,
+  idio.ar1 <span class="op">=</span> <span class="cn">FALSE</span>,
   rQ <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"diagonal"</span>, <span class="st">"identity"</span><span class="op">)</span>,
   rR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"diagonal"</span>, <span class="st">"identity"</span>, <span class="st">"none"</span><span class="op">)</span>,
   em.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"DGR"</span>, <span class="st">"BM"</span>, <span class="st">"none"</span><span class="op">)</span>,
@@ -90,6 +91,10 @@ with time-invariant system matrices and classical assumptions, while permitting 
 
 <dt>...</dt>
 <dd><p>(optional) arguments to <code><a href="tsnarmimp.html">tsnarmimp</a></code>.</p></dd>
+
+
+<dt>idio.ar1</dt>
+<dd><p>logical. Model observation errors as AR(1) processes: \(e_t = \rho e_{t-1} + v_t\). <em>Note</em> that this substantially increases computation time, and is generaly not needed if <code>n</code> is large (&gt;30). See theoretical vignette for details.</p></dd>
 
 
 <dt>rQ</dt>
@@ -167,6 +172,12 @@ This yields significant performance gains over the iterative methods. Final syst
 <dt><code>R</code></dt>
 <dd><p>\(n \times n\) observation (error) covariance matrix.</p></dd>
 
+<dt><code>e</code></dt>
+<dd><p>\(T \times n\) estimates of observation errors \(\textbf{e}_t\). Only available if <code>idio.ar1 = TRUE</code>.</p></dd>
+
+<dt><code>rho</code></dt>
+<dd><p>\(n \times 1\) estimates of AR(1) coefficients (\(\rho\)) in observation errors: \(e_t = \rho e_{t-1} + v_t\). Only available if <code>idio.ar1 = TRUE</code>.</p></dd>
+
 <dt><code>loglik</code></dt>
 <dd><p>vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.</p></dd>
 
@@ -194,7 +205,7 @@ This yields significant performance gains over the iterative methods. Final syst
     <p>This function efficiently estimates a Dynamic Factor Model with the following classical assumptions:</p><ol><li><p>Linearity</p></li>
 <li><p>Idiosynchratic measurement (observation) errors (<em>R</em> is diagonal)</p></li>
 <li><p>No direct relationship between series and lagged factors (<em>ceteris paribus</em> contemporaneous factors)</p></li>
-<li><p>No relationship between lagged error terms in the either measurement or transition equation (no serial correlation)</p></li>
+<li><p>No relationship between lagged error terms in the either measurement or transition equation (no serial correlation), unless explicitly modeled as AR(1) processes using <code>idio.ar1 = TRUE</code>.</p></li>
 </ol><p>Factors are allowed to evolve in a \(VAR(p)\) process, and data is internally standardized (scaled and centered) before estimation (removing the need of intercept terms).
 By assumptions 1-4, this translates into the following dynamic form:</p>
 <p>$$\textbf{x}_t = \textbf{C}_0 \textbf{f}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})$$
