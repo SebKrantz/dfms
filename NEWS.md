@@ -1,3 +1,9 @@
+# dfms 0.2.0.9000
+
+* Added argument `idio.ar1 = TRUE` allowing estimation of approximate DFM's with AR(1) observation errors. 
+
+* Added a small theoretical vignette entitled 'Dynamic Factor Models: A Very Short Introduction'. This vignette lays a foundation for present and future functionality of *dfms*. I plan to implement all features described in this vignette until summer 2023. 
+
 # dfms 0.1.5
 
 * Added argument `na.keep = TRUE` to `fitted.dfm`. Setting `na.keep = FALSE` allows interpolation of data based on the DFM. Thanks @apoorvalal (#45).
