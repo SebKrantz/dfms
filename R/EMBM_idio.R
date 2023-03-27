@@ -12,14 +12,9 @@
 # i_idio: a vector of indicators specifying which variables are idiosyncratic noise variables.'
 
 # Z_0 = F_0; V_0 = P_0
-EMstepBMidio = function(X, A, C, Q, R, Z_0, V_0, XW0, W, dgind, dnkron, dnkron_ind, r, p) {
+EMstepBMidio = function(X, A, C, Q, R, Z_0, V_0, XW0, W, dgind, dnkron, dnkron_ind, r, p, n, sr, TT, rQi, rRi) {
 
-  # TODO: rRi and rQi + methods
-
-  #Define dimensions of the input arguments
-  TT = dim(X)[1L]
-  n = dim(X)[2L]
-  sr = seq_len(r)
+  # Define dimensions of the input arguments
   srp = seq_len(r*p)
   rp1nr = (r*p+1L):ncol(A)
 
@@ -57,11 +52,17 @@ EMstepBMidio = function(X, A, C, Q, R, Z_0, V_0, XW0, W, dgind, dnkron, dnkron_i
 
   # System matrices
   A_new[sr, srp] = EZZ_FB[sr, , drop = FALSE] %*% ainv(EZZ_BB)
-  Q_new[sr, sr] = (EZZ[sr, sr] - tcrossprod(A_new[sr, srp, drop = FALSE], EZZ_FB[sr,, drop = FALSE])) / TT
+  if(rQi) {
+    Qsr = (EZZ[sr, sr] - tcrossprod(A_new[sr, srp, drop = FALSE], EZZ_FB[sr,, drop = FALSE])) / TT
+    Q_new[sr, sr] = if(rQi == 2L) Qsr else diag(diag(Qsr))
+  } else Q_new[sr, sr] = diag(r)
 
   # Errors
-  A_new[rp1nr, rp1nr] = EZZ_FB_u %r*% (1/EZZ_BB_u)
-  Q_new[rp1nr, rp1nr] = (diag(EZZ_u) - tcrossprod(A_new[rp1nr, rp1nr, drop = FALSE], EZZ_FB_u)) / TT
+  A_new[rp1nr, rp1nr] = EZZ_FB_u * (1/EZZ_BB_u) # %r*% # Same as EZZ_FB_u is diagonal...
+  if(rRi) {
+    if(rRi == 2L) stop("Cannot estimate unrestricted observation covariance matrix together with AR(1) serial correlation")
+    Q_new[rp1nr, rp1nr] = (diag(EZZ_u) - A_new[rp1nr, rp1nr] * EZZ_FB_u) / TT # tcrossprod(A_new[rp1nr, rp1nr, drop = FALSE], EZZ_FB_u) # Same as EZZ_FB_u is diagonal...
+  } else Q_new[rp1nr, rp1nr] = diag(n)
 
   # E(X'X) & E(X'Z)
   # Estimate matrix C using maximum likelihood approach
