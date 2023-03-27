@@ -278,12 +278,10 @@ DFM <- function(X, r, p = 1L, ...,
   ## Initial System Matrices
   init <- if(idio.ar1) init_cond_idio_ar1(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss, tol) else
                                 init_cond(X, F_pc, v, n, r, p, BMl, rRi, rQi)
-  # return(init)
   A <- init$A; C <- init$C; Q <- init$Q; R <- init$R; F_0 <- init$F_0; P_0 <- init$P_0
 
   ## Run standartized data through Kalman filter and smoother once
   kfs_res <- SKFS(X, A, C, Q, R, F_0, P_0, FALSE)
-  # return(kfs_res)
 
   ## Two-step solution is state mean from the Kalman smoother
   F_kal <- kfs_res$F_smooth[, sr, drop = FALSE]
@@ -307,20 +305,25 @@ DFM <- function(X, r, p = 1L, ...,
 
   # em.method = "none": only report two-step solution
   if(is.na(BMl)) {
-    # TODO: Do with idio.ar1 = TRUE
     # Better solution for system matrix estimation after Kalman Filtering and Smoothing?
     var <- .VAR(F_kal, p)
     beta <- ainv(crossprod(F_kal)) %*% crossprod(F_kal, if(anymiss) replace(X_imp, W, 0) else X_imp) # good??
     Q <- switch(rQi + 1L, diag(r),  diag(fvar(var$res)), cov(var$res))
     if(rRi) {
-      res <- X - F_kal %*% beta
+      if(idio.ar1) { # If AR(1) residuals, need to estimate coefficient and clean residuals from autocorrelation
+        e <- kfs_res$F_smooth[, -seq_len(rp), drop = FALSE]
+        res_AC1 <- AC1(e, FALSE)
+        res <- e[-1L, ] %-=% setop(e[-nrow(e), ], "*", res_AC1, rowwise = TRUE)
+      } else res <- X - F_kal %*% beta
       R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res, na.rm = TRUE))
     } else R <- diag(n)
     final_object <- c(object_init[1:6],
                       list(A = setDimnames(t(var$A), lagnam(fnam, p)), # A[sr, , drop = FALSE],
                            C = setDimnames(t(beta), list(Xnam, fnam)), # C[, sr, drop = FALSE],
                            Q = setDimnames(Q, list(unam, unam)),       # Q[sr, sr, drop = FALSE],
-                           R = setDimnames(R, list(Xnam, Xnam))),
+                           R = setDimnames(R, list(Xnam, Xnam)),
+                      e = if(idio.ar1) setColnames(e, Xnam) else NULL,
+                      rho = if(idio.ar1) setNames(res_AC1, Xnam) else NULL),
                       object_init[-(1:6)])
     class(final_object) <- "dfm"
     return(final_object)
@@ -369,8 +372,6 @@ DFM <- function(X, r, p = 1L, ...,
   ## Run the Kalman filtering and smoothing step for the last time
   ## with optimal estimates
   kfs_res <- eval(.KFS, em_res, encl)
-
-  # return(kfs_res)
 
   final_object <- c(object_init[1:6],
                list(F_qml = setColnames(kfs_res$F_smooth[, sr, drop = FALSE], fnam),
