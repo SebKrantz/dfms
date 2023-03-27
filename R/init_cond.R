@@ -29,7 +29,7 @@ init_cond <- function(X, F_pc, v, n, r, p, BMl, rRi, rQi) {
 }
 
 
-init_cond_idio_ar1 <- function(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss) {
+init_cond_idio_ar1 <- function(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss, tol) {
   rp <- r * p
   sr <- seq_len(r)
   srp <- seq_len(rp)
@@ -63,7 +63,7 @@ init_cond_idio_ar1 <- function(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss) {
   P_0[srp, srp] <- ainv(diag(rp^2) - kronecker(tmp, tmp)) %*% unattrib(Q[srp, srp, drop = FALSE])
   P_0[end, end] <- diag(1/(1-res_AC1^2) * diag(R))
   if(rRi == 2L) R <- diag(n)
-  diag(R) <- 1e-4 # The actual observation covariance is a very small fixed number (kappa)
+  diag(R) <- tol # The actual observation covariance is a very small fixed number (kappa)
 
   return(list(A = A, C = C, Q = Q, R = R, F_0 = F_0, P_0 = P_0))
 }

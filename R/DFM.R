@@ -276,7 +276,7 @@ DFM <- function(X, r, p = 1L, ...,
   F_pc <- X_imp %*% v
 
   ## Initial System Matrices
-  init <- if(idio.ar1) init_cond_idio_ar1(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss) else
+  init <- if(idio.ar1) init_cond_idio_ar1(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss, tol) else
                                 init_cond(X, F_pc, v, n, r, p, BMl, rRi, rQi)
   # return(init)
   A <- init$A; C <- init$C; Q <- init$Q; R <- init$R; F_0 <- init$F_0; P_0 <- init$P_0
