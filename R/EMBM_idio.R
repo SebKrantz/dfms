@@ -14,6 +14,8 @@
 # Z_0 = F_0; V_0 = P_0
 EMstepBMidio = function(X, A, C, Q, R, Z_0, V_0, XW0, W, dgind, dnkron, dnkron_ind, r, p) {
 
+  # TODO: rRi and rQi + methods
+
   #Define dimensions of the input arguments
   TT = dim(X)[1L]
   n = dim(X)[2L]
@@ -72,7 +74,7 @@ EMstepBMidio = function(X, A, C, Q, R, Z_0, V_0, XW0, W, dgind, dnkron, dnkron_i
 
   for (t in seq_len(TT)) {
     # select non-missing columns of Y for time t
-    nmiss = !W[t, ]
+    nmiss = as.double(!W[t, ])
     tmp = t(Zsmooth[t, sr])
     # Add components to denom (same as EMBM.R)
     tmp2 = crossprod(tmp) + Vsmooth[sr, sr, t]
@@ -84,7 +86,7 @@ EMstepBMidio = function(X, A, C, Q, R, Z_0, V_0, XW0, W, dgind, dnkron, dnkron_i
   }
 
   dim(denom) = c(r, r, n)
-  dnkron[dnkron_ind] = aperm(denom, c(1L, 3L, 2L))
+  dnkron[dnkron_ind] = aperm.default(denom, c(1L, 3L, 2L))
   # Solve for vec_C and reshape into C_new
   vec_C = solve.default(dnkron, unattrib(nom)) # ainv() -> slower...
   C_new = C
