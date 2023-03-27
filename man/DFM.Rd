@@ -29,7 +29,7 @@ DFM(
 
 \item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}.}
 
-\item{idio.ar1}{logical. model observation residuals as AR(1) processes.}
+\item{idio.ar1}{logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generaly not needed if \code{n} is large (>30). See theoretical vignette for details.}
 
 \item{rQ}{character. restrictions on the state (transition) covariance matrix (Q).}
 
@@ -75,6 +75,8 @@ A list-like object of class 'dfm' with the following elements:
 \item{\code{C}}{\eqn{n \times r}{n x r} observation matrix.}
 \item{\code{Q}}{\eqn{r \times r}{r x r} state (error) covariance matrix.}
 \item{\code{R}}{\eqn{n \times n}{n x n} observation (error) covariance matrix.}
+\item{\code{e}}{\eqn{T \times n}{T x n} estimates of observation errors \eqn{\textbf{e}_t}{e(t)}. Only available if \code{idio.ar1 = TRUE}.}
+\item{\code{rho}}{\eqn{n \times 1}{n x 1} estimates of AR(1) coefficients (\eqn{\rho}{rho}) in observation errors: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. Only available if \code{idio.ar1 = TRUE}.}
 \item{\code{loglik}}{vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.}
 \item{\code{tol}}{The numeric convergence tolerance used.}
 \item{\code{converged}}{single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).}
@@ -93,7 +95,7 @@ This function efficiently estimates a Dynamic Factor Model with the following cl
 \item Linearity
 \item Idiosynchratic measurement (observation) errors (\emph{R} is diagonal)
 \item No direct relationship between series and lagged factors (\emph{ceteris paribus} contemporaneous factors)
-\item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation)
+\item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation), unless explicitly modeled as AR(1) processes using \code{idio.ar1 = TRUE}.
 }
 Factors are allowed to evolve in a \eqn{VAR(p)} process, and data is internally standardized (scaled and centered) before estimation (removing the need of intercept terms).
 By assumptions 1-4, this translates into the following dynamic form:
