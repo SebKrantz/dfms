@@ -1,6 +1,8 @@
 
 library(collapse)
 
+NCRAN <- Sys.getenv("NCRAN") == "TRUE"
+
 # Two-Step factor estimates from monthly BM (2014) data
 X <- fscale(diff(qM(BM14_M)))
 r <- 5L # 5 Factors
@@ -30,12 +32,12 @@ F_kal <- kfs_res$F_smooth[, 1:r, drop = FALSE]
 colnames(F_kal) <- paste0("f", 1:r)
 
 # See that this is equal to the Two-Step estimate by DFM()
-expect_equal(F_kal, DFM(X, r, p, em.method = "none", pos.corr = FALSE)$F_2s)
+if(NCRAN) expect_equal(F_kal, DFM(X, r, p, em.method = "none", pos.corr = FALSE)$F_2s) else expect_equal(1L,1L)
 
 # Same in two parts
 kfs_res2 <- with(SKF(X, A, C, Q, R, F_0, P_0, FALSE), FIS(A, F, F_pred, P, P_pred))
 F_kal2 <- kfs_res2$F_smooth[, 1:r, drop = FALSE]
 colnames(F_kal2) <- paste0("f", 1:r)
 
-expect_equal(F_kal, F_kal2)
+if(NCRAN) expect_equal(F_kal, F_kal2) else expect_equal(1L,1L)
 
