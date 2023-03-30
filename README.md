@@ -43,7 +43,7 @@ The package is currently not intended to fit more general forms of the state spa
 
 ### Installation 
 
-```
+```r
 # CRAN
 install.packages("dfms")
 
@@ -52,7 +52,7 @@ install.packages('dfms', repos = c('https://sebkrantz.r-universe.dev', 'https://
 
 ```
 ### Usage Example 
-```
+```r
 library(dfms)
 
 # Fit DFM with 6 factors and 3 lags in the transition equation
