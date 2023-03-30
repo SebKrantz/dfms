@@ -42,7 +42,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">dfms</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -77,15 +77,15 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-
 <div class="section level1">
 <div class="page-header"><h1 id="dfms-dynamic-factor-models-for-r">
 <strong>dfms</strong>: Dynamic Factor Models for R<a class="anchor" aria-label="anchor" href="#dfms-dynamic-factor-models-for-r"></a>
 </h1></div>
 <!-- badges: start -->
 
-<p><strong>NOTE</strong>: This package is under <a href="https://stats-devguide.ropensci.org/" class="external-link">rOpenSci Statistical Software Peer Review</a>. Peer review might result in changes to the API. <!--
-The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/dfms")` and give feedback. --></p>
+<!-- **NOTE**: This package is under [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). Peer review might result in changes to the API. -->
+<!--
+The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/dfms")` and give feedback. -->
 <hr>
 <p><em>dfms</em> provides efficient estimation of Dynamic Factor Models via the EM Algorithm. Estimation can be done in 3 different ways following:</p>
 <ul>
@@ -93,19 +93,22 @@ The package is fully functional though, and you are very welcome to install it u
 <li><p>Doz, C., Giannone, D., &amp; Reichlin, L. (2012). A quasi-maximum likelihood approach for large, approximate dynamic factor models. <em>Review of economics and statistics, 94</em>(4), 1014-1024. <a href="doi:10.1162/REST_a_00225" class="uri">doi:10.1162/REST_a_00225</a></p></li>
 <li><p>Banbura, M., &amp; Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. <em>Journal of Applied Econometrics, 29</em>(1), 133-160. <a href="doi:10.1002/jae.2306" class="uri">doi:10.1002/jae.2306</a></p></li>
 </ul>
-<p>The default is <code>em.method = "auto"</code>, which chooses <code>"DGR"</code> following Doz, Giannone &amp; Reichlin (2012) if there are no missing values in the data, and <code>"BM"</code> following Banbura &amp; Modugno (2014) with missing data. Using <code>em.method = "none"</code> generates Two-Step estimates following Doz, Giannone &amp; Reichlin (2011). This is extremely efficient on bigger datasets. PCA and Two-Step estimates are also reported in EM based methods.</p>
+<p>The default is <code>em.method = "auto"</code>, which chooses <code>"DGR"</code> following Doz, Giannone &amp; Reichlin (2012) if there are no missing values in the data, and <code>"BM"</code> following Banbura &amp; Modugno (2014) with missing data. Using <code>em.method = "none"</code> generates Two-Step estimates following Doz, Giannone &amp; Reichlin (2011). This is extremely efficient on bigger datasets. PCA and Two-Step estimates are also reported in EM-based methods.</p>
 <p>All 3 estimation methods support missing data, with various preprocessing options, but <code>em.method = "DGR"</code> does not account for them in the EM iterations, and should only be used if a few values are missing at random. For all other cases <code>em.method = "BM"</code> or <code>em.method = "none"</code> is the way to go.</p>
 <div class="section level3">
 <h3 id="comparison-with-other-r-packages">Comparison with Other R Packages<a class="anchor" aria-label="anchor" href="#comparison-with-other-r-packages"></a>
 </h3>
-<p><em>dfms</em> is intended to provide a simple, numerically robust, and computationally efficient baseline implementation of (linear Gaussian) Dynamic Factor Models for R, allowing straightforward application to various contexts such as time series dimensionality reduction and multivariate forecasting. The implementation is based on efficient C++ code, making <em>dfms</em> orders of magnitude faster than packages such as <a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a> that can be used to fit dynamic factor models, or packages like <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and <a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>, which fit dynamic factor models specific to mixed-frequency nowcasting applications. The latter two packages additionally support blocking of variables into different groups for which factors are to be estimated, and EM adjustments for variables at different frequencies. <em>dfms</em> with <code>em.method = "BM"</code> does allow mixed-frequency data but performs no specific adjustments for the frequency of the data<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. <em>dfms</em> currently also does not allow residual autocorrelation in the estimation (i.e. it cannot estimate <em>approximate factor models</em>), but the addition of this feature is planned.</p>
-<p>The package is currently not intended to fit more general forms of the state space model such as provided by <a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a>, or advanced specifications of Dynamic Factor Models tailored to mixed-frequency nowcasting applications such as <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and <a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>. Such software could however benefit from the functions and methods provided in <em>dfms</em>, most notably <em>dfms</em> exports stationary Kalman Filters and Smoothers used in nowcasting applications, that are noticeably faster than the more general implementations provided by the <a href="https://CRAN.R-project.org/package=FKF" class="external-link"><em>FKF</em></a> package.</p>
+<p><em>dfms</em> is intended to provide a simple, numerically robust, and computationally efficient baseline implementation of (linear Gaussian) Dynamic Factor Models for R, allowing straightforward application to various contexts such as time series dimensionality reduction and multivariate forecasting. The implementation is based on efficient C++ code, making <em>dfms</em> orders of magnitude faster than packages such as <a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a> that can be used to fit dynamic factor models, or packages like <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and <a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>, which fit dynamic factor models specific to mixed-frequency nowcasting applications. The latter two packages additionally support blocking of variables into different groups for which factors are to be estimated, and EM adjustments for variables at different frequencies. <!-- *dfms* with `em.method = "BM"` does allow mixed-frequency data but performs no specific adjustments for the frequency of the data^[All series are weighted equally, and the prevalence of missing values in lower-frequency series downweights them. To remedy this lower frequency series could be included multiple times in the dataset e.g. include a quarterly series 3 times in a monthly dataset.]. *dfms* currently also does not allow residual autocorrelation in the estimation (i.e. it cannot estimate *approximate factor models*), but the addition of this feature is planned. --> The package is currently not intended to fit more general forms of the state space model such as provided by <a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a>.</p>
+<!-- or advanced specifications of Dynamic Factor Models tailored to mixed-frequency nowcasting applications such as [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>). Such software could however benefit from the functions and methods provided in *dfms*, most notably *dfms* exports stationary Kalman Filters and Smoothers used in nowcasting applications, that are noticeably faster than the more general implementations provided by the [*FKF*](<https://CRAN.R-project.org/package=FKF>) package. -->
 <!-- Estimation with *dfms* also requires stationary data of a single frequency, and assumes time-invariant system matrices and classical assumptions (i.e. the 'exact factor model', assuming away residual autocorrelation in the observation equation). -->
 </div>
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h3>
-<pre><code><span class="co"># Development Version</span>
+<pre><code><span class="co"># CRAN</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dfms"</span><span class="op">)</span>
+
+<span class="co"># Development Version</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'dfms'</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://sebkrantz.r-universe.dev'</span>, <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre>
 </div>
 <div class="section level3">
@@ -114,7 +117,7 @@ The package is fully functional though, and you are very welcome to install it u
 <pre><code><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sebkrantz.github.io/dfms/" class="external-link">dfms</a></span><span class="op">)</span>
 
 <span class="co"># Fit DFM with 6 factors and 3 lags in the transition equation</span>
-<span class="va">mod</span> <span class="op">=</span> <span class="fu"><a href="reference/DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">6</span>, p <span class="op">=</span> <span class="fl">3</span>, em.method <span class="op">=</span> <span class="st">"BM"</span><span class="op">)</span>
+<span class="va">mod</span> <span class="op">=</span> <span class="fu"><a href="reference/DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">6</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> 
 
 <span class="co"># 'dfm' methods</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span>
@@ -130,13 +133,6 @@ The package is fully functional though, and you are very welcome to install it u
 <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></code></pre>
 </div>
 </div>
-<div class="footnotes footnotes-end-of-document">
-<hr>
-<ol>
-<li id="fn1"><p>All series are weighted equally, and the prevalence of missing values in lower-frequency series downweights them. To remedy this lower frequency series could be included multiple times in the dataset e.g. include a quarterly series 3 times in a monthly dataset.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-</ol>
-</div>
-
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
