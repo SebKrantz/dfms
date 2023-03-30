@@ -105,16 +105,18 @@ The package is fully functional though, and you are very welcome to install it u
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h3>
-<pre><code><span class="co"># CRAN</span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># CRAN</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dfms"</span><span class="op">)</span>
 
 <span class="co"># Development Version</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'dfms'</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://sebkrantz.r-universe.dev'</span>, <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre>
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'dfms'</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'https://sebkrantz.r-universe.dev'</span>, <span class="st">'https://cloud.r-project.org'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="usage-example">Usage Example<a class="anchor" aria-label="anchor" href="#usage-example"></a>
 </h3>
-<pre><code><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sebkrantz.github.io/dfms/" class="external-link">dfms</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sebkrantz.github.io/dfms/" class="external-link">dfms</a></span><span class="op">)</span>
 
 <span class="co"># Fit DFM with 6 factors and 3 lags in the transition equation</span>
 <span class="va">mod</span> <span class="op">=</span> <span class="fu"><a href="reference/DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">6</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> 
@@ -130,7 +132,7 @@ The package is fully functional though, and you are very welcome to install it u
 <span class="co"># 'dfm_forecast' methods</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></code></pre>
+<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
   </div>

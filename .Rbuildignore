@@ -13,3 +13,4 @@ _cache$
 .log$
 .gz$
 .tex$
+vignettes/dynamic_factor_models*
