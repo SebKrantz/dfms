@@ -52,6 +52,7 @@ summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "
   summ <- list(info = c(n = dim(X)[2L], T = dim(X)[1L], r = r, p = p,
                         `%NA` = if(anymissing) sum(attr(X, "missing")) / prod(dim(X)) * 100 else 0),
                call = object$call,
+               idio_ar1 = idio_ar1,
                F_stats = msum(Fa),
                A = A,
                F_cov = pwcov(Fa, P = TRUE),
@@ -84,6 +85,7 @@ print.dfm_summary <- function(x,
   inf <- as.integer(x$info[1:4])
   cat("Dynamic Factor Model: n = ", inf[1L], ", T = ", inf[2L], ", r = ", inf[3L], ", p = ", inf[4L],
       ", %NA = ", round(x$info[5L], digits), "\n", sep = "")
+  if(length(x$idio_ar1)) cat("   with AR(1) errors: mean(abs(rho)) =", round(mean(abs(x$res_ACF)), 3), "\n")
   cat("\nCall: ", deparse(x$call))
   # cat("\nModel: ", ))
   cat("\n\nSummary Statistics of Factors [F]\n")

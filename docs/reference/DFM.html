@@ -18,7 +18,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dfms</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -277,6 +277,7 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"><span class="co"># Inspecting the model</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_small</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Factor Model: n = 14, T = 356, r = 2, p = 3, %NA = 38.3628</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    with AR(1) errors: mean(abs(rho)) = NA </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$small], r = 2, p = 3)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -470,6 +471,7 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"><span class="co"># Inspecting the model</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_medium</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Factor Model: n = 48, T = 356, r = 3, p = 3, %NA = 32.6135</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    with AR(1) errors: mean(abs(rho)) = NA </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$medium], r = 3, p = 3)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -556,6 +558,7 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"><span class="co"># Inspecting the model</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_large</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Factor Model: n = 101, T = 356, r = 6, p = 3, %NA = 29.7363</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    with AR(1) errors: mean(abs(rho)) = NA </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14, r = 6, p = 3)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

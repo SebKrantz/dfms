@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dfms</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Sebastian
 Krantz</h4>
             
-            <h4 data-toc-skip class="date">2023-03-28</h4>
+            <h4 data-toc-skip class="date">2023-03-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/HEAD/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="hidden name"><code>introduction.Rmd</code></div>
@@ -233,6 +233,7 @@ information printed to the data size. For large databases with more than
 <code class="sourceCode R"><span class="va">dfm_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">dfm_summary</span><span class="op">)</span> <span class="co"># Large model with &gt; 40 series: defaults to compact = 2</span>
 <span class="co">#&gt; Dynamic Factor Model: n = 92, T = 356, r = 4, p = 3, %NA = 25.8366</span>
+<span class="co">#&gt;    with AR(1) errors: mean(abs(rho)) = 0.253 </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Call:  DFM(X = BM14_M_diff, r = 4, p = 3)</span>
 <span class="co">#&gt; </span>
@@ -399,70 +400,24 @@ and the format of the frame.</p>
 <span class="co">#&gt; 6    6    FALSE  -1.357927 -0.3805697  3.5068964 -0.05346754</span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="notes-about-estimation-with-mixed-frequency">Notes About Estimation with Mixed Frequency<a class="anchor" aria-label="anchor" href="#notes-about-estimation-with-mixed-frequency"></a>
+<h2 id="estimation-with-mixed-frequency">Estimation with Mixed Frequency<a class="anchor" aria-label="anchor" href="#estimation-with-mixed-frequency"></a>
 </h2>
 <p><em>dfms</em> currently provides no specific adjustments for data at
-different frequencies. The baseline algorithm of BM14, being designed
-for arbitrary patterns of missing data, allows lower frequency series to
-be included in the estimation. The problem here is that series at lower
-frequency contain many missing values, which effectively lets these
-series have less weight in the estimation.</p>
-<p>BM14 use the approximation of Mariano and Murasawa (2003) to
-construct a monthly equivalent for each quarterly series, with
-appropriate factor loadings in the estimation.</p>
-<p>In the absence of such adjustments to the algorithm, or other methods
-of interpolating quarterly data, a very simple way to increase the
-weight of these series in the estimation is to duplicate them in the
-dataset. Such duplication can be mechanical (e.g. duplicate quarterly
-series 2 times in monthly dataset), but should ideally be based on
-considerations about the quality of the signal stemming from different
-quarterly series (i.e. informative series should be duplicated
-more).</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Quarterly series from BM14</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">BM14_Q</span>, <span class="fl">3</span><span class="op">)</span>
-<span class="co">#&gt;                gdp priv_cons   invest   export   import     empl prductivity</span>
-<span class="co">#&gt; 1980-03-31 1092266  639100.2 238798.3 212326.1 208414.9 118296.6          NA</span>
-<span class="co">#&gt; 1980-06-30 1087137  635191.5 234788.5 203062.0 202807.3 118366.6          NA</span>
-<span class="co">#&gt; 1980-09-30 1086518  639791.6 233879.2 200720.5 204375.7 118370.7          NA</span>
-<span class="co">#&gt;            capacity gdp_us</span>
-<span class="co">#&gt; 1980-03-31       NA 5908.5</span>
-<span class="co">#&gt; 1980-06-30       NA 5787.4</span>
-<span class="co">#&gt; 1980-09-30       NA 5776.6</span>
-<span class="co"># Pre-processing the data</span>
-<span class="va">BM14_Q</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">[</span><span class="va">BM14_Models</span><span class="op">$</span><span class="va">freq</span> <span class="op">==</span> <span class="st">"Q"</span>, <span class="op">]</span><span class="op">$</span><span class="va">log_trans</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/compound.html" class="external-link">%&lt;&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">BM14_Q_diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_Q</span><span class="op">)</span>
-<span class="co"># Merging to monthly data and duplicating 2 times</span>
-<span class="va">BM14_diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">BM14_M_diff</span>, <span class="va">BM14_Q_diff</span>, <span class="va">BM14_Q_diff</span>, <span class="va">BM14_Q_diff</span><span class="op">)</span>
+different frequencies. An algorithm that accommodates monthly and
+quarterly series is planned for summer 2023. In the meantime, users may
+choose to block the data (creating multiple quarterly series from a
+monthly series, and duplicating quarterly series to maintain equal
+representation).</p>
+<!-- 
+The baseline algorithm of BM14, being designed for arbitrary patterns of missing data, allows lower frequency series to be included in the estimation. The problem here is that series at lower frequency contain many missing values, which effectively lets these series have less weight in the estimation.
 
-<span class="co"># Estimating the model with 5 factors and 3 lags using BM14's EM algorithm</span>
-<span class="va">model2</span> <span class="op">=</span> <span class="fu"><a href="../reference/DFM.html">DFM</a></span><span class="op">(</span><span class="va">BM14_diff</span>, r <span class="op">=</span> <span class="fl">5</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>
-<span class="co">#&gt; Converged after 26 iterations.</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model2</span><span class="op">)</span>
-<span class="co">#&gt; Dynamic Factor Model: n = 119, T = 352, r = 5, p = 3, %NA = 35.2464</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Factor Transition Matrix [A]</span>
-<span class="co">#&gt;      L1.f1   L1.f2   L1.f3   L1.f4   L1.f5   L2.f1   L2.f2   L2.f3   L2.f4</span>
-<span class="co">#&gt; f1  0.3853  0.2380  0.3625 -0.3556  0.3172  0.0957 -0.0846 -0.1698 -0.1609</span>
-<span class="co">#&gt; f2  0.0708  0.3741  0.1319 -0.4202  0.2317 -0.1449 -0.0590  0.0459 -0.2377</span>
-<span class="co">#&gt; f3  0.0857  0.0129  0.3406  0.0926 -0.0222 -0.0859 -0.0465 -0.1961  0.0881</span>
-<span class="co">#&gt; f4 -0.0950 -0.2895 -0.0019 -0.4933  0.5706  0.0161  0.0813  0.1038 -0.4260</span>
-<span class="co">#&gt;      L2.f5   L3.f1  L3.f2   L3.f3   L3.f4   L3.f5</span>
-<span class="co">#&gt; f1 -0.1466  0.3742 0.0302  0.1324 -0.1763  0.0037</span>
-<span class="co">#&gt; f2 -0.2075 -0.1134 0.3895 -0.0243 -0.0012  0.1343</span>
-<span class="co">#&gt; f3 -0.0678 -0.0139 0.1125  0.1968  0.0666  0.0041</span>
-<span class="co">#&gt; f4  0.1149 -0.0079 0.0317  0.0104 -0.0639 -0.1434</span>
-<span class="co">#&gt;  [ reached getOption("max.print") -- omitted 1 row ]</span>
-<span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model2</span><span class="op">)</span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-16-1.png" width="672"></p>
-<p>Another possibility is to estimate different factor models for
-monthly and quarterly series, and combine them for the final prediction
-(e.g. by aggregating or blocking the monthly factor estimates).</p>
-<p>If performance is not critical, I also refer the user to the <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and
-<a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>
-packages, which provide elaborate models for mixed-frequency nowcasting,
-and handle mixed frequencies like BM14 (i.e. drawing on Mariano and
-Murasawa (2003)).</p>
+BM14 use the approximation of Mariano and Murasawa (2003) to construct a monthly equivalent for each quarterly series, with appropriate factor loadings in the estimation. 
+
+In the absence of such adjustments to the algorithm, or other methods of interpolating quarterly data, a very simple way to increase the weight of these series in the estimation is to duplicate them in the dataset. Such duplication can be mechanical (e.g. duplicate quarterly series 2 times in monthly dataset), but should ideally be based on considerations about the quality of the signal stemming from different quarterly series (i.e. informative series should be duplicated more).  -->
+<!--
+Another possibility is to estimate different factor models for monthly and quarterly series, and combine them for the final prediction (e.g. by aggregating or blocking the monthly factor estimates). 
+
+If performance is not critical, I also refer the user to the [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>) packages, which provide elaborate models for mixed-frequency nowcasting, and handle mixed frequencies like BM14 (i.e. drawing on Mariano and Murasawa (2003)). -->
 </div>
 <div class="section level2">
 <h2 id="additional-functions">Additional Functions<a class="anchor" aria-label="anchor" href="#additional-functions"></a>
