@@ -85,7 +85,7 @@ print.dfm_summary <- function(x,
   inf <- as.integer(x$info[1:4])
   cat("Dynamic Factor Model: n = ", inf[1L], ", T = ", inf[2L], ", r = ", inf[3L], ", p = ", inf[4L],
       ", %NA = ", round(x$info[5L], digits), "\n", sep = "")
-  if(length(x$idio_ar1)) cat("   with AR(1) errors: mean(abs(rho)) =", round(mean(abs(x$res_ACF)), 3), "\n")
+  if(x$idio_ar1) cat("   with AR(1) errors: mean(abs(rho)) =", round(mean(abs(x$res_ACF)), 3), "\n")
   cat("\nCall: ", deparse(x$call))
   # cat("\nModel: ", ))
   cat("\n\nSummary Statistics of Factors [F]\n")
