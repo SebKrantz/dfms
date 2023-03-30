@@ -154,15 +154,18 @@ The forecasts can also be retrieved in data frame using `as.data.frame()`. Again
 head(as.data.frame(fc, pivot = "wide"))
 ```
 
-## Notes About Estimation with Mixed Frequency
+## Estimation with Mixed Frequency
 
-*dfms* currently provides no specific adjustments for data at different frequencies. The baseline algorithm of BM14, being designed for arbitrary patterns of missing data, allows lower frequency series to be included in the estimation. The problem here is that series at lower frequency contain many missing values, which effectively lets these series have less weight in the estimation.
+*dfms* currently provides no specific adjustments for data at different frequencies. An algorithm that accommodates monthly and quarterly series is planned for summer 2023. In the meantime, users may choose to block the data (creating multiple quarterly series from a monthly series, and duplicating quarterly series to maintain equal representation).
+
+<!-- 
+The baseline algorithm of BM14, being designed for arbitrary patterns of missing data, allows lower frequency series to be included in the estimation. The problem here is that series at lower frequency contain many missing values, which effectively lets these series have less weight in the estimation.
 
 BM14 use the approximation of Mariano and Murasawa (2003) to construct a monthly equivalent for each quarterly series, with appropriate factor loadings in the estimation. 
 
-In the absence of such adjustments to the algorithm, or other methods of interpolating quarterly data, a very simple way to increase the weight of these series in the estimation is to duplicate them in the dataset. Such duplication can be mechanical (e.g. duplicate quarterly series 2 times in monthly dataset), but should ideally be based on considerations about the quality of the signal stemming from different quarterly series (i.e. informative series should be duplicated more).  
+In the absence of such adjustments to the algorithm, or other methods of interpolating quarterly data, a very simple way to increase the weight of these series in the estimation is to duplicate them in the dataset. Such duplication can be mechanical (e.g. duplicate quarterly series 2 times in monthly dataset), but should ideally be based on considerations about the quality of the signal stemming from different quarterly series (i.e. informative series should be duplicated more).  -->
 
-```{r}
+```{r, eval = FALSE, include=FALSE}
 # Quarterly series from BM14
 head(BM14_Q, 3)
 # Pre-processing the data
@@ -177,9 +180,10 @@ print(model2)
 plot(model2)
 ```
 
+<!--
 Another possibility is to estimate different factor models for monthly and quarterly series, and combine them for the final prediction (e.g. by aggregating or blocking the monthly factor estimates). 
 
-If performance is not critical, I also refer the user to the [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>) packages, which provide elaborate models for mixed-frequency nowcasting, and handle mixed frequencies like BM14 (i.e. drawing on Mariano and Murasawa (2003)). 
+If performance is not critical, I also refer the user to the [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>) packages, which provide elaborate models for mixed-frequency nowcasting, and handle mixed frequencies like BM14 (i.e. drawing on Mariano and Murasawa (2003)). -->
 
 ## Additional Functions
 
