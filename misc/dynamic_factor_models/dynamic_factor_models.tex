@@ -28,9 +28,9 @@
 \begin{document}
 \maketitle
 
-Dynamic factor models (DFMs) postulate that a small number of latent factors explain the common dynamics of a larger number of observed time series \citep{stock2016dynamic}. DFMs provide estimates of these unobserved factors and their joint dynamics, with many applications in forecasting, timer series interpolation, and macroeconomic monitoring, such as the creation of coincident business cycle indicators \citep{mariano2003new}. Another popular application is "nowcasting", where large volumes of time series data released at higher frequencies are synthesized to produce real-time estimates of low-frequency leading indicators such as GDP \citep{bok2018macroeconomic}. \newline
+Dynamic factor models (DFMs) postulate that a small number of latent factors explain the common dynamics of a larger number of observed time series \citep{stock2016dynamic}. DFMs provide estimates of these unobserved factors and their joint dynamics, with many applications in forecasting, time series interpolation, and macroeconomic monitoring, such as the creation of coincident business cycle indicators \citep{mariano2003new}. Another popular application is "nowcasting", where large volumes of time series data released at higher frequencies are synthesized to produce real-time estimates of low-frequency leading indicators such as GDP \citep{bok2018macroeconomic}. \newline
 
-DFMs are set up in State Space form and can be estimated using the Kalman Filter and several solution algorithms, the most popular one in the economics literature being the Expectation Maximization (EM) algorithm, due to its robust numerical properties \citep{doz2012quasi} and the popular mixed frequency generalization of \citet{banbura2014maximum}. % \newline
+DFMs are set up in State Space form and can be estimated using the Kalman Filter and several solution algorithms. The most popular one in the economics literature is the Expectation Maximization (EM) algorithm, due to its robust numerical properties \citep{doz2012quasi} and the popular mixed frequency generalization of \citet{banbura2014maximum}. % \newline
 
 \section{The Canonical (Exact) DFM}
 
@@ -87,7 +87,7 @@ This \emph{exact} DFM specification is quite restrictive as it assumes that all 
 \item Linearity and constant relationships (no structural breaks)
 \item Idiosynchratic measurement (observation) errors (\textbf{R} is diagonal)
 \item No direct relationship between series and lagged factors (can be relaxed)
-\item No relationship between lagged error terms in the either measurement or transition equation (no serial correlation).
+\item No relationship between lagged error terms in either measurement or transition equation (no serial correlation).
 \end{enumerate}
 
 Particularly assumption 4 is quite restrictive since it stipulates that all time dynamics in $\textbf{x}_t$ need to be accounted for by the factors. \newline
@@ -103,7 +103,7 @@ In this case, the stacked notation remains the same as long as $q < r-1$, with o
 modified to estimate the lagged loadings $\textbf{C}_i$. However, because of the proliferation of parameters, this extension has not received much attention in frequentist estimation approaches. Furthermore, in the presence of significant lagged dynamics, increasing the number of factors $r$ is often successful in capturing these dynamics, with certain factors loading strongly on the lagged indicators and others on the contemporaneous ones. \newline
 
 
-In the current practice of estimating large DFMs of economic time series, series for a given sector often have unmodeled sector-specific dynamics. Most of the economics literature on DFMs has thus focused on relaxing restrictions about the error structure in factor models, introducing the notion of \emph{approximate} factor models \citep{stock2016dynamic}. A particular emphasis has been placed on relaxing assumption 4, i.e. allowing some of the idiosynchratic dynamics of the time series to be unexplained by the common factors. 
+In the current practice of estimating large DFMs of economic time series, series for a given sector often have unmodeled sector-specific dynamics. Most of the economics literature on DFMs has thus focused on relaxing restrictions about the error structure in factor models, introducing the notion of \emph{approximate} factor models \citep{stock2016dynamic}. A particular emphasis has been placed on relaxing assumption 4, i.e. allowing some of the idiosyncratic dynamics of the time series to be unexplained by the common factors. 
 % doz2020dynamic
 
 
@@ -160,7 +160,7 @@ Like the \emph{exact} DFM, this model can also easily be extended to allow for $
 \textbf{C}^a_{(n \times rp+n)}  = (\textbf{C}_0, \textbf{C}_1, \dots, \textbf{C}_q, \textbf{0}, \dots, \textbf{0}, \textbf{I}).
 \end{equation}
 
-The same comments given above about proliferation of parameters and the possibility to include additional factors to account for lagged dynamics apply. \newline 
+The same comments given above about the proliferation of parameters and the possibility to include additional factors to account for lagged dynamics apply. \newline 
 
 In general, \citet{doz2011two, doz2012quasi} show that in the presence of serial correlation, the factors are still consistently estimated as $n, T \to \infty$ using an \emph{exact} DFM specification. Thus modeling serial correlation is particularly important in smaller samples. \citet{banbura2014maximum} also show that modeling the serial correlation improves forecast accuracy, but only at short horizons.
 
