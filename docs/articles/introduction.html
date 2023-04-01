@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dfms</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Sebastian
 Krantz</h4>
             
-            <h4 data-toc-skip class="date">2023-03-30</h4>
+            <h4 data-toc-skip class="date">2023-04-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/HEAD/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="hidden name"><code>introduction.Rmd</code></div>
@@ -104,7 +104,7 @@ from January 1980 through September 2009.</p>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; [1] "ip_total"       "ip_tot_cstr"    "ip_tot_cstr_en" "ip_constr"     </span>
 <span class="co">#&gt; [5] "ip_im_goods"    "ip_capital"</span>
-<span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-2-1.png" width="672"></p>
 <p>The data frame <code>BM14_Models</code> provides information about
 the series<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>, and the various models estimated by
@@ -138,7 +138,7 @@ user.</p>
 <span class="co"># log-transforming and first-differencing the data</span>
 <span class="va">BM14_M</span><span class="op">[</span>, <span class="va">BM14_Models_M</span><span class="op">$</span><span class="va">log_trans</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/compound.html" class="external-link">%&lt;&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">BM14_M_diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">BM14_M_diff</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">BM14_M_diff</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-4-1.png" width="672"></p>
 <div class="section level2">
 <h2 id="determining-the-structure-of-the-model">Determining the Structure of the Model<a class="anchor" aria-label="anchor" href="#determining-the-structure-of-the-model"></a>
@@ -155,7 +155,7 @@ criteria generally suggests the most parsimonious model.</p>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; IC1 IC2 IC3 </span>
 <span class="co">#&gt;   7   7  13</span>
-<span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ic</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ic</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-5-1.png" width="672"></p>
 <p>Another option is to use a Screeplot to gauge the number of factors
 by looking for a kink in the plot. A mathematical procedure for finding
@@ -169,7 +169,7 @@ that a model with 4 factors should be estimated, as factors, 5, 6 and 7
 do not add much to the explanatory power of the model. Next to the
 number of factors, the lag order of the factor-VAR of the transition
 equation should be estimated (the default is 1 lag). This can be done
-using the <code><a href="https://rdrr.io/pkg/vars/man/VARselect.html" class="external-link">VARselect()</a></code> function from the <em>vars</em>
+using the <code>VARselect()</code> function from the <em>vars</em>
 package, with PCA factor estimates reported by <code><a href="../reference/ICr.html">ICr()</a></code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Using vars::VARselect() with 4 principal components to estimate the VAR lag order</span>
@@ -220,9 +220,9 @@ function with parameters <code>r</code> and <code>p</code><a href="#fn7" class="
 <span class="co">#&gt; f2  0.1347 -0.0024 -0.0342</span>
 <span class="co">#&gt; f3 -0.0087  0.1767  0.0249</span>
 <span class="co">#&gt; f4  0.0307  0.0662 -0.0035</span>
-<span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-8-1.png" width="672"></p>
-<p>The model can be investigated using <code><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary()</a></code>, which
+<p>The model can be investigated using <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, which
 returns an object of class ‘dfm_summary’ containing the system matrices
 and summary statistics of the factors and the residuals in the
 measurement equation, as well as the R-Squared of the factor model for
@@ -230,10 +230,9 @@ individual series. The print method automatically adjusts the amount of
 information printed to the data size. For large databases with more than
 40 series, no series-level statistics are printed.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">dfm_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/vars/man/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">dfm_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">dfm_summary</span><span class="op">)</span> <span class="co"># Large model with &gt; 40 series: defaults to compact = 2</span>
 <span class="co">#&gt; Dynamic Factor Model: n = 92, T = 356, r = 4, p = 3, %NA = 25.8366</span>
-<span class="co">#&gt;    with AR(1) errors: mean(abs(rho)) = 0.253 </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Call:  DFM(X = BM14_M_diff, r = 4, p = 3)</span>
 <span class="co">#&gt; </span>
@@ -282,15 +281,15 @@ information printed to the data size. For large databases with more than
 <span class="co"># print(dfm_summary, compact = 1)</span>
 <span class="co"># print(dfm_summary, compact = 0) </span></code></pre></div>
 <p>Apart from the model summary, the <em>dfm</em> methods
-<code><a href="https://rdrr.io/pkg/vars/man/residuals.html" class="external-link">residuals()</a></code> and <code><a href="https://rdrr.io/pkg/vars/man/fitted.html" class="external-link">fitted()</a></code> return observation
+<code><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals()</a></code> and <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> return observation
 residuals and fitted values from the model. The default format is a
 plain matrix, but the functions also have an argument to return data in
 the original (input) format.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/vars/man/residuals.html" class="external-link">resid</a></span><span class="op">(</span><span class="va">model1</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">resid</a></span><span class="op">(</span><span class="va">model1</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/vars/man/fitted.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">model1</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">model1</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-10-2.png" width="672"></p>
 <p>Another way to examine the factor model visually is to plot the
 Quasi-Maximum-Likelihood (QML) factor estimates against PCA and Two-Step
@@ -299,7 +298,7 @@ Filter and Smoother is run only once. Both estimates are also computed
 by <code><a href="../reference/DFM.html">DFM()</a></code> during EM estimation and can also be visualized
 with <code>plot.dfm</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model1</span>, method <span class="op">=</span> <span class="st">"all"</span>, type <span class="op">=</span> <span class="st">"individual"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model1</span>, method <span class="op">=</span> <span class="st">"all"</span>, type <span class="op">=</span> <span class="st">"individual"</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-11-1.png" width="672"></p>
 <p>The plot with the various estimates shows that the QML estimates are
 more volatile in the initial periods where there are many missing
@@ -327,13 +326,13 @@ sequence of integers).</p>
 <div class="section level2">
 <h2 id="forecasting">Forecasting<a class="anchor" aria-label="anchor" href="#forecasting"></a>
 </h2>
-<p>DFM forecasts can be obtained with the <code><a href="https://rdrr.io/pkg/vars/man/predict.html" class="external-link">predict()</a></code> method,
+<p>DFM forecasts can be obtained with the <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> method,
 which dynamically forecasts the factors using the transition equation
 (default 10 periods), and then also predicts data forecasts using the
 observation equation. Objects are of class ‘dfm_forecast’</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># 12-period ahead DFM forecast</span>
-<span class="va">fc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/vars/man/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model1</span>, h <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>
+<span class="va">fc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model1</span>, h <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span>
 <span class="co">#&gt; 12 Step Ahead Forecast from Dynamic Factor Model</span>
 <span class="co">#&gt; </span>
@@ -379,7 +378,7 @@ stationary autoregressive model, the forecasts tend to zero quite
 quickly<a href="#fn9" class="footnote-ref" id="fnref9"><sup>9</sup></a>.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Setting an appropriate plot range to see the forecast</span>
-<span class="fu"><a href="https://rdrr.io/pkg/urca/man/plot-methods.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">320</span>, <span class="fl">370</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">320</span>, <span class="fl">370</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-14-1.png" width="672"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Predicting with Two-Step estimates</span>
