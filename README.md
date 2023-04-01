@@ -18,8 +18,6 @@
 <!--
 The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/dfms")` and give feedback. -->
 
-***
-
 *dfms* provides efficient estimation of Dynamic Factor Models via the EM Algorithm. Estimation can be done in 3 different ways following:
 
 - Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. *Journal of Econometrics, 164*(1), 188-205. <doi:10.1016/j.jeconom.2011.02.012> 

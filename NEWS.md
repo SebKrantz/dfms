@@ -1,3 +1,7 @@
+# dfms 0.2.1
+
+* Fixed print bug in `summary.dfm`: print method showed that model had AR(1) errors even though `idio.ar1 = FALSE` by default. 
+
 # dfms 0.2.0
 
 * Added argument `idio.ar1 = TRUE` allowing estimation of approximate DFM's with AR(1) observation errors. 
