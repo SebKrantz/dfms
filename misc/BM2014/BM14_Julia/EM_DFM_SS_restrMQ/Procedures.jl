@@ -68,6 +68,8 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     temp = zeros(5*NQ)
     temp[NQ+1:end,1:end-NQ] .= eye(4*NQ)
     A = BlockDiagonal([A, temp])
+    # Turn A into a normal matrix from BlockDiagonal
+    A = Matrix(A)
 
     # Define Q matrix with dimensions pC*r+5*NQ x pC*r+5*NQ and fill it with zeros
     Q = zeros(pC*r+5*NQ, pC*r+5*NQ)
@@ -79,7 +81,7 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     Q[pC*r+1:pC*r+NQ, pC*r+1:pC*r+NQ] = Diagonal(nanvar(resNaN[:, NM+1:end])) / 19
 
     # Calculate rp2
-    rp2 = (r*pC+5*NQ)^2
+    # rp2 = (r*pC+5*NQ)^2
 
     # Initial conditions
     initZ = zeros(r*pC+5*NQ)
