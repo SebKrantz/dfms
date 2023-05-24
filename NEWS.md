@@ -1,3 +1,7 @@
+# dfms 0.2.1.9000
+
+* Replace Armadillo `inv_sympd()` by Armadillo `inv()` in C++ Kalman Filter to improve numerical robustness at a minor performance cost.
+
 # dfms 0.2.1
 
 * Fixed print bug in `summary.dfm`: print method showed that model had AR(1) errors even though `idio.ar1 = FALSE` by default. 

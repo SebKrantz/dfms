@@ -70,7 +70,7 @@ Rcpp::List SKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 
       // Intermediate results
       VCt = Vp * Ci.t();
-      S = inv_sympd(Ci * VCt + Ri); // .i();
+      S = inv(Ci * VCt + Ri); // .i();
 
       // Prediction error
       et = xt - Ci * Zp;
@@ -149,7 +149,7 @@ Rcpp::List FIS(arma::mat A,
   for (int i = T-1; i--; ) {
     Vfi = VTf.slice(i);
     Vpi = VTp.slice(i+1);
-    Ji = Vfi * At * inv_sympd(Vpi); // .i();
+    Ji = Vfi * At * inv(Vpi); // .i();
     ZsT.row(i) = ZTf.row(i) + (Ji * (ZsT.row(i+1) - ZTp.row(i+1)).t()).t();
     VsT.slice(i) = Vfi + Ji * (VsT.slice(i+1) - Vpi) * Ji.t();
   }
@@ -243,7 +243,7 @@ Rcpp::List SKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
 
       // Intermediate results
       VCt = Vp * Ci.t();
-      S = inv_sympd(Ci * VCt + Ri); //.i();
+      S = inv(Ci * VCt + Ri); //.i();
 
       // Prediction error
       et = xt - Ci * Zp;
@@ -298,7 +298,7 @@ Rcpp::List SKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
     VsT.slice(i) = Vf + Ji * (VsT.slice(i+1) - VTp.slice(i+1)) * Jimt;
     // Cov(Z_t, Z_t-1): Needed for EM
     if(i > 0) {
-      Jimt = (VTf.slice(i-1) * At * inv_sympd(VTp.slice(i))).t(); // .i()
+      Jimt = (VTf.slice(i-1) * At * inv(VTp.slice(i))).t(); // .i()
       VVsT.slice(i) = Vf * Jimt + Ji * (VVsT.slice(i+1) - A * Vf) * Jimt;
     }
   }
