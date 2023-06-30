@@ -22,7 +22,7 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     # Static predictions
     f = x * v;
 
-    ff = zeros(T-rC, 0);
+    ff = zeros(T-rC+1, 0);
     for kk = 0:rC-1
         ff = [ff f[rC-kk:end-kk,:]];
     end
@@ -40,16 +40,16 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
         iff_i = inv(ff_i'*ff_i)
         Cc = iff_i*ff_i'*xx_i
         Cc = Cc - iff_i*Rcon'*inv(Rcon*iff_i*Rcon')*(Rcon*Cc-q)
-        C[i, 1:rC*r] .= Cc'
+        C[i, 1:rC*r] = Cc'
     end
 
     res = x[rC:end, :] - ff * C[:, 1:rC*r]'
     resNaN = copy(res)
     resNaN[indNaN[rC:end, :]] .= NaN
 
-    R = Diagonal(nanvar(resNaN))
+    R = Diagonal(dropdims(nanvar(resNaN, dims = 1), dims = 1))
     R[NM+1:end, NM+1:end] .= 0
-    C = [C [zeros(NM,rC*NQ);kron([1 2 3 2 1], eye(NQ))]]
+    C = [C [zeros(NM,rC*NQ); kron([1 2 3 2 1], eye(NQ))]]
 
     # Estimate A & Q from stacked F(t) = A*F(t-1) + e(t);
     z = f;
@@ -65,8 +65,8 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     A[1:r,1:r*p] = A_temp';
     A[r+1:end,1:r*(pC-1)] = eye(r*(pC-1));
 
-    temp = zeros(5*NQ)
-    temp[NQ+1:end,1:end-NQ] .= eye(4*NQ)
+    temp = zeros(5*NQ, 5*NQ)
+    temp[NQ+1:end,1:end-NQ] = eye(4*NQ)
     A = BlockDiagonal([A, temp])
     # Turn A into a normal matrix from BlockDiagonal
     A = Matrix(A)
@@ -78,7 +78,7 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     # Extract covariance matrix of e and assign it to the top-left r x r block of Q
     Q[1:r, 1:r] = cov(e)
     # Extract diagonal elements of the nanvar of resNaN from column NM+1 to end and assign it to the bottom-right NQ x NQ block of Q
-    Q[pC*r+1:pC*r+NQ, pC*r+1:pC*r+NQ] = Diagonal(nanvar(resNaN[:, NM+1:end])) / 19
+    Q[pC*r+1:pC*r+NQ, pC*r+1:pC*r+NQ] = Diagonal(dropdims(nanvar(resNaN[:, NM+1:end], dims = 1), dims = 1) / 19)
 
     # Calculate rp2
     # rp2 = (r*pC+5*NQ)^2
