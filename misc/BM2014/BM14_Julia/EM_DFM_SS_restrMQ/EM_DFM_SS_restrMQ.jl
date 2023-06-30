@@ -22,12 +22,12 @@ eye(n) = Matrix{Float64}(I, n, n)
 P = (r = 5, p = 2, max_iter = 100,
 # Building the matrix of restrictions on the loadings for the quarterly variables
     Rconstr = [2 -1 0 0 0;
-            3 0 -1 0 0;
-            2 0 0 -1 0;
-            1 0 0 0 -1],
+               3 0 -1 0 0;
+               2 0 0 -1 0;
+               1 0 0 0 -1],
     q = zeros(4,1),
     restr = "_restrMQ",
-    nQ = 10 # need to set number of quarterly variables
+    nQ = 9 # need to set number of quarterly variables
 )
 
 
