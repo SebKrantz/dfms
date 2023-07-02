@@ -49,7 +49,7 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
 
     R = Diagonal(dropdims(nanvar(resNaN, dims = 1), dims = 1))
     R[NM+1:end, NM+1:end] .= 0
-    C = [C zeros(NM,rC*NQ) kron([1 2 3 2 1], eye(NQ))]
+    C = [C [zeros(NM,rC*NQ); kron([1 2 3 2 1], eye(NQ))]]
 
     # Estimate A & Q from stacked F(t) = A*F(t-1) + e(t);
     z = f;
