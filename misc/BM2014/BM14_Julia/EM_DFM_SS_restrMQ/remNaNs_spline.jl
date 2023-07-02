@@ -23,7 +23,7 @@ function remNaNs_spline(X, options)
             nanEnd = cumsum(rem1[end:-1:1]) .== 1:T;
             nanEnd = nanEnd[end:-1:1];
             nanLE = nanLead .| nanEnd;
-            X[nanLE,:] = [];
+            X = X[.!nanLE,:] # X[nanLE,:] = [];
             indNaN = isnan.(X);
             for i = 1:N  
                 x = X[:,i];
@@ -46,7 +46,7 @@ function remNaNs_spline(X, options)
             nanEnd = cumsum(rem1[end:-1:1]) .== 1:T;
             nanEnd = nanEnd[end:-1:1];
             nanLE = nanLead .| nanEnd;
-            X[nanLE,:] = [];
+            X = X[.!nanLE,:] # X[nanLE,:] = [];
             indNaN = isnan.(X);
     elseif options.method == 4 # remove rows with leading and closing zeros & replace missing values
         rem1 = dropdims(sum(indNaN, dims = 2), dims = 2) .== N;
@@ -54,7 +54,7 @@ function remNaNs_spline(X, options)
         nanEnd = cumsum(rem1[end:-1:1]) .== 1:T;
         nanEnd = nanEnd[end:-1:1];
         nanLE = nanLead .| nanEnd;
-        X[nanLE,:] = [];
+        X = X[.!nanLE,:] # X[nanLE,:] = [];
         indNaN = isnan.(X);
             for i = 1:N  
                 x = X[:,i];
