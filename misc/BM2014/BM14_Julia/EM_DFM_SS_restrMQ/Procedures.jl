@@ -24,25 +24,29 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
 
     ff = zeros(T-rC+1, 0);
     for kk = 0:rC-1
-        ff = [ff f[rC-kk:end-kk,:]];
+        ff = [ff f[rC-kk:end-kk,:]]; # Matrix of lagged factors
     end
 
     Rcon = kron(Rcon,eye(r));
     q = kron(q,ones(r,1));
-
+    
+    # This loops over the quarterly variables 
     for i = N-NQ+1:N
         xx_i = xNaN[rC:T, i]
         if sum(.!isnan.(xx_i)) < size(ff, 2)+2
             xx_i = x[rC:T, i]
         end
         ff_i = ff[.!isnan.(xx_i), :]
-        xx_i = xx_i[.!isnan.(xx_i)]
+        xx_i = xx_i[.!isnan.(xx_i)] # Quarterly observations (no interpolation)
         iff_i = inv(ff_i'*ff_i)
-        Cc = iff_i*ff_i'*xx_i
+        Cc = iff_i*ff_i'*xx_i # Coefficients from regressing quarterly observations on corresponding values of factors
+        # This is restricted least squares with restrictions: Rcon * C_0 = q
+        # The restrictions in Rcon (with -1 in the right places) make sense!
         Cc = Cc - iff_i*Rcon'*inv(Rcon*iff_i*Rcon')*(Rcon*Cc-q)
-        C[i, 1:rC*r] = Cc'
+        C[i, 1:rC*r] = Cc' # This replaces the corresponding row. 
     end
 
+    # This computes residuals based on the new C matrix (with and without missing values)
     res = x[rC:end, :] - ff * C[:, 1:rC*r]'
     resNaN = copy(res)
     resNaN[indNaN[rC:end, :]] .= NaN
