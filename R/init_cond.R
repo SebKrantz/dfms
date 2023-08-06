@@ -74,12 +74,11 @@ Rcon <- matrix(c(2, -1, 0, 0, 0,
                  2, 0, 0, -1, 0,
                  1, 0, 0, 0, -1), ncol = 5, byrow = TRUE)
 
-init_cond_MQ <- function(X, X_imp, F_pc, v, n, r, p, nq, rRi, rQi) {
+init_cond_MQ <- function(X, X_imp, F_pc, v, n, r, p, TT, nq, rRi, rQi) {
 
   rC <- 5L # ncol(Rcon)
   pC <- max(p, rC)
   rpC <- r * pC
-  TT <- nrow(F_pc)
   nm <- n - nq
 
   # Observation equation -------------------------------
@@ -103,7 +102,7 @@ init_cond_MQ <- function(X, X_imp, F_pc, v, n, r, p, nq, rRi, rQi) {
       # The restrictions in Rcon (with -1 in the right places) make sense!
       tmp = tcrossprod(Iff_i, rRcon)
       Cc = Cc - tmp %*% ainv(rRcon %*% tmp) %*% rRcon %*% Cc
-      C[i, 1:(rC*r)] = Cc # This replaces the corresponding row. 
+      C[i, 1:(rC*r)] = Cc # This replaces the corresponding row.
   }
 
   if(rRi) {
@@ -125,8 +124,8 @@ init_cond_MQ <- function(X, X_imp, F_pc, v, n, r, p, nq, rRi, rQi) {
   A[(rpC+nq+1):rpC5nq, (rpC+nq+1):rpC5nq] <- diag(4*nq)
 
   Q[1:r, 1:r] <- switch(rQi + 1L, diag(r), diag(fvar(var$res)), cov(var$res))
-  Q[(rpC+1):(rpC+nq), (rpC+1):(rpC+nq)] <- if(rRi == 2L) 
-      cov(res[, (nm+1):end, drop = FALSE], use = "pairwise.complete.obs") else if(rRi == 1L) 
+  Q[(rpC+1):(rpC+nq), (rpC+1):(rpC+nq)] <- if(rRi == 2L)
+      cov(res[, (nm+1):end, drop = FALSE], use = "pairwise.complete.obs") else if(rRi == 1L)
       diag(fvar(res[, (nm+1):end], na.rm = TRUE)) else diag(nq)
 
   # Initial state and state covariance (P) ------------
