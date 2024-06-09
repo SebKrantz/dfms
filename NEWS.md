@@ -1,4 +1,4 @@
-# dfms 0.2.1.9000
+# dfms 0.2.2
 
 * Replace Armadillo `inv_sympd()` by Armadillo `inv()` in C++ Kalman Filter to improve numerical robustness at a minor performance cost.
 
