@@ -203,7 +203,8 @@
 #' @export
 
 DFM <- function(X, r, p = 1L, ...,
-                idio.ar1 = FALSE, # quarterly.vars = c(), blocks = c(),
+                idio.ar1 = FALSE,
+                quarterly.vars = NULL, # blocks = c(),
                 rQ = c("none", "diagonal", "identity"),
                 rR = c("diagonal", "identity", "none"),
                 em.method = c("auto", "DGR", "BM", "none"),
@@ -230,6 +231,7 @@ DFM <- function(X, r, p = 1L, ...,
   if(!is.logical(idio.ar1) || is.na(idio.ar1)) stop("idio.ar1 needs to be logical")
   if(!is.logical(pos.corr) || is.na(pos.corr)) stop("pos.corr needs to be logical")
   if(!is.logical(check.increased) || is.na(check.increased)) stop("check.increased needs to be logical")
+  if(!is.null(quarterly.vars) && !is.character(quarterly.vars)) stop("quarterly.vars needs to be a character vector with the names of quarterly variables in X")
 
   rp <- r * p
   sr <- seq_len(r)
@@ -242,6 +244,11 @@ DFM <- function(X, r, p = 1L, ...,
   Xnam <- dimnames(X)[[2L]]
   dimnames(X) <- NULL
   n <- ncol(X)
+  if(MFl <- !is.null(quarterly.vars)) {
+    qind <- ckmatch(quarterly.vars, Xnam)
+    nq <- length(qind)
+    if(!identical(sort(qind), (n-nq+1):n)) stop("Pleae order your data such that quarterly variables are to the right (after) the monthly variables")
+  }
 
   # Missing values
   anymiss <- anyNA(X)
@@ -261,8 +268,8 @@ DFM <- function(X, r, p = 1L, ...,
 
   # This is because after removing missing rows, the data could be complete, e.g. differencing data with diff.xts() of collapse::fdiff() just gives a NA row
   if(anymiss && length(rm.rows)) anymiss <- any(W)
-  BMl <- switch(tolower(em.method[1L]), auto = anymiss, dgr = FALSE, bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
-  if(idio.ar1 && !is.na(BMl)) BMl <- TRUE
+  BMl <- switch(tolower(em.method[1L]), auto = anymiss || idio.ar1 || MFl, dgr = FALSE || idio.ar1 || MFl,
+                bm = TRUE, none = NA, stop("Unknown EM option:", em.method[1L]))
 
   # Run PCA to get initial factor estimates:
   # v <- svd(X_imp, nu = 0L, nv = min(as.integer(r), n, TT))$v # Not faster than eigen...
@@ -276,8 +283,13 @@ DFM <- function(X, r, p = 1L, ...,
   F_pc <- X_imp %*% v
 
   ## Initial System Matrices
-  init <- if(idio.ar1) init_cond_idio_ar1(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss, tol) else
-                                init_cond(X, F_pc, v, n, r, p, BMl, rRi, rQi)
+  if(MFl) {
+    init <- if(idio.ar1) stop("Not yet implemented") else
+      init_cond_MQ(X, X_imp, F_pc, v, n, r, p, TT, nq, rRi, rQi)
+  } else {
+    init <- if(idio.ar1) init_cond_idio_ar1(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss, tol) else
+      init_cond(X, F_pc, v, n, r, p, BMl, rRi, rQi)
+  }
   A <- init$A; C <- init$C; Q <- init$Q; R <- init$R; F_0 <- init$F_0; P_0 <- init$P_0
 
   ## Run standartized data through Kalman filter and smoother once
