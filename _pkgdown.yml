@@ -85,8 +85,6 @@ reference:
 
 external-articles:
   - name: dynamic_factor_models
-    title: Dynamic Factor Models - A Very Short Introduction
-    description: Provides a short theoretical overview of dynamics factor models as used in the economics literature
     href: https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf
 
 articles:
