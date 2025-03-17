@@ -91,4 +91,4 @@ articles:
   - title: Dynamic Factor Models - A Very Short Introduction
     desc: Provides a short theoretical overview of dynamics factor models as used in the economics literature
     contents:
-    - url: https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf
+    - dynamic_factor_models
