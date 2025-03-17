@@ -25,7 +25,7 @@ The package is fully functional though, and you are very welcome to install it u
 
 - Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. *Journal of Applied Econometrics, 29*(1), 133-160. <doi:10.1002/jae.2306>
 
-The default is `em.method = "auto"`, which chooses `"BM"` following Banbura & Modugno (2014) with missing data or mixed frequency, and `"DGR"` following Doz, Giannone & Reichlin (2012) otherwise. Using `em.method = "none"` generates Two-Step estimates following Doz, Giannone & Reichlin (2011). This is extremely efficient on bigger datasets. PCA and Two-Step estimates are also reported in EM-based methods. All methods support missing data, but `em.method = "DGR"` does not account for them in EM iterations.
+The default is `em.method = "auto"`, which chooses `"BM"` following Banbura & Modugno (2014) with missing data or mixed frequency, and `"DGR"` following Doz, Giannone & Reichlin (2012) otherwise. Using `em.method = "none"` generates Two-Step estimates following Doz, Giannone & Reichlin (2011). This is extremely efficient on bigger datasets. PCA and Two-Step estimates are also reported in EM-based methods. All methods support missing data, but `em.method = "DGR"` does not model them in EM iterations.
 
 ### Comparison with Other R Packages
 
