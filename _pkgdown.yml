@@ -4,14 +4,27 @@ destination: docs
 home:
   title: Dynamic Factor Models for R
 
-# template:
-#  bootstrap: 5
+template:
+  bootstrap: 5
+  bootswatch: sandstone # Also good: flatly, yeti, simplex, superhero, zephyr
+  theme: ayu-dark # Or: ayu-mirage
+  math-rendering: katex
+  bslib:
+    primary: "#1e2124" # "#202224" # "#242424" # "#003254"
+    code-color: "#004573" # "#9c0027" # "#004d80" # b3002d
+    gray-dark: "#3f464d"
+
+development:
+  mode: auto
 
 articles:
   - title: Introduction to dfms
     desc: Provides a walk-through of all main features
     contents:
     - introduction
+  - title: Dynamic Factor Models
+    desc: Provides a walk-through of all main features
+    href: https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf
 
 right:
    - icon: fa-github
