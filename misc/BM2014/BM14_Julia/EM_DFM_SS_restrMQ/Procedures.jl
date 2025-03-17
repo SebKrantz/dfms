@@ -22,34 +22,38 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     # Static predictions
     f = x * v;
 
-    ff = zeros(T-rC, 0);
+    ff = zeros(T-rC+1, 0);
     for kk = 0:rC-1
-        ff = [ff f[rC-kk:end-kk,:]];
+        ff = [ff f[rC-kk:end-kk,:]]; # Matrix of lagged factors
     end
 
     Rcon = kron(Rcon,eye(r));
     q = kron(q,ones(r,1));
-
+    
+    # This loops over the quarterly variables 
     for i = N-NQ+1:N
         xx_i = xNaN[rC:T, i]
         if sum(.!isnan.(xx_i)) < size(ff, 2)+2
             xx_i = x[rC:T, i]
         end
         ff_i = ff[.!isnan.(xx_i), :]
-        xx_i = xx_i[.!isnan.(xx_i)]
+        xx_i = xx_i[.!isnan.(xx_i)] # Quarterly observations (no interpolation)
         iff_i = inv(ff_i'*ff_i)
-        Cc = iff_i*ff_i'*xx_i
+        Cc = iff_i*ff_i'*xx_i # Coefficients from regressing quarterly observations on corresponding values of factors
+        # This is restricted least squares with restrictions: Rcon * C_0 = q
+        # The restrictions in Rcon (with -1 in the right places) make sense!
         Cc = Cc - iff_i*Rcon'*inv(Rcon*iff_i*Rcon')*(Rcon*Cc-q)
-        C[i, 1:rC*r] .= Cc'
+        C[i, 1:rC*r] = Cc' # This replaces the corresponding row. 
     end
 
+    # This computes residuals based on the new C matrix (with and without missing values)
     res = x[rC:end, :] - ff * C[:, 1:rC*r]'
     resNaN = copy(res)
     resNaN[indNaN[rC:end, :]] .= NaN
 
-    R = Diagonal(nanvar(resNaN))
+    R = Diagonal(dropdims(nanvar(resNaN, dims = 1), dims = 1))
     R[NM+1:end, NM+1:end] .= 0
-    C = [C [zeros(NM,rC*NQ);kron([1 2 3 2 1], eye(NQ))]]
+    C = [C [zeros(NM,rC*NQ); kron([1 2 3 2 1], eye(NQ))]]
 
     # Estimate A & Q from stacked F(t) = A*F(t-1) + e(t);
     z = f;
@@ -65,8 +69,8 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     A[1:r,1:r*p] = A_temp';
     A[r+1:end,1:r*(pC-1)] = eye(r*(pC-1));
 
-    temp = zeros(5*NQ)
-    temp[NQ+1:end,1:end-NQ] .= eye(4*NQ)
+    temp = zeros(5*NQ, 5*NQ)
+    temp[NQ+1:end,1:end-NQ] = eye(4*NQ)
     A = BlockDiagonal([A, temp])
     # Turn A into a normal matrix from BlockDiagonal
     A = Matrix(A)
@@ -78,7 +82,7 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     # Extract covariance matrix of e and assign it to the top-left r x r block of Q
     Q[1:r, 1:r] = cov(e)
     # Extract diagonal elements of the nanvar of resNaN from column NM+1 to end and assign it to the bottom-right NQ x NQ block of Q
-    Q[pC*r+1:pC*r+NQ, pC*r+1:pC*r+NQ] = Diagonal(nanvar(resNaN[:, NM+1:end])) / 19
+    Q[pC*r+1:pC*r+NQ, pC*r+1:pC*r+NQ] = Diagonal(dropdims(nanvar(resNaN[:, NM+1:end], dims = 1), dims = 1)) #  / 19
 
     # Calculate rp2
     # rp2 = (r*pC+5*NQ)^2
@@ -90,7 +94,7 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     return A, C, Q, R, initZ, initV
 end
 
-
+# y_est, A, C, Q, R, Z_0, V_0, r, p, R_mat, q, nQ
 function EMstep(y, A, C, Q, R, Z_0, V_0, r, p, R_mat, q, nQ)
     n, T = size(y)
     rC = size(R_mat, 2)
@@ -111,10 +115,10 @@ function EMstep(y, A, C, Q, R, Z_0, V_0, r, p, R_mat, q, nQ)
     
     A_new[1:r, 1:rp] = EZZ_FB[1:r, 1:rp] * inv(EZZ_BB[1:rp, 1:rp])
     Q_new[1:r, 1:r] = (EZZ[1:r, 1:r] - A_new[1:r, 1:rp] * EZZ_FB[1:r, 1:rp]') / T
-    Q_new[rpC+1:rpC+nQ, rpC+1:rpC+nQ] = Diagonal(diag(Zsmooth[rpC+1:rpC+nQ, 2:end] * Zsmooth[rpC+1:rpC+nQ, 2:end]' + sum(Vsmooth[rpC+1:rpC+nQ, rpC+1:rpC+nQ, 2:end], dims=3))) / T
+    Q_new[rpC+1:rpC+nQ, rpC+1:rpC+nQ] = Diagonal(diag(Zsmooth[rpC+1:rpC+nQ, 2:end] * Zsmooth[rpC+1:rpC+nQ, 2:end]' + dropdims(sum(Vsmooth[rpC+1:rpC+nQ, rpC+1:rpC+nQ, 2:end], dims=3), dims = 3)) / T)
     
     Z_0 = Zsmooth[:, 1]
-    V_0 = zeros(length(Z_0))
+    V_0 = zeros(length(Z_0), length(Z_0))
     V_0[1:rpC, 1:rpC] = Vsmooth[1:rpC, 1:rpC, 1]
     V_0[rpC+1:end, rpC+1:end] = Diagonal(diag(Vsmooth[rpC+1:end, rpC+1:end, 1]))
 
@@ -127,11 +131,8 @@ function EMstep(y, A, C, Q, R, Z_0, V_0, r, p, R_mat, q, nQ)
     nom = zeros(nM, r)
 
     for t=1:T
-        
         nanYt = diagm(nanY[1:nM,t] .== 0)
-
         denom += kron(Zsmooth[1:r,t+1] * Zsmooth[1:r,t+1]' + Vsmooth[1:r,1:r,t+1], nanYt)
-
         nom += y[1:nM,t]*Zsmooth[1:r,t+1]';
     end
     
@@ -146,12 +147,11 @@ function EMstep(y, A, C, Q, R, Z_0, V_0, r, p, R_mat, q, nQ)
         nom = zeros(1, rC)
     
         for t=1:T
-            nanYt = diagm(nanY[i,t] .== 0)
-            denom += kron(Zsmooth[1:rC, t+1]*Zsmooth[1:rC, t+1]' + Vsmooth[1:rC, 1:rC, t+1], nanYt)
-            nom += Y[i, t]*Zsmooth[1:rC, t+1]'
+            denom += !nanY[i,t] * (Zsmooth[1:rC, t+1]*Zsmooth[1:rC, t+1]' + Vsmooth[1:rC, 1:rC, t+1])
+            nom += y[i, t]*Zsmooth[1:rC, t+1]'
         end
     
-        C_i = inv(denom)*nom'
+        C_i = inv(denom) * nom'
         C_i_constr = C_i - inv(denom)*R_mat'*inv(R_mat*inv(denom)*R_mat')*(R_mat*C_i-q)
         C_new[i, 1:rC] = C_i_constr
     end
@@ -163,8 +163,7 @@ function EMstep(y, A, C, Q, R, Z_0, V_0, r, p, R_mat, q, nQ)
                 nanYt*C_new*Vsmooth[:,:,t+1]*C_new'*nanYt + (I(n)-nanYt)*R*(I(n)-nanYt)
     end
     
-    R_new ./= T
-    R_new = Diagonal(diag(R_new))
+    R_new = Diagonal(diag(R_new) / T)
     R_new[n-nQ+1:end, n-nQ+1:end] .= 0
 
     return C_new, R_new, A_new, Q_new, loglik, Z_0, V_0

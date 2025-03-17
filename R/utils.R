@@ -49,6 +49,9 @@ unscale <- function(x, stats) TRA.matrix(TRA.matrix(x, stats[, "SD"], "*"), stat
 #' @noRd
 ftail <- function(x, p) {n <- dim(x)[1L]; x[(n-p+1L):n, , drop = FALSE]}
 
+ftailrev <- function(x, p) {n <- dim(x)[1L]; x[n:(n-p+1L),, drop = FALSE]}
+
+
 #' (Fast) Barebones Vector-Autoregression
 #'
 #' Quickly estimate a VAR(p) model using Armadillo's inverse function.

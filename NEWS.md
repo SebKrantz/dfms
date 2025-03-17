@@ -1,3 +1,7 @@
+# dfms 0.3.0
+
+* Added argument `quarterly.vars`, enabling mixed-frequency estimation with monthly and quarterly data following Banbura and Modugno (2014). The data matrix should contain the quarterly variables at the end of the matrix (after the monthly ones).
+
 # dfms 0.2.2
 
 * Replace Armadillo `inv_sympd()` by Armadillo `inv()` in C++ Kalman Filter to improve numerical robustness at a minor performance cost.

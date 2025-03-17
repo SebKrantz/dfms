@@ -1,6 +1,6 @@
 ###########################################
-# Julia Implementation of Single Frequency
-# DFM with AR(1) Observation Residuals
+# Julia Implementation of Mixed Frequency
+# DFM with WN Observation Residuals
 ###########################################
 
 # Installation and loading
@@ -18,18 +18,6 @@ using BlockDiagonals
 
 eye(n) = Matrix{Float64}(I, n, n)
 
-# Parameters
-P = (r = 5, p = 2, max_iter = 100,
-# Building the matrix of restrictions on the loadings for the quarterly variables
-    Rconstr = [2 -1 0 0 0;
-            3 0 -1 0 0;
-            2 0 0 -1 0;
-            1 0 0 0 -1],
-    q = zeros(4,1),
-    restr = "_restrMQ",
-    nQ = 10 # need to set number of quarterly variables
-)
-
 
 mutable struct Nanopt
     method
@@ -40,6 +28,17 @@ end
 include("runKF.jl")
 include("remNaNs_spline.jl")
 include("Procedures.jl")
+
+# Parameters
+P = (r = 4, p = 2, max_iter = 100,
+# Building the matrix of restrictions on the loadings for the quarterly variables
+    Rconstr = [2 -1 0 0 0;
+               3 0 -1 0 0;
+               2 0 0 -1 0;
+               1 0 0 0 -1],
+    q = zeros(4,1),
+    nQ = 2 # need to set number of quarterly variables
+)
 
 
 function EM_DFM_SS_restrMQ(X, P)
@@ -85,7 +84,7 @@ function EM_DFM_SS_restrMQ(X, P)
     converged = false
 
     # y for the estimation is WITH missing data
-    y = xNaN'
+    y = transpose(xNaN)
 
     #--------------------------------------------------------------------------
     #THE EM LOOP
