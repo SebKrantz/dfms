@@ -8,7 +8,7 @@
 ![downloads per month](https://cranlogs.r-pkg.org/badges/dfms?color=blue)
 ![downloads](https://cranlogs.r-pkg.org/badges/grand-total/dfms?color=blue)
 [![Codecov test coverage](https://codecov.io/gh/SebKrantz/dfms/branch/main/graph/badge.svg)](https://app.codecov.io/gh/SebKrantz/dfms?branch=main)
-[![minimal R version](https://img.shields.io/badge/R%3E%3D-3.4.0-6666ff.svg)](https://cran.r-project.org/)
+[![minimal R version](https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg)](https://cran.r-project.org/)
 [![dependencies](https://tinyverse.netlify.app/badge/dfms)](https://CRAN.R-project.org/package=dfms)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 <!-- badges: end -->
