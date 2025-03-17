@@ -17,18 +17,35 @@ template:
 development:
   mode: auto
 
-articles:
-  - title: Introduction to dfms
-    desc: Provides a walk-through of all main features
-    contents:
-    - introduction
-  - title: Dynamic Factor Models
-    desc: Provides a walk-through of all main features
-    href: https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf
+navbar:
+  title: dfms
+  structure:
+    left:
+    - reference
+    - articles
+    - news
+    - blog
+    right:
+    - search
+    - github
+  components:
+    reference:
+      text: Documentation
+      href: reference/index.html
+    articles:
+      text: Vignettes
+      href: articles/index.html
+    news:
+      text: News
+      href: news/index.html
+    blog:
+      text: Blog
+      href: https://sebkrantz.github.io/Rblog/
+    github:
+      icon: fa-github
+      href: https://github.com/SebKrantz/dfms
+      aria-label: GitHub
 
-right:
-   - icon: fa-github
-     href: https://github.com/SebKrantz/dfms
 
 reference:
 - title: "Information Criteria"
@@ -65,3 +82,12 @@ reference:
   desc: "Euro area macroeconomic data from Banbura and Modugno (2014), and 3 DFM specifications considered in their paper."
 - contents:
   - BM14_Models
+
+articles:
+  - title: Introduction to dfms
+    desc: Provides a walk-through of all main features
+    contents:
+    - introduction
+  - title: Dynamic Factor Models - A Very Short Introduction
+    desc: Provides a short theoretical overview of dynamics factor models as used in the economics literature
+    href: https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf
