@@ -10,6 +10,7 @@ DFM(
   p = 1L,
   ...,
   idio.ar1 = FALSE,
+  quarterly.vars = NULL,
   rQ = c("none", "diagonal", "identity"),
   rR = c("diagonal", "identity", "none"),
   em.method = c("auto", "DGR", "BM", "none"),
@@ -30,6 +31,8 @@ DFM(
 \item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}.}
 
 \item{idio.ar1}{logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generaly not needed if \code{n} is large (>30). See theoretical vignette for details.}
+
+\item{quarterly.vars}{character. Names of quarterly variables in \code{X} (if any). Monthly variables should be to the left of the quarterly variables in the data matrix and quarterly observations should be provided every 3rd period.}
 
 \item{rQ}{character. restrictions on the state (transition) covariance matrix (Q).}
 

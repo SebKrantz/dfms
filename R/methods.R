@@ -19,8 +19,13 @@ print.dfm <- function(x, digits = 4L, ...) {
   A <- x$A
   r <- dim(A)[1L]
   p <- dim(A)[2L]/r
+  if(length(qv <- x$quarterly.vars)) {
+    cat("Mixed Frequency Dynamic Factor Model\nn = ", dim(X)[2L], ", nm = ", dim(X)[2L] - length(qv), ", nq = ", length(qv), ", T = ", dim(X)[1L], ", r = ", r, ", p = ", p,
+        "\n%NA = ", round(sum(attr(X, "missing"))/prod(dim(X))*100, digits), ", %NAm = ", round(sum(attr(X, "missing")[, -ckmatch(qv, colnames(X))])/(nrow(X)*(ncol(X)-length(qv)))*100, digits), "\n", sep = "")
+  } else {
   cat("Dynamic Factor Model: n = ", dim(X)[2L], ", T = ", dim(X)[1L], ", r = ", r, ", p = ", p, ", %NA = ",
       if(x$anyNA) round(sum(attr(X, "missing"))/prod(dim(X))*100, digits) else 0,"\n", sep = "")
+  }
   if(length(x$rho)) cat("   with AR(1) errors: mean(abs(rho)) =", round(mean(abs(x$rho)), 3), "\n")
   fnam <- paste0("f", seq_len(r))
   cat("\nFactor Transition Matrix [A]\n")
@@ -49,8 +54,9 @@ summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "
   rescov <- pwcov(res, use = if(!idio_ar1 && anymissing) "pairwise.complete.obs" else "everything", P = TRUE)
   ACF <- if(idio_ar1) object$rho else AC1(res, anymissing)
   R2 <- 1 - diag(rescov[,, 1L])
-  summ <- list(info = c(n = dim(X)[2L], T = dim(X)[1L], r = r, p = p,
-                        `%NA` = if(anymissing) sum(attr(X, "missing")) / prod(dim(X)) * 100 else 0),
+  summ <- list(info = c(n = dim(X)[2L], T = dim(X)[1L], r = r, p = p, nq = length(object$quarterly.vars),
+                        `%NA` = if(anymissing) sum(attr(X, "missing")) / prod(dim(X)) * 100 else 0,
+                        `%NAm` = if(length(object$quarterly.vars)) sum(attr(X, "missing")[, -ckmatch(object$quarterly.vars, colnames(X))])/(nrow(X)*(ncol(X)-length(object$quarterly.vars)))*100 else NA),
                call = object$call,
                idio_ar1 = idio_ar1,
                F_stats = msum(Fa),
@@ -83,8 +89,13 @@ print.dfm_summary <- function(x,
                               compact = sum(x$info["n"] > 15, x$info["n"] > 40), ...) {
 
   inf <- as.integer(x$info[1:4])
-  cat("Dynamic Factor Model: n = ", inf[1L], ", T = ", inf[2L], ", r = ", inf[3L], ", p = ", inf[4L],
-      ", %NA = ", round(x$info[5L], digits), "\n", sep = "")
+  if(length(x$info["nq"] > 0)) {
+    cat("Mixed Frequency Dynamic Factor Model\nn = ", inf[1L], ", nm = ", inf[1L] - x$info["nq"], ", nq = ", x$info["nq"], ", T = ", inf[2L], ", r = ", inf[3L], ", p = ", inf[4L],
+        "\n%NA = ", round(x$info["%NA"], digits), ", %NAm = ", round(x$info["%NAm"], digits), "\n", sep = "")
+  } else {
+    cat("Dynamic Factor Model: n = ", inf[1L], ", T = ", inf[2L], ", r = ", inf[3L], ", p = ", inf[4L],
+        ", %NA = ", round(x$info["%NA"], digits), "\n", sep = "")
+  }
   if(x$idio_ar1) cat("   with AR(1) errors: mean(abs(rho)) =", round(mean(abs(x$res_ACF)), 3), "\n")
   cat("\nCall: ", deparse(x$call))
   # cat("\nModel: ", ))
@@ -297,6 +308,19 @@ as.data.frame.dfm <- function(x, ...,
   return(res)
 }
 
+predict_dfm_core <- function(object, method) {
+  Fa <- switch(tolower(method),
+               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
+               stop("Unkown method", method))
+  if(is.null(object$quarterly.vars)) return(tcrossprod(Fa, object$C))
+  qind <- ckmatch(object$quarterly.vars, dimnames(object$C)[[1L]])
+  res_m <- tcrossprod(Fa, object$C[-qind,, drop = FALSE])
+  Fa_lags <- flag(Fa, 0:4, fill = 0, stubs = FALSE)
+  Cq_lags <- object$C[qind, rep(1:ncol(Fa), each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), ncol(Fa))
+  res_q <- tcrossprod(Fa_lags, Cq_lags)
+  cbind(res_m, res_q)
+}
+
 #' @name residuals.dfm
 #' @aliases residuals.dfm
 #' @aliases resid.dfm
@@ -336,11 +360,8 @@ residuals.dfm <- function(object,
                           standardized = FALSE,
                           na.keep = TRUE, ...) {
   X <- object$X_imp
-  Fa <- switch(tolower(method),
-              pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
-              stop("Unkown method", method))
   if(!(standardized && length(object[["e"]]))) {
-    X_pred <- tcrossprod(Fa, object$C)
+    X_pred <- predict_dfm_core(object, method)
     if(!standardized) {  # TODO: What if AR(1) resid available?
       stats <- attr(X, "stats")
       X_pred <- unscale(X_pred, stats)
@@ -364,10 +385,7 @@ fitted.dfm <- function(object,
                        standardized = FALSE,
                        na.keep = TRUE, ...) {
   X <- object$X_imp
-  Fa <- switch(tolower(method),
-              pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
-              stop("Unkown method", method))
-  res <- tcrossprod(Fa, object$C)
+  res <- predict_dfm_core(object, method)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
   if(na.keep && object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
@@ -459,16 +477,30 @@ predict.dfm <- function(object,
 
   F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
   X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
-  F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
-  spi <- p:1
 
   # DFM forecasting loop
-  for (i in seq_len(h)) {
-    F_reg <- ftail(F_last, p)
-    F_fc[i, ] <- tmp <- A %*% `dim<-`(t(F_reg)[, spi, drop = FALSE], NULL)
-    dim(tmp) <- NULL
-    X_fc[i, ] <- C %*% tmp
-    F_last <- rbind(F_last, tmp)
+  if(is.null(object$quarterly.vars)) {
+    F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
+    for (i in seq_len(h)) {
+      F_reg <- ftail(F_last, p)
+      F_fc[i, ] <- tmp <- A %*% vec(t(F_reg)[, p:1, drop = FALSE])
+      dim(tmp) <- NULL
+      X_fc[i, ] <- C %*% tmp
+      F_last <- rbind(F_reg, tmp)
+    }
+  } else {
+    F_last <- ftail(Fa, max(p, 5))
+    qind <- ckmatch(object$quarterly.vars, dimnames(X)[[2L]])
+    Cq_lags <- object$C[qind, rep(1:ncol(Fa), each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), ncol(Fa))
+    # Mixed frequency forecasting loop
+    for (i in seq_len(h)) {
+      F_reg <- ftailrev(F_last, p)
+      F_fc[i, ] <- tmp <- A %*% vec(t(F_reg))
+      dim(tmp) <- NULL
+      X_fc[i, -qind] <- C[-qind,, drop = FALSE] %*% tmp
+      F_last <- rbind(F_last, tmp)
+      X_fc[i, qind] <- Cq_lags %*% vec(ftailrev(F_last, 5))
+    }
   }
 
   # Additional univariate forecasting of the residuals?

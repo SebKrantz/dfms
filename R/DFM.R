@@ -2,6 +2,7 @@
 .EM_DGR <- quote(EMstepDGR(X, A, C, Q, R, F_0, P_0, cpX, n, r, sr, TT, rQi, rRi))
 .EM_BM <- quote(EMstepBMOPT(X, A, C, Q, R, F_0, P_0, XW0, W, n, r, sr, TT, dgind, dnkron, dnkron_ind, rQi, rRi))
 .EM_BM_idio <- quote(EMstepBMidio(X, A, C, Q, R, F_0, P_0, XW0, W, dgind, dnkron, dnkron_ind, r, p, n, sr, TT, rQi, rRi))
+.EMstepBMMQ <- quote(EMstepBMMQ(X, A, C, Q, R, F_0, P_0, XW0, NW, dgind, dnkron, dnkron_ind, r, p, R_mat, n, nq, sr, TT, rQi, rRi))
 .KFS <- quote(SKFS(X, A, C, Q, R, F_0, P_0))
 
 
@@ -15,6 +16,7 @@
 #' @param p integer. number of lags in factor VAR.
 #' @param \dots (optional) arguments to \code{\link{tsnarmimp}}.
 #' @param idio.ar1 logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generaly not needed if \code{n} is large (>30). See theoretical vignette for details.
+#' @param quarterly.vars character. Names of quarterly variables in \code{X} (if any). Monthly variables should be to the left of the quarterly variables in the data matrix and quarterly observations should be provided every 3rd period.
 #' @param rQ character. restrictions on the state (transition) covariance matrix (Q).
 #' @param rR character. restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
@@ -115,7 +117,7 @@
 #' Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. \emph{Handbook of Macroeconomics, 2}, 415–525. https://doi.org/10.1016/bs.hesmac.2016.04.002
 #'
 #' @useDynLib dfms, .registration = TRUE
-#' @importFrom collapse fscale qsu fvar fmedian fmedian.default qM unattrib na_omit %=% %-=% %+=% %/=% %*=% %r*% whichv setColnames setDimnames
+#' @importFrom collapse fscale qsu fvar flag fmedian fmedian.default qM unattrib na_omit %=% %-=% %+=% %/=% %*=% %r*% whichv whichNA vec setColnames setDimnames
 #' @importFrom grDevices rainbow
 #' @importFrom graphics abline legend lines par
 #' @importFrom stats filter residuals rnorm spline ts.plot
@@ -312,6 +314,7 @@ DFM <- function(X, r, p = 1L, ...,
                        P_2s = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
                        anyNA = anymiss, # || length(rm.rows), # This is for internal missing values only
                        rm.rows = rm.rows,
+                       quarterly.vars = quarterly.vars,
                        em.method = if(is.na(BMl)) "none" else if(BMl) "BM" else "DGR",
                        call = match.call())
 
@@ -347,11 +350,22 @@ DFM <- function(X, r, p = 1L, ...,
   converged <- FALSE
 
   if(BMl) {
-    expr <- if(idio.ar1) .EM_BM_idio else .EM_BM
-    dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep, taken out to speed up the algorithm
-    dnkron_ind <- whichv(dnkron, 1)
-    XW0 <- X_imp
+    if(MFl) {
+      nm <- n - nq
+      rpC <- r * max(p, 5L)
+      rpC1nq <- (rpC+1L):(rpC+nq)
+      NW <- !W
+      R_mat <- kronecker(Rcon, diag(r)) # TODO: autsource this
+      expr <- if(idio.ar1) stop("not implemented yet") else .EMstepBMMQ
+      dnkron <- matrix(1, r, r) %x% diag(nm) # Used to be inside EMstep, taken out to speed up the algorithm
+      dnkron_ind <- whichv(dnkron, 1)
+    } else {
+      expr <- if(idio.ar1) .EM_BM_idio else .EM_BM
+      dnkron <- matrix(1, r, r) %x% diag(n) # Used to be inside EMstep, taken out to speed up the algorithm
+      dnkron_ind <- whichv(dnkron, 1)
+    }
     dgind <- 0:(n-1) * n + 1:n
+    XW0 <- X_imp
     if(anymiss) XW0[W] <- 0 else W <- is.na(X) # TODO: think about this...
   } else {
     expr <- .EM_DGR
@@ -391,7 +405,9 @@ DFM <- function(X, r, p = 1L, ...,
                     A = setDimnames(em_res$A[sr, seq_len(rp), drop = FALSE], lagnam(fnam, p)),
                     C = setDimnames(em_res$C[, sr, drop = FALSE], list(Xnam, fnam)),
                     Q = setDimnames(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
-                    R = setDimnames(if(idio.ar1) em_res$Q[-seq_len(rp), -seq_len(rp), drop = FALSE] else em_res$R, list(Xnam, Xnam)),
+                    R = setDimnames(if(MFl && idio.ar1) stop("not implemented yet") else if(MFl)
+                                    `[<-`(em_res$R, (nm+1):n, (nm+1):n, value = em_res$Q[rpC1nq, rpC1nq]) else if(idio.ar1)
+                                    em_res$Q[-seq_len(rp), -seq_len(rp), drop = FALSE] else em_res$R, list(Xnam, Xnam)),
                     e = if(idio.ar1) setColnames(kfs_res$F_smooth[, -seq_len(rp), drop = FALSE], Xnam) else NULL,
                     rho = if(idio.ar1) setNames(diag(em_res$A)[-seq_len(rp)], Xnam) else NULL,
                     loglik = if(num_iter == max.iter) loglik_all else loglik_all[seq_len(num_iter)],
