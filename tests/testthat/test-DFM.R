@@ -2,6 +2,17 @@ library(collapse)
 library(magrittr)
 library(xts)
 
+#' @srrstats {G5.0} *Where applicable or practicable, tests should use standard data sets with known properties (for example, the [NIST Standard Reference Datasets](https://www.itl.nist.gov/div898/strd/), or data sets provided by other widely-used R packages).*
+#' @srrstats {G5.1} *Data sets created within, and used to test, a package should be exported (or otherwise made generally available) so that users can confirm tests and run examples.*
+#' @srrstats {G5.2} *Appropriate error and warning behaviour of all functions should be explicitly demonstrated through tests. In particular,*
+#' @srrstats {G5.2a} *Every message produced within R code by `stop()`, `warning()`, `message()`, or equivalent should be unique*
+#' @srrstats {G5.2b} *Explicit tests should demonstrate conditions which trigger every one of those messages, and should compare the result with expected values.*
+#' @srrstats {G5.3} *For functions which are expected to return objects containing no missing (`NA`) or undefined (`NaN`, `Inf`) values, the absence of any such values in return objects should be explicitly tested.*
+#' @srrstats {G5.4} **Correctness tests** *to test that statistical algorithms produce expected results to some fixed test data sets (potentially through comparisons using binding frameworks such as [RStata](https://github.com/lbraglia/RStata)).*
+#' -> I have translated the authors original matlab code into R and run tests with that code (see misc/ directory in the repo). These comparisons yielded that my implementation is equivalent to the original Matlab code.
+#'  testing can be improved upon in general, an idea would be to run tests against the r-translations of those Matlab codes in the testthat framework, but I have not come round to do that yet and I would first like to gather some more substantive feedback on the software.
+
+
 # BM14 Replication Data. Constructing the database:
 BM14 = merge(BM14_M, BM14_Q)
 BM14[, BM14_Models$log_trans] %<>% log()
