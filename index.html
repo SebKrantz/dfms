@@ -63,6 +63,7 @@
 <li><p>Banbura, M., &amp; Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. <em>Journal of Applied Econometrics, 29</em>(1), 133-160. <a href="doi:10.1002/jae.2306" class="uri">doi:10.1002/jae.2306</a></p></li>
 </ul>
 <p>The default is <code>em.method = "auto"</code>, which chooses <code>"BM"</code> following Banbura &amp; Modugno (2014) with missing data or mixed frequency, and <code>"DGR"</code> following Doz, Giannone &amp; Reichlin (2012) otherwise. Using <code>em.method = "none"</code> generates Two-Step estimates following Doz, Giannone &amp; Reichlin (2011). This is extremely efficient on bigger datasets. PCA and Two-Step estimates are also reported in EM-estimation. All methods support missing data, but <code>em.method = "DGR"</code> does not model them in EM iterations.</p>
+<p>The package is stable, but functionality may expand in the future. In particular, mixed-frequency estimation with autoregressive errors is planned for the near future, and generation of the ‘news’ may be added in the further future.</p>
 <div class="section level3">
 <h3 id="comparison-with-other-r-packages">Comparison with Other R Packages<a class="anchor" aria-label="anchor" href="#comparison-with-other-r-packages"></a>
 </h3>
@@ -87,20 +88,106 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sebkrantz.github.io/dfms/">dfms</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Fit DFM with 6 factors and 3 lags in the transition equation</span></span>
-<span><span class="va">mod</span> <span class="op">=</span> <span class="fu"><a href="reference/DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">6</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> </span>
-<span></span>
-<span><span class="co"># 'dfm' methods</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Forecasting 20 periods ahead</span></span>
+<span><span class="va">mod</span> <span class="op">=</span> <span class="fu"><a href="reference/DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">6</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> </span></code></pre></div>
+<pre><code><span><span class="co">## Converged after 32 iterations.</span></span></code></pre>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 'dfm' methods</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Mixed Frequency Dynamic Factor Model</span></span>
+<span><span class="co">## n = 92, nm = 92, nq = 0, T = 356, r = 6, p = 3</span></span>
+<span><span class="co">## %NA = 25.8366, %NAm = NA</span></span>
+<span><span class="co">##</span></span>
+<span><span class="co">## Call:  DFM(X = diff(BM14_M), r = 6, p = 3)</span></span>
+<span><span class="co">##</span></span>
+<span><span class="co">## Summary Statistics of Factors [F]</span></span>
+<span><span class="co">##       N     Mean   Median      SD       Min      Max</span></span>
+<span><span class="co">## f1  356  -0.1189   0.4409  4.0228  -22.9164   7.8513</span></span>
+<span><span class="co">## f2  356  -0.4615  -0.3476  2.9201   -9.0973  10.7003</span></span>
+<span><span class="co">## f3  356  -0.0173   0.0377  2.2719   -8.5067   7.3009</span></span>
+<span><span class="co">## f4  356   -0.007  -0.1338  1.9378   -9.5052   9.3673</span></span>
+<span><span class="co">## f5  356    0.237   0.1091  2.0857   -8.7252   9.6715</span></span>
+<span><span class="co">## f6  356  -0.8361   -0.304  3.1406  -11.6611  15.4897</span></span>
+<span><span class="co">##</span></span>
+<span><span class="co">## Factor Transition Matrix [A]</span></span>
+<span><span class="co">##       L1.f1    L1.f2     L1.f3    L1.f4    L1.f5    L1.f6    L2.f1    L2.f2</span></span>
+<span><span class="co">## f1  0.53029 -0.53009  0.367302  0.04607 -0.06351  0.10310  0.02457  0.11673</span></span>
+<span><span class="co">## f2 -0.28380  0.07421 -0.032292  0.29741 -0.10094  0.21989  0.09958 -0.09149</span></span>
+<span><span class="co">## f3  0.17607  0.12979  0.378798 -0.06662 -0.12236  0.06685 -0.08068  0.09101</span></span>
+<span><span class="co">## f4  0.02711  0.08936  0.004643  0.37159  0.12100 -0.02763  0.01234 -0.05147</span></span>
+<span><span class="co">## f5 -0.26227 -0.03469 -0.046294  0.12712  0.26847  0.03141  0.06400  0.01971</span></span>
+<span><span class="co">## f6  0.08251  0.17619 -0.013374 -0.08731 -0.03875  0.27812 -0.01662  0.04877</span></span>
+<span><span class="co">##       L2.f3    L2.f4     L2.f5    L2.f6    L3.f1    L3.f2    L3.f3    L3.f4</span></span>
+<span><span class="co">## f1 -0.12638  0.23135  0.117184  0.21941  0.18478  0.02259 -0.03719 -0.07236</span></span>
+<span><span class="co">## f2  0.06708 -0.09768 -0.043057  0.08489  0.21107  0.16261  0.03057  0.04835</span></span>
+<span><span class="co">## f3 -0.22232  0.09799 -0.060666 -0.18028 -0.02773  0.01798  0.10143 -0.12420</span></span>
+<span><span class="co">## f4  0.02195  0.01266  0.050912  0.05144 -0.05601  0.04665  0.05710 -0.11412</span></span>
+<span><span class="co">## f5  0.04806 -0.03965 -0.009952 -0.18471  0.08332 -0.04640 -0.02047  0.02458</span></span>
+<span><span class="co">## f6  0.02279  0.01163 -0.100859  0.07152  0.00792  0.06071  0.11381  0.02520</span></span>
+<span><span class="co">##       L3.f5    L3.f6</span></span>
+<span><span class="co">## f1 -0.03026 -0.12606</span></span>
+<span><span class="co">## f2  0.12249  0.13357</span></span>
+<span><span class="co">## f3  0.04207 -0.07011</span></span>
+<span><span class="co">## f4 -0.05680 -0.01609</span></span>
+<span><span class="co">## f5  0.16397  0.07820</span></span>
+<span><span class="co">## f6 -0.17897  0.30328</span></span>
+<span><span class="co">##</span></span>
+<span><span class="co">## Factor Covariance Matrix [cov(F)]</span></span>
+<span><span class="co">##           f1        f2        f3        f4        f5        f6</span></span>
+<span><span class="co">## f1  16.1832   -0.4329    0.2483   -0.8224*  -1.7708*   0.7702</span></span>
+<span><span class="co">## f2  -0.4329    8.5272    0.0051    0.2954   -0.2114    4.2080*</span></span>
+<span><span class="co">## f3   0.2483    0.0051    5.1614   -0.1851   -0.3979    0.2979</span></span>
+<span><span class="co">## f4  -0.8224*   0.2954   -0.1851    3.7550    0.4344*   0.2211</span></span>
+<span><span class="co">## f5  -1.7708*  -0.2114   -0.3979    0.4344*   4.3503   -1.9785*</span></span>
+<span><span class="co">## f6   0.7702    4.2080*   0.2979    0.2211   -1.9785*   9.8634</span></span>
+<span><span class="co">##</span></span>
+<span><span class="co">## Factor Transition Error Covariance Matrix [Q]</span></span>
+<span><span class="co">##         u1      u2      u3      u4      u5      u6</span></span>
+<span><span class="co">## u1  7.2142  0.1151 -0.8208 -0.4379  0.4110 -0.1206</span></span>
+<span><span class="co">## u2  0.1151  4.8724  0.1076 -0.1438  0.1418  0.1759</span></span>
+<span><span class="co">## u3 -0.8208  0.1076  4.0584 -0.0788  0.0163  0.0038</span></span>
+<span><span class="co">## u4 -0.4379 -0.1438 -0.0788  3.0003  0.2562  0.0243</span></span>
+<span><span class="co">## u5  0.4110  0.1418  0.0163  0.2562  2.8410 -0.1031</span></span>
+<span><span class="co">## u6 -0.1206  0.1759  0.0038  0.0243 -0.1031  2.9284</span></span>
+<span><span class="co">##</span></span>
+<span><span class="co">## Summary of Residual AR(1) Serial Correlations</span></span>
+<span><span class="co">##    N     Mean   Median      SD      Min     Max</span></span>
+<span><span class="co">##   92  -0.0644  -0.1024  0.2702  -0.5113  0.6674</span></span>
+<span><span class="co">##</span></span>
+<span><span class="co">## Summary of Individual R-Squared's</span></span>
+<span><span class="co">##    N    Mean  Median      SD     Min     Max</span></span>
+<span><span class="co">##   92  0.4556  0.4069  0.3041  0.0112  0.9989</span></span></code></pre>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<p><img src="misc/figure/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1" width="100%"></p>
+</div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   Method Factor Time      Value</span></span>
+<span><span class="co">## 1    PCA     f1    1  0.8445713</span></span>
+<span><span class="co">## 2    PCA     f1    2  0.5259228</span></span>
+<span><span class="co">## 3    PCA     f1    3 -1.2107116</span></span>
+<span><span class="co">## 4    PCA     f1    4 -1.5399532</span></span>
+<span><span class="co">## 5    PCA     f1    5 -0.4631786</span></span>
+<span><span class="co">## 6    PCA     f1    6  0.2399304</span></span></code></pre>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Forecasting 20 periods ahead</span></span>
 <span><span class="va">fc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mod</span>, h <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 'dfm_forecast' methods</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<p><img src="misc/figure/unnamed-chunk-1-2.png" alt="plot of chunk unnamed-chunk-1" width="100%"></p>
+</div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   Variable Time Forecast      Value</span></span>
+<span><span class="co">## 1       f1    1    FALSE   4.179331</span></span>
+<span><span class="co">## 2       f1    2    FALSE  -1.368577</span></span>
+<span><span class="co">## 3       f1    3    FALSE -12.845157</span></span>
+<span><span class="co">## 4       f1    4    FALSE -14.562265</span></span>
+<span><span class="co">## 5       f1    5    FALSE  -7.791254</span></span>
+<span><span class="co">## 6       f1    6    FALSE  -1.254970</span></span></code></pre>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -138,6 +225,7 @@
 <ul class="list-unstyled">
 <li>Sebastian Krantz <br><small class="roles"> Author, maintainer </small>   </li>
 <li>Rytis Bagdziunas <br><small class="roles"> Author </small>   </li>
+<li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
 
@@ -152,7 +240,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.9000.</p>
 </div>
 
     </footer>

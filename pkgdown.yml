@@ -1,9 +1,9 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1.9000
-pkgdown_sha: 66477c0dbb4f4925ec872cf64d5eaa316cc70bac
+pkgdown: 2.1.2.9000
+pkgdown_sha: 99457e7fa7f36696ae743b06aca59c0fdd97a7d6
 articles:
   introduction: introduction.html
-last_built: 2025-03-22T10:52Z
+last_built: 2025-05-11T23:04Z
 urls:
   reference: https://sebkrantz.github.io/dfms/reference
   article: https://sebkrantz.github.io/dfms/articles
