@@ -116,6 +116,8 @@
 #'
 #' Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. \emph{Handbook of Macroeconomics, 2}, 415–525. https://doi.org/10.1016/bs.hesmac.2016.04.002
 #'
+#' @seealso \link{dfms-package}
+#'
 #' @useDynLib dfms, .registration = TRUE
 #' @importFrom collapse fscale qsu fvar flag fmedian fmedian.default qM unattrib na_omit %=% %-=% %+=% %/=% %*=% %r*% whichv whichNA vec setColnames setDimnames
 #' @importFrom grDevices rainbow

@@ -52,7 +52,7 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 #' \item{\code{P_pred}}{\eqn{rp \times rp \times T}{rp x rp x T} predicted state covariances. }
 #' \item{\code{loglik}}{value of the log likelihood. }
 #'
-#' @seealso \code{\link{FIS}} \code{\link{SKFS}}
+#' @seealso \code{\link{FIS}} \code{\link{SKFS}} \link{dfms-package}
 #' @examples # See ?SKFS
 #'
 #' @export
@@ -90,7 +90,7 @@ SKF <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #'
 #' Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman filter.
 #'
-#' @seealso \code{\link{SKF}} \code{\link{SKFS}}
+#' @seealso \code{\link{SKF}} \code{\link{SKFS}} \link{dfms-package}
 #' @examples # See ?SKFS
 #'
 #' @export
@@ -107,7 +107,7 @@ FIS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
 #' See 'Property 6.3: The Lag-One Covariance Smoother' in Shumway & Stoffer (2017).
 #'
 #'
-#' @seealso \code{\link{SKF}} \code{\link{FIS}}
+#' @seealso \code{\link{SKF}} \code{\link{FIS}} \link{dfms-package}
 #'
 #' @references
 #' Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
@@ -174,6 +174,9 @@ SKFS <- function(X, A, C, Q, R, F_0, P_0, loglik = FALSE) {
 #' ainv(crossprod(diff(EuStockMarkets)))
 #'
 #' @returns The matrix-inverse or pseudo-inverse.
+#'
+#' @seealso \link{dfms-package}
+#'
 #' @export
 ainv <- function(x) .Call(Cpp_ainv, x)
 # {

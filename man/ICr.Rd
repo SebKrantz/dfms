@@ -75,3 +75,6 @@ Onatski, A. (2010). Determining the number of factors from empirical distributio
 
 De Valk, S., de Mattos, D., & Ferreira, P. (2019). Nowcasting: An R package for predicting economic variables using dynamic factor models. \emph{The R Journal, 11}(1), 230-244.
 }
+\seealso{
+\link{dfms-package}
+}

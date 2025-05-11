@@ -49,6 +49,8 @@
 #' @param x,object an object class 'dfm'.
 #' @param digits integer. The number of digits to print out.
 #' @param \dots not used.
+#'
+#' @seealso \link{dfms-package}
 #' @importFrom collapse qsu frange
 #' @export
 print.dfm <- function(x, digits = 4L, ...) {
@@ -182,6 +184,7 @@ print.dfm_summary <- function(x,
 #' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
 #' @returns Nothing.
+#' @seealso \link{dfms-package}
 #' @examples \donttest{
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3)
@@ -277,6 +280,7 @@ plot.dfm <- function(x,
 #' @param \dots not used.
 #'
 #' @return A data frame of factor estimates.
+#' @seealso \link{dfms-package}
 #'
 #' @examples \donttest{
 #' library(xts)
@@ -378,6 +382,8 @@ predict_dfm_core <- function(object, method) {
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
 #'
+#' @seealso \link{dfms-package}
+#'
 #' @examples \donttest{
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
@@ -472,6 +478,8 @@ fitted.dfm <- function(object,
 #'  \item{\code{resid.fc}}{logical indicating whether a univariate forecasting function was applied to the residuals.}
 #'  \item{\code{resid.fc.ind}}{indices indicating for which variables (columns of \code{X}) the residuals were forecasted using the univariate function.}
 #'  \item{\code{call}}{call object obtained from \code{match.call()}.}
+#'
+#' @seealso \link{dfms-package}
 #'
 #' @examples \donttest{
 #' library(xts)
@@ -786,6 +794,8 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #' In the Screeplot a horizontal dashed line is shown signifying an eigenvalue of 1, or a share of variance corresponding to 1 divided by the number of eigenvalues.
 #'
 #' @note To determine the number of lags (\code{p}) in the factor transition equation, use the function \code{vars::VARselect} with r* principle components (also returned by \code{ICr}).
+#'
+#' @seealso \link{dfms-package}
 #'
 #' @examples
 #' library(xts)

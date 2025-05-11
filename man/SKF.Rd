@@ -71,5 +71,5 @@ Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman 
 Hamilton, J. D. (1994). Time Series Analysis. Princeton university press.
 }
 \seealso{
-\code{\link{FIS}} \code{\link{SKFS}}
+\code{\link{FIS}} \code{\link{SKFS}} \link{dfms-package}
 }

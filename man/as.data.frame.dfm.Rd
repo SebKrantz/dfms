@@ -54,3 +54,6 @@ for (pv in c("long", "wide.factor", "wide.method", "wide", "t.wide")) {
 }
 
 }
+\seealso{
+\link{dfms-package}
+}

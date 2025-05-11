@@ -224,3 +224,6 @@ Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor model
 
 Stock, J. H., & Watson, M. W. (2016). Dynamic Factor Models, Factor-Augmented Vector Autoregressions, and Structural Vector Autoregressions in Macroeconomics. \emph{Handbook of Macroeconomics, 2}, 415–525. https://doi.org/10.1016/bs.hesmac.2016.04.002
 }
+\seealso{
+\link{dfms-package}
+}

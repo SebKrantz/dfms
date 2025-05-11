@@ -27,3 +27,6 @@ em_converged(10001, 10000)
 em_converged(10001, 10000, check = TRUE)
 em_converged(10000, 10001, check = TRUE)
 }
+\seealso{
+\link{dfms-package}
+}

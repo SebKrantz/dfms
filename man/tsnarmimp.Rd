@@ -43,3 +43,6 @@ library(xts)
 str(tsnarmimp(BM14_M))
 
 }
+\seealso{
+\link{dfms-package}
+}

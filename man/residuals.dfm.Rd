@@ -59,3 +59,6 @@ head(fitted(mod, orig.format = TRUE)) # this is an xts object
 }
 
 }
+\seealso{
+\link{dfms-package}
+}

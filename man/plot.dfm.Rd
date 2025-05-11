@@ -42,3 +42,6 @@ plot(mod, type = "residual")
 }
 
 }
+\seealso{
+\link{dfms-package}
+}

@@ -78,5 +78,5 @@ rm(X, r, p, n, X_imp, v, F_pc, C, res, R, var, A, Q, F_0, P_0, kfs_res, F_kal, k
 Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applications: With R Examples. Springer.
 }
 \seealso{
-\code{\link{SKF}} \code{\link{FIS}}
+\code{\link{SKF}} \code{\link{FIS}} \link{dfms-package}
 }
