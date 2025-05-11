@@ -1,3 +1,41 @@
+#' @srrstats {TS2.5} *Incorporate a system to ensure that both row and column orders follow the same ordering as the underlying time series data. This may, for example, be done by including the `index` attribute of the time series data as an attribute of the auto-covariance matrix.*
+#' @srrstats {TS2.6} *Where applicable, auto-covariance matrices should also include specification of appropriate units.*
+#' @srrstats {TS3.0} *Provide tests to demonstrate at least one case in which errors widen appropriately with forecast horizon.*
+#' @srrstats {TS3.1} *If possible, provide at least one test which violates TS3.0*
+#' -> currently I don't forecast the covariance matrices. This could be implemented in the future.
+#' @srrstats {TS3.2} *Document the general drivers of forecast errors or horizons, as demonstrated via the particular cases of TS3.0 and TS3.1*
+#' @srrstats {TS3.3} *Either:*
+#' @srrstats {TS3.3a} *Document, preferable via an example, how to trim forecast values based on a specified error margin or equivalent; or*
+#' @srrstats {TS3.3b} *Provide an explicit mechanism to trim forecast values to a specified error margin, either via an explicit post-processing function, or via an input parameter to a primary analytic function.*
+#' @srrstats {TS4.0} *Return values should either:*
+#' @srrstats {TS4.0a} *Be in same class as input data, for example by using the [`tsbox` package](https://www.tsbox.help/) to re-convert from standard internal format (see 1.4, above); or*
+#' @srrstats {TS4.0b} *Be in a unique, preferably class-defined, format.*
+#' @srrstats {TS4.1} *Any units included as attributes of input data should also be included within return values.*
+#' @srrstats {TS4.2} *The type and class of all return values should be explicitly documented.*
+#' @srrstats {TS4.3} *Return values should explicitly include all appropriate units and/or time scales*
+#' @srrstats {TS4.4} *Document the effect of any such transformations on forecast data, including potential effects on both first- and second-order estimates.*
+#' @srrstats {TS4.5} *In decreasing order of preference, either:*
+#' @srrstats {TS4.5a} *Provide explicit routines or options to back-transform data commensurate with original, non-stationary input data*
+#' @srrstats {TS4.5b} *Demonstrate how data may be back-transformed to a form commensurate with original, non-stationary input data.*
+#' @srrstats {TS4.5c} *Document associated limitations on forecast values*
+#' @srrstats {TS4.6} *Time Series Software which implements or otherwise enables forecasting should return either:*
+#' @srrstats {TS4.6a} *A distribution object, for example via one of the many packages described in the CRAN Task View on [Probability Distributions](https://cran.r-project.org/web/views/Distributions.html) (or the new [`distributional` package](https://pkg.mitchelloharawild.com/distributional/) as used in the [`fable` package](https://fable.tidyverts.org) for time-series forecasting).*
+#' @srrstats {TS4.6b} *For each variable to be forecast, predicted values equivalent to first- and second-order moments (for example, mean and standard error values).*
+#' @srrstats {TS4.6c} *Some more general indication of error associated with forecast estimates.*
+#' @srrstats {TS4.7} *Ensure that forecast (modelled) values are clearly distinguished from observed (model or input) values, either (in this case in no order of preference) by*
+#' @srrstats {TS4.7a} *Returning forecast values alone*
+#' @srrstats {TS4.7b} *Returning distinct list items for model and forecast values*
+#' @srrstats {TS4.7c} *Combining model and forecast values into a single return object with an appropriate additional column clearly distinguishing the two kinds of data.*
+#' @srrstats {TS5.0} *Implement default `plot` methods for any implemented class system.*
+#' @srrstats {TS5.1} *When representing results in temporal domain(s), ensure that one axis is clearly labelled "time" (or equivalent), with continuous units.*
+#' @srrstats {TS5.2} *Default to placing the "time" (or equivalent) variable on the horizontal axis.*
+#' @srrstats {TS5.3} *Ensure that units of the time, frequency, or index variable are printed by default on the axis.*
+#' @srrstats {TS5.5} *Provide options to determine whether plots of data with missing values should generate continuous or broken lines.*
+#' @srrstats {TS5.6} *By default indicate distributional limits of forecast on plot*
+#' @srrstats {TS5.7} *By default include model (input) values in plot, as well as forecast (output) values*
+#' @srrstats {TS5.8} *By default provide clear visual distinction between model (input) values and forecast (output) values.*
+
+
 #' @name summary.dfm
 #' @aliases print.dfm
 #' @aliases summary.dfm
@@ -11,6 +49,8 @@
 #' @param x,object an object class 'dfm'.
 #' @param digits integer. The number of digits to print out.
 #' @param \dots not used.
+#'
+#' @seealso \link{dfms-package}
 #' @importFrom collapse qsu frange
 #' @export
 print.dfm <- function(x, digits = 4L, ...) {
@@ -30,6 +70,7 @@ print.dfm <- function(x, digits = 4L, ...) {
   fnam <- paste0("f", seq_len(r))
   cat("\nFactor Transition Matrix [A]\n")
   print(round(A, digits))
+  return(invisible(x))
 }
 
 #' @rdname summary.dfm
@@ -132,6 +173,7 @@ print.dfm_summary <- function(x,
   }
   cat("\nSummary of Individual R-Squared's\n")
   print(x$R2_stats, digits)
+  return(invisible(x))
 }
 
 
@@ -142,6 +184,7 @@ print.dfm_summary <- function(x,
 #' @param scale.factors logical. Standardize factor estimates, this usually improves the plot since the factor estimates corresponding to the greatest PCA eigenvalues tend to have a greater variance than the data.
 #' @param \dots for \code{plot.dfm}: further arguments to \code{\link{plot}}, \code{\link{ts.plot}}, or \code{\link{boxplot}}, depending on the \code{type} of plot. For \code{screeplot.dfm}: further arguments to \code{\link{screeplot.ICr}}.
 #' @returns Nothing.
+#' @seealso \link{dfms-package}
 #' @examples \donttest{
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
 #' mod = DFM(diff(BM14_M), r = 3, p = 3)
@@ -237,6 +280,7 @@ plot.dfm <- function(x,
 #' @param \dots not used.
 #'
 #' @return A data frame of factor estimates.
+#' @seealso \link{dfms-package}
 #'
 #' @examples \donttest{
 #' library(xts)
@@ -338,6 +382,8 @@ predict_dfm_core <- function(object, method) {
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
 #'
+#' @seealso \link{dfms-package}
+#'
 #' @examples \donttest{
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
@@ -432,6 +478,8 @@ fitted.dfm <- function(object,
 #'  \item{\code{resid.fc}}{logical indicating whether a univariate forecasting function was applied to the residuals.}
 #'  \item{\code{resid.fc.ind}}{indices indicating for which variables (columns of \code{X}) the residuals were forecasted using the univariate function.}
 #'  \item{\code{call}}{call object obtained from \code{match.call()}.}
+#'
+#' @seealso \link{dfms-package}
 #'
 #' @examples \donttest{
 #' library(xts)
@@ -572,6 +620,7 @@ print.dfm_forecast <- function(x,
   X_fcst <- x$X_fcst
   dimnames(X_fcst)[[1L]] <- seq_len(h)
   print(round(X_fcst, digits))
+  return(invisible(x))
 }
 
 #' @rdname predict.dfm
@@ -746,6 +795,8 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #'
 #' @note To determine the number of lags (\code{p}) in the factor transition equation, use the function \code{vars::VARselect} with r* principle components (also returned by \code{ICr}).
 #'
+#' @seealso \link{dfms-package}
+#'
 #' @examples
 #' library(xts)
 #' library(vars)
@@ -823,6 +874,7 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
 print.ICr <- function(x, ...) {
   cat("Optimal Number of Factors (r) from Bai and Ng (2002) Criteria\n\n")
   print(x$r.star)
+  return(invisible(x))
 }
 
 #' @rdname ICr

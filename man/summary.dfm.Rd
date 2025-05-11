@@ -36,3 +36,6 @@ print(mod)
 summary(mod)
 
 }
+\seealso{
+\link{dfms-package}
+}

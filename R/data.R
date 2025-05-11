@@ -23,6 +23,8 @@
 #' @source
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160.
 #'
+#' @seealso \link{dfms-package}
+#'
 #' @examples
 #' library(magrittr)
 #' library(xts)

@@ -22,3 +22,6 @@ Matrix inverse and pseudo-inverse by the Armadillo C++ library.
 ainv(crossprod(diff(EuStockMarkets)))
 
 }
+\seealso{
+\link{dfms-package}
+}

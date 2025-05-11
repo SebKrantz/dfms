@@ -48,4 +48,7 @@ head(BM14[, BM14_Models$small])
 head(BM14[, BM14_Models$medium])
 
 }
+\seealso{
+\link{dfms-package}
+}
 \keyword{datasets}

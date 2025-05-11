@@ -68,6 +68,7 @@ ftailrev <- function(x, p) {n <- dim(x)[1L]; x[n:(n-p+1L),, drop = FALSE]}
 #'  \item{\code{A}}{\eqn{np \times n}{np x n} transition matrix, where n is the number of series in \code{x}. }
 #'  \item{\code{res}}{VAR residual matrix: \code{Y - X \%*\% A}. }
 #'
+#' @seealso \link{dfms-package}
 #' @examples
 #' var = .VAR(diff(EuStockMarkets), 3)
 #' str(var)
@@ -76,6 +77,7 @@ ftailrev <- function(x, p) {n <- dim(x)[1L]; x[n:(n-p+1L),, drop = FALSE]}
 #'
 #' @export
 .VAR <- function(x, p = 1L) {
+  if(p < 1L) stop("p must be >= 1, you supplied p = ", p)
   TT <- dim(x)[1L]
   Y <- x[(p + 1L):TT, ]
   X <- do.call(cbind, lapply(1:p, function(i) x[(p + 1L - i):(TT - i), ]))
@@ -95,6 +97,8 @@ ftailrev <- function(x, p) {n <- dim(x)[1L]; x[n:(n-p+1L),, drop = FALSE]}
 #' @param tol numerical. The tolerance of the test. If |LL(t) - LL(t-1)| / avg < tol, where avg = (|LL(t)| + |LL(t-1)|)/2, then algorithm has converged.
 #' @param check.increased logical. Check if likelihood has increased.
 #' @return A logical statement indicating whether EM algorithm has converged. if \code{check.increased = TRUE}, a vector with 2 elements indicating the convergence status and whether the likelihood has decreased.
+#'
+#' @seealso \link{dfms-package}
 #'
 #' @examples
 #' em_converged(1001, 1000)
@@ -216,6 +220,7 @@ impNA_spline <- function(X, W, k) {
 #'  \item{\code{"missing"}}{a missingness matrix \code{W} matching the dimensions of \code{X_imp}. }
 #'  \item{\code{"rm.rows"}}{and a vector of indices of rows (cases) with too many missing values that were removed. }
 #'
+#' @seealso \link{dfms-package}
 #'
 #' @examples
 #' library(xts)

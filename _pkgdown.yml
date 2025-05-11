@@ -48,6 +48,8 @@ navbar:
 
 
 reference:
+- contents:
+  - dfms-package
 - title: "Information Criteria"
   desc: "Choose the number of factors and the lag-order of the factor VAR."
 - contents:

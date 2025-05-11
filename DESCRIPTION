@@ -2,7 +2,8 @@ Package: dfms
 Version: 0.3.0
 Title: Dynamic Factor Models
 Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"), email = "sebastian.krantz@graduateinstitute.ch"),
-             person("Rytis", "Bagdziunas", role = "aut"))
+             person("Rytis", "Bagdziunas", role = "aut"),
+             person("Santtu", "Tikka", role = "rev"))
 Description: Efficient estimation of Dynamic Factor Models using the Expectation Maximization (EM) algorithm 
   or Two-Step (2S) estimation, supporting datasets with missing data. The estimation options follow advances in the 
   econometric literature: either running the Kalman Filter and Smoother once with initial values from PCA - 

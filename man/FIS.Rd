@@ -51,5 +51,5 @@ Shumway, R. H., & Stoffer, D. S. (2017). Time Series Analysis and Its Applicatio
 Harvey, A. C. (1990). Forecasting, structural time series models and the Kalman filter.
 }
 \seealso{
-\code{\link{SKF}} \code{\link{SKFS}}
+\code{\link{SKF}} \code{\link{SKFS}} \link{dfms-package}
 }

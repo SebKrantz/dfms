@@ -145,3 +145,6 @@ head(as.data.frame(fcar, use = "data"))   # Data
 head(as.data.frame(fcar, use = "both"))   # Both
 }
 }
+\seealso{
+\link{dfms-package}
+}

@@ -31,3 +31,6 @@ var$A
 rm(var)
 
 }
+\seealso{
+\link{dfms-package}
+}
