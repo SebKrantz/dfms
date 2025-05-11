@@ -76,6 +76,7 @@ ftailrev <- function(x, p) {n <- dim(x)[1L]; x[n:(n-p+1L),, drop = FALSE]}
 #'
 #' @export
 .VAR <- function(x, p = 1L) {
+  if(p < 1L) stop("p must be >= 1, you supplied p = ", p)
   TT <- dim(x)[1L]
   Y <- x[(p + 1L):TT, ]
   X <- do.call(cbind, lapply(1:p, function(i) x[(p + 1L - i):(TT - i), ]))
