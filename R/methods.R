@@ -68,6 +68,7 @@ print.dfm <- function(x, digits = 4L, ...) {
   fnam <- paste0("f", seq_len(r))
   cat("\nFactor Transition Matrix [A]\n")
   print(round(A, digits))
+  return(invisible(x))
 }
 
 #' @rdname summary.dfm
@@ -170,6 +171,7 @@ print.dfm_summary <- function(x,
   }
   cat("\nSummary of Individual R-Squared's\n")
   print(x$R2_stats, digits)
+  return(invisible(x))
 }
 
 
@@ -610,6 +612,7 @@ print.dfm_forecast <- function(x,
   X_fcst <- x$X_fcst
   dimnames(X_fcst)[[1L]] <- seq_len(h)
   print(round(X_fcst, digits))
+  return(invisible(x))
 }
 
 #' @rdname predict.dfm
@@ -861,6 +864,7 @@ ICr <- function(X, max.r = min(20, ncol(X)-1)) {
 print.ICr <- function(x, ...) {
   cat("Optimal Number of Factors (r) from Bai and Ng (2002) Criteria\n\n")
   print(x$r.star)
+  return(invisible(x))
 }
 
 #' @rdname ICr
