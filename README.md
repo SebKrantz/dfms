@@ -139,7 +139,7 @@ plot(mod)
 ```
 
 <div class="figure">
-<img src="misc/figure/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
+<img src="https://raw.githubusercontent.com/SebKrantz/dfms/main/misc/figure/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
 </div>
 
 ```r
@@ -165,7 +165,7 @@ plot(fc)
 ```
 
 <div class="figure">
-<img src="misc/figure/unnamed-chunk-1-2.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
+<img src="https://raw.githubusercontent.com/SebKrantz/dfms/main/misc/figure/unnamed-chunk-1-2.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
 </div>
 
 ```r
