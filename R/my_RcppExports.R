@@ -4,7 +4,7 @@ Estep <- function(X, A, C, Q, R, F_0, P_0) {
 
 #' (Fast) Stationary Kalman Filter
 #'
-#' @description A simple and fast C++ implementation of the Kalman Filter for stationary data with time-invariant system matrices and missing data.
+#' @description A simple and fast C++ implementation of the Kalman Filter for stationary data (or random walks - data should be mean zero and without a trend) with time-invariant system matrices and missing data.
 #' @param X numeric data matrix (\eqn{T \times n}{T x n}).
 #' @param A transition matrix (\eqn{rp \times rp}{rp x rp}).
 #' @param C observation matrix (\eqn{n \times rp}{n x rp}).
@@ -103,7 +103,7 @@ FIS <- function(A, F, F_pred, P, P_pred, F_0 = NULL, P_0 = NULL) {
 #' @inheritParams SKF
 #'
 #' @returns All results from \code{\link{SKF}} and \code{\link{FIS}}, and additionally
-#' a \eqn{rp \times rp \times T}{rp x rp x T} matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^smooth_t, F^smooth_{t-1} | T)}{Cov(F_smooth(t), F_smooth(t-1) | T)} and needed for EM iterations.
+#' a \eqn{rp \times rp \times T}{rp x rp x T} matrix \code{PPm_smooth}, which is equal to the estimate of \eqn{Cov(F^{smooth}_t, F^{smooth}_{t-1} | T)}{Cov(F_smooth(t), F_smooth(t-1) | T)} and needed for EM iterations.
 #' See 'Property 6.3: The Lag-One Covariance Smoother' in Shumway & Stoffer (2017).
 #'
 #'
