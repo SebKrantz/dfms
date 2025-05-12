@@ -53,7 +53,7 @@ Prior to estimation, all data is differenced by BM14, and some series are log, d
 library(magrittr)
 # log-transforming and first-differencing the data
 BM14_M[, BM14_Models_M$log_trans] %<>% log()
-BM14_M_diff = diff(BM14_M)
+BM14_M_diff <- diff(BM14_M)
 plot(scale(BM14_M_diff), lwd = 1)
 ```
 
@@ -62,7 +62,7 @@ plot(scale(BM14_M_diff), lwd = 1)
 Before estimating a model, the `ICr()` function can be applied to determine the number of factors. It computes 3 information criteria proposed in Bai and NG (2002)^[Bai, J., Ng, S. (2002). Determining the Number of Factors in Approximate Factor Models. *Econometrica, 70*(1), 191-221. <doi:10.1111/1468-0262.00273>], whereby the second criteria generally suggests the most parsimonious model. 
 
 ```{r}
-ic = ICr(BM14_M_diff)
+ic <- ICr(BM14_M_diff)
 print(ic)
 plot(ic)
 ```
@@ -88,7 +88,7 @@ Estimation can then simply be done using the `DFM()` function with parameters `r
 
 ```{r}
 # Estimating the model with 4 factors and 3 lags using BM14's EM algorithm
-model1 = DFM(BM14_M_diff, r = 4, p = 3)
+model1 <- DFM(BM14_M_diff, r = 4, p = 3)
 print(model1)
 plot(model1)
 ```
@@ -134,7 +134,7 @@ DFM forecasts can be obtained with the `predict()` method, which dynamically for
 
 ```{r}
 # 12-period ahead DFM forecast
-fc = predict(model1, h = 12)
+fc <- predict(model1, h = 12)
 print(fc)
 ```
 
@@ -156,7 +156,7 @@ head(as.data.frame(fc, pivot = "wide"))
 
 ## Estimation with Mixed Frequency
 
-*dfms* currently provides no specific adjustments for data at different frequencies. An algorithm that accommodates monthly and quarterly series is planned for summer 2023. In the meantime, users may choose to block the data (creating multiple quarterly series from a monthly series, and duplicating quarterly series to maintain equal representation).
+Since v0.3.0 *dfms* allows monthly and quarterly mixed frequency estimation following Mariano & Murasawa (2003) and Banbura & Modugno (2014). Quarterly variables should be to the right of the monthly variables in the data matrix and need to be indicated using the `quarterly.vars` argument. Quarterly observations should be provided every 3rd period.
 
 <!-- 
 The baseline algorithm of BM14, being designed for arbitrary patterns of missing data, allows lower frequency series to be included in the estimation. The problem here is that series at lower frequency contain many missing values, which effectively lets these series have less weight in the estimation.
@@ -170,12 +170,12 @@ In the absence of such adjustments to the algorithm, or other methods of interpo
 head(BM14_Q, 3)
 # Pre-processing the data
 BM14_Q[, BM14_Models[BM14_Models$freq == "Q", ]$log_trans] %<>% log()
-BM14_Q_diff = diff(BM14_Q)
-# Merging to monthly data and duplicating 2 times
-BM14_diff = cbind(BM14_M_diff, BM14_Q_diff, BM14_Q_diff, BM14_Q_diff)
+BM14_Q_diff <- diff(BM14_Q)
+# Merging to monthly data
+BM14_diff <- cbind(BM14_M_diff, BM14_Q_diff)
 
 # Estimating the model with 5 factors and 3 lags using BM14's EM algorithm
-model2 = DFM(BM14_diff, r = 5, p = 3)
+model2 <- DFM(BM14_diff, r = 5, p = 3, quarterly.vars = colnames(BM14_Q))
 print(model2)
 plot(model2)
 ```
