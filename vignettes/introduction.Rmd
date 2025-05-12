@@ -169,7 +169,7 @@ In the absence of such adjustments to the algorithm, or other methods of interpo
 # Quarterly series from BM14
 head(BM14_Q, 3)
 # Pre-processing the data
-BM14_Q[, BM14_Models[BM14_Models$freq == "Q", ]$log_trans] %<>% log()
+BM14_Q[, BM14_Models$log_trans[BM14_Models$freq == "Q"]] %<>% log()
 BM14_Q_diff <- diff(BM14_Q)
 # Merging to monthly data
 BM14_diff <- cbind(BM14_M_diff, BM14_Q_diff)
