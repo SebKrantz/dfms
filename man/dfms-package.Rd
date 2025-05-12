@@ -6,7 +6,7 @@
 \alias{dfms}
 \title{Dynamic Factor Models}
 \description{
-\emph{dfms} provides efficient estimation of Dynamic Factor Models via the EM Algorithm --- following Doz, Giannone & Reichlin (2011, 2012) and Banbura & Modugno (2014). The package has the following contents:
+\emph{dfms} provides efficient estimation of Dynamic Factor Models via the EM Algorithm --- following Doz, Giannone & Reichlin (2011, 2012) and Banbura & Modugno (2014). Contents:
 
 \strong{Information Criteria to Determine the Number of Factors}
 

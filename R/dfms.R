@@ -2,7 +2,7 @@
 #'
 #' @description
 #'
-#' *dfms* provides efficient estimation of Dynamic Factor Models via the EM Algorithm --- following Doz, Giannone & Reichlin (2011, 2012) and Banbura & Modugno (2014). The package has the following contents:
+#' *dfms* provides efficient estimation of Dynamic Factor Models via the EM Algorithm --- following Doz, Giannone & Reichlin (2011, 2012) and Banbura & Modugno (2014). Contents:
 #'
 #' **Information Criteria to Determine the Number of Factors**
 #'
