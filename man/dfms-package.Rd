@@ -8,7 +8,7 @@
 \description{
 \emph{dfms} provides efficient estimation of Dynamic Factor Models via the EM Algorithm --- following Doz, Giannone & Reichlin (2011, 2012) and Banbura & Modugno (2014). The package has the following contents:
 
-\strong{Information Criteria}
+\strong{Information Criteria to Determine the Number of Factors}
 
 \code{\link[=ICr]{ICr()}}\cr
 \itemize{
