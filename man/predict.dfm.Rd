@@ -58,7 +58,7 @@
 \item{standardized}{logical. \code{FALSE} will return data forecasts on the original scale.}
 
 \item{resFUN}{an (optional) function to compute a univariate forecast of the residuals.
-The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector or forecasts. See Examples.}
+The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector of forecasts. See Examples.}
 
 \item{resAC}{numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.}
 
