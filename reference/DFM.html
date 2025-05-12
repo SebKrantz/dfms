@@ -33,7 +33,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Estimate a Dynamic Factor Model</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/development/R/DFM.R" class="external-link"><code>R/DFM.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/main/R/DFM.R" class="external-link"><code>R/DFM.R</code></a></small>
       <div class="d-none name"><code>DFM.Rd</code></div>
     </div>
 
@@ -266,159 +266,160 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Estimating the model with 2 factors and 3 lags</span></span></span>
-<span class="r-in"><span><span class="va">dfm_small</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">small</span><span class="op">]</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dfm_small</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">small</span><span class="op">]</span>, r <span class="op">=</span> <span class="fl">2</span>, p <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>    quarterly.vars <span class="op">=</span> <span class="va">BM14_Models</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/exposition.html" class="external-link">%$%</a></span> <span class="va">series</span><span class="op">[</span><span class="va">freq</span> <span class="op">==</span> <span class="st">"Q"</span> <span class="op">&amp;</span> <span class="va">small</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 26 iterations.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Inspecting the model</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_small</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Mixed Frequency Dynamic Factor Model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> n = 14, nm = 14, nq = 0, T = 356, r = 2, p = 3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> %NA = 38.3628, %NAm = NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> n = 14, nm = 10, nq = 4, T = 356, r = 2, p = 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> %NA = 38.3628, %NAm = 26.3202</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$small], r = 2, p = 3)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$small], r = 2, p = 3, quarterly.vars = BM14_Models %$%      series[freq == "Q" &amp; small])</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD      Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0777   0.1544  2.0324  -8.9693  3.2519</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.0468  -0.0279  1.3933  -4.2683  5.8201</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean  Median      SD      Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.1605  0.1274  2.0755  -9.4638  3.1838</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.1049  0.0463  1.3905  -4.2535  5.3709</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     L1.f1   L1.f2    L2.f1   L2.f2   L3.f1    L3.f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1 1.2107 -0.1290 -0.06743  0.1059 -0.2065 0.008175</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 0.3656  0.4819  0.10274 -0.2022 -0.6789 0.391439</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     L1.f1   L1.f2   L2.f1   L2.f2   L3.f1    L3.f2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1 1.2824 -0.1946 -0.2100  0.2179 -0.1402 -0.05373</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 0.1709  0.5829  0.2514 -0.2866 -0.6082  0.41312</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Covariance Matrix [cov(F)]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           f1        f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1   4.1307   -0.4890*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  -0.4890*   1.9412 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1   4.3077   -0.5272*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  -0.5272*   1.9334 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Error Covariance Matrix [Q]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        u1     u2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u1 0.2845 0.2434</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u2 0.2434 0.4387</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u1 0.3026 0.2191</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u2 0.2191 0.4764</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observation Matrix [C]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             f1      f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr             0.2450  0.1850</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                0.0245  0.0323</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> orders                  0.1669  0.1692</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl       0.0493 -0.0062</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind         0.2450  0.4559</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                 0.1196  0.4508</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> urx                    -0.3830  0.1478</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val  0.0568  0.0847</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                 0.1207  0.2317</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                 0.0968  0.1707</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                     0.3666  0.0236</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl                    0.3661 -0.2945</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                0.2730 -0.1416</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                  0.2194  0.1953</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr             0.2516  0.1905</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                0.0265  0.0290</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> orders                  0.1725  0.1659</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl       0.0533  0.0067</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind         0.2650  0.4645</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                 0.1296  0.4786</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urx                    -0.3799  0.1838</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val  0.0601  0.0865</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                 0.1307  0.2383</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                 0.0958  0.1625</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                     0.0434  0.0217</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl                    0.0437 -0.0249</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                0.0392  0.0116</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                  0.0268  0.0437</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observation Error Covariance Matrix [diag(R) - Restricted]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            ip_tot_cstr               new_cars                 orders </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.6374                 0.9906                 0.7938 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.6269                 0.9909                 0.7924 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      ret_turnover_defl        ecs_ec_sent_ind                pms_pmi </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.9863                 0.3405                 0.3814 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.9845                 0.3332                 0.3706 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    urx extra_ea_trade_exp_val                euro325 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.1861                 0.9708                 0.8215 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.1681                 0.9688                 0.8183 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                raw_mat                    gdp                   empl </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.9028                 0.4079                 0.1488 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.9096                 0.3599                 0.1326 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               capacity                 gdp_us </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.5644                 0.7362 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.4659                 0.6048 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Observation Residual Covariance Matrix [cov(resid(DFM))]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        ip_tot_cstr  new_cars    orders ret_turnover_defl</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr                0.6126   -0.0151    0.1996*          -0.0168 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                  -0.0151    0.9943   -0.0077            0.1269*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> orders                     0.1996*  -0.0077    0.7827            0.0342 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl         -0.0168    0.1269*   0.0342            0.9885 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind           -0.0074   -0.0312   -0.0863*          -0.0018 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                   -0.0591   -0.0482   -0.0184            0.0068 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> urx                        0.0104   -0.0190    0.0524           -0.0095 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val     0.0737    0.0962    0.0760           -0.0145 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                   -0.0294    0.0543   -0.0896            0.0140 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                    0.0936    0.1054    0.0054            0.0392 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                       -0.0178   -0.0432   -0.0163            0.0624 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl                      -0.0335   -0.0505    0.0229            0.0005 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                  -0.0503   -0.0134   -0.0238           -0.0375 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                    -0.1565*   0.0034   -0.0046           -0.0659 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr                0.6016   -0.0155    0.1950*          -0.0191 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                  -0.0155    0.9946   -0.0080            0.1262 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> orders                     0.1950*  -0.0080    0.7821            0.0324 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl         -0.0191    0.1262    0.0324            0.9864 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind           -0.0209   -0.0282   -0.0861*          -0.0101 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                   -0.0687   -0.0472   -0.0187            0.0022 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urx                        0.0113   -0.0158    0.0547*          -0.0098 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val     0.0697    0.0963    0.0742           -0.0190 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                   -0.0373    0.0556   -0.0904            0.0107 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                    0.0921    0.1067    0.0067            0.0323 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                        0.0720   -0.0844    0.0107           -0.0055 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl                      -0.0031   -0.1102   -0.0405           -0.0695 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                  -0.0066   -0.0474   -0.0520           -0.1209 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                    -0.0740   -0.0115    0.0609           -0.1050 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        ecs_ec_sent_ind   pms_pmi       urx</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr                   -0.0074   -0.0591    0.0104 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                      -0.0312   -0.0482   -0.0190 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> orders                        -0.0863*  -0.0184    0.0524 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl             -0.0018    0.0068   -0.0095 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind                0.2537   -0.0718*   0.0030 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                       -0.0718*   0.3167    0.0291 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> urx                            0.0030    0.0291    0.1653 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val        -0.0657*  -0.0426    0.0045 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                       -0.0290   -0.0365    0.0002 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                       -0.0451    0.0409    0.0336 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                           -0.0813*  -0.0211   -0.0020 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl                           0.0453*   0.0421    0.0066 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                      -0.0567   -0.0113    0.0380 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                        -0.1000*  -0.0293    0.0423 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr                   -0.0209   -0.0687    0.0113 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                      -0.0282   -0.0472   -0.0158 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> orders                        -0.0861*  -0.0187    0.0547*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl             -0.0101    0.0022   -0.0098 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind                0.2434   -0.0836*  -0.0114 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                       -0.0836*   0.2982    0.0106 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urx                           -0.0114    0.0106    0.1409 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val        -0.0697*  -0.0419    0.0077 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                       -0.0358   -0.0396   -0.0014 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                       -0.0433    0.0339    0.0248 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                           -0.0258    0.0604    0.0200 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl                           0.0444    0.1233    0.0351 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                      -0.0473    0.0574    0.0304 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                        -0.0519    0.0210    0.0555 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        extra_ea_trade_exp_val   euro325   raw_mat       gdp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr                           0.0737   -0.0294    0.0936   -0.0178 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                              0.0962    0.0543    0.1054   -0.0432 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> orders                                0.0760   -0.0896    0.0054   -0.0163 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl                    -0.0145    0.0140    0.0392    0.0624 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind                      -0.0657*  -0.0290   -0.0451   -0.0813*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                              -0.0426   -0.0365    0.0409   -0.0211 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> urx                                   0.0045    0.0002    0.0336   -0.0020 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val                0.9693    0.0141   -0.0336    0.0744 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                               0.0141    0.8026    0.0103   -0.0458 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                              -0.0336    0.0103    0.8897   -0.0561 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                                   0.0744   -0.0458   -0.0561    0.3798 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl                                 -0.0301    0.0173    0.0022   -0.0311 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                             -0.0421   -0.0023   -0.2376*   0.1283*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                               -0.0775    0.0616   -0.0399    0.0510 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr                           0.0697   -0.0373    0.0921    0.0720 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                              0.0963    0.0556    0.1067   -0.0844 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> orders                                0.0742   -0.0904    0.0067    0.0107 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl                    -0.0190    0.0107    0.0323   -0.0055 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind                      -0.0697*  -0.0358   -0.0433   -0.0258 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                              -0.0419   -0.0396    0.0339    0.0604 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urx                                   0.0077   -0.0014    0.0248    0.0200 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val                0.9673    0.0112   -0.0329    0.0482 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                               0.0112    0.7982    0.0097    0.0341 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                              -0.0329    0.0097    0.8984    0.0022 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                                   0.0482    0.0341    0.0022    0.8794 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl                                 -0.0869    0.0905    0.0372    0.4779*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                             -0.0428    0.0477   -0.1930*   0.5392*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                               -0.0780    0.1076    0.0037    0.3432*</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             empl  capacity    gdp_us</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr             -0.0335   -0.0503   -0.1565*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                -0.0505   -0.0134    0.0034 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> orders                   0.0229   -0.0238   -0.0046 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl        0.0005   -0.0375   -0.0659 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind          0.0453*  -0.0567   -0.1000*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                  0.0421   -0.0113   -0.0293 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> urx                      0.0066    0.0380    0.0423 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val  -0.0301   -0.0421   -0.0775 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                  0.0173   -0.0023    0.0616 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                  0.0022   -0.2376*  -0.0399 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                     -0.0311    0.1283*   0.0510 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> empl                     0.1155   -0.0515*  -0.0259 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                -0.0515*   0.5558    0.1338*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                  -0.0259    0.1338*   0.7093 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ip_tot_cstr             -0.0031   -0.0066   -0.0740 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> new_cars                -0.1102   -0.0474   -0.0115 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> orders                  -0.0405   -0.0520    0.0609 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ret_turnover_defl       -0.0695   -0.1209   -0.1050 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ecs_ec_sent_ind          0.0444   -0.0473   -0.0519 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> pms_pmi                  0.1233    0.0574    0.0210 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urx                      0.0351    0.0304    0.0555 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> extra_ea_trade_exp_val  -0.0869   -0.0428   -0.0780 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> euro325                  0.0905    0.0477    0.1076 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> raw_mat                  0.0372   -0.1930*   0.0037 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp                      0.4779*   0.5392*   0.3432*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> empl                     0.8218    0.4565*   0.1683*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> capacity                 0.4565*   0.9166    0.2969*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gdp_us                   0.1683*   0.2969*   0.9371 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Residual AR(1) Serial Correlation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            ip_tot_cstr               new_cars                 orders </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               -0.37927               -0.40846               -0.41429 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               -0.38749               -0.40829               -0.41500 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      ret_turnover_defl        ecs_ec_sent_ind                pms_pmi </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               -0.49173               -0.12364                0.09490 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               -0.49326               -0.09350                0.08832 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    urx extra_ea_trade_exp_val                euro325 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                0.01165               -0.52365                0.24452 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               -0.09171               -0.52651                0.24433 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                raw_mat                    gdp                   empl </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                0.26723                     NA                     NA </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                0.27610                     NA                     NA </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               capacity                 gdp_us </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     NA                     NA </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Residual AR(1) Serial Correlations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    N     Mean   Median      SD      Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   10  -0.1723  -0.2515  0.3086  -0.5237  0.2672</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   10  -0.1807  -0.2405  0.3062  -0.5265  0.2761</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Goodness of Fit: R-Squared</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            ip_tot_cstr               new_cars                 orders </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.3874                 0.0057                 0.2173 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.3984                 0.0054                 0.2179 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      ret_turnover_defl        ecs_ec_sent_ind                pms_pmi </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.0115                 0.7463                 0.6833 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.0136                 0.7566                 0.7018 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    urx extra_ea_trade_exp_val                euro325 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.8347                 0.0307                 0.1974 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.8591                 0.0327                 0.2018 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                raw_mat                    gdp                   empl </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.1103                 0.6202                 0.8845 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.1016                 0.1206                 0.1782 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               capacity                 gdp_us </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.4442                 0.2907 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 0.0834                 0.0629 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    N    Mean  Median      SD     Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   14  0.3903  0.3391  0.3146  0.0057  0.8845</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   14  0.2667  0.1494  0.2939  0.0054  0.8591</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dfm_small</span><span class="op">)</span>  <span class="co"># Factors and data</span></span></span>
 <span class="r-plt img"><img src="DFM-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dfm_small</span>, method <span class="op">=</span> <span class="st">"all"</span>, type <span class="op">=</span> <span class="st">"individual"</span><span class="op">)</span> <span class="co"># Factor estimates</span></span></span>
@@ -461,52 +462,49 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Estimating the model with 3 factors and 3 lags</span></span></span>
-<span class="r-in"><span><span class="va">dfm_medium</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">medium</span><span class="op">]</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dfm_medium</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">medium</span><span class="op">]</span>, r <span class="op">=</span> <span class="fl">3</span>, p <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>    quarterly.vars <span class="op">=</span> <span class="va">BM14_Models</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/exposition.html" class="external-link">%$%</a></span> <span class="va">series</span><span class="op">[</span><span class="va">freq</span> <span class="op">==</span> <span class="st">"Q"</span> <span class="op">&amp;</span> <span class="va">medium</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 26 iterations.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Inspecting the model</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_medium</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Mixed Frequency Dynamic Factor Model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> n = 48, nm = 48, nq = 0, T = 356, r = 3, p = 3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> %NA = 32.6135, %NAm = NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> n = 48, nm = 39, nq = 9, T = 356, r = 3, p = 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> %NA = 32.6135, %NAm = 24.0781</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$medium], r = 3, p = 3)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14[, BM14_Models$medium], r = 3, p = 3, quarterly.vars = BM14_Models %$%      series[freq == "Q" &amp; medium])</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0403   0.4214  2.9848  -17.3578  5.4713</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356  -0.0109  -0.2687  2.0526   -4.8352  8.2507</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0274   -0.119  1.5727   -6.8234  4.0181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0985   0.4918  3.1283  -19.3582  5.3549</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.0341   -0.224  2.2831    -6.462  8.3411</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0172  -0.1399  1.5726   -6.7371  4.3577</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       L1.f1    L1.f2   L1.f3    L2.f1     L2.f2   L2.f3    L3.f1   L3.f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.74619  0.08633 0.28267  0.06055 -0.045219 -0.1494  0.07457 0.05102</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.01289  0.40113 0.04716 -0.09857  0.104393  0.1231 -0.09578 0.24146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.14844 -0.06662 0.41315 -0.01687 -0.001667 -0.1762 -0.14472 0.15933</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       L3.f3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.06631</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.02438</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.15381</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       L1.f1    L1.f2  L1.f3   L2.f1    L2.f2    L2.f3   L3.f1  L3.f2    L3.f3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.93895 -0.19728 0.1715 0.05318  0.06486  0.01496 -0.1298 0.0859 -0.02337</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.30923  0.75786 0.1641 0.38513 -0.38768 -0.02307 -0.2750 0.4086  0.02054</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.06881  0.03244 0.4077 0.36873 -0.32608 -0.17889 -0.4565 0.3461  0.11805</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Covariance Matrix [cov(F)]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          f1       f2       f3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  8.9091   0.2889   0.2680 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.2889   4.2132   0.0017 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.2680   0.0017   2.4733 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           f1        f2        f3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1   9.7864   -0.6567    0.3212 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  -0.6567    5.2124    0.0848 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3   0.3212    0.0848    2.4729 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Error Covariance Matrix [Q]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         u1      u2      u3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u1  2.1176  1.1526 -0.3597</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u2  1.1526  1.9879 -0.4395</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u3 -0.3597 -0.4395  2.0555</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u1  1.8586  1.3143 -0.3865</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u2  1.3143  1.8104 -0.5786</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u3 -0.3865 -0.5786  1.8320</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Residual AR(1) Serial Correlations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    N     Mean   Median      SD      Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   39  -0.0879  -0.1043  0.2624  -0.5417  0.4481</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   39  -0.0901  -0.0699  0.2595  -0.5508  0.3205</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    N   Mean  Median      SD     Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   48  0.381  0.3489  0.2986  0.0073  0.9311</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    N    Mean  Median      SD     Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   48  0.2894   0.155  0.2852  0.0086  0.9362</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dfm_medium</span><span class="op">)</span>  <span class="co"># Factors and data</span></span></span>
 <span class="r-plt img"><img src="DFM-9.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dfm_medium</span>, method <span class="op">=</span> <span class="st">"all"</span>, type <span class="op">=</span> <span class="st">"individual"</span><span class="op">)</span> <span class="co"># Factor estimates</span></span></span>
@@ -549,74 +547,75 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Estimating the model with 6 factors and 3 lags</span></span></span>
-<span class="r-in"><span><span class="va">dfm_large</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span>, <span class="fl">6</span>, <span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 42 iterations.</span>
+<span class="r-in"><span><span class="va">dfm_large</span> <span class="op">=</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span>, r <span class="op">=</span> <span class="fl">6</span>, p <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>    quarterly.vars <span class="op">=</span> <span class="va">BM14_Models</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/exposition.html" class="external-link">%$%</a></span> <span class="va">series</span><span class="op">[</span><span class="va">freq</span> <span class="op">==</span> <span class="st">"Q"</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 39 iterations.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Inspecting the model</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_large</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Mixed Frequency Dynamic Factor Model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> n = 101, nm = 101, nq = 0, T = 356, r = 6, p = 3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> %NA = 29.7363, %NAm = NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> n = 101, nm = 92, nq = 9, T = 356, r = 6, p = 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> %NA = 29.7363, %NAm = 25.8366</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14, r = 6, p = 3)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14, r = 6, p = 3, quarterly.vars = BM14_Models %$%      series[freq == "Q"])</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min      Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0128   0.6589  4.8593  -22.6273  12.1396</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356  -0.1426   0.1953  3.2924  -13.4553  17.0049</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0121   0.0539  2.6158  -10.0501    7.645</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4  356   0.0532    0.227  3.0551  -17.2138   10.345</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  356  -0.0526  -0.0474  2.6591  -10.8706  11.5097</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6  356  -0.0074  -0.0276  2.3392   -8.0883  15.4214</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356   -0.107   0.6573  4.8387  -23.1251  14.7986</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356  -0.2216   0.1847  3.4756  -13.9892  17.5939</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0085    0.038   2.538    -9.952    7.023</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4  356   0.1225   0.2815  3.1901  -17.2132  11.1281</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  356  -0.0816  -0.0857  2.6977  -11.8225  11.6105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  356  -0.0021  -0.0044  2.2638   -8.0332  14.3884</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1    L1.f2     L1.f3    L1.f4    L1.f5    L1.f6    L2.f1    L2.f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.4892 -0.27413  0.555373 -0.49350  0.33904 -0.10227 -0.10721  0.04923</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.1409  0.42355 -0.119072 -0.09760  0.11595  0.14366  0.19016 -0.06640</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.2769  0.06985  0.394982  0.10002 -0.12723 -0.11881 -0.20734  0.04944</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.2432 -0.03345  0.085401 -0.18619  0.52093 -0.04263  0.01735 -0.17177</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.2858  0.01547 -0.008841  0.40969  0.07289  0.01797 -0.01169  0.16386</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6 -0.2178  0.12874 -0.113025 -0.03033 -0.09462  0.40510  0.10945 -0.09195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       L2.f3    L2.f4    L2.f5    L2.f6     L3.f1    L3.f2     L3.f3     L3.f4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1 -0.23156 -0.14988 -0.06505  0.50861  0.367040 -0.11658  0.070419  0.008798</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.07793 -0.07484  0.21098 -0.19913  0.091421  0.22904  0.008526 -0.142987</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.32524  0.23108 -0.07323  0.10170 -0.004843 -0.10569  0.186417  0.121418</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4  0.08269 -0.19694  0.05137  0.11849  0.054295 -0.13206 -0.029156  0.100593</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5 -0.12568 -0.01248 -0.15211 -0.01158 -0.145431  0.01864  0.038644  0.038082</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.11387 -0.08252  0.14040 -0.19996  0.015064  0.05480  0.060205 -0.111405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      L1.f1    L1.f2     L1.f3     L1.f4    L1.f5     L1.f6      L2.f1    L2.f2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.4146 -0.31547  0.535594 -0.409677  0.24935 -0.042001 -0.0013023  0.10535</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.1181  0.42170 -0.132113 -0.044417  0.11608  0.126305  0.0865712 -0.02060</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.2563  0.07508  0.387405  0.069762 -0.13764 -0.102988 -0.1223568  0.01331</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.2962 -0.12730  0.098611 -0.104417  0.48309 -0.037316  0.0466138 -0.10279</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.3225  0.08940 -0.008011  0.344206  0.09136  0.009044 -0.0134199  0.07329</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6 -0.1849  0.10457 -0.088462 -0.009701 -0.07510  0.362577  0.0007091 -0.06256</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       L2.f3    L2.f4     L2.f5    L2.f6    L3.f1    L3.f2    L3.f3    L3.f4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1 -0.18944 -0.17725 -0.036033  0.48920  0.32166 -0.06934  0.06825  0.05621</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.04108 -0.06438  0.172166 -0.08944  0.15363  0.22166  0.11864 -0.13273</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.27139  0.19914 -0.010737  0.02744 -0.04957 -0.08776  0.10569  0.12061</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4  0.04184 -0.17465 -0.003223  0.16731  0.07214 -0.11843 -0.03447  0.12219</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5 -0.08275 -0.01601 -0.107952 -0.10232 -0.17649  0.02642 -0.00477  0.01682</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.03254 -0.04805  0.086758 -0.10416  0.09119  0.06214  0.13715 -0.12928</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       L3.f5    L3.f6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.13116 -0.02589</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.02080  0.17876</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.12427 -0.03180</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.05662  0.06638</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.02519 -0.18284</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.05736  0.10027</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.15754  0.05201</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  0.01799  0.09386</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.11424  0.01713</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.06460  0.07272</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.03395 -0.14320</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.05089  0.02547</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Covariance Matrix [cov(F)]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           f1        f2        f3        f4        f5        f6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f1  23.6126   -0.2329    0.1166    4.0970*  -2.4727*  -2.8984*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f2  -0.2329   10.8399   -1.8458*   0.6389   -1.1282*   2.1751*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f3   0.1166   -1.8458*   6.8426   -1.6781*   1.6056*  -1.2712*</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f4   4.0970*   0.6389   -1.6781*   9.3339   -4.2441*  -0.0480 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f5  -2.4727*  -1.1282*   1.6056*  -4.2441*   7.0708   -0.6045 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> f6  -2.8984*   2.1751*  -1.2712*  -0.0480   -0.6045    5.4720 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  23.4128    0.7031   -0.2198    3.7881*  -2.5178*  -1.9928*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2   0.7031   12.0798   -1.6485*  -0.4811   -0.6676    2.4008*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  -0.2198   -1.6485*   6.4415   -1.4691*   1.4553*  -0.9491*</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4   3.7881*  -0.4811   -1.4691*  10.1768   -4.6435*  -0.4141 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  -2.5178*  -0.6676    1.4553*  -4.6435*   7.2774   -0.4585 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  -1.9928*   2.4008*  -0.9491*  -0.4141   -0.4585    5.1250 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Error Covariance Matrix [Q]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         u1      u2      u3      u4      u5      u6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u1  9.4291 -0.3199 -1.3015  2.2611 -2.0748  0.0669</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u2 -0.3199  5.3107  0.0049  0.8209 -0.5604 -0.0135</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u3 -1.3015  0.0049  4.3942 -0.5711  0.4848  0.0342</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u4  2.2611  0.8209 -0.5711  4.8600 -1.6002  0.1788</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u5 -2.0748 -0.5604  0.4848 -1.6002  4.4129 -0.0902</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> u6  0.0669 -0.0135  0.0342  0.1788 -0.0902  3.2699</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u1 10.2115  0.2060 -1.4420  2.4061 -2.2408  0.2968</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u2  0.2060  5.8639 -0.0814  0.8044 -0.6562  0.1438</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u3 -1.4420 -0.0814  4.3219 -0.5280  0.4627  0.1162</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u4  2.4061  0.8044 -0.5280  4.9253 -1.6502  0.0570</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u5 -2.2408 -0.6562  0.4627 -1.6502  4.4696 -0.0469</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u6  0.2968  0.1438  0.1162  0.0570 -0.0469  3.1868</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Residual AR(1) Serial Correlations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    N     Mean   Median      SD      Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   92  -0.0706  -0.0965  0.2712  -0.5567  0.6628</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   92  -0.0673  -0.0953  0.2657  -0.4957  0.6614</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     N    Mean  Median      SD     Min     Max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   101  0.4677  0.4352  0.2929  0.0096  0.9984</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   101  0.4297  0.3892  0.3071  0.0121  0.9987</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dfm_large</span><span class="op">)</span>  <span class="co"># Factors and data</span></span></span>
 <span class="r-plt img"><img src="DFM-15.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># plot(dfm_large, method = "all", type = "individual") # Factor estimates</span></span></span>

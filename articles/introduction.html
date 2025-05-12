@@ -60,7 +60,7 @@ Krantz</h4>
             
             <h4 data-toc-skip class="date">2025-05-12</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/development/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="d-none name"><code>introduction.Rmd</code></div>
     </div>
 
@@ -128,7 +128,7 @@ user.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
 <span><span class="co"># log-transforming and first-differencing the data</span></span>
 <span><span class="va">BM14_M</span><span class="op">[</span>, <span class="va">BM14_Models_M</span><span class="op">$</span><span class="va">log_trans</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/compound.html" class="external-link">%&lt;&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">BM14_M_diff</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span></span>
+<span><span class="va">BM14_M_diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">BM14_M_diff</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-4-1.png" width="672"></p>
 <div class="section level2">
@@ -141,7 +141,7 @@ Factors in Approximate Factor Models. &lt;em&gt;Econometrica, 70&lt;/em&gt;(1),
 191-221. &lt;a href="doi:10.1111/1468-0262.00273" class="uri"&gt;doi:10.1111/1468-0262.00273&lt;/a&gt;&lt;/p&gt;'><sup>4</sup></a>, whereby the second
 criteria generally suggests the most parsimonious model.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ic</span> <span class="op">=</span> <span class="fu"><a href="../reference/ICr.html">ICr</a></span><span class="op">(</span><span class="va">BM14_M_diff</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">ic</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ICr.html">ICr</a></span><span class="op">(</span><span class="va">BM14_M_diff</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Missing values detected: imputing data with tsnarmimp() with default settings</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ic</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Optimal Number of Factors (r) from Bai and Ng (2002) Criteria</span></span>
@@ -216,7 +216,7 @@ and &lt;code&gt;em.method = "BM"&lt;/code&gt; gives identical factor estimates, 
 in this case &lt;code&gt;em.method = "DGR"&lt;/code&gt; should be used.&lt;/p&gt;'><sup>7</sup></a>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimating the model with 4 factors and 3 lags using BM14's EM algorithm</span></span>
-<span><span class="va">model1</span> <span class="op">=</span> <span class="fu"><a href="../reference/DFM.html">DFM</a></span><span class="op">(</span><span class="va">BM14_M_diff</span>, r <span class="op">=</span> <span class="fl">4</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">model1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DFM.html">DFM</a></span><span class="op">(</span><span class="va">BM14_M_diff</span>, r <span class="op">=</span> <span class="fl">4</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Converged after 26 iterations.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Dynamic Factor Model: n = 92, T = 356, r = 4, p = 3, %NA = 25.8366</span></span>
@@ -348,7 +348,7 @@ which dynamically forecasts the factors using the transition equation
 observation equation. Objects are of class ‘dfm_forecast’</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 12-period ahead DFM forecast</span></span>
-<span><span class="va">fc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model1</span>, h <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="va">fc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model1</span>, h <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 12 Step Ahead Forecast from Dynamic Factor Model</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -430,12 +430,12 @@ and the format of the frame.</p>
 <div class="section level2">
 <h2 id="estimation-with-mixed-frequency">Estimation with Mixed Frequency<a class="anchor" aria-label="anchor" href="#estimation-with-mixed-frequency"></a>
 </h2>
-<p><em>dfms</em> currently provides no specific adjustments for data at
-different frequencies. An algorithm that accommodates monthly and
-quarterly series is planned for summer 2023. In the meantime, users may
-choose to block the data (creating multiple quarterly series from a
-monthly series, and duplicating quarterly series to maintain equal
-representation).</p>
+<p>Since v0.3.0 <em>dfms</em> allows monthly and quarterly mixed
+frequency estimation following Mariano &amp; Murasawa (2003) and Banbura
+&amp; Modugno (2014). Quarterly variables should be to the right of the
+monthly variables in the data matrix and need to be indicated using the
+<code>quarterly.vars</code> argument. Quarterly observations should be
+provided every 3rd period.</p>
 <!-- 
 The baseline algorithm of BM14, being designed for arbitrary patterns of missing data, allows lower frequency series to be included in the estimation. The problem here is that series at lower frequency contain many missing values, which effectively lets these series have less weight in the estimation.
 
