@@ -17,7 +17,8 @@
 <!--
 The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/dfms")` and give feedback. -->
 
-*dfms* provides efficient estimation of Dynamic Factor Models via the EM Algorithm. Estimation can be done in 3 different ways following:
+*dfms* provides efficient estimation of Dynamic Factor Models via the EM Algorithm. Factors are assumed to follow a stationary VAR 
+  process of order `p`. Estimation can be done in 3 different ways following:
 
 - Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. *Journal of Econometrics, 164*(1), 188-205. <doi:10.1016/j.jeconom.2011.02.012> 
 
@@ -27,7 +28,7 @@ The package is fully functional though, and you are very welcome to install it u
 
 The default is `em.method = "auto"`, which chooses `"BM"` following Banbura & Modugno (2014) with missing data or mixed frequency, and `"DGR"` following Doz, Giannone & Reichlin (2012) otherwise. Using `em.method = "none"` generates Two-Step estimates following Doz, Giannone & Reichlin (2011). This is extremely efficient on bigger datasets. PCA and Two-Step estimates are also reported in EM-estimation. All methods support missing data, but `em.method = "DGR"` does not model them in EM iterations.
 
-The package is stable, but functionality may expand in the future. In particular, mixed-frequency estimation with autoregressive errors is planned for the near future, and generation of the 'news' may be added in the further future. 
+The package is currently stable, but functionality may expand in the future. In particular, mixed-frequency estimation with autoregressive errors is planned for the near future, and generation of the 'news' may be added in the further future. 
 
 
 ### Comparison with Other R Packages
@@ -56,7 +57,7 @@ install.packages('dfms', repos = c('https://sebkrantz.r-universe.dev', 'https://
 library(dfms)
 
 # Fit DFM with 6 factors and 3 lags in the transition equation
-mod = DFM(diff(BM14_M), r = 6, p = 3) 
+mod <- DFM(diff(BM14_M), r = 6, p = 3) 
 ```
 
 ```
@@ -139,7 +140,7 @@ plot(mod)
 ```
 
 <div class="figure">
-<img src="misc/figure/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
+<img src="https://raw.githubusercontent.com/SebKrantz/dfms/main/misc/figure/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
 </div>
 
 ```r
@@ -158,14 +159,14 @@ as.data.frame(mod) |> head()
 
 ```r
 # Forecasting 20 periods ahead
-fc = predict(mod, h = 20)
+fc <- predict(mod, h = 20)
 
 # 'dfm_forecast' methods
 plot(fc)
 ```
 
 <div class="figure">
-<img src="misc/figure/unnamed-chunk-1-2.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
+<img src="https://raw.githubusercontent.com/SebKrantz/dfms/main/misc/figure/unnamed-chunk-1-2.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
 </div>
 
 ```r
