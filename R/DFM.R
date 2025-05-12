@@ -12,13 +12,13 @@
 #' with time-invariant system matrices and classical assumptions, while permitting missing data.
 #'
 #' @param X a \code{T x n} numeric data matrix or frame of stationary time series. May contain missing values.
-#' @param r integer. number of factors.
-#' @param p integer. number of lags in factor VAR.
+#' @param r integer. Number of factors.
+#' @param p integer. Number of lags in factor VAR.
 #' @param \dots (optional) arguments to \code{\link{tsnarmimp}}.
 #' @param idio.ar1 logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generaly not needed if \code{n} is large (>30). See theoretical vignette for details.
 #' @param quarterly.vars character. Names of quarterly variables in \code{X} (if any). Monthly variables should be to the left of the quarterly variables in the data matrix and quarterly observations should be provided every 3rd period.
-#' @param rQ character. restrictions on the state (transition) covariance matrix (Q).
-#' @param rR character. restrictions on the observation (measurement) covariance matrix (R).
+#' @param rQ character. Restrictions on the state (transition) covariance matrix (Q).
+#' @param rR character. Restrictions on the observation (measurement) covariance matrix (R).
 #' @param em.method character. The implementation of the Expectation Maximization Algorithm used. The options are:
 #'    \tabular{llll}{
 #' \code{"auto"} \tab\tab Automatic selection: \code{"BM"} if \code{anyNA(X)}, else \code{"DGR"}. \cr\cr

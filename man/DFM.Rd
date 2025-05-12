@@ -24,9 +24,9 @@ DFM(
 \arguments{
 \item{X}{a \code{T x n} numeric data matrix or frame of stationary time series. May contain missing values.}
 
-\item{r}{integer. number of factors.}
+\item{r}{integer. Number of factors.}
 
-\item{p}{integer. number of lags in factor VAR.}
+\item{p}{integer. Number of lags in factor VAR.}
 
 \item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}.}
 
@@ -34,9 +34,9 @@ DFM(
 
 \item{quarterly.vars}{character. Names of quarterly variables in \code{X} (if any). Monthly variables should be to the left of the quarterly variables in the data matrix and quarterly observations should be provided every 3rd period.}
 
-\item{rQ}{character. restrictions on the state (transition) covariance matrix (Q).}
+\item{rQ}{character. Restrictions on the state (transition) covariance matrix (Q).}
 
-\item{rR}{character. restrictions on the observation (measurement) covariance matrix (R).}
+\item{rR}{character. Restrictions on the observation (measurement) covariance matrix (R).}
 
 \item{em.method}{character. The implementation of the Expectation Maximization Algorithm used. The options are:
 \tabular{llll}{
