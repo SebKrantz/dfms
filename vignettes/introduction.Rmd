@@ -165,7 +165,7 @@ BM14 use the approximation of Mariano and Murasawa (2003) to construct a monthly
 
 In the absence of such adjustments to the algorithm, or other methods of interpolating quarterly data, a very simple way to increase the weight of these series in the estimation is to duplicate them in the dataset. Such duplication can be mechanical (e.g. duplicate quarterly series 2 times in monthly dataset), but should ideally be based on considerations about the quality of the signal stemming from different quarterly series (i.e. informative series should be duplicated more).  -->
 
-```{r, eval = FALSE, include=FALSE}
+```{r}
 # Quarterly series from BM14
 head(BM14_Q, 3)
 # Pre-processing the data
