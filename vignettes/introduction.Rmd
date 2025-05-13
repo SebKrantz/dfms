@@ -143,6 +143,7 @@ These forecasts can also be visualized using a plot method. By default the entir
 # Setting an appropriate plot range to see the forecast
 plot(fc, xlim = c(320, 370))
 ```
+
 By default, `predict()` uses the QML factor estimates (if available). We can however also predict with PCA or TwoStep estimates using, e.g., `predict(model_m, h = 12, method = "2s")`. 
 
 The forecasts can be retrieved in data frame using `as.data.frame()`. Again the method has various arguments to control the output (factors, data, or both --- default factors) and the format of the frame. 
