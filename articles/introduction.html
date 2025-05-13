@@ -58,7 +58,7 @@
                         <h4 data-toc-skip class="author">Sebastian
 Krantz</h4>
             
-            <h4 data-toc-skip class="date">2025-05-12</h4>
+            <h4 data-toc-skip class="date">2025-05-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/development/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="d-none name"><code>introduction.Rmd</code></div>
@@ -216,9 +216,9 @@ and &lt;code&gt;em.method = "BM"&lt;/code&gt; gives identical factor estimates, 
 in this case &lt;code&gt;em.method = "DGR"&lt;/code&gt; should be used.&lt;/p&gt;'><sup>7</sup></a>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimating the model with 4 factors and 3 lags using BM14's EM algorithm</span></span>
-<span><span class="va">model1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DFM.html">DFM</a></span><span class="op">(</span><span class="va">BM14_M_diff</span>, r <span class="op">=</span> <span class="fl">4</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">model_m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DFM.html">DFM</a></span><span class="op">(</span><span class="va">BM14_M_diff</span>, r <span class="op">=</span> <span class="fl">4</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Converged after 26 iterations.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model_m</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Dynamic Factor Model: n = 92, T = 356, r = 4, p = 3, %NA = 25.8366</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Factor Transition Matrix [A]</span></span>
@@ -232,7 +232,7 @@ in this case &lt;code&gt;em.method = "DGR"&lt;/code&gt; should be used.&lt;/p&gt
 <span><span class="co">#&gt; f2  0.1347 -0.0024 -0.0342</span></span>
 <span><span class="co">#&gt; f3 -0.0087  0.1767  0.0249</span></span>
 <span><span class="co">#&gt; f4  0.0307  0.0662 -0.0035</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_m</span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-8-1.png" width="672"></p>
 <p>The model can be investigated using <code><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary()</a></code>, which
 returns an object of class ‘dfm_summary’ containing the system matrices
@@ -242,7 +242,7 @@ individual series. The print method automatically adjusts the amount of
 information printed to the data size. For large databases with more than
 40 series, no series-level statistics are printed.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dfm_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model1</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">dfm_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model_m</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">dfm_summary</span><span class="op">)</span> <span class="co"># Large model with &gt; 40 series: defaults to compact = 2</span></span>
 <span><span class="co">#&gt; Mixed Frequency Dynamic Factor Model</span></span>
 <span><span class="co">#&gt; n = 92, nm = 92, nq = 0, T = 356, r = 4, p = 3</span></span>
@@ -300,10 +300,10 @@ residuals and fitted values from the model. The default format is a
 plain matrix, but the functions also have an argument to return data in
 the original (input) format.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">resid</a></span><span class="op">(</span><span class="va">model1</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">resid</a></span><span class="op">(</span><span class="va">model_m</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">model1</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">model_m</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-10-2.png" width="672"></p>
 <p>Another way to examine the factor model visually is to plot the
 Quasi-Maximum-Likelihood (QML) factor estimates against PCA and Two-Step
@@ -314,12 +314,12 @@ Filter and Smoother is run only once. Both estimates are also computed
 by <code><a href="../reference/DFM.html">DFM()</a></code> during EM estimation and can also be visualized
 with <code>plot.dfm</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model1</span>, method <span class="op">=</span> <span class="st">"all"</span>, type <span class="op">=</span> <span class="st">"individual"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_m</span>, method <span class="op">=</span> <span class="st">"all"</span>, type <span class="op">=</span> <span class="st">"individual"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-11-1.png" width="672"></p>
 <p>The plot with the various estimates shows that the QML estimates are
 more volatile in the initial periods where there are many missing
 series, but less volatile in the latter periods. In general, QML
-estimates may now always be superior across the entire data range to
+estimates may not always be superior across the entire data range to
 Two-Step and PCA estimates. Often, Two-Step estimates also provide
 similar forecasting performance, and are much faster to estimate using
 <code>DFM(BM14_M_diff, r = 4, p = 3, em.method = "none")</code>.</p>
@@ -330,7 +330,7 @@ possible to add a time variable from the original data (the default is a
 sequence of integers).</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Default: all estimates in long format</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">model1</span>, time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/zoo/man/index.html" class="external-link">index</a></span><span class="op">(</span><span class="va">BM14_M_diff</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">model_m</span>, time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/zoo/man/index.html" class="external-link">index</a></span><span class="op">(</span><span class="va">BM14_M_diff</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Method Factor       Time      Value</span></span>
 <span><span class="co">#&gt; 1    PCA     f1 1980-02-29  1.1503013</span></span>
 <span><span class="co">#&gt; 2    PCA     f1 1980-03-31  0.3374613</span></span>
@@ -345,10 +345,10 @@ sequence of integers).</p>
 <p>DFM forecasts can be obtained with the <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> method,
 which dynamically forecasts the factors using the transition equation
 (default 10 periods), and then also predicts data forecasts using the
-observation equation. Objects are of class ‘dfm_forecast’</p>
+observation equation. Objects are of class ‘dfm_forecast’.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 12-period ahead DFM forecast</span></span>
-<span><span class="va">fc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model1</span>, h <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="va">fc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model_m</span>, h <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 12 Step Ahead Forecast from Dynamic Factor Model</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -408,15 +408,15 @@ Higher lag-orders product more interesting forecast dynamics.&lt;/p&gt;"><sup>9<
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Setting an appropriate plot range to see the forecast</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">320</span>, <span class="fl">370</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-14-1.png" width="672"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Predicting with Two-Step estimates</span></span>
-<span><span class="co"># plot(predict(model1, h = 12, method = "2s"), xlim = c(320, 370))</span></span></code></pre></div>
-<p>The forecasts can also be retrieved in data frame using
+<p><img src="introduction_files/figure-html/unnamed-chunk-14-1.png" width="672">
+By default, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> uses the QML factor estimates (if
+available). We can however also predict with PCA or TwoStep estimates
+using, e.g., <code>predict(model_m, h = 12, method = "2s")</code>.</p>
+<p>The forecasts can be retrieved in data frame using
 <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>. Again the method has various arguments to
-control the forecasts retained (factors, data or both, default factors),
-and the format of the frame.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+control the output (factors, data, or both — default factors) and the
+format of the frame.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Factor forecasts in wide format</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">fc</span>, pivot <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Time Forecast         f1         f2         f3          f4</span></span>
@@ -430,19 +430,21 @@ and the format of the frame.</p>
 <div class="section level2">
 <h2 id="estimation-with-mixed-frequency">Estimation with Mixed Frequency<a class="anchor" aria-label="anchor" href="#estimation-with-mixed-frequency"></a>
 </h2>
-<p>Since v0.3.0 <em>dfms</em> allows monthly and quarterly mixed
+<p>Since v0.3.0, <em>dfms</em> allows monthly and quarterly mixed
 frequency estimation following Mariano &amp; Murasawa (2003) and Banbura
 &amp; Modugno (2014). Quarterly variables should be to the right of the
 monthly variables in the data matrix and need to be indicated using the
 <code>quarterly.vars</code> argument. Quarterly observations should be
-provided every 3rd period.</p>
+provided every 3rd period (months 3, 6, 9, and 12). Below, I estimate
+the mixed frequency DFM, adding a factor to capture any idiosynchratic
+dynamics in the quarterly series.</p>
 <!-- 
 The baseline algorithm of BM14, being designed for arbitrary patterns of missing data, allows lower frequency series to be included in the estimation. The problem here is that series at lower frequency contain many missing values, which effectively lets these series have less weight in the estimation.
 
 BM14 use the approximation of Mariano and Murasawa (2003) to construct a monthly equivalent for each quarterly series, with appropriate factor loadings in the estimation. 
 
 In the absence of such adjustments to the algorithm, or other methods of interpolating quarterly data, a very simple way to increase the weight of these series in the estimation is to duplicate them in the dataset. Such duplication can be mechanical (e.g. duplicate quarterly series 2 times in monthly dataset), but should ideally be based on considerations about the quality of the signal stemming from different quarterly series (i.e. informative series should be duplicated more).  -->
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Quarterly series from BM14</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">BM14_Q</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                gdp priv_cons   invest   export   import     empl prductivity</span></span>
@@ -454,15 +456,15 @@ In the absence of such adjustments to the algorithm, or other methods of interpo
 <span><span class="co">#&gt; 1980-06-30       NA 5787.4</span></span>
 <span><span class="co">#&gt; 1980-09-30       NA 5776.6</span></span>
 <span><span class="co"># Pre-processing the data</span></span>
-<span><span class="va">BM14_Q</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">[</span><span class="va">BM14_Models</span><span class="op">$</span><span class="va">freq</span> <span class="op">==</span> <span class="st">"Q"</span>, <span class="op">]</span><span class="op">$</span><span class="va">log_trans</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/compound.html" class="external-link">%&lt;&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">BM14_Q</span><span class="op">[</span>, <span class="va">BM14_Models</span><span class="op">$</span><span class="va">log_trans</span><span class="op">[</span><span class="va">BM14_Models</span><span class="op">$</span><span class="va">freq</span> <span class="op">==</span> <span class="st">"Q"</span><span class="op">]</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/compound.html" class="external-link">%&lt;&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">BM14_Q_diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_Q</span><span class="op">)</span></span>
 <span><span class="co"># Merging to monthly data</span></span>
-<span><span class="va">BM14_diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">BM14_M_diff</span>, <span class="va">BM14_Q_diff</span><span class="op">)</span></span>
+<span><span class="va">BM14_diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">BM14_M_diff</span>, <span class="va">BM14_Q_diff</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimating the model with 5 factors and 3 lags using BM14's EM algorithm</span></span>
-<span><span class="va">model2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DFM.html">DFM</a></span><span class="op">(</span><span class="va">BM14_diff</span>, r <span class="op">=</span> <span class="fl">5</span>, p <span class="op">=</span> <span class="fl">3</span>, quarterly.vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">BM14_Q</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">model_mq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DFM.html">DFM</a></span><span class="op">(</span><span class="va">BM14_diff</span>, r <span class="op">=</span> <span class="fl">5</span>, p <span class="op">=</span> <span class="fl">3</span>, quarterly.vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">BM14_Q</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Converged after 36 iterations.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">model_mq</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Mixed Frequency Dynamic Factor Model</span></span>
 <span><span class="co">#&gt; n = 101, nm = 92, nq = 9, T = 356, r = 5, p = 3</span></span>
 <span><span class="co">#&gt; %NA = 29.7363, %NAm = 25.8366</span></span>
@@ -479,7 +481,7 @@ In the absence of such adjustments to the algorithm, or other methods of interpo
 <span><span class="co">#&gt; f3 -0.0337 -0.0337 -0.0986  0.1048  0.1325 -0.0781</span></span>
 <span><span class="co">#&gt; f4  0.1374  0.0543 -0.0733 -0.0256  0.0902 -0.0382</span></span>
 <span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 1 row ]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_mq</span><span class="op">)</span></span></code></pre></div>
 <p><img src="introduction_files/figure-html/unnamed-chunk-16-1.png" width="672"></p>
 <!--
 Another possibility is to estimate different factor models for monthly and quarterly series, and combine them for the final prediction (e.g. by aggregating or blocking the monthly factor estimates). 
@@ -502,6 +504,29 @@ log-likelihood in EM estimation.</p>
 the Armadillo C++ library through the functions <code><a href="../reference/ainv.html">ainv()</a></code> and
 <code><a href="../reference/ainv.html">apinv()</a></code>. These are often faster than <code><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve()</a></code>,
 and somewhat more robust in near-singularity cases.</p>
+</div>
+<div class="section level2">
+<h2 id="conclusion-and-outlook">Conclusion and Outlook<a class="anchor" aria-label="anchor" href="#conclusion-and-outlook"></a>
+</h2>
+<p><em>dfms</em> provides a simple but robust and powerful
+implementation of dynamic factors models in R. For more information
+about the model consult the <a href="https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf" class="external-link">theoretical
+vignette</a>.</p>
+<p>Other implementations more geared to economic nowcasting applications
+are provided in R packages <a href="https://github.com/nmecsys/nowcasting" class="external-link"><em>nowcasting</em></a> and
+<a href="https://github.com/dhopp1/nowcastDFM" class="external-link"><em>nowcastDFM</em></a>.
+More general forms of autoregressive state space models can be fit using
+<a href="https://CRAN.R-project.org/package=MARSS" class="external-link"><em>MARSS</em></a>.
+For large-scale nowcasting models, the <a href="https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.dynamic_factor_mq.DynamicFactorMQ.html" class="external-link"><code>DynamicFactorMQ</code></a>
+class in the <em>statsmodels</em> Python library provides a robust and
+performant implementation.</p>
+<p>In the future, a simple <code><a href="https://rdrr.io/r/utils/news.html" class="external-link">news()</a></code> function following
+Banbura and Modugno (2014) may be added to <em>dfms</em> to evaluate the
+impact of new observations on model predictions. In general, my time on
+this package is very limited, but the original Matlab codes of Banbura
+and Modugno (2014) are <a href="https://github.com/SebKrantz/dfms/tree/main/misc/BM2014" class="external-link">in the
+repo</a>. Thus, impatient users are also very welcome to do advances and
+submit PRs.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
