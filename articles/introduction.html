@@ -408,8 +408,8 @@ Higher lag-orders product more interesting forecast dynamics.&lt;/p&gt;"><sup>9<
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Setting an appropriate plot range to see the forecast</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">320</span>, <span class="fl">370</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-14-1.png" width="672">
-By default, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> uses the QML factor estimates (if
+<p><img src="introduction_files/figure-html/unnamed-chunk-14-1.png" width="672"></p>
+<p>By default, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> uses the QML factor estimates (if
 available). We can however also predict with PCA or TwoStep estimates
 using, e.g., <code>predict(model_m, h = 12, method = "2s")</code>.</p>
 <p>The forecasts can be retrieved in data frame using
