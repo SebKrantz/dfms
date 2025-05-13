@@ -87,7 +87,7 @@ reference:
 
 external-articles:
   - name: dynamic_factor_models
-    title: Dynamic Factor Models - A Very Short Introduction
+    title: Dynamic Factor Models: A Very Short Introduction
     description: " "
     href: https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf
 
