@@ -77,9 +77,6 @@ print.dfm <- function(x, digits = 4L, ...) {
 coef.dfm <- function(object, ...) list(A = object$A, C = object$C)
 
 #' @export
-coefficients.dfm <- coef.dfm
-
-#' @export
 logLik.dfm <- function(object, ...) object$loglik[length(object$loglik)]
 
 #' @rdname summary.dfm
