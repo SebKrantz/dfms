@@ -3,7 +3,7 @@ pkgdown: 2.1.2.9000
 pkgdown_sha: 909afa30f1d762be6d88ae438d1aec5d2c9bbfe3
 articles:
   introduction: introduction.html
-last_built: 2025-05-17T23:13Z
+last_built: 2025-05-17T23:37Z
 urls:
   reference: https://sebkrantz.github.io/dfms/reference
   article: https://sebkrantz.github.io/dfms/articles

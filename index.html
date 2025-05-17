@@ -93,9 +93,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 'dfm' methods</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Mixed Frequency Dynamic Factor Model</span></span>
-<span><span class="co">## n = 92, nm = 92, nq = 0, T = 356, r = 6, p = 3</span></span>
-<span><span class="co">## %NA = 25.8366, %NAm = NA</span></span>
+<pre><code><span><span class="co">## Dynamic Factor Model: n = 92, T = 356, r = 6, p = 3, %NA = 25.8366</span></span>
 <span><span class="co">##</span></span>
 <span><span class="co">## Call:  DFM(X = diff(BM14_M), r = 6, p = 3)</span></span>
 <span><span class="co">##</span></span>
@@ -109,27 +107,20 @@
 <span><span class="co">## f6  356  -0.8361   -0.304  3.1406  -11.6611  15.4897</span></span>
 <span><span class="co">##</span></span>
 <span><span class="co">## Factor Transition Matrix [A]</span></span>
-<span><span class="co">##       L1.f1    L1.f2     L1.f3    L1.f4    L1.f5    L1.f6    L2.f1    L2.f2</span></span>
-<span><span class="co">## f1  0.53029 -0.53009  0.367302  0.04607 -0.06351  0.10310  0.02457  0.11673</span></span>
-<span><span class="co">## f2 -0.28380  0.07421 -0.032292  0.29741 -0.10094  0.21989  0.09958 -0.09149</span></span>
-<span><span class="co">## f3  0.17607  0.12979  0.378798 -0.06662 -0.12236  0.06685 -0.08068  0.09101</span></span>
-<span><span class="co">## f4  0.02711  0.08936  0.004643  0.37159  0.12100 -0.02763  0.01234 -0.05147</span></span>
-<span><span class="co">## f5 -0.26227 -0.03469 -0.046294  0.12712  0.26847  0.03141  0.06400  0.01971</span></span>
-<span><span class="co">## f6  0.08251  0.17619 -0.013374 -0.08731 -0.03875  0.27812 -0.01662  0.04877</span></span>
-<span><span class="co">##       L2.f3    L2.f4     L2.f5    L2.f6    L3.f1    L3.f2    L3.f3    L3.f4</span></span>
-<span><span class="co">## f1 -0.12638  0.23135  0.117184  0.21941  0.18478  0.02259 -0.03719 -0.07236</span></span>
-<span><span class="co">## f2  0.06708 -0.09768 -0.043057  0.08489  0.21107  0.16261  0.03057  0.04835</span></span>
-<span><span class="co">## f3 -0.22232  0.09799 -0.060666 -0.18028 -0.02773  0.01798  0.10143 -0.12420</span></span>
-<span><span class="co">## f4  0.02195  0.01266  0.050912  0.05144 -0.05601  0.04665  0.05710 -0.11412</span></span>
-<span><span class="co">## f5  0.04806 -0.03965 -0.009952 -0.18471  0.08332 -0.04640 -0.02047  0.02458</span></span>
-<span><span class="co">## f6  0.02279  0.01163 -0.100859  0.07152  0.00792  0.06071  0.11381  0.02520</span></span>
-<span><span class="co">##       L3.f5    L3.f6</span></span>
-<span><span class="co">## f1 -0.03026 -0.12606</span></span>
-<span><span class="co">## f2  0.12249  0.13357</span></span>
-<span><span class="co">## f3  0.04207 -0.07011</span></span>
-<span><span class="co">## f4 -0.05680 -0.01609</span></span>
-<span><span class="co">## f5  0.16397  0.07820</span></span>
-<span><span class="co">## f6 -0.17897  0.30328</span></span>
+<span><span class="co">##       L1.f1    L1.f2     L1.f3    L1.f4    L1.f5    L1.f6    L2.f1    L2.f2    L2.f3</span></span>
+<span><span class="co">## f1  0.53029 -0.53009  0.367302  0.04607 -0.06351  0.10310  0.02457  0.11673 -0.12638</span></span>
+<span><span class="co">## f2 -0.28380  0.07421 -0.032292  0.29741 -0.10094  0.21989  0.09958 -0.09149  0.06708</span></span>
+<span><span class="co">## f3  0.17607  0.12979  0.378798 -0.06662 -0.12236  0.06685 -0.08068  0.09101 -0.22232</span></span>
+<span><span class="co">## f4  0.02711  0.08936  0.004643  0.37159  0.12100 -0.02763  0.01234 -0.05147  0.02195</span></span>
+<span><span class="co">## f5 -0.26227 -0.03469 -0.046294  0.12712  0.26847  0.03141  0.06400  0.01971  0.04806</span></span>
+<span><span class="co">## f6  0.08251  0.17619 -0.013374 -0.08731 -0.03875  0.27812 -0.01662  0.04877  0.02279</span></span>
+<span><span class="co">##       L2.f4     L2.f5    L2.f6    L3.f1    L3.f2    L3.f3    L3.f4    L3.f5    L3.f6</span></span>
+<span><span class="co">## f1  0.23135  0.117184  0.21941  0.18478  0.02259 -0.03719 -0.07236 -0.03026 -0.12606</span></span>
+<span><span class="co">## f2 -0.09768 -0.043057  0.08489  0.21107  0.16261  0.03057  0.04835  0.12249  0.13357</span></span>
+<span><span class="co">## f3  0.09799 -0.060666 -0.18028 -0.02773  0.01798  0.10143 -0.12420  0.04207 -0.07011</span></span>
+<span><span class="co">## f4  0.01266  0.050912  0.05144 -0.05601  0.04665  0.05710 -0.11412 -0.05680 -0.01609</span></span>
+<span><span class="co">## f5 -0.03965 -0.009952 -0.18471  0.08332 -0.04640 -0.02047  0.02458  0.16397  0.07820</span></span>
+<span><span class="co">## f6  0.01163 -0.100859  0.07152  0.00792  0.06071  0.11381  0.02520 -0.17897  0.30328</span></span>
 <span><span class="co">##</span></span>
 <span><span class="co">## Factor Covariance Matrix [cov(F)]</span></span>
 <span><span class="co">##           f1        f2        f3        f4        f5        f6</span></span>
@@ -171,11 +162,11 @@
 <span><span class="co">## 5    PCA     f1    5 -0.4631786</span></span>
 <span><span class="co">## 6    PCA     f1    6  0.2399304</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Forecasting 20 periods ahead</span></span>
-<span><span class="va">fc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mod</span>, h <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Forecasting 12 periods ahead</span></span>
+<span><span class="va">fc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mod</span>, h <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 'dfm_forecast' methods</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">320</span>, <span class="fl">370</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <p><img src="https://raw.githubusercontent.com/SebKrantz/dfms/main/misc/figure/unnamed-chunk-1-2.png" alt="plot of chunk unnamed-chunk-1" width="100%"></p>
 </div>

@@ -60,7 +60,7 @@ Krantz</h4>
             
             <h4 data-toc-skip class="date">2025-05-17</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/v0.3.0/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="d-none name"><code>introduction.Rmd</code></div>
     </div>
 
@@ -244,9 +244,7 @@ information printed to the data size. For large databases with more than
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dfm_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model_m</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">dfm_summary</span><span class="op">)</span> <span class="co"># Large model with &gt; 40 series: defaults to compact = 2</span></span>
-<span><span class="co">#&gt; Mixed Frequency Dynamic Factor Model</span></span>
-<span><span class="co">#&gt; n = 92, nm = 92, nq = 0, T = 356, r = 4, p = 3</span></span>
-<span><span class="co">#&gt; %NA = 25.8366, %NAm = NA</span></span>
+<span><span class="co">#&gt; Dynamic Factor Model: n = 92, T = 356, r = 4, p = 3, %NA = 25.8366</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:  DFM(X = BM14_M_diff, r = 4, p = 3)</span></span>
 <span><span class="co">#&gt; </span></span>
