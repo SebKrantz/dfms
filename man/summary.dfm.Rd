@@ -4,9 +4,15 @@
 \alias{summary.dfm}
 \alias{print.dfm}
 \alias{print.dfm_summary}
+\alias{coef.dfm}
+\alias{logLik.dfm}
 \title{DFM Summary Methods}
 \usage{
 \method{print}{dfm}(x, digits = 4L, ...)
+
+\method{coef}{dfm}(object, ...)
+
+\method{logLik}{dfm}(object, ...)
 
 \method{summary}{dfm}(object, method = switch(object$em.method, none = "2s", "qml"), ...)
 
@@ -24,11 +30,11 @@
 \item{compact}{integer. Display a more compact printout: \code{0} prints everything, \code{1} omits the observation matrix \eqn{\textbf{C}}{C} and residual covariance matrix \code{cov(resid(model))}, and \code{2} omits all disaggregated information on the input data. Sensible default are chosen for different sizes of the input dataset so as to limit large printouts.}
 }
 \value{
-Summary information following a dynamic factor model estimation.
+Summary information following a dynamic factor model estimation. \code{coef()} returns \eqn{\textbf{A}}{A} and \eqn{\textbf{C}}{C}.
 }
 \description{
-Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic model information and the factor transition matrix \eqn{\textbf{A}}{A},
-\code{summary.dfm} returns all system matrices and additional residual and goodness of fit statistics - with a print method allowing full or compact printout.
+Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic model information and the factor transition matrix \eqn{\textbf{A}}{A}, \code{coef.dfm} returns \eqn{\textbf{A}}{A} and \eqn{\textbf{C}}{C} in a plain list, whereas
+\code{summary.dfm} returns all system matrices and additional residual and goodness of fit statistics---with a print method allowing full or compact printout.
 }
 \examples{
 mod = DFM(diff(BM14_Q), 2, 3)

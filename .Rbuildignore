@@ -1,6 +1,7 @@
 ^dfms\.Rproj$
 ^\.Rproj\.user$
 misc
+^README\.html$
 .RData
 LICENSE
 ^\.github$

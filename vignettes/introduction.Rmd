@@ -88,15 +88,15 @@ Estimation can then simply be done using the `DFM()` function with parameters `r
 
 ```{r}
 # Estimating the model with 4 factors and 3 lags using BM14's EM algorithm
-model1 <- DFM(BM14_M_diff, r = 4, p = 3)
-print(model1)
-plot(model1)
+model_m <- DFM(BM14_M_diff, r = 4, p = 3)
+print(model_m)
+plot(model_m)
 ```
 
 The model can be investigated using `summary()`, which returns an object of class 'dfm_summary' containing the system matrices and summary statistics of the factors and the residuals in the measurement equation, as well as the R-Squared of the factor model for individual series. The print method automatically adjusts the amount of information printed to the data size. For large databases with more than 40 series, no series-level statistics are printed. 
 
 ```{r}
-dfm_summary <- summary(model1)
+dfm_summary <- summary(model_m)
 print(dfm_summary) # Large model with > 40 series: defaults to compact = 2
 
 # Can request more detailed printouts
@@ -107,8 +107,8 @@ print(dfm_summary) # Large model with > 40 series: defaults to compact = 2
 Apart from the model summary, the *dfm* methods `residuals()` and `fitted()` return observation residuals and fitted values from the model. The default format is a plain matrix, but the functions also have an argument to return data in the original (input) format.
 
 ```{r}
-plot(resid(model1, orig.format = TRUE))
-plot(fitted(model1, orig.format = TRUE))
+plot(resid(model_m, orig.format = TRUE))
+plot(fitted(model_m, orig.format = TRUE))
 ```
 
 
@@ -116,25 +116,25 @@ plot(fitted(model1, orig.format = TRUE))
 Another way to examine the factor model visually is to plot the Quasi-Maximum-Likelihood (QML) factor estimates against PCA and Two-Step estimates following Doz, Giannone and Reichlin (2011)^[Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. *Journal of Econometrics, 164*(1), 188-205.], where the Kalman Filter and Smoother is run only once. Both estimates are also computed by `DFM()` during EM estimation and can also be visualized with `plot.dfm`.
 
 ```{r}
-plot(model1, method = "all", type = "individual")
+plot(model_m, method = "all", type = "individual")
 ```
 
-The plot with the various estimates shows that the QML estimates are more volatile in the initial periods where there are many missing series, but less volatile in the latter periods. In general, QML estimates may now always be superior across the entire data range to Two-Step and PCA estimates. Often, Two-Step estimates also provide similar forecasting performance, and are much faster to estimate using `DFM(BM14_M_diff, r = 4, p = 3, em.method = "none")`.  
+The plot with the various estimates shows that the QML estimates are more volatile in the initial periods where there are many missing series, but less volatile in the latter periods. In general, QML estimates may not always be superior across the entire data range to Two-Step and PCA estimates. Often, Two-Step estimates also provide similar forecasting performance, and are much faster to estimate using `DFM(BM14_M_diff, r = 4, p = 3, em.method = "none")`.  
 
 The factor estimates themselves can be extracted in a data frame using `as.data.frame()`, which also provides various options regarding the estimates retained and the format of the frame. It is also possible to add a time variable from the original data (the default is a sequence of integers).
 
 ```{r}
 # Default: all estimates in long format
-head(as.data.frame(model1, time = index(BM14_M_diff)))
+head(as.data.frame(model_m, time = index(BM14_M_diff)))
 ```
 
 ## Forecasting
 
-DFM forecasts can be obtained with the `predict()` method, which dynamically forecasts the factors using the transition equation (default 10 periods), and then also predicts data forecasts using the observation equation. Objects are of class 'dfm_forecast'
+DFM forecasts can be obtained with the `predict()` method, which dynamically forecasts the factors using the transition equation (default 10 periods), and then also predicts data forecasts using the observation equation. Objects are of class 'dfm_forecast'.
 
 ```{r}
 # 12-period ahead DFM forecast
-fc <- predict(model1, h = 12)
+fc <- predict(model_m, h = 12)
 print(fc)
 ```
 
@@ -142,12 +142,11 @@ These forecasts can also be visualized using a plot method. By default the entir
 ```{r}
 # Setting an appropriate plot range to see the forecast
 plot(fc, xlim = c(320, 370))
-# Predicting with Two-Step estimates
-# plot(predict(model1, h = 12, method = "2s"), xlim = c(320, 370))
 ```
 
+By default, `predict()` uses the QML factor estimates (if available). We can however also predict with PCA or TwoStep estimates using, e.g., `predict(model_m, h = 12, method = "2s")`. 
 
-The forecasts can also be retrieved in data frame using `as.data.frame()`. Again the method has various arguments to control the forecasts retained (factors, data or both, default factors), and the format of the frame. 
+The forecasts can be retrieved in data frame using `as.data.frame()`. Again the method has various arguments to control the output (factors, data, or both --- default factors) and the format of the frame. 
 
 ```{r}
 # Factor forecasts in wide format
@@ -156,7 +155,7 @@ head(as.data.frame(fc, pivot = "wide"))
 
 ## Estimation with Mixed Frequency
 
-Since v0.3.0 *dfms* allows monthly and quarterly mixed frequency estimation following Mariano & Murasawa (2003) and Banbura & Modugno (2014). Quarterly variables should be to the right of the monthly variables in the data matrix and need to be indicated using the `quarterly.vars` argument. Quarterly observations should be provided every 3rd period.
+Since v0.3.0, *dfms* allows monthly and quarterly mixed frequency estimation following Mariano & Murasawa (2003) and Banbura & Modugno (2014). Quarterly variables should be to the right of the monthly variables in the data matrix and need to be indicated using the `quarterly.vars` argument. Quarterly observations should be provided every 3rd period (months 3, 6, 9, and 12). Below, I estimate the mixed frequency DFM, adding a factor to capture any idiosynchratic dynamics in the quarterly series. 
 
 <!-- 
 The baseline algorithm of BM14, being designed for arbitrary patterns of missing data, allows lower frequency series to be included in the estimation. The problem here is that series at lower frequency contain many missing values, which effectively lets these series have less weight in the estimation.
@@ -165,19 +164,19 @@ BM14 use the approximation of Mariano and Murasawa (2003) to construct a monthly
 
 In the absence of such adjustments to the algorithm, or other methods of interpolating quarterly data, a very simple way to increase the weight of these series in the estimation is to duplicate them in the dataset. Such duplication can be mechanical (e.g. duplicate quarterly series 2 times in monthly dataset), but should ideally be based on considerations about the quality of the signal stemming from different quarterly series (i.e. informative series should be duplicated more).  -->
 
-```{r, eval = FALSE, include=FALSE}
+```{r}
 # Quarterly series from BM14
 head(BM14_Q, 3)
 # Pre-processing the data
-BM14_Q[, BM14_Models[BM14_Models$freq == "Q", ]$log_trans] %<>% log()
+BM14_Q[, BM14_Models$log_trans[BM14_Models$freq == "Q"]] %<>% log()
 BM14_Q_diff <- diff(BM14_Q)
 # Merging to monthly data
-BM14_diff <- cbind(BM14_M_diff, BM14_Q_diff)
+BM14_diff <- merge(BM14_M_diff, BM14_Q_diff)
 
 # Estimating the model with 5 factors and 3 lags using BM14's EM algorithm
-model2 <- DFM(BM14_diff, r = 5, p = 3, quarterly.vars = colnames(BM14_Q))
-print(model2)
-plot(model2)
+model_mq <- DFM(BM14_diff, r = 5, p = 3, quarterly.vars = colnames(BM14_Q))
+print(model_mq)
+plot(model_mq)
 ```
 
 <!--
@@ -190,6 +189,14 @@ If performance is not critical, I also refer the user to the [*nowcasting*](<htt
 *dfms* also exports central functions that help with DFM estimation, such as imputing missing values with `tsnarmimp()`, estimating a VAR with `.VAR()`, or Kalman Filtering and Smoothing with `SKFS()`, or separately with `SKF()` followed by `FIS()`. To my knowledge these are the fastest routines for simple stationary Kalman Filtering and Smoothing currently available in R. The function `em_converged()` can be used to check convergence of the log-likelihood in EM estimation. 
 
 *dfms* also exports a matrix inverse and pseudo-inverse from the Armadillo C++ library through the functions `ainv()` and `apinv()`. These are often faster than `solve()`, and somewhat more robust in near-singularity cases. 
+
+## Conclusion and Outlook
+
+*dfms* provides a simple but robust and powerful implementation of dynamic factors models in R. For more information about the model consult the [theoretical vignette](https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf). 
+
+Other implementations more geared to economic nowcasting applications are provided in R packages [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>). More general forms of autoregressive state space models can be fit using [*MARSS*](<https://CRAN.R-project.org/package=MARSS>). For large-scale nowcasting models, the [`DynamicFactorMQ`](https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.dynamic_factor_mq.DynamicFactorMQ.html) class in the *statsmodels* Python library provides a robust and performant implementation.
+
+In the future, a simple `news()` function following Banbura and Modugno (2014) may be added to *dfms* to evaluate the impact of new observations on model predictions. In general, my time on this package is very limited, but the original Matlab codes of Banbura and Modugno (2014) are [in the repo](https://github.com/SebKrantz/dfms/tree/main/misc/BM2014). Thus, impatient users are also very welcome to do advances and submit PRs.
 
 ## References
 

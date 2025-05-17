@@ -22,21 +22,21 @@ DFM(
 )
 }
 \arguments{
-\item{X}{a \code{T x n} numeric data matrix or frame of stationary time series. May contain missing values.}
+\item{X}{a \code{T x n} numeric data matrix or frame of stationary time series. May contain missing values. \emph{Note} that data is internally standardized (scaled and centered) before estimation.}
 
-\item{r}{integer. number of factors.}
+\item{r}{integer. Number of factors.}
 
-\item{p}{integer. number of lags in factor VAR.}
+\item{p}{integer. Number of lags in factor VAR.}
 
-\item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}.}
+\item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}. The default settings impute internal missing values with a cubic spline and the edges with the median and a 3-period moving average.}
 
-\item{idio.ar1}{logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generaly not needed if \code{n} is large (>30). See theoretical vignette for details.}
+\item{idio.ar1}{logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generally not needed if \code{n} is large (>30). See theoretical vignette for details.}
 
 \item{quarterly.vars}{character. Names of quarterly variables in \code{X} (if any). Monthly variables should be to the left of the quarterly variables in the data matrix and quarterly observations should be provided every 3rd period.}
 
-\item{rQ}{character. restrictions on the state (transition) covariance matrix (Q).}
+\item{rQ}{character. Restrictions on the state (transition) covariance matrix (Q).}
 
-\item{rR}{character. restrictions on the observation (measurement) covariance matrix (R).}
+\item{rR}{character. Restrictions on the observation (measurement) covariance matrix (R).}
 
 \item{em.method}{character. The implementation of the Expectation Maximization Algorithm used. The options are:
 \tabular{llll}{
@@ -60,7 +60,7 @@ This yields significant performance gains over the iterative methods. Final syst
 }
 \value{
 A list-like object of class 'dfm' with the following elements:
-\item{\code{X_imp}}{\eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
+\item{\code{X_imp}}{\eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data---after applying \code{\link{tsnarmimp}}. It has attributes attached allowing for reconstruction of the original data:
 \tabular{llll}{
 \code{"stats"} \tab\tab is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr\cr
 \code{"missing"} \tab\tab is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr\cr
@@ -85,6 +85,7 @@ A list-like object of class 'dfm' with the following elements:
 \item{\code{converged}}{single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).}
 \item{\code{anyNA}}{single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.}
 \item{\code{rm.rows}}{vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. }
+\item{\code{quarterly.vars}}{names of the quarterly variables (if any).}
 \item{\code{em.method}}{The EM method used.}
 \item{\code{call}}{call object obtained from \code{match.call()}.}
 }
@@ -133,6 +134,7 @@ where
 \eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr
 \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 }
+The filter is initialized with PCA estimates on the imputed dataset---see \code{\link{SKFS}} for a complete code example.
 }
 \examples{
 library(magrittr)
