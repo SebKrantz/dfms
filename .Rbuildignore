@@ -1,6 +1,7 @@
 ^dfms\.Rproj$
 ^\.Rproj\.user$
 misc
+^README\.Rmd$
 ^README\.html$
 .RData
 LICENSE

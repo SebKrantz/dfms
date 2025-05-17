@@ -138,7 +138,7 @@ print.dfm_summary <- function(x,
                               compact = sum(x$info["n"] > 15, x$info["n"] > 40), ...) {
 
   inf <- as.integer(x$info[1:4])
-  if(length(x$info["nq"] > 0)) {
+  if(x$info["nq"] > 0) {
     cat("Mixed Frequency Dynamic Factor Model\nn = ", inf[1L], ", nm = ", inf[1L] - x$info["nq"], ", nq = ", x$info["nq"], ", T = ", inf[2L], ", r = ", inf[3L], ", p = ", inf[4L],
         "\n%NA = ", round(x$info["%NA"], digits), ", %NAm = ", round(x$info["%NAm"], digits), "\n", sep = "")
   } else {
