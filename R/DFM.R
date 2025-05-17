@@ -11,7 +11,7 @@
 #' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data
 #' with time-invariant system matrices and classical assumptions, while permitting missing data.
 #'
-#' @param X a \code{T x n} numeric data matrix or frame of stationary time series. May contain missing values.
+#' @param X a \code{T x n} numeric data matrix or frame of stationary time series. May contain missing values. \emph{Note} that data is internally standardized (scaled and centered) before estimation.
 #' @param r integer. Number of factors.
 #' @param p integer. Number of lags in factor VAR.
 #' @param \dots (optional) arguments to \code{\link{tsnarmimp}}.
@@ -104,6 +104,7 @@
 #'  \item{\code{converged}}{single logical valued indicating whether the EM algorithm converged (within \code{max.iter} iterations subject to \code{tol}).}
 #'  \item{\code{anyNA}}{single logical valued indicating whether there were any (internal) missing values in the data (determined after removal of rows with too many missing values). If \code{FALSE}, \code{X_imp} is simply the original data in matrix form, and does not have the \code{"missing"} attribute attached.}
 #'  \item{\code{rm.rows}}{vector of any cases (rows) that were removed beforehand (subject to \code{max.missing} and \code{na.rm.method}). If no cases were removed the slot is \code{NULL}. }
+#'  \item{\code{quarterly.vars}}{names of the quarterly variables (if any).}
 #'  \item{\code{em.method}}{The EM method used.}
 #'  \item{\code{call}}{call object obtained from \code{match.call()}.}
 #'
