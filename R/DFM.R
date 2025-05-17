@@ -404,7 +404,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   ## Initial System Matrices
   if(MFl) {
-    init <- if(idio.ar1) stop("Not yet implemented") else
+    init <- if(idio.ar1) stop("Mixed frequency with autocorrelated errors is not yet implemented") else
       init_cond_MQ(X, X_imp, F_pc, v, n, r, p, TT, nq, rRi, rQi)
   } else {
     init <- if(idio.ar1) init_cond_idio_ar1(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss, tol) else

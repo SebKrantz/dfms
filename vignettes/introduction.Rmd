@@ -107,8 +107,8 @@ print(dfm_summary) # Large model with > 40 series: defaults to compact = 2
 Apart from the model summary, the *dfm* methods `residuals()` and `fitted()` return observation residuals and fitted values from the model. The default format is a plain matrix, but the functions also have an argument to return data in the original (input) format.
 
 ```{r}
-plot(resid(model_m, orig.format = TRUE))
-plot(fitted(model_m, orig.format = TRUE))
+plot(resid(model_m, orig.format = TRUE), lwd = 1)
+plot(fitted(model_m, orig.format = TRUE), lwd = 1)
 ```
 
 
