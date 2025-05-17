@@ -75,6 +75,8 @@ print.dfm <- function(x, digits = 4L, ...) {
 
 #' @export
 coef.dfm <- function(object, ...) list(A = object$A, C = object$C)
+
+#' @export
 coefficients.dfm <- coef.dfm
 
 #' @export
