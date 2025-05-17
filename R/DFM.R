@@ -15,7 +15,7 @@
 #' @param r integer. Number of factors.
 #' @param p integer. Number of lags in factor VAR.
 #' @param \dots (optional) arguments to \code{\link{tsnarmimp}}. The default settings impute internal missing values with a cubic spline and the edges with the median and a 3-period moving average.
-#' @param idio.ar1 logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generaly not needed if \code{n} is large (>30). See theoretical vignette for details.
+#' @param idio.ar1 logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generally not needed if \code{n} is large (>30). See theoretical vignette for details.
 #' @param quarterly.vars character. Names of quarterly variables in \code{X} (if any). Monthly variables should be to the left of the quarterly variables in the data matrix and quarterly observations should be provided every 3rd period.
 #' @param rQ character. Restrictions on the state (transition) covariance matrix (Q).
 #' @param rR character. Restrictions on the observation (measurement) covariance matrix (R).
