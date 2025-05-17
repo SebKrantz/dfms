@@ -28,7 +28,7 @@ DFM(
 
 \item{p}{integer. Number of lags in factor VAR.}
 
-\item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}.}
+\item{\dots}{(optional) arguments to \code{\link{tsnarmimp}}. The default settings impute internal missing values with a cubic spline and the edges with the median and a 3-period moving average.}
 
 \item{idio.ar1}{logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generaly not needed if \code{n} is large (>30). See theoretical vignette for details.}
 
@@ -60,7 +60,7 @@ This yields significant performance gains over the iterative methods. Final syst
 }
 \value{
 A list-like object of class 'dfm' with the following elements:
-\item{\code{X_imp}}{\eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
+\item{\code{X_imp}}{\eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data---after applying \code{\link{tsnarmimp}}. It has attributes attached allowing for reconstruction of the original data:
 \tabular{llll}{
 \code{"stats"} \tab\tab is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr\cr
 \code{"missing"} \tab\tab is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr\cr
@@ -134,6 +134,7 @@ where
 \eqn{\textbf{Q}}{Q} \tab\tab \eqn{rp \times rp}{rp x rp} state covariance matrix. The top \eqn{r \times r}{r x r} part gives the contemporaneous relationships, the rest are zeros by assumption 4.\cr\cr
 \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 }
+The filter is initialized with PCA estimates on the imputed dataset---see \code{\link{SKFS}} for a complete code example.
 }
 \examples{
 library(magrittr)

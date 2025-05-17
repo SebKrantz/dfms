@@ -14,7 +14,7 @@
 #' @param X a \code{T x n} numeric data matrix or frame of stationary time series. May contain missing values. \emph{Note} that data is internally standardized (scaled and centered) before estimation.
 #' @param r integer. Number of factors.
 #' @param p integer. Number of lags in factor VAR.
-#' @param \dots (optional) arguments to \code{\link{tsnarmimp}}.
+#' @param \dots (optional) arguments to \code{\link{tsnarmimp}}. The default settings impute internal missing values with a cubic spline and the edges with the median and a 3-period moving average.
 #' @param idio.ar1 logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generaly not needed if \code{n} is large (>30). See theoretical vignette for details.
 #' @param quarterly.vars character. Names of quarterly variables in \code{X} (if any). Monthly variables should be to the left of the quarterly variables in the data matrix and quarterly observations should be provided every 3rd period.
 #' @param rQ character. Restrictions on the state (transition) covariance matrix (Q).
@@ -77,9 +77,11 @@
 #'  \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 #' }
 #  that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[f(t)|F(t-1)] = E[f(t)|f(t-1)] = A1 f(t-1)} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
+#' The filter is initialized with PCA estimates on the imputed dataset---see \code{\link{SKFS}} for a complete code example.
+#'
 #'
 #' @returns A list-like object of class 'dfm' with the following elements:
-#'  \item{\code{X_imp}}{\eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:
+#'  \item{\code{X_imp}}{\eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data---after applying \code{\link{tsnarmimp}}. It has attributes attached allowing for reconstruction of the original data:
 #'  \tabular{llll}{
 #'      \code{"stats"} \tab\tab is a \eqn{n \times 5}{n x 5} matrix of summary statistics of class \code{"qsu"} (see \code{\link[collapse]{qsu}}).\cr\cr
 #'      \code{"missing"} \tab\tab is a \eqn{T \times n}{T x n} logical matrix indicating missing or infinite values in the original data (which are imputed in \code{X_imp}).\cr\cr
