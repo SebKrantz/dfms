@@ -33,7 +33,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Estimate a Dynamic Factor Model</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/development/R/DFM.R" class="external-link"><code>R/DFM.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/main/R/DFM.R" class="external-link"><code>R/DFM.R</code></a></small>
       <div class="d-none name"><code>DFM.Rd</code></div>
     </div>
 
@@ -67,7 +67,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
 
 
 <dl><dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>a <code>T x n</code> numeric data matrix or frame of stationary time series. May contain missing values.</p></dd>
+<dd><p>a <code>T x n</code> numeric data matrix or frame of stationary time series. May contain missing values. <em>Note</em> that data is internally standardized (scaled and centered) before estimation.</p></dd>
 
 
 <dt id="arg-r">r<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
@@ -79,11 +79,11 @@ with time-invariant system matrices and classical assumptions, while permitting 
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>(optional) arguments to <code><a href="tsnarmimp.html">tsnarmimp</a></code>.</p></dd>
+<dd><p>(optional) arguments to <code><a href="tsnarmimp.html">tsnarmimp</a></code>. The default settings impute internal missing values with a cubic spline and the edges with the median and a 3-period moving average.</p></dd>
 
 
 <dt id="arg-idio-ar-">idio.ar1<a class="anchor" aria-label="anchor" href="#arg-idio-ar-"></a></dt>
-<dd><p>logical. Model observation errors as AR(1) processes: \(e_t = \rho e_{t-1} + v_t\). <em>Note</em> that this substantially increases computation time, and is generaly not needed if <code>n</code> is large (&gt;30). See theoretical vignette for details.</p></dd>
+<dd><p>logical. Model observation errors as AR(1) processes: \(e_t = \rho e_{t-1} + v_t\). <em>Note</em> that this substantially increases computation time, and is generally not needed if <code>n</code> is large (&gt;30). See theoretical vignette for details.</p></dd>
 
 
 <dt id="arg-quarterly-vars">quarterly.vars<a class="anchor" aria-label="anchor" href="#arg-quarterly-vars"></a></dt>
@@ -128,7 +128,7 @@ This yields significant performance gains over the iterative methods. Final syst
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list-like object of class 'dfm' with the following elements:</p>
 <dl><dt><code>X_imp</code></dt>
-<dd><p>\(T \times n\) matrix with the imputed and standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:</p><table class="table table"><tr><td><code>"stats"</code></td><td></td><td>is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://sebkrantz.github.io/collapse/reference/qsu.html" class="external-link">qsu</a></code>).</td><td></td></tr><tr><td><code>"missing"</code></td><td></td><td>is a \(T \times n\) logical matrix indicating missing or infinite values in the original data (which are imputed in <code>X_imp</code>).</td><td></td></tr><tr><td><code>"attributes"</code></td><td></td><td>contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.</td><td></td></tr><tr><td><code>"is.list"</code></td><td></td><td>is a logical value indicating whether the original data input was a list / data frame.</td><td></td></tr></table></dd>
+<dd><p>\(T \times n\) matrix with the imputed and standardized (scaled and centered) data—after applying <code><a href="tsnarmimp.html">tsnarmimp</a></code>. It has attributes attached allowing for reconstruction of the original data:</p><table class="table table"><tr><td><code>"stats"</code></td><td></td><td>is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://sebkrantz.github.io/collapse/reference/qsu.html" class="external-link">qsu</a></code>).</td><td></td></tr><tr><td><code>"missing"</code></td><td></td><td>is a \(T \times n\) logical matrix indicating missing or infinite values in the original data (which are imputed in <code>X_imp</code>).</td><td></td></tr><tr><td><code>"attributes"</code></td><td></td><td>contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.</td><td></td></tr><tr><td><code>"is.list"</code></td><td></td><td>is a logical value indicating whether the original data input was a list / data frame.</td><td></td></tr></table></dd>
 
 <dt><code>eigen</code></dt>
 <dd><p><code>eigen(cov(X_imp))</code>.</p></dd>
@@ -184,6 +184,9 @@ This yields significant performance gains over the iterative methods. Final syst
 <dt><code>rm.rows</code></dt>
 <dd><p>vector of any cases (rows) that were removed beforehand (subject to <code>max.missing</code> and <code>na.rm.method</code>). If no cases were removed the slot is <code>NULL</code>.</p></dd>
 
+<dt><code>quarterly.vars</code></dt>
+<dd><p>names of the quarterly variables (if any).</p></dd>
+
 <dt><code>em.method</code></dt>
 <dd><p>The EM method used.</p></dd>
 
@@ -205,7 +208,8 @@ $$\textbf{f}_t = \sum_{j=1}^p \textbf{A}_j \textbf{f}_{t-j} + \textbf{u}_t \ \si
 <table class="table table"><tr><td>\(n\)</td><td></td><td>number of series in \(\textbf{x}_t\) (\(r\) and \(p\) as the arguments to <code>DFM</code>).</td><td></td></tr><tr><td>\(\textbf{x}_t\)</td><td></td><td>\(n \times 1\) vector of observed series at time \(t\): \((x_{1t}, \dots, x_{nt})'\). Some observations can be missing.</td><td></td></tr><tr><td>\(\textbf{f}_t\)</td><td></td><td>\(r \times 1\) vector of factors at time \(t\): \((f_{1t}, \dots, f_{rt})'\).</td><td></td></tr><tr><td>\(\textbf{C}_0\)</td><td></td><td>\(n \times r\) measurement (observation) matrix.</td><td></td></tr><tr><td>\(\textbf{A}_j\)</td><td></td><td>\(r \times r\) state transition matrix at lag \(j\).</td><td></td></tr><tr><td>\(\textbf{Q}_0\)</td><td></td><td>\(r \times r\) state covariance matrix.</td><td></td></tr><tr><td>\(\textbf{R}\)</td><td></td><td>\(n \times n\) measurement (observation) covariance matrix. It is diagonal by assumption 2 that \(E[\textbf{x}_{it}|\textbf{x}_{-i,t},\textbf{x}_{i,t-1}, \dots, \textbf{f}_t, \textbf{f}_{t-1}, \dots] = \textbf{Cf}_t \forall i\).</td><td></td></tr></table><p>This model can be estimated using a classical form of the Kalman Filter and the Expectation Maximization (EM) algorithm, after transforming it to State-Space (stacked, VAR(1)) form:</p>
 <p>$$\textbf{x}_t = \textbf{C} \textbf{F}_t + \textbf{e}_t \ \sim\  N(\textbf{0}, \textbf{R})$$
 $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textbf{Q})$$</p>
-<p>where</p><table class="table table"><tr><td>\(n\)</td><td></td><td>number of series in \(\textbf{x}_t\) (\(r\) and \(p\) as the arguments to <code>DFM</code>).</td><td></td></tr><tr><td>\(\textbf{x}_t\)</td><td></td><td>\(n \times 1\) vector of observed series at time \(t\): \((x_{1t}, \dots, x_{nt})'\). Some observations can be missing.</td><td></td></tr><tr><td>\(\textbf{F}_t\)</td><td></td><td>\(rp \times 1\) vector of stacked factors at time \(t\): \((f_{1t}, \dots, f_{rt}, f_{1,t-1}, \dots, f_{r,t-1}, \dots, f_{1,t-p}, \dots, f_{r,t-p})'\).</td><td></td></tr><tr><td>\(\textbf{C}\)</td><td></td><td>\(n \times rp\) observation matrix. Only the first \(n \times r\) terms are non-zero, by assumption 3 that \(E[\textbf{x}_t|\textbf{F}_t] = E[\textbf{x}_t|\textbf{f}_t]\) (no relationship of observed series with lagged factors given contemporaneous factors).</td><td></td></tr><tr><td>\(\textbf{A}\)</td><td></td><td>stacked \(rp \times rp\) state transition matrix consisting of 3 parts: the top \(r \times rp\) part provides the dynamic relationships captured by \((\textbf{A}_1, \dots, \textbf{A}_p)\) in the dynamic form, the terms <code>A[(r+1):rp, 1:(rp-r)]</code> constitute an \((rp-r) \times (rp-r)\) identity matrix mapping all lagged factors to their known values at times t. The remaining part <code>A[(rp-r+1):rp, (rp-r+1):rp]</code> is an \(r \times r\) matrix of zeros.</td><td></td></tr><tr><td>\(\textbf{Q}\)</td><td></td><td>\(rp \times rp\) state covariance matrix. The top \(r \times r\) part gives the contemporaneous relationships, the rest are zeros by assumption 4.</td><td></td></tr><tr><td>\(\textbf{R}\)</td><td></td><td>\(n \times n\) observation covariance matrix. It is diagonal by assumption 2 and identical to \(\textbf{R}\) as stated in the dynamic form.</td><td></td></tr></table></div>
+<p>where</p><table class="table table"><tr><td>\(n\)</td><td></td><td>number of series in \(\textbf{x}_t\) (\(r\) and \(p\) as the arguments to <code>DFM</code>).</td><td></td></tr><tr><td>\(\textbf{x}_t\)</td><td></td><td>\(n \times 1\) vector of observed series at time \(t\): \((x_{1t}, \dots, x_{nt})'\). Some observations can be missing.</td><td></td></tr><tr><td>\(\textbf{F}_t\)</td><td></td><td>\(rp \times 1\) vector of stacked factors at time \(t\): \((f_{1t}, \dots, f_{rt}, f_{1,t-1}, \dots, f_{r,t-1}, \dots, f_{1,t-p}, \dots, f_{r,t-p})'\).</td><td></td></tr><tr><td>\(\textbf{C}\)</td><td></td><td>\(n \times rp\) observation matrix. Only the first \(n \times r\) terms are non-zero, by assumption 3 that \(E[\textbf{x}_t|\textbf{F}_t] = E[\textbf{x}_t|\textbf{f}_t]\) (no relationship of observed series with lagged factors given contemporaneous factors).</td><td></td></tr><tr><td>\(\textbf{A}\)</td><td></td><td>stacked \(rp \times rp\) state transition matrix consisting of 3 parts: the top \(r \times rp\) part provides the dynamic relationships captured by \((\textbf{A}_1, \dots, \textbf{A}_p)\) in the dynamic form, the terms <code>A[(r+1):rp, 1:(rp-r)]</code> constitute an \((rp-r) \times (rp-r)\) identity matrix mapping all lagged factors to their known values at times t. The remaining part <code>A[(rp-r+1):rp, (rp-r+1):rp]</code> is an \(r \times r\) matrix of zeros.</td><td></td></tr><tr><td>\(\textbf{Q}\)</td><td></td><td>\(rp \times rp\) state covariance matrix. The top \(r \times r\) part gives the contemporaneous relationships, the rest are zeros by assumption 4.</td><td></td></tr><tr><td>\(\textbf{R}\)</td><td></td><td>\(n \times n\) observation covariance matrix. It is diagonal by assumption 2 and identical to \(\textbf{R}\) as stated in the dynamic form.</td><td></td></tr></table><p>The filter is initialized with PCA estimates on the imputed dataset—see <code><a href="SKFS.html">SKFS</a></code> for a complete code example.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Doz, C., Giannone, D., &amp; Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. <em>Journal of Econometrics, 164</em>(1), 188-205.</p>
