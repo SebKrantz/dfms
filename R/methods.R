@@ -73,6 +73,13 @@ print.dfm <- function(x, digits = 4L, ...) {
   return(invisible(x))
 }
 
+#' @export
+coef.dfm <- function(object, ...) list(A = object$A, C = object$C)
+coefficients.dfm <- coef.dfm
+
+#' @export
+logLik.dfm <- function(object, ...) object$loglik[length(object$loglik)]
+
 #' @rdname summary.dfm
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param \dots not used.

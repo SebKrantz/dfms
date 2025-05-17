@@ -2,7 +2,9 @@
 
 S3method(as.data.frame,dfm)
 S3method(as.data.frame,dfm_forecast)
+S3method(coef,dfm)
 S3method(fitted,dfm)
+S3method(logLik,dfm)
 S3method(plot,ICr)
 S3method(plot,dfm)
 S3method(plot,dfm_forecast)
