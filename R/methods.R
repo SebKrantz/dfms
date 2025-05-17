@@ -43,8 +43,8 @@
 #'
 #' @title DFM Summary Methods
 #'
-#' @description Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic model information and the factor transition matrix \eqn{\textbf{A}}{A},
-#' \code{summary.dfm} returns all system matrices and additional residual and goodness of fit statistics - with a print method allowing full or compact printout.
+#' @description Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic model information and the factor transition matrix \eqn{\textbf{A}}{A}, \code{coef.dfm} returns \eqn{\textbf{A}}{A} and \eqn{\textbf{C}}{C} in a plain list, whereas
+#' \code{summary.dfm} returns all system matrices and additional residual and goodness of fit statistics---with a print method allowing full or compact printout.
 #'
 #' @param x,object an object class 'dfm'.
 #' @param digits integer. The number of digits to print out.
@@ -73,16 +73,18 @@ print.dfm <- function(x, digits = 4L, ...) {
   return(invisible(x))
 }
 
+#' @rdname summary.dfm
 #' @export
 coef.dfm <- function(object, ...) list(A = object$A, C = object$C)
 
+#' @rdname summary.dfm
 #' @export
 logLik.dfm <- function(object, ...) object$loglik[length(object$loglik)]
 
 #' @rdname summary.dfm
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param \dots not used.
-#' @return Summary information following a dynamic factor model estimation.
+#' @return Summary information following a dynamic factor model estimation. \code{coef()} returns \eqn{\textbf{A}}{A} and \eqn{\textbf{C}}{C}.
 #' @importFrom stats cov
 #' @importFrom collapse pwcov
 #' @export
