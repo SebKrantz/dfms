@@ -59,7 +59,7 @@ To determine the number of lags (\code{p}) in the factor transition equation, us
 library(xts)
 library(vars)
 
-ics = ICr(diff(BM14_M))
+ics <- ICr(diff(BM14_M))
 print(ics)
 plot(ics)
 screeplot(ics)

@@ -47,7 +47,7 @@ The residuals \eqn{\textbf{e}_t = \textbf{x}_t - \textbf{C} \textbf{F}_t}{e(t) =
 \donttest{
 library(xts)
 # Fit DFM with 3 factors and 3 lags in the transition equation
-mod = DFM(diff(BM14_M), r = 3, p = 3)
+mod <- DFM(diff(BM14_M), r = 3, p = 3)
 
 # Residuals
 head(resid(mod))

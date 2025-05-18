@@ -36,14 +36,14 @@ Extract Factor Estimates in a Data Frame
 \donttest{
 library(xts)
 # Fit DFM with 3 factors and 3 lags in the transition equation
-mod = DFM(diff(BM14_M), r = 3, p = 3)
+mod <- DFM(diff(BM14_M), r = 3, p = 3)
 
 # Taking a single estimate:
 print(head(as.data.frame(mod, method = "qml")))
 print(head(as.data.frame(mod, method = "qml", pivot = "wide")))
 
 # Adding a proper time variable
-time = index(BM14_M)[-1L]
+time <- index(BM14_M)[-1L]
 print(head(as.data.frame(mod, method = "qml", time = time)))
 
 # All estimates: different pivoting methods
