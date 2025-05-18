@@ -138,7 +138,7 @@
 #' BM14[, BM14_Models$freq == "M"] %<>% diff()
 #' BM14[, BM14_Models$freq == "Q"] %<>% diff(3)
 #'
-#'
+#' \donttest{
 #' ### Small Model ---------------------------------------
 #'
 #' # IC for number of factors
@@ -188,7 +188,7 @@
 #'
 #'
 #' ### Large Model ---------------------------------
-#' \donttest{
+#'
 #' # IC for number of factors
 #' IC_large <- ICr(BM14)
 #' plot(IC_large)
