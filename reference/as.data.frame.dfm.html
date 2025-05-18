@@ -31,7 +31,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Extract Factor Estimates in a Data Frame</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/v0.3.0/R/methods.R" class="external-link"><code>R/methods.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/main/R/methods.R" class="external-link"><code>R/methods.R</code></a></small>
       <div class="d-none name"><code>as.data.frame.dfm.Rd</code></div>
     </div>
 
@@ -94,7 +94,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://joshuaulrich.github.io/xts/" class="external-link">xts</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Fit DFM with 3 factors and 3 lags in the transition equation</span></span></span>
-<span class="r-in"><span><span class="va">mod</span> <span class="op">=</span> <span class="fu"><a href="DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">3</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">3</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 26 iterations.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Taking a single estimate:</span></span></span>
@@ -116,7 +116,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6    6  -1.0811737 -2.430000  1.5735378</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Adding a proper time variable</span></span></span>
-<span class="r-in"><span><span class="va">time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/zoo/man/index.html" class="external-link">index</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1L</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/zoo/man/index.html" class="external-link">index</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1L</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">mod</span>, method <span class="op">=</span> <span class="st">"qml"</span>, time <span class="op">=</span> <span class="va">time</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Method Factor       Time       Value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    QML     f1 1980-02-29   3.0487579</span>
