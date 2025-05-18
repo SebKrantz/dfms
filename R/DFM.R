@@ -133,7 +133,7 @@
 #' library(vars)
 #'
 #' # BM14 Replication Data. Constructing the database:
-#' BM14 = merge(BM14_M, BM14_Q)
+#' BM14 <- merge(BM14_M, BM14_Q)
 #' BM14[, BM14_Models$log_trans] %<>% log()
 #' BM14[, BM14_Models$freq == "M"] %<>% diff()
 #' BM14[, BM14_Models$freq == "Q"] %<>% diff(3)
@@ -142,7 +142,7 @@
 #' ### Small Model ---------------------------------------
 #'
 #' # IC for number of factors
-#' IC_small = ICr(BM14[, BM14_Models$small], max.r = 5)
+#' IC_small <- ICr(BM14[, BM14_Models$small], max.r = 5)
 #' plot(IC_small)
 #' screeplot(IC_small)
 #'
@@ -150,7 +150,7 @@
 #' VARselect(IC_small$F_pca[, 1:2])
 #'
 #' # Estimating the model with 2 factors and 3 lags
-#' dfm_small = DFM(BM14[, BM14_Models$small], r = 2, p = 3,
+#' dfm_small <- DFM(BM14[, BM14_Models$small], r = 2, p = 3,
 #'     quarterly.vars = BM14_Models %$% series[freq == "Q" & small])
 #'
 #' # Inspecting the model
@@ -166,7 +166,7 @@
 #' ### Medium-Sized Model ---------------------------------
 #'
 #' # IC for number of factors
-#' IC_medium = ICr(BM14[, BM14_Models$medium])
+#' IC_medium <- ICr(BM14[, BM14_Models$medium])
 #' plot(IC_medium)
 #' screeplot(IC_medium)
 #'
@@ -174,7 +174,7 @@
 #' VARselect(IC_medium$F_pca[, 1:3])
 #'
 #' # Estimating the model with 3 factors and 3 lags
-#' dfm_medium = DFM(BM14[, BM14_Models$medium], r = 3, p = 3,
+#' dfm_medium <- DFM(BM14[, BM14_Models$medium], r = 3, p = 3,
 #'     quarterly.vars = BM14_Models %$% series[freq == "Q" & medium])
 #'
 #' # Inspecting the model
@@ -190,7 +190,7 @@
 #' ### Large Model ---------------------------------
 #' \donttest{
 #' # IC for number of factors
-#' IC_large = ICr(BM14)
+#' IC_large <- ICr(BM14)
 #' plot(IC_large)
 #' screeplot(IC_large)
 #'
@@ -198,7 +198,7 @@
 #' VARselect(IC_large$F_pca[, 1:6])
 #'
 #' # Estimating the model with 6 factors and 3 lags
-#' dfm_large = DFM(BM14, r = 6, p = 3,
+#' dfm_large <- DFM(BM14, r = 6, p = 3,
 #'     quarterly.vars = BM14_Models %$% series[freq == "Q"])
 #'
 #' # Inspecting the model

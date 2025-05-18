@@ -37,7 +37,7 @@ Summary and print methods for class 'dfm'. \code{print.dfm} just prints basic mo
 \code{summary.dfm} returns all system matrices and additional residual and goodness of fit statistics---with a print method allowing full or compact printout.
 }
 \examples{
-mod = DFM(diff(BM14_Q), 2, 3)
+mod <- DFM(diff(BM14_Q), 2, 3)
 print(mod)
 summary(mod)
 

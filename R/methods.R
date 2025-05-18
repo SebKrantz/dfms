@@ -128,7 +128,7 @@ summary.dfm <- function(object, method = switch(object$em.method, none = "2s", "
 #' @param \dots not used.
 #'
 #' @examples
-#' mod = DFM(diff(BM14_Q), 2, 3)
+#' mod <- DFM(diff(BM14_Q), 2, 3)
 #' print(mod)
 #' summary(mod)
 #'
@@ -195,7 +195,7 @@ print.dfm_summary <- function(x,
 #' @seealso \link{dfms-package}
 #' @examples \donttest{
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3)
+#' mod <- DFM(diff(BM14_M), r = 3, p = 3)
 #' plot(mod)
 #' plot(mod, type = "individual", method = "all")
 #' plot(mod, type = "residual")
@@ -293,14 +293,14 @@ plot.dfm <- function(x,
 #' @examples \donttest{
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3)
+#' mod <- DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # Taking a single estimate:
 #' print(head(as.data.frame(mod, method = "qml")))
 #' print(head(as.data.frame(mod, method = "qml", pivot = "wide")))
 #'
 #' # Adding a proper time variable
-#' time = index(BM14_M)[-1L]
+#' time <- index(BM14_M)[-1L]
 #' print(head(as.data.frame(mod, method = "qml", time = time)))
 #'
 #' # All estimates: different pivoting methods
@@ -395,7 +395,7 @@ predict_dfm_core <- function(object, method) {
 #' @examples \donttest{
 #' library(xts)
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3)
+#' mod <- DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # Residuals
 #' head(resid(mod))
@@ -494,16 +494,16 @@ fitted.dfm <- function(object,
 #' library(collapse)
 #'
 #' # Fit DFM with 3 factors and 3 lags in the transition equation
-#' mod = DFM(diff(BM14_M), r = 3, p = 3)
+#' mod <- DFM(diff(BM14_M), r = 3, p = 3)
 #'
 #' # 15 period ahead forecast
-#' fc = predict(mod, h = 15)
+#' fc <- predict(mod, h = 15)
 #' print(fc)
 #' plot(fc, xlim = c(300, 370))
 #'
 #' # Also forecasting autocorrelated residuals with an AR(1)
 #' fcfun <- function(x, h) predict(ar(na_rm(x)), n.ahead = h)$pred
-#' fcar = predict(mod, resFUN = fcfun, h = 15)
+#' fcar <- predict(mod, resFUN = fcfun, h = 15)
 #' plot(fcar, xlim = c(300, 370))
 #'
 #' # Retrieving a data frame of the forecasts
@@ -809,7 +809,7 @@ as.data.frame.dfm_forecast <- function(x, ...,
 #' library(xts)
 #' library(vars)
 #'
-#' ics = ICr(diff(BM14_M))
+#' ics <- ICr(diff(BM14_M))
 #' print(ics)
 #' plot(ics)
 #' screeplot(ics)

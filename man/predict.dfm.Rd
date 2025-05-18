@@ -127,16 +127,16 @@ library(xts)
 library(collapse)
 
 # Fit DFM with 3 factors and 3 lags in the transition equation
-mod = DFM(diff(BM14_M), r = 3, p = 3)
+mod <- DFM(diff(BM14_M), r = 3, p = 3)
 
 # 15 period ahead forecast
-fc = predict(mod, h = 15)
+fc <- predict(mod, h = 15)
 print(fc)
 plot(fc, xlim = c(300, 370))
 
 # Also forecasting autocorrelated residuals with an AR(1)
 fcfun <- function(x, h) predict(ar(na_rm(x)), n.ahead = h)$pred
-fcar = predict(mod, resFUN = fcfun, h = 15)
+fcar <- predict(mod, resFUN = fcfun, h = 15)
 plot(fcar, xlim = c(300, 370))
 
 # Retrieving a data frame of the forecasts
