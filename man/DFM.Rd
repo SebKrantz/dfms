@@ -147,7 +147,7 @@ BM14[, BM14_Models$log_trans] \%<>\% log()
 BM14[, BM14_Models$freq == "M"] \%<>\% diff()
 BM14[, BM14_Models$freq == "Q"] \%<>\% diff(3)
 
-
+\donttest{
 ### Small Model ---------------------------------------
 
 # IC for number of factors
@@ -197,7 +197,7 @@ plot(predict(dfm_medium), xlim = c(300, 370))
 
 
 ### Large Model ---------------------------------
-\donttest{
+
 # IC for number of factors
 IC_large <- ICr(BM14)
 plot(IC_large)
