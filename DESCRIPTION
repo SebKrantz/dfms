@@ -1,5 +1,5 @@
 Package: dfms
-Version: 0.3.0
+Version: 0.3.1
 Title: Dynamic Factor Models
 Authors@R: c(person("Sebastian", "Krantz", role = c("aut", "cre"), email = "sebastian.krantz@graduateinstitute.ch"),
              person("Rytis", "Bagdziunas", role = "aut"),
@@ -16,7 +16,7 @@ Description: Efficient estimation of Dynamic Factor Models using the Expectation
   A comprehensive set of methods supports interpretation and visualization of the model as well as forecasting. 
   Information criteria to choose the number of factors are also provided - following Bai and Ng (2002) 
   <doi:10.1111/1468-0262.00273>.
-URL: https://sebkrantz.github.io/dfms/
+URL: https://sebkrantz.github.io/dfms/, https://github.com/SebKrantz/dfms
 BugReports: https://github.com/SebKrantz/dfms/issues
 Depends: R (>= 3.5.0)
 Imports: Rcpp (>= 1.0.1), collapse (>= 2.0.0)
