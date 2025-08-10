@@ -58,7 +58,7 @@ EMstepBMMQ = function(X, A, C, Q, R, Z_0, V_0, XW0, NW, dgind, dnkron, dnkron_in
     Qsr = (EZZ[sr, sr] - tcrossprod(A_new[sr, srp, drop = FALSE], EZZ_FB[sr, srp, drop = FALSE])) / TT
     Q_new[sr, sr] = if(rQi == 2L) Qsr else diag(diag(Qsr))
   } else Q_new[sr, sr] = diag(r)
-  Q_new[rpC1nq, rpC1nq] = diag(diag(crossprod(Zsmooth[, rpC1nq, drop = FALSE]) + sum3(Vsmooth[rpC1nq, rpC1nq,, drop = FALSE])) / TT)
+  Q_new[rpC1nq, rpC1nq] = diag(diag(crossprod(Zsmooth[, rpC1nq, drop = FALSE]) + sum3(Vsmooth[rpC1nq, rpC1nq,, drop = FALSE])) / TT, nrow = nq)
 
   # E(X'X) & E(X'Z)
   # Estimate matrix C using maximum likelihood approach

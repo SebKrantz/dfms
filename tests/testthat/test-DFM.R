@@ -103,3 +103,13 @@ expect_equal(mod$F_twostep, mod_BM$F_twostep, tolerance = 1e-2)
 expect_equal(mod$F_qml, mod_BM$F_qml, tolerance = 1e-2)
 expect_equal(mod$A, mod_BM$A, tolerance = 1e-1)
 
+# testing #73
+y<-as.xts(rnorm(100),order.by = seq(from=as.Date("1980-04-01"),length.out=100,by="quarter")-1)
+x1<-as.xts(rnorm(100),order.by = seq(from=as.Date("1980-02-01"),length.out=100,by="month")-1)
+x2<-as.xts(rnorm(100),order.by = seq(from=as.Date("1980-02-01"),length.out=100,by="month")-1)
+
+data<-cbind(y,x1,x2)
+data["1988-03-31",1]<-NA
+data1<-data[time(data)<="1987-12-31"]
+
+expect_visible(DFM(data1[,c("x1","x2","y")], r = 1, p = 1, quarterly.vars = c("y")))
