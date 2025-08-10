@@ -1,3 +1,7 @@
+# dfms 0.3.1
+
+* Fixed bug which occurred with only one quarterly variable (#73). Thanks @SantiagoD999 for reporting.
+
 # dfms 0.3.0
 
 * Added argument `quarterly.vars`, enabling mixed-frequency estimation with monthly and quarterly data following Banbura and Modugno (2014). The data matrix should contain the quarterly variables at the end (after the monthly ones).
