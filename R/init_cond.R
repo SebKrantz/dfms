@@ -129,7 +129,7 @@ init_cond_MQ <- function(X, X_imp, F_pc, v, n, r, p, TT, nq, rRi, rQi) {
   Q[1:r, 1:r] <- switch(rQi + 1L, diag(r), diag(fvar(var$res)), cov(var$res))
   Q[(rpC+1):(rpC+nq), (rpC+1):(rpC+nq)] <- if(rRi == 2L)
       cov(res[, -seq_len(nm), drop = FALSE], use = "pairwise.complete.obs") else if(rRi == 1L)
-      diag(fvar(res[, -seq_len(nm)], na.rm = TRUE)) else diag(nq)
+      diag(fvar(res[, -seq_len(nm), drop = FALSE], na.rm = TRUE), nrow = nq) else diag(nq)
   diag(Q)[diag(Q) == 0] <- 1e-6 # Prevent singularity in Kalman Filter
 
 
