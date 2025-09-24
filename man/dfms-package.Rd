@@ -62,3 +62,27 @@ Doz, C., Giannone, D., & Reichlin, L. (2012). A quasi-maximum likelihood approac
 
 Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor models on datasets with arbitrary pattern of missing data. \emph{Journal of Applied Econometrics, 29}(1), 133-160. \url{doi:10.1002/jae.2306}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://sebkrantz.github.io/dfms/}
+  \item \url{https://github.com/SebKrantz/dfms}
+  \item Report bugs at \url{https://github.com/SebKrantz/dfms/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Sebastian Krantz \email{sebastian.krantz@graduateinstitute.ch}
+
+Authors:
+\itemize{
+  \item Rytis Bagdziunas
+}
+
+Other contributors:
+\itemize{
+  \item Santtu Tikka [reviewer]
+  \item Eli Holmes [reviewer]
+}
+
+}
