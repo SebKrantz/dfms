@@ -86,7 +86,7 @@ Rcpp::List SKF(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
       // Compute likelihood. Skip this part if S is not positive definite.
       if(retLL) {
         detS = det(S);
-        if(detS > 0) loglik += log(detS) - conv_to<double>::from(et.t() * S * et) - dn;
+        if(detS > 0) loglik += log(detS) - as_scalar(et.t() * S * et) - dn;
       }
 
     } else { // If all missing: just prediction.
@@ -259,7 +259,7 @@ Rcpp::List SKFS(arma::mat X, arma::mat A, arma::mat C, arma::mat Q,
       // Compute likelihood. Skip this part if S is not positive definite.
       if(retLL) {
         detS = det(S);
-        if(detS > 0) loglik += log(detS) - conv_to<double>::from(et.t() * S * et) - dn; // Standard Kalman Filter Likelihood
+        if(detS > 0) loglik += log(detS) - as_scalar(et.t() * S * et) - dn; // Standard Kalman Filter Likelihood
       }
 
     } else { // If all missing: just prediction.
