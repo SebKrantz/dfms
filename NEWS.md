@@ -1,3 +1,7 @@
+# dfms 0.3.2
+
+* Minor internal C++ changes to ensure compatibility with *RcppArmadillo* 15.0.2.
+
 # dfms 0.3.1
 
 * Fixed bug which occurred with only one quarterly variable (#73). Thanks @SantiagoD999 for reporting.
