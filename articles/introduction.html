@@ -58,9 +58,9 @@
                         <h4 data-toc-skip class="author">Sebastian
 Krantz</h4>
             
-            <h4 data-toc-skip class="date">2025-09-24</h4>
+            <h4 data-toc-skip class="date">2025-11-11</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/v0.3.2/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="d-none name"><code>introduction.Rmd</code></div>
     </div>
 
@@ -92,7 +92,7 @@ from January 1980 through September 2009.</p>
 <span><span class="co">#&gt; [1] "ip_total"       "ip_tot_cstr"    "ip_tot_cstr_en" "ip_constr"     </span></span>
 <span><span class="co">#&gt; [5] "ip_im_goods"    "ip_capital"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-2-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" width="672"></p>
 <p>The data frame <code>BM14_Models</code> provides information about
 the series<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Both about the monthly ones and quarterly series
 contained in &lt;code&gt;BM14_Q&lt;/code&gt;. The order of rows in
@@ -130,7 +130,7 @@ user.</p>
 <span><span class="va">BM14_M</span><span class="op">[</span>, <span class="va">BM14_Models_M</span><span class="op">$</span><span class="va">log_trans</span><span class="op">]</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/compound.html" class="external-link">%&lt;&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">BM14_M_diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">BM14_M_diff</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-4-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" width="672"></p>
 <div class="section level2">
 <h2 id="determining-the-structure-of-the-model">Determining the Structure of the Model<a class="anchor" aria-label="anchor" href="#determining-the-structure-of-the-model"></a>
 </h2>
@@ -149,7 +149,7 @@ criteria generally suggests the most parsimonious model.</p>
 <span><span class="co">#&gt; IC1 IC2 IC3 </span></span>
 <span><span class="co">#&gt;   7   7  13</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ic</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-5-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" width="672"></p>
 <p>Another option is to use a Screeplot to gauge the number of factors
 by looking for a kink in the plot. A mathematical procedure for finding
 the kink was suggested by Onatski (2010)<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Onatski, A. (2010). Determining the number of factors
@@ -158,7 +158,7 @@ and Statistics, 92&lt;/em&gt;(4), 1004-1016.&lt;/p&gt;"><sup>5</sup></a>, but th
 not implemented in <code><a href="../reference/ICr.html">ICr()</a></code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/screeplot.html" class="external-link">screeplot</a></span><span class="op">(</span><span class="va">ic</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-6-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" width="672"></p>
 <p>Based on both the information criteria and the Screeplot, I gauge
 that a model with 4 factors should be estimated, as factors, 5, 6 and 7
 do not add much to the explanatory power of the model. Next to the
@@ -233,7 +233,7 @@ in this case &lt;code&gt;em.method = "DGR"&lt;/code&gt; should be used.&lt;/p&gt
 <span><span class="co">#&gt; f3 -0.0087  0.1767  0.0249</span></span>
 <span><span class="co">#&gt; f4  0.0307  0.0662 -0.0035</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_m</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-8-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" width="672"></p>
 <p>The model can be investigated using <code><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary()</a></code>, which
 returns an object of class ‘dfm_summary’ containing the system matrices
 and summary statistics of the factors and the residuals in the
@@ -299,10 +299,10 @@ plain matrix, but the functions also have an argument to return data in
 the original (input) format.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">resid</a></span><span class="op">(</span><span class="va">model_m</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="672"></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted</a></span><span class="op">(</span><span class="va">model_m</span>, orig.format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, lwd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-10-2.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-10-2.png" class="r-plt" width="672"></p>
 <p>Another way to examine the factor model visually is to plot the
 Quasi-Maximum-Likelihood (QML) factor estimates against PCA and Two-Step
 estimates following Doz, Giannone and Reichlin (2011)<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Doz, C., Giannone, D., &amp;amp; Reichlin, L. (2011). A
@@ -313,7 +313,7 @@ by <code><a href="../reference/DFM.html">DFM()</a></code> during EM estimation a
 with <code>plot.dfm</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_m</span>, method <span class="op">=</span> <span class="st">"all"</span>, type <span class="op">=</span> <span class="st">"individual"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-11-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" width="672"></p>
 <p>The plot with the various estimates shows that the QML estimates are
 more volatile in the initial periods where there are many missing
 series, but less volatile in the latter periods. In general, QML
@@ -406,7 +406,7 @@ Higher lag-orders product more interesting forecast dynamics.&lt;/p&gt;"><sup>9<
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Setting an appropriate plot range to see the forecast</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fc</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">320</span>, <span class="fl">370</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-14-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="672"></p>
 <p>By default, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> uses the QML factor estimates (if
 available). We can however also predict with PCA or TwoStep estimates
 using, e.g., <code>predict(model_m, h = 12, method = "2s")</code>.</p>
@@ -480,7 +480,7 @@ In the absence of such adjustments to the algorithm, or other methods of interpo
 <span><span class="co">#&gt; f4  0.1374  0.0543 -0.0733 -0.0256  0.0902 -0.0382</span></span>
 <span><span class="co">#&gt;  [ reached 'max' / getOption("max.print") -- omitted 1 row ]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">model_mq</span><span class="op">)</span></span></code></pre></div>
-<p><img src="introduction_files/figure-html/unnamed-chunk-16-1.png" width="672"></p>
+<p><img src="introduction_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" width="672"></p>
 <!--
 Another possibility is to estimate different factor models for monthly and quarterly series, and combine them for the final prediction (e.g. by aggregating or blocking the monthly factor estimates). 
 
@@ -563,7 +563,7 @@ Autoregressions in Macroeconomics. <em>Handbook of Macroeconomics,
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer>
