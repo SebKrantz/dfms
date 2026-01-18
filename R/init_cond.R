@@ -68,6 +68,7 @@ init_cond_idio_ar1 <- function(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss, tol)
   return(list(A = A, C = C, Q = Q, R = R, F_0 = F_0, P_0 = P_0))
 }
 
+
 # Global variable in the package
 Rcon <- matrix(c(2, -1, 0, 0, 0,
                  3, 0, -1, 0, 0,
@@ -143,6 +144,167 @@ init_cond_MQ <- function(X, X_imp, F_pc, v, n, r, p, TT, nq, rRi, rQi) {
   diag(M) <- diag(M) + 1e-4 # Ensure matrix is non-singular
   P_0 <- ainv(M) %*% unattrib(Q)
   dim(P_0) <- c(rpC5nq, rpC5nq)
+
+  return(list(A = A, C = C, Q = Q, R = R, F_0 = F_0, P_0 = P_0))
+}
+
+
+# Mixed frequency with AR(1) idiosyncratic errors
+# Based on MATLAB: EM_DFM_SS_idio_restrMQ.m InitCond()
+# State vector: [factors(rpC), monthly_errors(nm), quarterly_error_lags(5*nq)]
+init_cond_MQ_idio <- function(X, X_imp, F_pc, v, n, r, p, TT, nq, rRi, rQi, anymiss, tol) {
+
+  # Dimensions
+  rp <- r * p
+  rC <- 5L # ncol(Rcon)
+  pC <- max(p, rC)
+  rpC <- r * pC
+  nm <- n - nq
+  state_dim <- rpC + nm + 5L * nq
+
+  sr <- seq_len(r)
+  srp <- seq_len(rp)
+  snm <- seq_len(nm)
+
+  # Observation equation -------------------------------
+  # 1. Factor loadings with Rcon constraints for quarterly variables
+  C <- cbind(v, matrix(0, n, rpC - r))
+  rRcon <- kronecker(Rcon, diag(r))
+
+  # Contemporaneous factors + lags for quarterly variable regression
+  FF <- do.call(cbind, lapply(0:(rC-1L), function(i) F_pc[(rC - i):(TT - i), ]))
+
+  # Restricted least squares for quarterly loadings
+  for (i in (nm+1L):n) {
+    x_i <- X[rC:TT, i]
+    nna <- whichNA(x_i, invert = TRUE)
+    if (length(nna) < ncol(FF) + 2L) x_i <- X_imp[rC:TT, i]
+    ff_i <- FF[nna, , drop = FALSE]
+    x_i <- x_i[nna]
+    Iff_i <- ainv(crossprod(ff_i))
+    Cc <- Iff_i %*% crossprod(ff_i, x_i)
+    tmp <- tcrossprod(Iff_i, rRcon)
+    Cc <- Cc - tmp %*% ainv(rRcon %*% tmp) %*% rRcon %*% Cc
+    C[i, 1:(rC*r)] <- Cc
+  }
+
+  # Compute residuals for AR(1) estimation
+  res <- X[rC:TT, ] - tcrossprod(FF, C[, 1:(rC*r)])
+  resNaN <- res
+  resNaN[is.na(X[rC:TT, ])] <- NA
+
+  # Initial R for variance estimation
+  R_init <- if(rRi) {
+    if(rRi == 2L) cov(resNaN, use = "pairwise.complete.obs")
+    else diag(fvar(resNaN, na.rm = TRUE))
+  } else diag(n)
+
+  # 2. Monthly error identity block: eyeN in MATLAB
+  # C = [C, eyeN] where eyeN is N x NM (identity for monthly rows, zeros for quarterly)
+  C <- cbind(C, rbind(diag(nm), matrix(0, nq, nm)))
+
+  # 3. Quarterly temporal aggregation block
+  # C = [C, [zeros(NM,5*NQ); kron(eye(NQ),[1 2 3 2 1])]]
+  # Note: MATLAB kron(eye(NQ),[1 2 3 2 1]) treats [1 2 3 2 1] as row vector -> nq x 5*nq matrix
+  C <- cbind(C, rbind(matrix(0, nm, 5L*nq), kronecker(diag(nq), matrix(c(1, 2, 3, 2, 1), nrow = 1))))
+
+  # Transition equation -------------------------------
+  # Monthly AR(1) estimation: BM and SM matrices
+  BM <- SM <- numeric(nm)
+
+  for (i in snm) {
+    res_i <- resNaN[, i]
+    # Find valid (non-NA) observations, excluding leading/trailing NAs
+    valid <- !is.na(res_i)
+    if(sum(valid) > 2L) {
+      res_clean <- res[valid, i]
+      n_clean <- length(res_clean)
+      # AR(1) coefficient: rho = cov(e_t, e_{t-1}) / var(e_{t-1})
+      BM[i] <- sum(res_clean[-n_clean] * res_clean[-1L]) /
+               sum(res_clean[-n_clean]^2)
+      # Innovation variance: var(e_t - rho * e_{t-1})
+      SM[i] <- var(res_clean[-1L] - res_clean[-n_clean] * BM[i])
+    } else {
+      BM[i] <- 0.1 # Default initial value
+      SM[i] <- R_init[i, i]
+    }
+  }
+  # Stationary variance for monthly errors
+  initViM <- SM / (1 - BM^2)
+
+  # Quarterly initial values (from MATLAB lines 317-328)
+  # sig_e = Rdiag(NM+1:N)/19 where 19 = 1^2 + 2^2 + 3^2 + 2^2 + 1^2
+  sig_e <- diag(R_init)[(nm+1L):n] / 19
+  rho0 <- 0.1 # Initial AR(1) coefficient for quarterly errors
+
+  # Build A matrix: blkdiag(A_factors, BM, BQ)
+  var <- .VAR(F_pc, p)
+  A <- matrix(0, state_dim, state_dim)
+
+  # Factor VAR block
+  A[sr, srp] <- t(var$A)
+  if(pC > 1L) A[(r+1L):rpC, 1:(rpC-r)] <- diag(rpC - r)
+
+  # Monthly AR1 block (diagonal)
+  monthly_idx <- (rpC+1L):(rpC+nm)
+  A[monthly_idx, monthly_idx] <- diag(BM)
+
+  # Quarterly AR1 lag structure: BQ = kron(eye(NQ), [[rho0, 0,0,0,0]; [eye(4), zeros(4,1)]])
+  # Each 5x5 block shifts lags and updates current with AR1
+  BQ_block <- rbind(c(rho0, rep(0, 4)), cbind(diag(4), rep(0, 4)))
+  for (j in seq_len(nq)) {
+    idx <- rpC + nm + (j-1L)*5L + 1:5
+    A[idx, idx] <- BQ_block
+  }
+
+  # Build Q matrix: blkdiag(Q_factors, SM, SQ)
+  Q <- matrix(0, state_dim, state_dim)
+  Q[sr, sr] <- switch(rQi + 1L, diag(r), diag(fvar(var$res)), cov(var$res))
+
+  # Monthly innovation variance (diagonal)
+  Q[monthly_idx, monthly_idx] <- diag(SM)
+
+  # Quarterly innovation variance: SQ = kron(diag((1-rho0^2)*sig_e), temp) where temp[1,1]=1
+  # Only the (1,1) position of each 5x5 block has innovation variance
+  for (j in seq_len(nq)) {
+    idx <- rpC + nm + (j-1L)*5L + 1L
+    Q[idx, idx] <- (1 - rho0^2) * sig_e[j]
+  }
+
+  # Prevent singularity
+  diag(Q)[diag(Q) < 1e-6] <- 1e-6
+
+  # Observation covariance R: fixed small value (kappa)
+  # Actual observation error variance is modeled in state equation
+  R <- tol * diag(n)
+
+  # Initial state and state covariance (P) ------------
+  F_0 <- rep(0, state_dim)
+
+  # P_0 factor block: stationary VAR covariance
+  srpC <- seq_len(rpC)
+  tmp_A <- A[srpC, srpC, drop = FALSE]
+  P_0_factors <- ainv(diag(rpC^2) - kronecker(tmp_A, tmp_A)) %*% unattrib(Q[srpC, srpC, drop = FALSE])
+  dim(P_0_factors) <- c(rpC, rpC)
+
+  # P_0 monthly errors: stationary AR1 variance
+  P_0_monthly <- diag(initViM)
+
+  # P_0 quarterly errors: initViQ = reshape(inv(eye((5*NQ)^2)-kron(BQ,BQ))*SQ(:),5*NQ,5*NQ)
+  # For each quarterly variable, compute stationary covariance
+  BQ_kron <- kronecker(BQ_block, BQ_block)
+  P_0_block_inv <- ainv(diag(25) - BQ_kron)
+
+  P_0 <- matrix(0, state_dim, state_dim)
+  P_0[srpC, srpC] <- P_0_factors
+  P_0[monthly_idx, monthly_idx] <- P_0_monthly
+
+  for (j in seq_len(nq)) {
+    idx <- rpC + nm + (j-1L)*5L + 1:5
+    SQ_j <- matrix(0, 5, 5)
+    SQ_j[1, 1] <- (1 - rho0^2) * sig_e[j]
+    P_0[idx, idx] <- matrix(P_0_block_inv %*% c(SQ_j), 5, 5)
+  }
 
   return(list(A = A, C = C, Q = Q, R = R, F_0 = F_0, P_0 = P_0))
 }
