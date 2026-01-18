@@ -86,8 +86,8 @@ EMstepBMMQidio <- function(X, A, C, Q, R, Z_0, V_0, XW0, NW, dgind, dnkron, dnkr
            diag(tmp2_e + Vsmooth[all_error_idx, all_error_idx, TT])  # E(Z'Z)
   EZZ_BB_u <- diag(crossprod(tmp_e)) +
               diag(tmp2_e + Vsmooth0[all_error_idx, all_error_idx])  # E(Z(-1)'Z(-1))
-  EZZ_FB_u <- diag(diag(crossprod(Zsmooth[, all_error_idx, drop = FALSE], tmp_e))) +
-              diag(diag(rowSums(VVsmooth[all_error_idx, all_error_idx, , drop = FALSE], dims = 2L)))  # E(Z'Z(-1))
+  EZZ_FB_u <- diag(crossprod(Zsmooth[, all_error_idx, drop = FALSE], tmp_e)) +
+              diag(rowSums(VVsmooth[all_error_idx, all_error_idx, , drop = FALSE], dims = 2L))  # E(Z'Z(-1))
 
   # ==========================================
   # Update A and Q matrices
