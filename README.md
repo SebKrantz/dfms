@@ -28,7 +28,7 @@ The package is fully functional though, and you are very welcome to install it u
 
 The default is `em.method = "auto"`, which chooses `"BM"` following Banbura & Modugno (2014) with missing data or mixed frequency, and `"DGR"` following Doz, Giannone & Reichlin (2012) otherwise. Using `em.method = "none"` generates Two-Step estimates following Doz, Giannone & Reichlin (2011). This is extremely efficient on bigger datasets. PCA and Two-Step estimates are also reported in EM-estimation. All methods support missing data, but `em.method = "DGR"` does not model them in EM iterations.
 
-The package is currently stable, but functionality may expand in the future. In particular, mixed-frequency estimation with autoregressive errors is planned for the near future, and generation of the 'news' may be added in the further future. 
+The package is currently stable, but functionality may expand in the future. In particular, generation of the 'news' may be added in the future. 
 
 
 ### Comparison with Other R Packages

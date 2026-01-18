@@ -1,3 +1,13 @@
+# dfms 0.4.0
+
+* Added support for mixed-frequency estimation with AR(1) idiosyncratic errors (`quarterly.vars` combined with `idio.ar1 = TRUE`). This implements the full model of Banbura and Modugno (2014), allowing observation errors to follow AR(1) processes while handling mixed monthly-quarterly data with temporal aggregation constraints.
+
+* New internal functions `init_cond_MQ_idio()` and `EMstepBMMQidio()` implement the EM algorithm for the combined MQ + idio.ar1 case, with state vector structure `[factors, monthly_errors, quarterly_error_lags]`.
+
+* Updated `plot.dfm()` with `type = "residual"` to properly handle mixed-frequency and AR(1) error models by using the `residuals()` method internally.
+
+* Added examples and documentation for the new MQ + idio.ar1 functionality in both the `DFM()` help page and the introductory vignette.
+
 # dfms 0.3.2
 
 * Minor internal C++ changes to ensure compatibility with *RcppArmadillo* 15.0.2.
