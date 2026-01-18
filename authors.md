@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/SebKrantz/dfms/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/SebKrantz/dfms/blob/v0.4.0/DESCRIPTION)
 
 Krantz S, Bagdziunas R (2026). *dfms: Dynamic Factor Models*. R package
 version 0.4.0, <https://sebkrantz.github.io/dfms/>.
