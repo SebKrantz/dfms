@@ -209,6 +209,26 @@
 #'
 #' # 10 periods ahead forecast
 #' plot(predict(dfm_large), xlim = c(300, 370))
+#'
+#'
+#' ### Mixed-Frequency Model with AR(1) Idiosyncratic Errors ---------
+#'
+#' # Estimate model with AR(1) observation errors
+#' # This models e(t) = rho * e(t-1) + v(t) for each series
+#' dfm_large_ar1 <- DFM(BM14, r = 6, p = 3, idio.ar1 = TRUE,
+#'     quarterly.vars = BM14_Models %$% series[freq == "Q"])
+#'
+#' # Model summary shows AR(1) coefficients
+#' summary(dfm_large_ar1)
+#'
+#' # Access AR(1) coefficients (rho) for each series
+#' head(dfm_large_ar1$rho)
+#'
+#' # Access estimated observation errors
+#' head(dfm_large_ar1$e)
+#'
+#' # Compare with model without AR(1) errors
+#' dfm_large_ar1$loglik  # Log-likelihood path
 #' }
 #' @export
 
@@ -404,7 +424,7 @@ DFM <- function(X, r, p = 1L, ...,
 
   ## Initial System Matrices
   if(MFl) {
-    init <- if(idio.ar1) stop("Mixed frequency with autocorrelated errors is not yet implemented") else
+    init <- if(idio.ar1) init_cond_MQ_idio(X, X_imp, F_pc, v, n, r, p, TT, nq, rRi, rQi, anymiss, tol) else
       init_cond_MQ(X, X_imp, F_pc, v, n, r, p, TT, nq, rRi, rQi)
   } else {
     init <- if(idio.ar1) init_cond_idio_ar1(X, F_pc, v, n, r, p, BMl, rRi, rQi, anymiss, tol) else
@@ -471,9 +491,14 @@ DFM <- function(X, r, p = 1L, ...,
     if(MFl) {
       nm <- n - nq
       rpC <- r * max(p, 5L)
-      rpC1nq <- (rpC+1L):(rpC+nq)
+      rpC1nq <- (rpC+1L):(rpC+nq)  # Used for non-idio.ar1 MQ case
+      if(idio.ar1) {
+        # Additional indices for MQ + idio.ar1 case
+        monthly_idx <- (rpC+1L):(rpC+nm)
+        quarterly_first_idx <- rpC + nm + seq(1L, 5L*nq, by = 5L)
+      }
       NW <- !W
-      R_mat <- kronecker(Rcon, diag(r)) # TODO: autsource this
+      R_mat <- kronecker(Rcon, diag(r))
       expr <- if(idio.ar1) .EM_BM_MQ_idio else .EM_BM_MQ
       dnkron <- matrix(1, r, r) %x% diag(nm) # Used to be inside EMstep, taken out to speed up the algorithm
       dnkron_ind <- whichv(dnkron, 1)
@@ -517,17 +542,57 @@ DFM <- function(X, r, p = 1L, ...,
   ## with optimal estimates
   kfs_res <- eval(.KFS, em_res, encl)
 
+  # Extract R, e, rho depending on model type
+  if(MFl && idio.ar1) {
+    # MQ + idio.ar1: Reconstruct observation error covariance from state covariance Q
+    R_out <- matrix(0, n, n)
+    # Monthly: diagonal AR1 error variance from Q[monthly_idx, monthly_idx]
+    diag(R_out)[1:nm] <- diag(em_res$Q[monthly_idx, monthly_idx])
+    # Quarterly: first position of each 5x5 block in Q
+    for(j in seq_len(nq)) {
+      idx <- rpC + nm + (j-1L)*5L + 1L
+      R_out[nm+j, nm+j] <- em_res$Q[idx, idx]
+    }
+    # Extract errors: monthly + first lag of each quarterly
+    e_out <- matrix(NA_real_, TT, n)
+    e_out[, 1:nm] <- kfs_res$F_smooth[, monthly_idx, drop = FALSE]
+    for(j in seq_len(nq)) {
+      e_out[, nm+j] <- kfs_res$F_smooth[, rpC + nm + (j-1L)*5L + 1L]
+    }
+    # Extract rho: monthly + quarterly AR1 coefficients
+    rho_out <- numeric(n)
+    rho_out[1:nm] <- diag(em_res$A[monthly_idx, monthly_idx])
+    for(j in seq_len(nq)) {
+      idx <- rpC + nm + (j-1L)*5L + 1L
+      rho_out[nm+j] <- em_res$A[idx, idx]
+    }
+  } else if(MFl) {
+    # MQ without idio.ar1
+    R_out <- em_res$R
+    R_out[(nm+1):n, (nm+1):n] <- em_res$Q[rpC1nq, rpC1nq]
+    e_out <- NULL
+    rho_out <- NULL
+  } else if(idio.ar1) {
+    # idio.ar1 without MQ
+    R_out <- em_res$Q[-seq_len(rp), -seq_len(rp), drop = FALSE]
+    e_out <- kfs_res$F_smooth[, -seq_len(rp), drop = FALSE]
+    rho_out <- diag(em_res$A)[-seq_len(rp)]
+  } else {
+    # Basic case
+    R_out <- em_res$R
+    e_out <- NULL
+    rho_out <- NULL
+  }
+
   final_object <- c(object_init[1:6],
                list(F_qml = setColnames(kfs_res$F_smooth[, sr, drop = FALSE], fnam),
                     P_qml = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
                     A = setDimnames(em_res$A[sr, seq_len(rp), drop = FALSE], lagnam(fnam, p)),
                     C = setDimnames(em_res$C[, sr, drop = FALSE], list(Xnam, fnam)),
                     Q = setDimnames(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
-                    R = setDimnames(if(MFl && idio.ar1) stop("not implemented yet") else if(MFl)
-                                    `[<-`(em_res$R, (nm+1):n, (nm+1):n, value = em_res$Q[rpC1nq, rpC1nq]) else if(idio.ar1)
-                                    em_res$Q[-seq_len(rp), -seq_len(rp), drop = FALSE] else em_res$R, list(Xnam, Xnam)),
-                    e = if(idio.ar1) setColnames(kfs_res$F_smooth[, -seq_len(rp), drop = FALSE], Xnam) else NULL,
-                    rho = if(idio.ar1) setNames(diag(em_res$A)[-seq_len(rp)], Xnam) else NULL,
+                    R = setDimnames(R_out, list(Xnam, Xnam)),
+                    e = if(idio.ar1) setColnames(e_out, Xnam) else NULL,
+                    rho = if(idio.ar1) setNames(rho_out, Xnam) else NULL,
                     loglik = if(num_iter == max.iter) loglik_all else loglik_all[seq_len(num_iter)],
                     tol = tol,
                     converged = converged),

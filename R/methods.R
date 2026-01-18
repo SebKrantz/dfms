@@ -272,7 +272,9 @@ plot.dfm <- function(x,
       if(allests) stop("Need to choose a specific method for residual plots")
       oldpar <- par(mar = c(11.5, 4.1, 4.1, 2.1))
       on.exit(par(oldpar))
-      boxplot(x$X_imp - tcrossprod(Fa, x$C), main = if(is.null(dots$main)) "Residuals by input variable" else dots$main, las = 2, ...)
+      # Use residuals method which handles MQ and idio.ar1 properly
+      res <- residuals.dfm(x, method = method[1L], standardized = TRUE, na.keep = TRUE)
+      boxplot(res, main = if(is.null(dots$main)) "Residuals by input variable" else dots$main, las = 2, ...)
     },
     stop("Unknown plot type: ", type[1L])
   )
