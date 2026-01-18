@@ -218,6 +218,26 @@ plot(dfm_large, type = "residual") # Residuals from factor predictions
 
 # 10 periods ahead forecast
 plot(predict(dfm_large), xlim = c(300, 370))
+
+
+### Mixed-Frequency Model with AR(1) Idiosyncratic Errors ---------
+
+# Estimate model with AR(1) observation errors
+# This models e(t) = rho * e(t-1) + v(t) for each series
+dfm_large_ar1 <- DFM(BM14, r = 6, p = 3, idio.ar1 = TRUE,
+    quarterly.vars = BM14_Models \%$\% series[freq == "Q"])
+
+# Model summary shows AR(1) coefficients
+summary(dfm_large_ar1)
+
+# Access AR(1) coefficients (rho) for each series
+head(dfm_large_ar1$rho)
+
+# Access estimated observation errors
+head(dfm_large_ar1$e)
+
+# Compare with model without AR(1) errors
+dfm_large_ar1$loglik  # Log-likelihood path
 }
 }
 \references{
