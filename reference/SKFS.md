@@ -67,7 +67,7 @@ Applications: With R Examples. Springer.
 
 ``` r
 library(collapse)
-#> collapse 2.1.4, see ?`collapse-package` or ?`collapse-documentation`
+#> collapse 2.1.6, see ?`collapse-package` or ?`collapse-documentation`
 #> 
 #> Attaching package: ‘collapse’
 #> The following object is masked from ‘package:vars’:

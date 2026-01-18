@@ -29,9 +29,8 @@ All methods support missing data, but `em.method = "DGR"` does not model
 them in EM iterations.
 
 The package is currently stable, but functionality may expand in the
-future. In particular, mixed-frequency estimation with autoregressive
-errors is planned for the near future, and generation of the ‘news’ may
-be added in the further future.
+future. In particular, generation of the ‘news’ may be added in the
+future.
 
 ### Comparison with Other R Packages
 

@@ -9,7 +9,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
 
     <a class="navbar-brand me-2" href="../index.html">dfms</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,7 @@ with time-invariant system matrices and classical assumptions, while permitting 
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Estimate a Dynamic Factor Model</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/v0.3.2/R/DFM.R" class="external-link"><code>R/DFM.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/main/R/DFM.R" class="external-link"><code>R/DFM.R</code></a></small>
       <div class="d-none name"><code>DFM.Rd</code></div>
     </div>
 
@@ -128,7 +128,7 @@ This yields significant performance gains over the iterative methods. Final syst
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list-like object of class 'dfm' with the following elements:</p>
 <dl><dt><code>X_imp</code></dt>
-<dd><p>\(T \times n\) matrix with the imputed and standardized (scaled and centered) data—after applying <code><a href="tsnarmimp.html">tsnarmimp</a></code>. It has attributes attached allowing for reconstruction of the original data:</p><table class="table table"><tr><td><code>"stats"</code></td><td></td><td>is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://sebkrantz.github.io/collapse/reference/qsu.html" class="external-link">qsu</a></code>).</td><td></td></tr><tr><td><code>"missing"</code></td><td></td><td>is a \(T \times n\) logical matrix indicating missing or infinite values in the original data (which are imputed in <code>X_imp</code>).</td><td></td></tr><tr><td><code>"attributes"</code></td><td></td><td>contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.</td><td></td></tr><tr><td><code>"is.list"</code></td><td></td><td>is a logical value indicating whether the original data input was a list / data frame.</td><td></td></tr></table></dd>
+<dd><p>\(T \times n\) matrix with the imputed and standardized (scaled and centered) data—after applying <code><a href="tsnarmimp.html">tsnarmimp</a></code>. It has attributes attached allowing for reconstruction of the original data:</p><table class="table table"><tr><td><code>"stats"</code></td><td></td><td>is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://fastverse.org/collapse/reference/qsu.html" class="external-link">qsu</a></code>).</td><td></td></tr><tr><td><code>"missing"</code></td><td></td><td>is a \(T \times n\) logical matrix indicating missing or infinite values in the original data (which are imputed in <code>X_imp</code>).</td><td></td></tr><tr><td><code>"attributes"</code></td><td></td><td>contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.</td><td></td></tr><tr><td><code>"is.list"</code></td><td></td><td>is a logical value indicating whether the original data input was a list / data frame.</td><td></td></tr></table></dd>
 
 <dt><code>eigen</code></dt>
 <dd><p><code>eigen(cov(X_imp))</code>.</p></dd>
@@ -629,6 +629,253 @@ $$\textbf{F}_t = \textbf{A F}_{t-1} + \textbf{u}_t \ \sim\  N(\textbf{0}, \textb
 <span class="r-in"><span><span class="co"># 10 periods ahead forecast</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">dfm_large</span><span class="op">)</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">300</span>, <span class="fl">370</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="DFM-17.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">### Mixed-Frequency Model with AR(1) Idiosyncratic Errors ---------</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Estimate model with AR(1) observation errors</span></span></span>
+<span class="r-in"><span><span class="co"># This models e(t) = rho * e(t-1) + v(t) for each series</span></span></span>
+<span class="r-in"><span><span class="va">dfm_large_ar1</span> <span class="op">&lt;-</span> <span class="fu">DFM</span><span class="op">(</span><span class="va">BM14</span>, r <span class="op">=</span> <span class="fl">6</span>, p <span class="op">=</span> <span class="fl">3</span>, idio.ar1 <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    quarterly.vars <span class="op">=</span> <span class="va">BM14_Models</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/exposition.html" class="external-link">%$%</a></span> <span class="va">series</span><span class="op">[</span><span class="va">freq</span> <span class="op">==</span> <span class="st">"Q"</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Converged after 27 iterations.</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Model summary shows AR(1) coefficients</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/pkg/urca/man/summary-methods.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">dfm_large_ar1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Mixed Frequency Dynamic Factor Model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> n = 101, nm = 92, nq = 9, T = 356, r = 6, p = 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> %NA = 29.7363, %NAm = 25.8366</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    with AR(1) errors: mean(abs(rho)) = 0.272 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:  DFM(X = BM14, r = 6, p = 3, idio.ar1 = TRUE, quarterly.vars = BM14_Models %$%      series[freq == "Q"])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Summary Statistics of Factors [F]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       N     Mean   Median      SD       Min      Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  356  -0.0932   0.4356  4.1258  -26.3399   7.2689</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2  356   0.0141   0.3348  2.8144  -13.6388  14.9466</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  356  -0.0904   0.0623  2.4063  -10.6054   7.7731</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4  356   0.0655   0.1567  2.4883   -9.7491     9.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  356  -0.0532  -0.0793  2.2006   -7.0683   7.9831</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  356   0.0785   0.1214  1.7718    -9.055   4.8855</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Matrix [A]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       L1.f1    L1.f2     L1.f3    L1.f4     L1.f5    L1.f6    L2.f1     L2.f2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.36294 -0.33739  0.390802 -0.16640  0.015708  0.17678  0.16782 -0.034706</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.04303  0.20884 -0.072546  0.15323  0.009384 -0.03609  0.08371  0.035102</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  0.16766  0.12552  0.333441  0.03715 -0.056107 -0.13851 -0.07633 -0.049216</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.14238 -0.02027  0.104313 -0.03705  0.409972  0.05844  0.02029 -0.025738</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.18039  0.01489 -0.035480  0.28023  0.120216 -0.06277 -0.01386  0.017727</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6 -0.06093  0.04987  0.009273  0.05994 -0.011549  0.19555 -0.04598  0.006984</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        L2.f3     L2.f4     L2.f5    L2.f6    L3.f1    L3.f2    L3.f3     L3.f4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1 -0.061362 -0.084291  0.066044  0.13487  0.29337 -0.02864  0.07579 -0.025627</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.079912 -0.011331  0.004003  0.06906  0.22750  0.28135  0.10763 -0.008841</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.150995  0.187179  0.072732 -0.17937 -0.06504 -0.08119  0.10897  0.058212</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4  0.009792 -0.147390  0.052710  0.04956 -0.08077 -0.11240 -0.10943  0.115191</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5 -0.051458 -0.089720 -0.112780  0.06085 -0.05774  0.04967  0.06603  0.012034</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6 -0.068374  0.007569 -0.049427  0.04002  0.06585  0.06722  0.05816 -0.026570</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       L3.f5    L3.f6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  0.02247 -0.05281</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2 -0.01189  0.13155</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3 -0.11803 -0.04513</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4 -0.13004  0.06949</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  0.07094 -0.15219</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  0.04678  0.07416</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Factor Covariance Matrix [cov(F)]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           f1        f2        f3        f4        f5        f6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f1  17.0224    0.9532   -0.1667   -0.0775   -0.3385   -0.2222 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f2   0.9532    7.9206   -0.2488   -1.0206*   0.1217   -0.3593 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f3  -0.1667   -0.2488    5.7905    0.0333   -0.0485   -0.0480 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f4  -0.0775   -1.0206*   0.0333    6.1916   -1.3488*   0.3836 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f5  -0.3385    0.1217   -0.0485   -1.3488*   4.8426    0.1443 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f6  -0.2222   -0.3593   -0.0480    0.3836    0.1443    3.1392 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Factor Transition Error Covariance Matrix [Q]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         u1      u2      u3      u4      u5      u6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u1  6.6526 -0.5783 -1.1405  1.3603 -1.3792  0.6104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u2 -0.5783  5.3191  0.0332 -0.1322 -0.2439 -0.5950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u3 -1.1405  0.0332  4.4231  0.0626 -0.0724  0.1648</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u4  1.3603 -0.1322  0.0626  4.7055 -0.9944  0.4509</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u5 -1.3792 -0.2439 -0.0724 -0.9944  4.1330  0.1573</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> u6  0.6104 -0.5950  0.1648  0.4509  0.1573  2.9458</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Residual AR(1) Serial Correlations</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     N     Mean   Median      SD      Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   101  -0.0581  -0.1326  0.3254  -0.6311  0.9075</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Summary of Individual R-Squared's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     N    Mean  Median      SD     Min     Max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   101  0.6087  0.6793  0.2909  0.0039  0.9975</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Access AR(1) coefficients (rho) for each series</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dfm_large_ar1</span><span class="op">$</span><span class="va">rho</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       ip_total    ip_tot_cstr ip_tot_cstr_en      ip_constr    ip_im_goods </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     -0.4565217     -0.4189399     -0.6310923     -0.3832824     -0.1150151 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ip_capital </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     -0.3351250 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Access estimated observation errors</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dfm_large_ar1</span><span class="op">$</span><span class="va">e</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           ip_total   ip_tot_cstr ip_tot_cstr_en     ip_constr    ip_im_goods</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  4.090700e-41  2.773400e-43  -9.284405e-25  1.068275e-49  1.229385e-109</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -3.169609e-41 -1.163997e-43   7.234494e-25 -1.071486e-49 -1.413799e-110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  4.299249e-41  4.926788e-44  -6.744676e-25  2.137958e-49  1.610407e-111</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -8.210496e-41 -2.184188e-44   7.709324e-25 -5.325980e-49 -4.893789e-113</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  1.743392e-40  1.201861e-44  -1.033646e-24  1.379910e-48 -1.179288e-111</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] -3.793705e-40 -1.188133e-44   1.519262e-24 -3.596541e-48  1.043790e-110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ip_capital     ip_d_cstr    ip_nd_cons         ip_en       ip_en_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -1.944303e-56  1.888720e-84  4.816108e-66 -9.555744e-56 -1.944248e-66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  8.178211e-57 -5.369288e-85 -3.094479e-66  1.295765e-55  2.187136e-66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -7.701158e-57  9.752601e-85  7.051130e-66 -3.266343e-55 -6.486240e-66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  1.738260e-56 -4.665112e-84 -2.394640e-65  9.346773e-55  2.281459e-65</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -4.999318e-56  2.390846e-83  8.478264e-65 -2.718771e-54 -8.145441e-65</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]  1.485491e-55 -1.228627e-82 -3.011926e-64  7.923738e-54  2.911579e-64</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           ip_manuf     ip_metals  ip_chemicals   ip_electric  ip_machinery</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  3.811841e-28  1.061574e-61  2.808696e-57 -1.379006e-49 -9.142109e-37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -2.798538e-28 -4.290610e-62 -2.626191e-57  1.129823e-49  5.296934e-37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  2.611274e-28  4.675522e-62  5.939577e-57 -1.982737e-49 -4.251618e-37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -3.194775e-28 -1.237244e-61 -1.715952e-56  4.769731e-49  5.453626e-37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  4.721270e-28  3.941849e-61  5.122161e-56 -1.220941e-48 -9.538318e-37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] -7.641334e-28 -1.281107e-60 -1.534681e-55  3.155888e-48  1.866478e-36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           ip_paper    ip_plastic      new_cars        orders ret_turnover_defl</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -6.441647e-94 -6.682650e-44 -5.749264e-45 -1.469969e-66       -3.86140700</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  2.642492e-93  5.150991e-44  4.387543e-45  9.461044e-67        2.01426869</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -1.558201e-92 -7.472124e-44 -6.504336e-45 -1.156951e-66       -0.97525169</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  9.303855e-92  1.538219e-43  1.377787e-44  2.266244e-66        0.04166604</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -5.557195e-91 -3.479769e-43 -3.197471e-44 -5.135422e-66       -0.51489075</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]  3.319347e-90  8.024085e-43  7.552159e-44  1.199259e-65        1.81347305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ecs_ec_sent_ind  ecs_ind_conf ecs_ind_order_book ecs_ind_stocks</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    7.019681e-40  2.458348e-58      -2.324592e-53  -2.327511e-29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]   -2.529104e-39 -3.460365e-58       3.951806e-53   2.307864e-29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]    1.099037e-38  2.899652e-57      -2.799512e-52  -5.547478e-29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]   -4.828063e-38 -2.601194e-56       2.108370e-51   1.662147e-28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]    2.122165e-37  2.335500e-55      -1.589624e-50  -5.116898e-28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]   -9.328206e-37 -2.096969e-54       1.198534e-49   1.579794e-27</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ecs_ind_prod_exp ecs_ind_prod_rec_m ecs_ind_x_orders ecs_ind_empl_exp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    -1.963344e-42      -7.053766e-17     2.581352e-56    -5.788957e-51</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]     1.781038e-42       5.036705e-17    -1.823120e-56     3.407008e-50</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]    -7.377403e-42      -5.294718e-17     1.386374e-55    -2.242466e-49</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]     3.691013e-41       7.944348e-17    -1.232320e-54     1.480006e-48</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]    -1.861997e-40      -1.418243e-16     1.097726e-53    -9.768506e-48</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]     9.396237e-40       2.682671e-16    -9.778589e-53     6.447533e-47</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ecs_cons_conf ecs_cons_sit_over_next_12 ecs_cons_exp_unempl</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -6.746136e-74             -8.441318e-59       7.186846e-111</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  1.093414e-72              7.454530e-58      -8.399174e-112</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -1.792053e-71             -6.769903e-57       5.646915e-110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  2.937213e-70              6.150267e-56      -4.278867e-108</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -4.814155e-69             -5.587369e-55       3.242321e-106</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]  7.890504e-68              5.075990e-54      -2.456875e-104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ecs_cons_gen_last_12m ecs_cstr_conf ecs_cstr_order_books ecs_cstr_empl_exp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]         -1.558279e-59 -3.864650e-39        -3.206632e-32     -3.142529e-34</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]         -1.801058e-59  4.273319e-39         2.448859e-32      2.393847e-34</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]         -1.614725e-58 -1.614561e-38        -5.921301e-32     -6.334039e-34</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]         -1.569366e-57  7.133020e-38         1.962234e-31      2.268084e-33</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]         -1.526639e-56 -3.178655e-37        -6.721948e-31     -8.345304e-33</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]         -1.485088e-55  1.417108e-36         2.309332e-30      3.076863e-32</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ecs_cstr_prod_recent ecs_ret_tr_conf ecs_ret_tr_bus_sit ecs_ret_tr_stocks</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]        -2.074378e-53    3.631713e-39       1.110684e-40     -1.086935e-23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]         8.861033e-53   -1.719347e-39      -6.909123e-41      9.565073e-24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]        -6.762395e-52    4.616078e-39       2.365973e-40     -1.649752e-23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]         5.230494e-51   -2.042420e-38      -1.121462e-39      3.763642e-23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]        -4.046531e-50    9.335982e-38       5.406575e-39     -9.118502e-23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]         3.130580e-49   -4.274274e-37      -2.608431e-38      2.232554e-22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ecs_ret_tr_exp_bus ecs_ret_tr_empl  ecs_serv_conf ecs_serv_empl_exp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]       1.768988e-43   -8.626704e-38 -1.746649e-150    -7.221803e-182</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]      -2.671458e-43    1.183339e-37  2.045560e-150     8.941669e-183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]       1.254029e-42   -3.936167e-37 -1.202534e-149    -1.207501e-183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]      -6.449884e-42    1.477913e-36  7.891663e-149     9.738593e-184</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]       3.329385e-41   -5.599817e-36 -5.192910e-148    -6.789456e-183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]      -1.718839e-40    2.123122e-35  3.417277e-147     5.477853e-182</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      pms_comp_output  pms_comp_empl       pms_pmi pms_manuf_empl</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]               0 -3.446477e-217 2.425447e-271 -1.875658e-234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]               0  2.708394e-218 4.646938e-270  9.584543e-236</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]               0 -2.128376e-219 8.899469e-269 -4.897667e-237</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]               0  1.672572e-220 1.704358e-267  2.502690e-238</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]               0 -1.314381e-221 3.264056e-266 -1.278866e-239</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]               0  1.032898e-222 6.251069e-265  6.534958e-241</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      pms_manuf_output pms_manuf_product   pms_serv_out  pms_serv_empl</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   -1.385982e-159    -8.746639e-158 -5.438809e-313 -1.475161e-142</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    1.957084e-160    -1.311423e-158  1.862736e-314  3.138414e-143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]   -2.763512e-161    -1.966276e-159 -6.379680e-316 -6.677037e-144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]    3.902232e-162    -2.948127e-160  2.185075e-317  1.420752e-144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]   -5.510168e-163    -4.420261e-161 -7.775506e-319 -3.032455e-145</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]    7.780664e-164    -6.627498e-162  8.787303e-319  6.912067e-146</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      pms_serv_new_bus pms_serv_product          urx    empl_total  empl_tot_xc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]                0   -5.532815e-122 1.527306e-50 -2.189655e-08 1.664538e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]                0   -1.507222e-122 6.916613e-51 -2.105954e-08 1.666183e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]                0   -5.383310e-123 3.140323e-51 -2.054119e-08 1.689056e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]                0   -6.611946e-123 1.443543e-51 -2.033363e-08 1.733449e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]                0   -2.124985e-122 7.026725e-52 -2.043374e-08 1.799928e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]                0   -7.898323e-122 4.271091e-52 -2.084302e-08 1.889340e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          empl_cstr   empl_manuf extra_ea_trade_exp_val intra_ea_trade_exp_val</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -3.909774e-20 1.130804e-05             -0.1173080              0.5300049</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -3.037622e-20 1.125250e-05             -0.6082641              0.5613434</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -2.429536e-20 1.130307e-05              0.2089724              0.6935698</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] -2.032653e-20 1.146023e-05             -0.3888678             -0.8632375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] -1.812472e-20 1.172545e-05             -0.7122444              0.9965301</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] -1.749851e-20 1.210123e-05              0.1964240             -0.8188774</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      extra_ea_trade_imp_val intra_ea_trade_imp_val      us_ip     us_urx</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]              0.7441252              0.3905597  0.4464705 -0.5972064</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]              2.2986685             -2.2884988 -0.6994935 -0.3270729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]             -2.5212749              1.2639157 -1.5727228  1.6812686</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]              1.4758380             -0.1257012 -1.9704646  1.5982896</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]              0.1805347              0.1019460 -0.7847065 -0.6068660</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]              0.1648355              0.3371970 -0.5442462  0.4663372</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          us_empl us_retail_sales us_ip_manuf_exp us_cons_exp   us_r3_m</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.68805923   -3.879492e-85      1.09995435 -0.16821408  1.841994</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -1.05923627    8.964934e-85      0.21804294 -0.96714338  3.912328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -0.32778663   -3.271557e-84     -2.65396143  0.31640642 -2.906317</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  0.87144459    1.245807e-83     -2.95870846 -0.02023559 -7.023246</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  0.01071255   -4.758257e-83      0.16277231  0.99325909 -1.871839</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]  0.64722814    1.817750e-82      0.06523476 -0.58291072  2.277664</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      us_r10_year          m3        loans      ir_long       ir_short</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   4.8907708  0.07194975 6.259551e-78 3.374236e-65 -1.710178e-112</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]   0.1963391  0.94025272 1.492565e-78 8.668876e-66 -3.188068e-113</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  -3.0176803 -0.63796022 3.566169e-79 4.511839e-66 -5.943110e-114</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  -2.1176326 -0.08400808 8.822942e-80 1.124106e-65 -1.107899e-114</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  -0.2053264  0.37246930 3.448220e-80 4.509294e-65 -2.065324e-115</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]   1.8400670  1.31812770 6.462160e-80 1.877460e-64 -3.850596e-116</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          ir_1_year     ir_2_year     ir_5_year          eer       eer_cpi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  1.220272e-98 8.549943e-151 3.681757e-156 0.0004557372  6.827481e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  2.745420e-99 1.796414e-151 7.405038e-157 0.0002974932 -4.009777e-10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 6.176765e-100 3.808120e-152 1.618525e-157 0.0002342173  4.175719e-11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 1.389675e-100 9.676741e-153 9.959707e-158 0.0002457102 -3.143740e-10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 3.126552e-101 1.002608e-152 3.551094e-157 0.0003356407  5.343853e-09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 7.034274e-102 4.016726e-152 1.743610e-156 0.0005327172 -9.123236e-08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           eer_ppi     exr_usd    exr_gbp    rxr_yen        euro50       euro325</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 2.978315e-69  0.73454196 -1.0565458  2.4954660 -2.529723e-60 -6.362085e-59</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 6.337630e-69  0.37396618 -0.2080339 -0.4297539 -3.060252e-61 -8.108712e-60</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 2.205470e-68 -0.20597328 -1.6671123  0.4294326 -3.702041e-62 -1.033485e-60</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 8.077629e-68  0.53680789 -1.5342581 -3.8573492 -4.478426e-63 -1.317215e-61</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 2.970038e-67  0.07440597 -0.7810578 -2.2184222 -5.417632e-64 -1.678839e-62</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 1.092360e-66  0.24086153 -0.4188286  1.8411043 -6.553806e-65 -2.139743e-63</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            sp500       dow_j  raw_mat_en raw_mat_oil raw_mat_gold</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.431919190 -0.17589384  0.81784534 -0.34892116  -0.06331777</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.010685447  0.10735651 -0.25481550 -0.01625208  -3.53588829</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.109158959 -0.11497711 -0.22658581  0.06371555  -2.19498973</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.007235308  0.03244591  0.08718499  0.16768271  -1.29570277</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.166750379 -0.18766044 -0.69483895  0.06920533   3.06659121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.015507310  0.02006015  0.31392001 -0.07390485   1.48255729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      raw_mat_oil_fwd     raw_mat         gdp   priv_cons     invest      export</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1.322800e-28 -0.40362743  0.04292267 -0.07682953 0.04696923 -0.13995419</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]    4.144101e-29 -0.12983426  0.05129271 -0.05790409 0.06563161 -0.08840784</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]    1.299791e-29  0.37714437  0.09987802 -0.15427628 0.11585092 -0.22419183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]    4.125192e-30  0.16670567  0.04691497 -0.01023578 0.08187876 -0.10553460</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]    1.463590e-30 -0.06393378  0.01649269  0.05402172 0.06276925 -0.06993188</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]    1.005651e-30 -0.08081010 -0.02636112  0.20745746 0.04525212  0.03071138</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           import       empl    prductivity      capacity       gdp_us</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.01986328 0.25685434 -2.190174e-184 -2.715323e-43 -0.087264721</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.01055342 0.18337707  1.464337e-185  1.253871e-42 -0.104537037</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] -0.04353313 0.13800700 -9.790471e-187 -5.812130e-42 -0.194121324</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  0.04643295 0.09459807  6.545849e-188  2.694602e-41 -0.112607167</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  0.09398922 0.05497276 -4.376515e-189 -1.249274e-40 -0.065167393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]  0.21910457 0.02206330  2.926111e-190  5.791894e-40 -0.001692607</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Compare with model without AR(1) errors</span></span></span>
+<span class="r-in"><span><span class="va">dfm_large_ar1</span><span class="op">$</span><span class="va">loglik</span>  <span class="co"># Log-likelihood path</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] -37569.02 -37273.48 -37113.12 -36999.05 -36919.58 -36867.57 -36833.99</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] -36810.86 -36793.18 -36778.36 -36765.15 -36752.93 -36741.45 -36730.58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15] -36720.29 -36710.54 -36701.32 -36692.67 -36684.63 -36677.25 -36670.55</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [22] -36664.51 -36659.09 -36654.22 -36649.84 -36645.88 -36642.28</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

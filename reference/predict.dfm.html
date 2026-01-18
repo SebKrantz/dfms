@@ -9,7 +9,7 @@ with an option to also forecast autocorrelated residuals with a univariate metho
 
     <a class="navbar-brand me-2" href="../index.html">dfms</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,7 @@ with an option to also forecast autocorrelated residuals with a univariate metho
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>DFM Forecasts</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/v0.3.2/R/methods.R" class="external-link"><code>R/methods.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SebKrantz/dfms/blob/main/R/methods.R" class="external-link"><code>R/methods.R</code></a></small>
       <div class="d-none name"><code>predict.dfm.Rd</code></div>
     </div>
 
@@ -201,7 +201,7 @@ The function needs to have a second argument providing the forecast horizon (<co
 <dd><p>\(h \times r\) matrix with the factor forecasts.</p></dd>
 
 <dt><code>X</code></dt>
-<dd><p>\(T \times n\) matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:</p><table class="table table"><tr><td><code>"stats"</code></td><td></td><td>is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://sebkrantz.github.io/collapse/reference/qsu.html" class="external-link">qsu</a></code>). Only attached if <code>standardized = TRUE</code>.</td><td></td></tr><tr><td><code>"attributes"</code></td><td></td><td>contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.</td><td></td></tr><tr><td><code>"is.list"</code></td><td></td><td>is a logical value indicating whether the original data input was a list / data frame.</td><td></td></tr></table></dd>
+<dd><p>\(T \times n\) matrix with the standardized (scaled and centered) data - with attributes attached allowing reconstruction of the original data:</p><table class="table table"><tr><td><code>"stats"</code></td><td></td><td>is a \(n \times 5\) matrix of summary statistics of class <code>"qsu"</code> (see <code><a href="https://fastverse.org/collapse/reference/qsu.html" class="external-link">qsu</a></code>). Only attached if <code>standardized = TRUE</code>.</td><td></td></tr><tr><td><code>"attributes"</code></td><td></td><td>contains the <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></code> of the original data input.</td><td></td></tr><tr><td><code>"is.list"</code></td><td></td><td>is a logical value indicating whether the original data input was a list / data frame.</td><td></td></tr></table></dd>
 
 <dt><code>F</code></dt>
 <dd><p>\(T \times r\) matrix of factor estimates.</p></dd>
@@ -234,7 +234,7 @@ The function needs to have a second argument providing the forecast horizon (<co
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://joshuaulrich.github.io/xts/" class="external-link">xts</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sebkrantz.github.io/collapse/" class="external-link">collapse</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://fastverse.org/collapse/" class="external-link">collapse</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fit DFM with 3 factors and 3 lags in the transition equation</span></span></span>
 <span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="DFM.html">DFM</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">BM14_M</span><span class="op">)</span>, r <span class="op">=</span> <span class="fl">3</span>, p <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
@@ -556,7 +556,7 @@ The function needs to have a second argument providing the forecast horizon (<co
 <span class="r-plt img"><img src="predict.dfm-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Also forecasting autocorrelated residuals with an AR(1)</span></span></span>
-<span class="r-in"><span><span class="va">fcfun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">h</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ar.html" class="external-link">ar</a></span><span class="op">(</span><span class="fu"><a href="https://sebkrantz.github.io/collapse/reference/efficient-programming.html" class="external-link">na_rm</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, n.ahead <span class="op">=</span> <span class="va">h</span><span class="op">)</span><span class="op">$</span><span class="va">pred</span></span></span>
+<span class="r-in"><span><span class="va">fcfun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">h</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ar.html" class="external-link">ar</a></span><span class="op">(</span><span class="fu"><a href="https://fastverse.org/collapse/reference/efficient-programming.html" class="external-link">na_rm</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, n.ahead <span class="op">=</span> <span class="va">h</span><span class="op">)</span><span class="op">$</span><span class="va">pred</span></span></span>
 <span class="r-in"><span><span class="va">fcar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mod</span>, resFUN <span class="op">=</span> <span class="va">fcfun</span>, h <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fcar</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">300</span>, <span class="fl">370</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="predict.dfm-2.png" alt="" width="700" height="433"></span>

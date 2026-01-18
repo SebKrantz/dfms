@@ -186,11 +186,11 @@ A list-like object of class 'dfm_forecast' with the following elements:
   data - with attributes attached allowing reconstruction of the
   original data:
 
-  |                |     |                                                                                                                                                                                   |     |
-  |----------------|-----|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----|
-  | `"stats"`      |     | is a \\n \times 5\\ matrix of summary statistics of class `"qsu"` (see [`qsu`](https://sebkrantz.github.io/collapse/reference/qsu.html)). Only attached if `standardized = TRUE`. |     |
-  | `"attributes"` |     | contains the [`attributes`](https://rdrr.io/r/base/attributes.html) of the original data input.                                                                                   |     |
-  | `"is.list"`    |     | is a logical value indicating whether the original data input was a list / data frame.                                                                                            |     |
+  |                |     |                                                                                                                                                                             |     |
+  |----------------|-----|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----|
+  | `"stats"`      |     | is a \\n \times 5\\ matrix of summary statistics of class `"qsu"` (see [`qsu`](https://fastverse.org/collapse/reference/qsu.html)). Only attached if `standardized = TRUE`. |     |
+  | `"attributes"` |     | contains the [`attributes`](https://rdrr.io/r/base/attributes.html) of the original data input.                                                                             |     |
+  | `"is.list"`    |     | is a logical value indicating whether the original data input was a list / data frame.                                                                                      |     |
 
 - `F`:
 

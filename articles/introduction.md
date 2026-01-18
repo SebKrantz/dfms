@@ -437,7 +437,82 @@ print(model_mq)
 plot(model_mq)
 ```
 
-![](introduction_files/figure-html/unnamed-chunk-16-1.png)
+![](introduction_files/figure-html/MQ-1.png)
+
+## Modeling AR(1) Idiosyncratic Errors
+
+By default, observation errors are assumed to be white noise. However,
+in practice, idiosyncratic errors often exhibit serial correlation.
+Setting `idio.ar1 = TRUE` models observation errors as AR(1) processes:
+e\_{it} = \rho_i e\_{i,t-1} + v\_{it}, where \rho_i is estimated for
+each series.
+
+This option can be combined with mixed-frequency estimation. Below, I
+estimate the mixed-frequency model with AR(1) idiosyncratic errors.
+
+``` r
+# Mixed-frequency model with AR(1) idiosyncratic errors
+model_mq_ar1 <- DFM(BM14_diff, r = 5, p = 3,
+                    quarterly.vars = colnames(BM14_Q),
+                    idio.ar1 = TRUE)
+#> Converged after 27 iterations.
+print(model_mq_ar1)
+#> Mixed Frequency Dynamic Factor Model
+#> n = 101, nm = 92, nq = 9, T = 356, r = 5, p = 3
+#> %NA = 29.7363, %NAm = 25.8366
+#>    with AR(1) errors: mean(abs(rho)) = 0.288 
+#> 
+#> Factor Transition Matrix [A]
+#>      L1.f1   L1.f2   L1.f3   L1.f4   L1.f5   L2.f1   L2.f2   L2.f3   L2.f4
+#> f1  0.4073 -0.3484  0.4001 -0.1942  0.1016  0.1284 -0.0106 -0.1072 -0.0232
+#> f2 -0.0983  0.1906 -0.1025  0.1917  0.0215  0.1326  0.0410 -0.0669  0.0069
+#> f3  0.1556  0.1352  0.3643 -0.0077 -0.0898 -0.1249 -0.0616 -0.1719  0.1489
+#> f4 -0.1252  0.0063  0.0934 -0.0476  0.4319  0.0175 -0.0567  0.0112 -0.1570
+#>      L2.f5   L3.f1   L3.f2   L3.f3   L3.f4   L3.f5
+#> f1  0.1505  0.2816  0.0061  0.0701 -0.0112 -0.0342
+#> f2 -0.0306  0.2382  0.3035  0.1069 -0.0172 -0.0276
+#> f3  0.0545 -0.0116 -0.1385  0.1737  0.0152 -0.0931
+#> f4  0.0866 -0.1001 -0.0618 -0.1389  0.1426 -0.1245
+#>  [ reached 'max' / getOption("max.print") -- omitted 1 row ]
+```
+
+The estimated AR(1) coefficients (\rho) for each series are stored in
+the `rho` element of the model object. For most series, the AR(1)
+coefficient are small, indicating little serial correlation in the
+idiosyncratic errors after accounting for the common factors.
+
+``` r
+# AR(1) coefficients for the first 10 series
+head(model_mq_ar1$rho, 10)
+#>       ip_total    ip_tot_cstr ip_tot_cstr_en      ip_constr    ip_im_goods 
+#>     -0.4559076     -0.3826675     -0.6420425     -0.3796805     -0.1303219 
+#>     ip_capital      ip_d_cstr     ip_nd_cons          ip_en        ip_en_2 
+#>     -0.3448632     -0.2102364     -0.2824372     -0.3324289     -0.2811062
+
+# Summary of AR(1) coefficients
+summary(model_mq_ar1$rho)
+#>     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+#> -0.64204 -0.28244 -0.15388 -0.05556  0.19562  0.91507
+```
+
+The estimated observation errors are available in the `e` element.
+
+``` r
+# Dimension of estimated errors
+dim(model_mq_ar1$e)
+#> [1] 356 101
+
+# Plot estimated errors for first 5 monthly series
+matplot(model_mq_ar1$e[, 1:5], type = "l", lty = 1,
+        main = "Estimated Idiosyncratic Errors (First 5 Series)",
+        xlab = "Time", ylab = "Error")
+```
+
+![](introduction_files/figure-html/unnamed-chunk-17-1.png)
+
+Note that modeling AR(1) errors increases computation time, particularly
+for large datasets. It is generally most useful when dealing with
+smaller panels where idiosyncratic dynamics may be more pronounced.
 
 ## Additional Functions
 
