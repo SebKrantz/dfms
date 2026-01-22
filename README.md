@@ -2,7 +2,7 @@
 <!-- badges: start -->
 [![Status at rOpenSci Software Peer Review](https://badges.ropensci.org/556_status.svg)](https://github.com/ropensci/software-review/issues/556)
 [![R-CMD-check](https://github.com/ropensci/dfms/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/dfms/actions)
-[![dfms status badge](https://sebkrantz.r-universe.dev/badges/dfms)](https://sebkrantz.r-universe.dev)
+[![dfms status badge](https://ropensci.r-universe.dev/badges/dfms)](https://ropensci.r-universe.dev)
 [![CRAN status](https://www.r-pkg.org/badges/version/dfms)](https://cran.r-project.org/package=dfms) 
 [![cran checks](https://badges.cranchecks.info/worst/dfms.svg)](https://cran.r-project.org/web/checks/check_results_dfms.html)
 ![downloads per month](https://cranlogs.r-pkg.org/badges/dfms?color=blue)
