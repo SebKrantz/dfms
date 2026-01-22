@@ -1,18 +1,11 @@
-url: https://sebkrantz.github.io/dfms/
+url: https://docs.ropensci.org/dfms/
 destination: docs
 
 home:
   title: Dynamic Factor Models for R
 
 template:
-  bootstrap: 5
-  bootswatch: sandstone # Also good: flatly, yeti, simplex, superhero, zephyr
-  theme: ayu-dark # Or: ayu-mirage
   math-rendering: katex
-  bslib:
-    primary: "#1e2124" # "#202224" # "#242424" # "#003254"
-    code-color: "#004573" # "#9c0027" # "#004d80" # b3002d
-    gray-dark: "#3f464d"
 
 development:
   mode: auto
@@ -43,7 +36,7 @@ navbar:
       href: https://sebkrantz.github.io/Rblog/
     github:
       icon: fa-github
-      href: https://github.com/SebKrantz/dfms
+      href: https://github.com/ropensci/dfms
       aria-label: GitHub
 
 
@@ -89,7 +82,7 @@ external-articles:
   - name: dynamic_factor_models
     title: Dynamic Factor Models - A Very Short Introduction
     description: " "
-    href: https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf
+    href: https://raw.githubusercontent.com/ropensci/dfms/main/vignettes/dynamic_factor_models_paper.pdf
 
 articles:
   - title: Introduction to dfms

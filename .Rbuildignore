@@ -6,6 +6,9 @@ misc
 .RData
 LICENSE
 ^\.github$
+^\.cursor$
+^\.claude$
+.claude
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
@@ -15,4 +18,4 @@ _cache$
 .log$
 .gz$
 .tex$
-vignettes/dynamic_factor_models*
+^\.DS_Store$

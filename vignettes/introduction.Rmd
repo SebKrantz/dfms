@@ -230,11 +230,11 @@ If performance is not critical, I also refer the user to the [*nowcasting*](<htt
 
 ## Conclusion and Outlook
 
-*dfms* provides a simple but robust and powerful implementation of dynamic factors models in R. For more information about the model consult the [theoretical vignette](https://raw.githubusercontent.com/SebKrantz/dfms/main/vignettes/dynamic_factor_models_paper.pdf). 
+*dfms* provides a simple but robust and powerful implementation of dynamic factors models in R. For more information about the model consult the [theoretical vignette](https://raw.githubusercontent.com/ropensci/dfms/main/vignettes/dynamic_factor_models_paper.pdf). 
 
 Other implementations more geared to economic nowcasting applications are provided in R packages [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>). More general forms of autoregressive state space models can be fit using [*MARSS*](<https://CRAN.R-project.org/package=MARSS>). For large-scale nowcasting models, the [`DynamicFactorMQ`](https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.dynamic_factor_mq.DynamicFactorMQ.html) class in the *statsmodels* Python library provides a robust and performant implementation.
 
-In the future, a simple `news()` function following Banbura and Modugno (2014) may be added to *dfms* to evaluate the impact of new observations on model predictions. In general, my time on this package is very limited, but the original Matlab codes of Banbura and Modugno (2014) are [in the repo](https://github.com/SebKrantz/dfms/tree/main/misc/BM2014). Thus, impatient users are also very welcome to do advances and submit PRs.
+In the future, a simple `news()` function following Banbura and Modugno (2014) may be added to *dfms* to evaluate the impact of new observations on model predictions. In general, my time on this package is very limited, but the original Matlab codes of Banbura and Modugno (2014) are [in the repo](https://github.com/ropensci/dfms/tree/main/misc/BM2014). Thus, impatient users are also very welcome to do advances and submit PRs.
 
 ## References
 

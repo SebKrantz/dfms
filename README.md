@@ -1,13 +1,13 @@
 # **dfms**: Dynamic Factor Models for R
 <!-- badges: start -->
 [![Status at rOpenSci Software Peer Review](https://badges.ropensci.org/556_status.svg)](https://github.com/ropensci/software-review/issues/556)
-[![R-CMD-check](https://github.com/SebKrantz/dfms/workflows/R-CMD-check/badge.svg)](https://github.com/SebKrantz/dfms/actions)
+[![R-CMD-check](https://github.com/ropensci/dfms/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/dfms/actions)
 [![dfms status badge](https://sebkrantz.r-universe.dev/badges/dfms)](https://sebkrantz.r-universe.dev)
 [![CRAN status](https://www.r-pkg.org/badges/version/dfms)](https://cran.r-project.org/package=dfms) 
 [![cran checks](https://badges.cranchecks.info/worst/dfms.svg)](https://cran.r-project.org/web/checks/check_results_dfms.html)
 ![downloads per month](https://cranlogs.r-pkg.org/badges/dfms?color=blue)
 ![downloads](https://cranlogs.r-pkg.org/badges/grand-total/dfms?color=blue)
-[![Codecov test coverage](https://codecov.io/gh/SebKrantz/dfms/branch/main/graph/badge.svg)](https://app.codecov.io/gh/SebKrantz/dfms?branch=main)
+[![Codecov test coverage](https://codecov.io/gh/ropensci/dfms/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ropensci/dfms?branch=main)
 [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg)](https://cran.r-project.org/)
 [![dependencies](https://tinyverse.netlify.app/badge/dfms)](https://CRAN.R-project.org/package=dfms)
 <!-- [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) -->
@@ -15,7 +15,7 @@
 
 <!-- **NOTE**: This package is under [rOpenSci Statistical Software Peer Review](https://stats-devguide.ropensci.org/). Peer review might result in changes to the API. -->
 <!--
-The package is fully functional though, and you are very welcome to install it using `remotes::install_github("SebKrantz/dfms")` and give feedback. -->
+The package is fully functional though, and you are very welcome to install it using `remotes::install_github("ropensci/dfms")` and give feedback. -->
 
 *dfms* provides efficient estimation of Dynamic Factor Models via the EM Algorithm. Factors are assumed to follow a stationary VAR 
   process of order `p`. Estimation can be done in 3 different ways following:
@@ -131,7 +131,7 @@ plot(mod)
 ```
 
 <div class="figure">
-<img src="https://raw.githubusercontent.com/SebKrantz/dfms/main/misc/figure/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
+<img src="https://raw.githubusercontent.com/ropensci/dfms/main/misc/figure/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
 </div>
 
 ```r
@@ -157,7 +157,7 @@ plot(fc, xlim = c(320, 370))
 ```
 
 <div class="figure">
-<img src="https://raw.githubusercontent.com/SebKrantz/dfms/main/misc/figure/unnamed-chunk-1-2.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
+<img src="https://raw.githubusercontent.com/ropensci/dfms/main/misc/figure/unnamed-chunk-1-2.png" alt="plot of chunk unnamed-chunk-1" width="100%" />
 </div>
 
 ```r
