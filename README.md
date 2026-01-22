@@ -46,7 +46,7 @@ The *dfms* package is not intended to fit more general forms of the state space 
 install.packages("dfms")
 
 # Development Version
-install.packages('dfms', repos = c('https://sebkrantz.r-universe.dev', 'https://cloud.r-project.org'))
+install.packages('dfms', repos = c('https://ropensci.r-universe.dev', 'https://cloud.r-project.org'))
 
 ```
 
