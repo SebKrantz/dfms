@@ -65,9 +65,9 @@ Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor model
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://sebkrantz.github.io/dfms/}
-  \item \url{https://github.com/SebKrantz/dfms}
-  \item Report bugs at \url{https://github.com/SebKrantz/dfms/issues}
+  \item \url{https://docs.ropensci.org/dfms/}
+  \item \url{https://github.com/ropensci/dfms}
+  \item Report bugs at \url{https://github.com/ropensci/dfms/issues}
 }
 
 }

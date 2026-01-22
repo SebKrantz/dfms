@@ -1,3 +1,7 @@
+# dfms 0.4.1
+
+* *dfms* is now part of [rOpenSci](https://ropensci.org/) – following completion of a scientific review by @eeholmes and @santikka. This means the repo shifted to [ropensci/dfms](https://github.com/ropensci/dfms) and the docs (now in rOpenSci style) to [docs.ropensci.org/dfms](https://docs.ropensci.org/dfms/). 
+
 # dfms 0.4.0
 
 * Added support for mixed-frequency estimation with AR(1) idiosyncratic errors (`quarterly.vars` combined with `idio.ar1 = TRUE`). This implements the full model of Banbura and Modugno (2014), allowing observation errors to follow AR(1) processes while handling mixed monthly-quarterly data with temporal aggregation constraints.
