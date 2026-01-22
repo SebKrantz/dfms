@@ -2,6 +2,8 @@
 
 ## dfms 0.4.0
 
+CRAN release: 2026-01-18
+
 - Added support for mixed-frequency estimation with AR(1) idiosyncratic
   errors (`quarterly.vars` combined with `idio.ar1 = TRUE`). This
   implements the full model of Banbura and Modugno (2014), allowing

@@ -35,7 +35,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.4.0" id="dfms-040">dfms 0.4.0<a class="anchor" aria-label="anchor" href="#dfms-040"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.4.0" id="dfms-040">dfms 0.4.0<a class="anchor" aria-label="anchor" href="#dfms-040"></a></h2><p class="text-muted">CRAN release: 2026-01-18</p>
 <ul><li><p>Added support for mixed-frequency estimation with AR(1) idiosyncratic errors (<code>quarterly.vars</code> combined with <code>idio.ar1 = TRUE</code>). This implements the full model of Banbura and Modugno (2014), allowing observation errors to follow AR(1) processes while handling mixed monthly-quarterly data with temporal aggregation constraints.</p></li>
 <li><p>New internal functions <code>init_cond_MQ_idio()</code> and <code>EMstepBMMQidio()</code> implement the EM algorithm for the combined MQ + idio.ar1 case, with state vector structure <code>[factors, monthly_errors, quarterly_error_lags]</code>.</p></li>
 <li><p>Updated <code><a href="../reference/plot.dfm.html">plot.dfm()</a></code> with <code>type = "residual"</code> to properly handle mixed-frequency and AR(1) error models by using the <code><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals()</a></code> method internally.</p></li>
