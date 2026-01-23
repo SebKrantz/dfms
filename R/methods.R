@@ -481,14 +481,14 @@ fitted.dfm <- function(object,
 #' @param object a \code{dfm} object for the old vintage.
 #' @param comparison a \code{dfm} object or a new dataset for the updated vintage.
 #' @param t_fcst integer. Forecast target time index.
-#' @param vars Integer or character identifying target variables. Defaults to all variables.
+#' @param target.vars Integer or character identifying target variables. Defaults to all variables.
 #' @param groups,series optional character vectors for grouping and naming variables.
 #' @param standardized logical. Return results on standardized scale?
 #' @param \dots not used.
 #' @return For a single target, a \code{dfm.news} object with elements:
 #' \itemize{
-#' \item \code{y_old}: old forecast for the target variable at \code{t_fcst}.
-#' \item \code{y_new}: new forecast for the target variable at \code{t_fcst}.
+#' \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
+#' \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
 #' \item \code{groupnews}: named vector of news contributions aggregated by group.
 #' \item \code{singlenews}: named vector of news contributions by series.
 #' \item \code{gain}: news weights for each new release.
@@ -497,7 +497,7 @@ fitted.dfm <- function(object,
 #' \item \code{fore}: old forecasts for the new releases.
 #' \item \code{filt}: filtered gains for the new releases.
 #' }
-#' If \code{vars} selects multiple targets, a \code{dfm.news_list} object is returned,
+#' If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
 #' where each element is a \code{dfm.news} object and list names correspond to targets.
 #'
 #' @references
@@ -510,8 +510,8 @@ news <- function(object, ...) UseMethod("news")
 
 news.dfm <- function(object,
                      comparison,
-                     t_fcst,
-                     vars = NULL,
+                     t.fcst,
+                     target.vars = NULL,
                      groups = NULL,
                      series = NULL,
                      standardized = FALSE, ...) {
@@ -542,22 +542,22 @@ news.dfm <- function(object,
     stop("dfm objects have different variable ordering")
   }
 
-  if(!is.numeric(t_fcst) || length(t_fcst) != 1L) stop("t_fcst must be a single integer index")
-  t_fcst <- as.integer(t_fcst)
-  if(t_fcst < 1L || t_fcst > nrow(X_old)) stop("t_fcst is out of bounds")
+  if(!is.numeric(t.fcst) || length(t.fcst) != 1L) stop("t.fcst must be a single integer index")
+  t_fcst <- as.integer(t.fcst)
+  if(t_fcst < 1L || t_fcst > nrow(X_old)) stop("t.fcst is out of bounds")
 
-  resolve_vars <- function(vars, n, names) {
-    if(is.null(vars)) return(seq_len(n))
-    if(is.character(vars)) {
-      if(is.null(names)) stop("vars is a name but data have no column names")
-      return(as.integer(ckmatch(vars, names, e = "Unknown vars:")))
+  resolve_vars <- function(target.vars, n, names) {
+    if(is.null(target.vars)) return(seq_len(n))
+    if(is.character(target.vars)) {
+      if(is.null(names)) stop("target.vars is a name but data have no column names")
+      return(as.integer(ckmatch(target.vars, names, e = "Unknown target.vars:")))
     }
-    if(!is.numeric(vars)) stop("vars must be NULL, numeric indices, or names")
-    vars <- as.integer(vars)
-    if(any(vars < 1L | vars > n)) stop("vars is out of bounds")
-    unique(vars)
+    if(!is.numeric(target.vars)) stop("target.vars must be NULL, numeric indices, or names")
+    target.vars <- as.integer(target.vars)
+    if(any(target.vars < 1L | target.vars > n)) stop("target.vars is out of bounds")
+    unique(target.vars)
   }
-  vars_idx <- resolve_vars(vars, ncol(X_old), colnames(X_old))
+  vars_idx <- resolve_vars(target.vars, ncol(X_old), colnames(X_old))
 
   r_old <- nrow(object$A)
   if(ncol(object$A) %% r_old != 0L) stop("Invalid transition matrix dimensions in dfm object")
@@ -707,14 +707,14 @@ news.dfm <- function(object,
   res <- lapply(vars_idx, compute_news)
   if(length(vars_idx) == 1L) {
     res <- res[[1L]]
-    res$var <- vars_idx
+    res$target.var <- vars_idx
     res$t_fcst <- t_fcst
     res$standardized <- standardized
     class(res) <- "dfm.news"
     return(res)
   }
   if(!is.null(colnames(X_old))) names(res) <- colnames(X_old)[vars_idx]
-  attr(res, "vars") <- vars_idx
+  attr(res, "target.vars") <- vars_idx
   attr(res, "t_fcst") <- t_fcst
   attr(res, "standardized") <- standardized
   class(res) <- "dfm.news_list"
@@ -724,7 +724,7 @@ news.dfm <- function(object,
 #' @export
 print.dfm.news <- function(x, digits = 4L, ...) {
   cat("DFM News\n")
-  cat("Target variable:", if(!is.null(names(x$singlenews))) names(x$singlenews)[x$var] else x$var, "\n")
+  cat("Target variable:", if(!is.null(names(x$singlenews))) names(x$singlenews)[x$target.var] else x$target.var, "\n")
   cat("Target time:", x$t_fcst, "\n")
   cat("Old forecast:", round(x$y_old, digits), "\n")
   cat("New forecast:", round(x$y_new, digits), "\n")
