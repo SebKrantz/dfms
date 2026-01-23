@@ -46,7 +46,8 @@ test_that("news uses simple-case shortcut", {
   res_all <- news(dfm_old, X_new, t.fcst = 10)
   expect_s3_class(res_all, "dfm.news_list")
   expect_length(res_data$gain, 0)
+  expect_true(is.null(res_data$gain_scaled) || length(res_data$gain_scaled) == ncol(X))
 
   expect_length(res$gain, 0)
-  expect_length(res$gainSer, 0)
+  expect_true(is.null(names(res$gain)) || length(names(res$gain)) == 0L)
 })

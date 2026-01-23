@@ -491,11 +491,10 @@ fitted.dfm <- function(object,
 #' \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
 #' \item \code{groupnews}: named vector of news contributions aggregated by group.
 #' \item \code{singlenews}: named vector of news contributions by series.
-#' \item \code{gain}: news weights for each new release.
-#' \item \code{gainSer}: series names corresponding to \code{gain}.
+#' \item \code{gain}: named news weights for each new release.
+#' \item \code{gain_scaled}: scaled gain for each new release (matches the data scale).
 #' \item \code{actual}: actual values for the new releases.
-#' \item \code{fore}: old forecasts for the new releases.
-#' \item \code{filt}: filtered gains for the new releases.
+#' \item \code{forecasts}: old forecasts for the new releases.
 #' }
 #' If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
 #' where each element is a \code{dfm.news} object and list names correspond to targets.
@@ -601,9 +600,9 @@ news.dfm <- function(object,
     groupnews <- setNames(numeric(length(gList)), gList)
     groupnews[match(groups[v_news], gList)] <- temp
     return(list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-                singlenews = singlenews, gain = numeric(0L),
-                gainSer = character(0L), actual = rep(NA_real_, n),
-                fore = rep(NA_real_, n), filt = rep(NA_real_, n)))
+                singlenews = singlenews, gain = setNames(numeric(0L), character(0L)),
+                gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
+                forecasts = rep(NA_real_, n)))
     }
 
     rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
@@ -619,9 +618,9 @@ news.dfm <- function(object,
     return(list(y_old = y_old, y_new = y_new,
                 groupnews = setNames(numeric(length(gList)), gList),
                 singlenews = setNames(numeric(n), series),
-                gain = numeric(0L), gainSer = character(0L),
-                actual = rep(NA_real_, n), fore = rep(NA_real_, n),
-                filt = rep(NA_real_, n)))
+                gain = setNames(numeric(0L), character(0L)),
+                gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
+                forecasts = rep(NA_real_, n)))
     }
 
   t_miss <- rel[, 1L]
@@ -682,26 +681,27 @@ news.dfm <- function(object,
     if(any(idx)) groupnews[i] <- sum(gain[idx] * innov[idx])
   }
 
-  actual <- fore <- filt <- rep(NA_real_, n)
+  actual <- forecasts <- gain_scaled <- rep(NA_real_, n)
   for(i in seq_len(n_news)) {
     actual[v_miss[i]] <- X_new[t_miss[i], v_miss[i]]
-    fore[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
-    filt[v_miss[i]] <- if(standardized) gain[i] else gain[i] / Wx[v_miss[i]]
+    forecasts[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
+    gain_scaled[v_miss[i]] <- if(standardized) gain[i] else gain[i] / Wx[v_miss[i]]
   }
   if(!standardized) {
     actual <- dfm_news_unscale_vec(actual, Mx, Wx)
     actual[is.na(actual)] <- NA_real_
-    fore <- dfm_news_unscale_vec(fore, Mx, Wx)
-    fore[is.na(fore)] <- NA_real_
+    forecasts <- dfm_news_unscale_vec(forecasts, Mx, Wx)
+    forecasts[is.na(forecasts)] <- NA_real_
   }
 
   idx <- !duplicated(v_miss)
-  gain <- gain[idx]
-  gainSer <- series[v_miss][idx]
+    gain <- gain[idx]
+    gainSer <- series[v_miss][idx]
+    names(gain) <- gainSer
 
     list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-         singlenews = singlenews, gain = gain, gainSer = gainSer,
-         actual = actual, fore = fore, filt = filt)
+         singlenews = singlenews, gain = gain, gain_scaled = gain_scaled,
+         actual = actual, forecasts = forecasts)
   }
 
   res <- lapply(vars_idx, compute_news)
