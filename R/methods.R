@@ -456,7 +456,7 @@ fitted.dfm <- function(object,
 #'
 #' Compute the Banbura and Modugno (2014) news decomposition of forecast updates.
 #' Given an old vintage and an updated vintage, the function decomposes the
-#' forecast revision at \code{t_fcst} into contributions from new releases.
+#' forecast revision at \code{t.fcst} into contributions from new releases.
 #'
 #' Let \eqn{y_t^{old}} and \eqn{y_t^{new}} be the old and new forecasts of a target
 #' series at \eqn{t = t_{fcst}}. For each new release \eqn{i} (a previously missing
@@ -480,7 +480,7 @@ fitted.dfm <- function(object,
 #'
 #' @param object a \code{dfm} object for the old vintage.
 #' @param comparison a \code{dfm} object or a new dataset for the updated vintage.
-#' @param t_fcst integer. Forecast target time index.
+#' @param t.fcst integer. Forecast target time index.
 #' @param target.vars Integer or character identifying target variables. Defaults to all variables.
 #' @param groups,series optional character vectors for grouping and naming variables.
 #' @param standardized logical. Return results on standardized scale?
@@ -715,7 +715,7 @@ news.dfm <- function(object,
   }
   if(!is.null(colnames(X_old))) names(res) <- colnames(X_old)[vars_idx]
   attr(res, "target.vars") <- vars_idx
-  attr(res, "t_fcst") <- t_fcst
+  attr(res, "t.fcst") <- t_fcst
   attr(res, "standardized") <- standardized
   class(res) <- "dfm.news_list"
   res
@@ -735,7 +735,7 @@ print.dfm.news <- function(x, digits = 4L, ...) {
 
 #' @export
 print.dfm.news_list <- function(x, digits = 4L, ...) {
-  t_fcst <- attr(x, "t_fcst")
+  t_fcst <- attr(x, "t.fcst")
   standardized <- attr(x, "standardized")
   cat("DFM News (Multiple Targets)\n")
   cat("Target time:", t_fcst, "\n")
