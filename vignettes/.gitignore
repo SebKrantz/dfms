@@ -1,2 +1,8 @@
 *.html
 *.R
+*.tex
+*.log
+*.pdf
+!dynamic_factor_models_paper.pdf
+*.synctex.gz
+*_cache/

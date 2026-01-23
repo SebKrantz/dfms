@@ -19,3 +19,4 @@ _cache$
 .gz$
 .tex$
 ^\.DS_Store$
+vignettes/dynamic_factor_models*
