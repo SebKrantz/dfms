@@ -46,3 +46,10 @@ dfm_news_stats <- function(X) {
 dfm_news_unscale_vec <- function(x, Mx, Wx) {
   x * Wx + Mx
 }
+
+dfm_news_scale <- function(X, stats) {
+  if(is.null(stats)) stop("stats are required to scale X")
+  Mx <- stats[, "Mean"]
+  Wx <- stats[, "SD"]
+  TRA.matrix(TRA.matrix(X, Mx, "-"), Wx, "/")
+}

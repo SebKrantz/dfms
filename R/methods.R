@@ -453,28 +453,86 @@ fitted.dfm <- function(object,
 }
 
 #' News Decomposition
-#' @param object,dfm_new objects of class 'dfm' for old and new vintages.
+#'
+#' Compute the Banbura and Modugno (2014) news decomposition of forecast updates.
+#' Given an old vintage and an updated vintage, the function decomposes the
+#' forecast revision at \code{t_fcst} into contributions from new releases.
+#'
+#' Let \eqn{y_t^{old}} and \eqn{y_t^{new}} be the old and new forecasts of a target
+#' series at \eqn{t = t_{fcst}}. For each new release \eqn{i} (a previously missing
+#' observation that becomes observed), the innovation is
+#' \deqn{\nu_i = x_i^{new} - \hat{x}_i^{old},}
+#' where \eqn{\hat{x}_i^{old}} is the smoothed estimate from the old vintage.
+#' The revision is decomposed as
+#' \deqn{y_t^{new} - y_t^{old} = \sum_i g_i \nu_i,}
+#' with gain weights computed from Kalman smoother covariances:
+#' \deqn{g = \sigma_y C_y P_1 P_2^{-1}.}
+#' Here \eqn{\sigma_y} is the target series standard deviation, \eqn{C_y} is the
+#' loading row for the target series, \eqn{P_1} collects cross-covariances between
+#' the target and each news item, and \eqn{P_2} is the covariance matrix of the
+#' news items (including measurement error where appropriate). See Section 2.3 and
+#' Appendix D in Banbura and Modugno (2014).
+#'
+#' The function uses the system matrices and scaling from the new vintage. The old
+#' data are re-standardized to the new-vintage scale before smoothing so that
+#' innovations and gains are computed on a consistent scale. Set
+#' \code{standardized = FALSE} to report results on the original data scale.
+#'
+#' @param object a \code{dfm} object for the old vintage.
+#' @param comparison a \code{dfm} object or a new dataset for the updated vintage.
 #' @param t_fcst integer. Forecast target time index.
-#' @param v_news integer or character. Target variable index or name.
+#' @param vars Integer or character identifying target variables. Defaults to all variables.
 #' @param groups,series optional character vectors for grouping and naming variables.
 #' @param standardized logical. Return results on standardized scale?
 #' @param \dots not used.
-#' @return A list with news decomposition results.
+#' @return For a single target, a \code{dfm.news} object with elements:
+#' \itemize{
+#' \item \code{y_old}: old forecast for the target variable at \code{t_fcst}.
+#' \item \code{y_new}: new forecast for the target variable at \code{t_fcst}.
+#' \item \code{groupnews}: named vector of news contributions aggregated by group.
+#' \item \code{singlenews}: named vector of news contributions by series.
+#' \item \code{gain}: news weights for each new release.
+#' \item \code{gainSer}: series names corresponding to \code{gain}.
+#' \item \code{actual}: actual values for the new releases.
+#' \item \code{fore}: old forecasts for the new releases.
+#' \item \code{filt}: filtered gains for the new releases.
+#' }
+#' If \code{vars} selects multiple targets, a \code{dfm.news_list} object is returned,
+#' where each element is a \code{dfm.news} object and list names correspond to targets.
+#'
+#' @references
+#' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor
+#' models on datasets with arbitrary pattern of missing data. Journal of Applied
+#' Econometrics, 29(1), 133-160.
+#'
 #' @export
 news <- function(object, ...) UseMethod("news")
 
-#' @rdname news.dfm
-#' @export
 news.dfm <- function(object,
-                     dfm_new,
+                     comparison,
                      t_fcst,
-                     v_news,
+                     vars = NULL,
                      groups = NULL,
                      series = NULL,
                      standardized = FALSE, ...) {
-  if(!inherits(dfm_new, "dfm")) stop("dfm_new must be a 'dfm' object")
+  if(inherits(comparison, "dfm")) {
+    dfm_new <- comparison
+  } else {
+    cl <- object$call
+    if(is.null(cl)) stop("dfm object has no call to re-estimate comparison")
+    if(is.null(cl$X)) cl[[2L]] <- comparison else cl$X <- comparison
+    dfm_new <- eval(cl, envir = parent.frame())
+    if(!inherits(dfm_new, "dfm")) stop("comparison data did not produce a 'dfm' object")
+  }
   X_old <- dfm_news_restore_missing(object$X_imp)
   X_new <- dfm_news_restore_missing(dfm_new$X_imp)
+
+  stats_old <- attr(object$X_imp, "stats")
+  stats_new <- attr(dfm_new$X_imp, "stats")
+  if(is.null(stats_new)) stop("dfm_new lacks stats to standardize data")
+  if(is.null(stats_old)) stop("dfm object lacks stats to standardize data")
+
+  X_old <- dfm_news_scale(unscale(X_old, stats_old), stats_new)
 
   if(nrow(X_old) != nrow(X_new) || ncol(X_old) != ncol(X_new)) {
     stop("dfm objects have incompatible data dimensions")
@@ -488,22 +546,26 @@ news.dfm <- function(object,
   t_fcst <- as.integer(t_fcst)
   if(t_fcst < 1L || t_fcst > nrow(X_old)) stop("t_fcst is out of bounds")
 
-  if(is.character(v_news)) {
-    if(is.null(colnames(X_old))) stop("v_news is a name but data have no column names")
-    v_news <- ckmatch(v_news, colnames(X_old), e = "Unknown v_news:")
-  } else if(!is.numeric(v_news) || length(v_news) != 1L) {
-    stop("v_news must be a single integer index or a column name")
+  resolve_vars <- function(vars, n, names) {
+    if(is.null(vars)) return(seq_len(n))
+    if(is.character(vars)) {
+      if(is.null(names)) stop("vars is a name but data have no column names")
+      return(as.integer(ckmatch(vars, names, e = "Unknown vars:")))
+    }
+    if(!is.numeric(vars)) stop("vars must be NULL, numeric indices, or names")
+    vars <- as.integer(vars)
+    if(any(vars < 1L | vars > n)) stop("vars is out of bounds")
+    unique(vars)
   }
-  v_news <- as.integer(v_news)
-  if(v_news < 1L || v_news > ncol(X_old)) stop("v_news is out of bounds")
+  vars_idx <- resolve_vars(vars, ncol(X_old), colnames(X_old))
 
-  r <- nrow(object$A)
-  if(ncol(object$A) %% r != 0L) stop("Invalid transition matrix dimensions in dfm object")
-  p <- ncol(object$A) / r
-  r_new <- nrow(dfm_new$A)
-  if(ncol(dfm_new$A) %% r_new != 0L) stop("Invalid transition matrix dimensions in dfm_new")
-  p_new <- ncol(dfm_new$A) / r_new
-  if(r != r_new || p != p_new) stop("dfm objects have incompatible r or p")
+  r_old <- nrow(object$A)
+  if(ncol(object$A) %% r_old != 0L) stop("Invalid transition matrix dimensions in dfm object")
+  p_old <- ncol(object$A) / r_old
+  r <- nrow(dfm_new$A)
+  if(ncol(dfm_new$A) %% r != 0L) stop("Invalid transition matrix dimensions in dfm_new")
+  p <- ncol(dfm_new$A) / r
+  if(r_old != r || p_old != p) stop("dfm objects have incompatible r or p")
 
   n <- ncol(X_old)
   series <- if(is.null(series)) colnames(X_old) else series
@@ -514,17 +576,18 @@ news.dfm <- function(object,
   if(length(groups) != n) stop("groups must have length equal to the number of variables")
   gList <- unique(groups)
 
-  stats <- dfm_news_stats(object$X_imp)
+  stats <- dfm_news_stats(dfm_new$X_imp)
   Mx <- stats$Mx
   Wx <- stats$Wx
   scale_vec <- if(standardized) rep(1, n) else Wx
 
-  A <- object$A
-  C <- object$C
-  Q <- object$Q
-  R <- object$R
+  A <- dfm_new$A
+  C <- dfm_new$C
+  Q <- dfm_new$Q
+  R <- dfm_new$R
 
-  if(!is.na(X_new[t_fcst, v_news])) {
+  compute_news <- function(v_news) {
+    if(!is.na(X_new[t_fcst, v_news])) {
     Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
     y_old <- Res_old$X_sm[t_fcst, v_news]
     y_new <- X_new[t_fcst, v_news]
@@ -541,10 +604,10 @@ news.dfm <- function(object,
                 singlenews = singlenews, gain = numeric(0L),
                 gainSer = character(0L), actual = rep(NA_real_, n),
                 fore = rep(NA_real_, n), filt = rep(NA_real_, n)))
-  }
+    }
 
-  rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
-  if(!nrow(rel)) {
+    rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
+    if(!nrow(rel)) {
     Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
     Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
     y_old <- Res_old$X_sm[t_fcst, v_news]
@@ -559,7 +622,7 @@ news.dfm <- function(object,
                 gain = numeric(0L), gainSer = character(0L),
                 actual = rep(NA_real_, n), fore = rep(NA_real_, n),
                 filt = rep(NA_real_, n)))
-  }
+    }
 
   t_miss <- rel[, 1L]
   v_miss <- rel[, 2L]
@@ -636,9 +699,52 @@ news.dfm <- function(object,
   gain <- gain[idx]
   gainSer <- series[v_miss][idx]
 
-  list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-       singlenews = singlenews, gain = gain, gainSer = gainSer,
-       actual = actual, fore = fore, filt = filt)
+    list(y_old = y_old, y_new = y_new, groupnews = groupnews,
+         singlenews = singlenews, gain = gain, gainSer = gainSer,
+         actual = actual, fore = fore, filt = filt)
+  }
+
+  res <- lapply(vars_idx, compute_news)
+  if(length(vars_idx) == 1L) {
+    res <- res[[1L]]
+    res$var <- vars_idx
+    res$t_fcst <- t_fcst
+    res$standardized <- standardized
+    class(res) <- "dfm.news"
+    return(res)
+  }
+  if(!is.null(colnames(X_old))) names(res) <- colnames(X_old)[vars_idx]
+  attr(res, "vars") <- vars_idx
+  attr(res, "t_fcst") <- t_fcst
+  attr(res, "standardized") <- standardized
+  class(res) <- "dfm.news_list"
+  res
+}
+
+#' @export
+print.dfm.news <- function(x, digits = 4L, ...) {
+  cat("DFM News\n")
+  cat("Target variable:", if(!is.null(names(x$singlenews))) names(x$singlenews)[x$var] else x$var, "\n")
+  cat("Target time:", x$t_fcst, "\n")
+  cat("Old forecast:", round(x$y_old, digits), "\n")
+  cat("New forecast:", round(x$y_new, digits), "\n")
+  cat("Revision:", round(x$y_new - x$y_old, digits), "\n")
+  cat("Standardized:", isTRUE(x$standardized), "\n")
+  return(invisible(x))
+}
+
+#' @export
+print.dfm.news_list <- function(x, digits = 4L, ...) {
+  t_fcst <- attr(x, "t_fcst")
+  standardized <- attr(x, "standardized")
+  cat("DFM News (Multiple Targets)\n")
+  cat("Target time:", t_fcst, "\n")
+  cat("Targets:", length(x), "\n")
+  cat("Standardized:", isTRUE(standardized), "\n")
+  tbl <- sapply(x, function(res) c(y_old = res$y_old, y_new = res$y_new, revision = res$y_new - res$y_old))
+  if(is.null(dim(tbl))) tbl <- matrix(tbl, nrow = 3L)
+  print(round(t(tbl), digits))
+  return(invisible(x))
 }
 
 #% @aliases forecast.dfm
