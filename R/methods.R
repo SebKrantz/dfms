@@ -452,6 +452,195 @@ fitted.dfm <- function(object,
   return(qM(res))
 }
 
+#' News Decomposition
+#' @param object,dfm_new objects of class 'dfm' for old and new vintages.
+#' @param t_fcst integer. Forecast target time index.
+#' @param v_news integer or character. Target variable index or name.
+#' @param groups,series optional character vectors for grouping and naming variables.
+#' @param standardized logical. Return results on standardized scale?
+#' @param \dots not used.
+#' @return A list with news decomposition results.
+#' @export
+news <- function(object, ...) UseMethod("news")
+
+#' @rdname news.dfm
+#' @export
+news.dfm <- function(object,
+                     dfm_new,
+                     t_fcst,
+                     v_news,
+                     groups = NULL,
+                     series = NULL,
+                     standardized = FALSE, ...) {
+  if(!inherits(dfm_new, "dfm")) stop("dfm_new must be a 'dfm' object")
+  X_old <- dfm_news_restore_missing(object$X_imp)
+  X_new <- dfm_news_restore_missing(dfm_new$X_imp)
+
+  if(nrow(X_old) != nrow(X_new) || ncol(X_old) != ncol(X_new)) {
+    stop("dfm objects have incompatible data dimensions")
+  }
+  if(!is.null(colnames(X_old)) && !is.null(colnames(X_new)) &&
+     any(colnames(X_old) != colnames(X_new))) {
+    stop("dfm objects have different variable ordering")
+  }
+
+  if(!is.numeric(t_fcst) || length(t_fcst) != 1L) stop("t_fcst must be a single integer index")
+  t_fcst <- as.integer(t_fcst)
+  if(t_fcst < 1L || t_fcst > nrow(X_old)) stop("t_fcst is out of bounds")
+
+  if(is.character(v_news)) {
+    if(is.null(colnames(X_old))) stop("v_news is a name but data have no column names")
+    v_news <- ckmatch(v_news, colnames(X_old), e = "Unknown v_news:")
+  } else if(!is.numeric(v_news) || length(v_news) != 1L) {
+    stop("v_news must be a single integer index or a column name")
+  }
+  v_news <- as.integer(v_news)
+  if(v_news < 1L || v_news > ncol(X_old)) stop("v_news is out of bounds")
+
+  r <- nrow(object$A)
+  if(ncol(object$A) %% r != 0L) stop("Invalid transition matrix dimensions in dfm object")
+  p <- ncol(object$A) / r
+  r_new <- nrow(dfm_new$A)
+  if(ncol(dfm_new$A) %% r_new != 0L) stop("Invalid transition matrix dimensions in dfm_new")
+  p_new <- ncol(dfm_new$A) / r_new
+  if(r != r_new || p != p_new) stop("dfm objects have incompatible r or p")
+
+  n <- ncol(X_old)
+  series <- if(is.null(series)) colnames(X_old) else series
+  if(is.null(series)) series <- paste0("Series", seq_len(n))
+  if(length(series) != n) stop("series must have length equal to the number of variables")
+
+  groups <- if(is.null(groups)) series else groups
+  if(length(groups) != n) stop("groups must have length equal to the number of variables")
+  gList <- unique(groups)
+
+  stats <- dfm_news_stats(object$X_imp)
+  Mx <- stats$Mx
+  Wx <- stats$Wx
+  scale_vec <- if(standardized) rep(1, n) else Wx
+
+  A <- object$A
+  C <- object$C
+  Q <- object$Q
+  R <- object$R
+
+  if(!is.na(X_new[t_fcst, v_news])) {
+    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
+    y_old <- Res_old$X_sm[t_fcst, v_news]
+    y_new <- X_new[t_fcst, v_news]
+    if(!standardized) {
+      y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
+      y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
+    }
+    temp <- y_new - y_old
+    singlenews <- setNames(numeric(n), series)
+    singlenews[v_news] <- temp
+    groupnews <- setNames(numeric(length(gList)), gList)
+    groupnews[match(groups[v_news], gList)] <- temp
+    return(list(y_old = y_old, y_new = y_new, groupnews = groupnews,
+                singlenews = singlenews, gain = numeric(0L),
+                gainSer = character(0L), actual = rep(NA_real_, n),
+                fore = rep(NA_real_, n), filt = rep(NA_real_, n)))
+  }
+
+  rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
+  if(!nrow(rel)) {
+    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
+    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
+    y_old <- Res_old$X_sm[t_fcst, v_news]
+    y_new <- Res_new$X_sm[t_fcst, v_news]
+    if(!standardized) {
+      y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
+      y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
+    }
+    return(list(y_old = y_old, y_new = y_new,
+                groupnews = setNames(numeric(length(gList)), gList),
+                singlenews = setNames(numeric(n), series),
+                gain = numeric(0L), gainSer = character(0L),
+                actual = rep(NA_real_, n), fore = rep(NA_real_, n),
+                filt = rep(NA_real_, n)))
+  }
+
+  t_miss <- rel[, 1L]
+  v_miss <- rel[, 2L]
+  lag <- t_fcst - t_miss
+  k <- as.integer(max(c(abs(lag), max(lag) - min(lag))))
+
+  Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, k)
+  Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
+
+  y_old <- Res_old$X_sm[t_fcst, v_news]
+  y_new <- Res_new$X_sm[t_fcst, v_news]
+  if(!standardized) {
+    y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
+    y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
+  }
+
+  n_news <- length(t_miss)
+  innov <- numeric(n_news)
+  for(i in seq_len(n_news)) {
+    innov[i] <- X_new[t_miss[i], v_miss[i]] - Res_old$X_sm[t_miss[i], v_miss[i]]
+  }
+
+  P <- Res_old$P
+  P1 <- matrix(0, r, n_news)
+  for(i in seq_len(n_news)) {
+    h <- abs(t_fcst - t_miss[i])
+    m <- max(t_miss[i], t_fcst)
+    idx <- (h * r + 1L):(h * r + r)
+    Pp <- P[1:r, idx, m, drop = FALSE]
+    if(t_miss[i] > t_fcst) Pp <- t(Pp)
+    P1[, i] <- Pp %*% t(C[v_miss[i], 1:r, drop = FALSE])
+  }
+
+  P2 <- matrix(0, n_news, n_news)
+  for(i in seq_len(n_news)) {
+    for(j in seq_len(n_news)) {
+      h <- abs(lag[i] - lag[j])
+      m <- max(t_miss[i], t_miss[j])
+      idx <- (h * r + 1L):(h * r + r)
+      Pp <- P[1:r, idx, m, drop = FALSE]
+      if(t_miss[j] > t_miss[i]) Pp <- t(Pp)
+      WW <- if(v_miss[i] == v_miss[j] && t_miss[i] != t_miss[j]) 0 else R[v_miss[i], v_miss[j]]
+      P2[i, j] <- drop(C[v_miss[i], 1:r, drop = FALSE] %*% Pp %*% t(C[v_miss[j], 1:r, drop = FALSE])) + WW
+    }
+  }
+  if(qr(P2)$rank < n_news) stop("P2 is singular; cannot compute news weights")
+
+  gain <- drop(scale_vec[v_news] * (C[v_news, 1:r, drop = FALSE] %*% P1 %*% solve(P2)))
+  temp <- gain * innov
+
+  singlenews <- setNames(numeric(n), series)
+  for(i in seq_len(n_news)) singlenews[v_miss[i]] <- singlenews[v_miss[i]] + temp[i]
+
+  groupnews <- setNames(numeric(length(gList)), gList)
+  for(i in seq_along(gList)) {
+    idx <- groups[v_miss] == gList[i]
+    if(any(idx)) groupnews[i] <- sum(gain[idx] * innov[idx])
+  }
+
+  actual <- fore <- filt <- rep(NA_real_, n)
+  for(i in seq_len(n_news)) {
+    actual[v_miss[i]] <- X_new[t_miss[i], v_miss[i]]
+    fore[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
+    filt[v_miss[i]] <- if(standardized) gain[i] else gain[i] / Wx[v_miss[i]]
+  }
+  if(!standardized) {
+    actual <- dfm_news_unscale_vec(actual, Mx, Wx)
+    actual[is.na(actual)] <- NA_real_
+    fore <- dfm_news_unscale_vec(fore, Mx, Wx)
+    fore[is.na(fore)] <- NA_real_
+  }
+
+  idx <- !duplicated(v_miss)
+  gain <- gain[idx]
+  gainSer <- series[v_miss][idx]
+
+  list(y_old = y_old, y_new = y_new, groupnews = groupnews,
+       singlenews = singlenews, gain = gain, gainSer = gainSer,
+       actual = actual, fore = fore, filt = filt)
+}
+
 #% @aliases forecast.dfm
 #' @name predict.dfm
 #' @aliases print.dfm_forecast
