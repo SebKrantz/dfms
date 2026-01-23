@@ -1,10 +1,10 @@
 url: https://docs.ropensci.org/dfms/
-destination: docs
 
 home:
   title: Dynamic Factor Models for R
 
 template:
+  package: rotemplate
   math-rendering: katex
 
 development:
