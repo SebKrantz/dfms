@@ -60,6 +60,10 @@ reference:
   desc: "Forecast both the factors and the data, and methods to visualize forecasts and extract results."
 - contents:
   - predict.dfm
+- title: "News Decomposition"
+  desc: "Decompose forecast revisions into news contributions."
+- contents:
+  - news.dfm
 - title: "Fast Stationary Kalman Filtering and Smoothing"
   desc: "Optimized Armadillo C++ implementations of the stationary Kalman Filter and Smoother."
 - contents:

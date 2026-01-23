@@ -1,3 +1,7 @@
+# dfms 0.5.0
+
+* Added `news()` functionality for Banbura and Modugno (2014) style news decomposition, including re-estimation on updated vintages and per-target output objects with print methods.
+
 # dfms 0.4.1
 
 * *dfms* is now part of [rOpenSci](https://ropensci.org/) – following completion of a scientific review by @eeholmes and @santikka. This means the repo shifted to [ropensci/dfms](https://github.com/ropensci/dfms) and the docs (now in rOpenSci style) to [docs.ropensci.org/dfms](https://docs.ropensci.org/dfms/). 

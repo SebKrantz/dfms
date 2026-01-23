@@ -183,12 +183,25 @@ plot(model_mq)
 
 By default, observation errors are assumed to be white noise. However, in practice, idiosyncratic errors often exhibit serial correlation. Setting `idio.ar1 = TRUE` models observation errors as AR(1) processes: $e_{it} = \rho_i e_{i,t-1} + v_{it}$, where $\rho_i$ is estimated for each series.
 
-This option can be combined with mixed-frequency estimation. Below, I estimate the mixed-frequency model with AR(1) idiosyncratic errors.
+This option can be combined with mixed-frequency estimation. Since estimating AR(1) errors increases runtime, the examples below use the medium-sized dataset.
 
 ```{r MQ_AR1}
+# Medium-size mixed-frequency dataset (smaller runtime than the large panel)
+BM14_M_med <- BM14_M[, BM14_Models$medium[BM14_Models$freq == "M"]]
+BM14_Q_med <- BM14_Q[, BM14_Models$medium[BM14_Models$freq == "Q"]]
+
+# Transformations
+BM14_M_med[, BM14_Models$log_trans[BM14_Models$freq == "M" & BM14_Models$medium]] %<>% log()
+BM14_Q_med[, BM14_Models$log_trans[BM14_Models$freq == "Q" & BM14_Models$medium]] %<>% log()
+BM14_M_med <- diff(BM14_M_med)
+BM14_Q_med <- diff(BM14_Q_med)
+
+# Merge monthly + quarterly
+BM14_med <- merge(BM14_M_med, BM14_Q_med)
+
 # Mixed-frequency model with AR(1) idiosyncratic errors
-model_mq_ar1 <- DFM(BM14_diff, r = 5, p = 3,
-                    quarterly.vars = colnames(BM14_Q),
+model_mq_ar1 <- DFM(BM14_med, r = 5, p = 3,
+                    quarterly.vars = colnames(BM14_Q_med),
                     idio.ar1 = TRUE)
 print(model_mq_ar1)
 ```
@@ -217,6 +230,29 @@ matplot(model_mq_ar1$e[, 1:5], type = "l", lty = 1,
 
 Note that modeling AR(1) errors increases computation time, particularly for large datasets. It is generally most useful when dealing with smaller panels where idiosyncratic dynamics may be more pronounced.
 
+## News Decomposition
+
+The `news()` function decomposes forecast revisions into contributions from new data releases following Banbura and Modugno (2014). The idea is to compare an old vintage (with ragged-edge missing values) to a new vintage where some missing values are now observed. The output reports the forecast revision for a target series and decomposes it into series- and group-level contributions.
+
+Below, we use a medium-size mixed-frequency dataset, introduce a new release at the ragged edge for one quarterly series, and compute its news impact on that quarterly target.
+
+```{r news}
+# Create old and new vintages with a new quarterly release at the ragged edge
+target_var <- "gdp"
+X_old <- BM14_med
+X_new <- BM14_med
+X_old[nrow(X_old), target_var] <- NA
+X_new[nrow(X_new), target_var] <- X_new[nrow(X_new) - 1L, target_var]
+
+# Fit models (use a small factor structure for speed)
+dfm_old <- DFM(X_old, r = 2, p = 2, quarterly.vars = colnames(BM14_Q_med), em.method = "none")
+
+# Compute news for the target variable at the last period
+t_last <- nrow(dfm_old$X_imp)
+news_res <- news(dfm_old, X_new, t.fcst = t_last, target.vars = target_var)
+print(news_res)
+```
+
 <!--
 Another possibility is to estimate different factor models for monthly and quarterly series, and combine them for the final prediction (e.g. by aggregating or blocking the monthly factor estimates). 
 
@@ -233,8 +269,6 @@ If performance is not critical, I also refer the user to the [*nowcasting*](<htt
 *dfms* provides a simple but robust and powerful implementation of dynamic factors models in R. For more information about the model consult the [theoretical vignette](https://raw.githubusercontent.com/ropensci/dfms/main/vignettes/dynamic_factor_models_paper.pdf). 
 
 Other implementations more geared to economic nowcasting applications are provided in R packages [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>). More general forms of autoregressive state space models can be fit using [*MARSS*](<https://CRAN.R-project.org/package=MARSS>). For large-scale nowcasting models, the [`DynamicFactorMQ`](https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.dynamic_factor_mq.DynamicFactorMQ.html) class in the *statsmodels* Python library provides a robust and performant implementation.
-
-In the future, a simple `news()` function following Banbura and Modugno (2014) may be added to *dfms* to evaluate the impact of new observations on model predictions. In general, my time on this package is very limited, but the original Matlab codes of Banbura and Modugno (2014) are [in the repo](https://github.com/ropensci/dfms/tree/main/misc/BM2014). Thus, impatient users are also very welcome to do advances and submit PRs.
 
 ## References
 

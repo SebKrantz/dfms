@@ -507,6 +507,9 @@ fitted.dfm <- function(object,
 #' @export
 news <- function(object, ...) UseMethod("news")
 
+#' @rdname news
+#'
+#' @export
 news.dfm <- function(object,
                      comparison,
                      t.fcst,
@@ -708,7 +711,7 @@ news.dfm <- function(object,
   if(length(vars_idx) == 1L) {
     res <- res[[1L]]
     res$target.var <- vars_idx
-    res$t_fcst <- t_fcst
+    res$t.fcst <- t_fcst
     res$standardized <- standardized
     class(res) <- "dfm.news"
     return(res)
@@ -725,7 +728,7 @@ news.dfm <- function(object,
 print.dfm.news <- function(x, digits = 4L, ...) {
   cat("DFM News\n")
   cat("Target variable:", if(!is.null(names(x$singlenews))) names(x$singlenews)[x$target.var] else x$target.var, "\n")
-  cat("Target time:", x$t_fcst, "\n")
+  cat("Target time:", x$t.fcst, "\n")
   cat("Old forecast:", round(x$y_old, digits), "\n")
   cat("New forecast:", round(x$y_new, digits), "\n")
   cat("Revision:", round(x$y_new - x$y_old, digits), "\n")
