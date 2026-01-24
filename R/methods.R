@@ -598,6 +598,12 @@ news.dfm <- function(object,
   Q <- dfm_new$Q
   R <- dfm_new$R
 
+  # Detect model type: MQ and/or AR1
+  quarterly.vars <- dfm_new$quarterly.vars
+  idio.ar1 <- !is.null(dfm_new$rho)
+  rho <- if(idio.ar1) dfm_new$rho else NULL
+  R_idio <- if(idio.ar1) diag(diag(dfm_new$R)) else NULL
+
   # Compute releases ONCE (shared across all targets)
   rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
   n_news <- nrow(rel)
@@ -609,8 +615,12 @@ news.dfm <- function(object,
     lag <- t_fcst - t_miss
     k <- as.integer(max(c(abs(lag), max(lag) - min(lag))))
 
-    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, k)
-    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
+    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, k,
+                            idio.ar1 = idio.ar1, rho = rho, R_idio = R_idio,
+                            quarterly.vars = quarterly.vars)
+    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L,
+                            idio.ar1 = idio.ar1, rho = rho, R_idio = R_idio,
+                            quarterly.vars = quarterly.vars)
 
     # Pre-compute innovations
     innov <- numeric(n_news)
@@ -660,8 +670,12 @@ news.dfm <- function(object,
 
   } else {
     # No new releases
-    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
-    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
+    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L,
+                            idio.ar1 = idio.ar1, rho = rho, R_idio = R_idio,
+                            quarterly.vars = quarterly.vars)
+    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L,
+                            idio.ar1 = idio.ar1, rho = rho, R_idio = R_idio,
+                            quarterly.vars = quarterly.vars)
   }
 
   # Inner function: now only computes target-specific outputs
