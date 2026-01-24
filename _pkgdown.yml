@@ -4,8 +4,8 @@ home:
   title: Dynamic Factor Models for R
 
 template:
-  package: rotemplate
-  math-rendering: katex
+  params:
+    mathjax: true
 
 development:
   mode: auto
