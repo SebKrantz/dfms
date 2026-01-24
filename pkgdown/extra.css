@@ -1,13 +1,6 @@
 .navbar-nav .nav-item > .nav-link {
   margin-right: 10px;
 }
-.template-home img.logo {
-  width: 150px;
-}
-img.logo {
-  width: 150px;
-  margin-left: 30px;
-}
 .h1, .h2, .h3, h1, h2, h3 {
   margin-top: 35px;
   margin-bottom: 10px;
