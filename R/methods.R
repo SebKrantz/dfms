@@ -598,122 +598,151 @@ news.dfm <- function(object,
   Q <- dfm_new$Q
   R <- dfm_new$R
 
-  compute_news <- function(v_news) {
-    if(!is.na(X_new[t_fcst, v_news])) {
-    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
-    y_old <- Res_old$X_sm[t_fcst, v_news]
-    y_new <- X_new[t_fcst, v_news]
-    if(!standardized) {
-      y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
-      y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
-    }
-    temp <- y_new - y_old
-    singlenews <- setNames(numeric(n), series)
-    singlenews[v_news] <- temp
-    groupnews <- setNames(numeric(length(gList)), gList)
-    groupnews[match(groups[v_news], gList)] <- temp
-    return(list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-                singlenews = singlenews, gain = setNames(numeric(0L), character(0L)),
-                gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
-                forecasts = rep(NA_real_, n)))
+  # Compute releases ONCE (shared across all targets)
+  rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
+  n_news <- nrow(rel)
+
+  # Pre-compute KFS results and shared matrices
+  if(n_news > 0L) {
+    t_miss <- rel[, 1L]
+    v_miss <- rel[, 2L]
+    lag <- t_fcst - t_miss
+    k <- as.integer(max(c(abs(lag), max(lag) - min(lag))))
+
+    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, k)
+    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
+
+    # Pre-compute innovations
+    innov <- numeric(n_news)
+    for(i in seq_len(n_news)) {
+      innov[i] <- X_new[t_miss[i], v_miss[i]] - Res_old$X_sm[t_miss[i], v_miss[i]]
     }
 
-    rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
-    if(!nrow(rel)) {
+    # Pre-compute P1 (r x n_news)
+    P <- Res_old$P
+    P1 <- matrix(0, r, n_news)
+    for(i in seq_len(n_news)) {
+      h <- abs(t_fcst - t_miss[i])
+      m <- max(t_miss[i], t_fcst)
+      idx <- (h * r + 1L):(h * r + r)
+      Pp <- matrix(P[1:r, idx, m], r, r)
+      if(t_miss[i] > t_fcst) Pp <- t(Pp)
+      P1[, i] <- Pp %*% t(C[v_miss[i], 1:r, drop = FALSE])
+    }
+
+    # Pre-compute P2 with symmetry optimization (upper triangle only)
+    P2 <- matrix(0, n_news, n_news)
+    for(i in seq_len(n_news)) {
+      for(j in i:n_news) {
+        h <- abs(lag[i] - lag[j])
+        m <- max(t_miss[i], t_miss[j])
+        idx <- (h * r + 1L):(h * r + r)
+        Pp <- matrix(P[1:r, idx, m], r, r)
+        if(t_miss[j] > t_miss[i]) Pp <- t(Pp)
+        WW <- if(v_miss[i] == v_miss[j] && t_miss[i] != t_miss[j]) 0 else R[v_miss[i], v_miss[j]]
+        P2[i, j] <- drop(C[v_miss[i], 1:r, drop = FALSE] %*% Pp %*% t(C[v_miss[j], 1:r, drop = FALSE])) + WW
+      }
+    }
+    # Mirror to lower triangle (P2 is symmetric)
+    P2[lower.tri(P2)] <- t(P2)[lower.tri(P2)]
+
+    if(qr(P2)$rank < n_news) stop("P2 is singular; cannot compute news weights")
+
+    # Pre-compute P1 %*% solve(P2) for efficiency
+    P1_P2inv <- P1 %*% solve(P2)
+
+    # Pre-compute actual and forecasts (shared across targets)
+    actual_base <- forecasts_base <- rep(NA_real_, n)
+    for(i in seq_len(n_news)) {
+      actual_base[v_miss[i]] <- X_new[t_miss[i], v_miss[i]]
+      forecasts_base[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
+    }
+
+  } else {
+    # No new releases
     Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
     Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
+  }
+
+  # Inner function: now only computes target-specific outputs
+  compute_news <- function(v_news) {
+    # Case 1: Target is directly observed in new data
+    if(!is.na(X_new[t_fcst, v_news])) {
+      y_old <- Res_old$X_sm[t_fcst, v_news]
+      y_new <- X_new[t_fcst, v_news]
+      if(!standardized) {
+        y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
+        y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
+      }
+      temp <- y_new - y_old
+      singlenews <- setNames(numeric(n), series)
+      singlenews[v_news] <- temp
+      groupnews <- setNames(numeric(length(gList)), gList)
+      groupnews[match(groups[v_news], gList)] <- temp
+      return(list(y_old = y_old, y_new = y_new, groupnews = groupnews,
+                  singlenews = singlenews, gain = setNames(numeric(0L), character(0L)),
+                  gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
+                  forecasts = rep(NA_real_, n)))
+    }
+
+    # Case 2: No new releases
+    if(n_news == 0L) {
+      y_old <- Res_old$X_sm[t_fcst, v_news]
+      y_new <- Res_new$X_sm[t_fcst, v_news]
+      if(!standardized) {
+        y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
+        y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
+      }
+      return(list(y_old = y_old, y_new = y_new,
+                  groupnews = setNames(numeric(length(gList)), gList),
+                  singlenews = setNames(numeric(n), series),
+                  gain = setNames(numeric(0L), character(0L)),
+                  gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
+                  forecasts = rep(NA_real_, n)))
+    }
+
+    # Case 3: Main news decomposition (uses pre-computed P1_P2inv, innov)
     y_old <- Res_old$X_sm[t_fcst, v_news]
     y_new <- Res_new$X_sm[t_fcst, v_news]
     if(!standardized) {
       y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
       y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
     }
-    return(list(y_old = y_old, y_new = y_new,
-                groupnews = setNames(numeric(length(gList)), gList),
-                singlenews = setNames(numeric(n), series),
-                gain = setNames(numeric(0L), character(0L)),
-                gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
-                forecasts = rep(NA_real_, n)))
+
+    # Compute gain using pre-computed P1_P2inv
+    gain <- drop(scale_vec[v_news] * (C[v_news, 1:r, drop = FALSE] %*% P1_P2inv))
+    temp <- gain * innov
+
+    singlenews <- setNames(numeric(n), series)
+    for(i in seq_len(n_news)) singlenews[v_miss[i]] <- singlenews[v_miss[i]] + temp[i]
+
+    groupnews <- setNames(numeric(length(gList)), gList)
+    for(i in seq_along(gList)) {
+      idx <- groups[v_miss] == gList[i]
+      if(any(idx)) groupnews[i] <- sum(gain[idx] * innov[idx])
     }
 
-  t_miss <- rel[, 1L]
-  v_miss <- rel[, 2L]
-  lag <- t_fcst - t_miss
-  k <- as.integer(max(c(abs(lag), max(lag) - min(lag))))
-
-  Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, k)
-  Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
-
-  y_old <- Res_old$X_sm[t_fcst, v_news]
-  y_new <- Res_new$X_sm[t_fcst, v_news]
-  if(!standardized) {
-    y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
-    y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
-  }
-
-  n_news <- length(t_miss)
-  innov <- numeric(n_news)
-  for(i in seq_len(n_news)) {
-    innov[i] <- X_new[t_miss[i], v_miss[i]] - Res_old$X_sm[t_miss[i], v_miss[i]]
-  }
-
-  P <- Res_old$P
-  P1 <- matrix(0, r, n_news)
-  for(i in seq_len(n_news)) {
-    h <- abs(t_fcst - t_miss[i])
-    m <- max(t_miss[i], t_fcst)
-    idx <- (h * r + 1L):(h * r + r)
-    Pp <- P[1:r, idx, m, drop = FALSE]
-    if(t_miss[i] > t_fcst) Pp <- t(Pp)
-    P1[, i] <- Pp %*% t(C[v_miss[i], 1:r, drop = FALSE])
-  }
-
-  P2 <- matrix(0, n_news, n_news)
-  for(i in seq_len(n_news)) {
-    for(j in seq_len(n_news)) {
-      h <- abs(lag[i] - lag[j])
-      m <- max(t_miss[i], t_miss[j])
-      idx <- (h * r + 1L):(h * r + r)
-      Pp <- P[1:r, idx, m, drop = FALSE]
-      if(t_miss[j] > t_miss[i]) Pp <- t(Pp)
-      WW <- if(v_miss[i] == v_miss[j] && t_miss[i] != t_miss[j]) 0 else R[v_miss[i], v_miss[j]]
-      P2[i, j] <- drop(C[v_miss[i], 1:r, drop = FALSE] %*% Pp %*% t(C[v_miss[j], 1:r, drop = FALSE])) + WW
+    gain_scaled <- rep(NA_real_, n)
+    for(i in seq_len(n_news)) {
+      gain_scaled[v_miss[i]] <- if(standardized) gain[i] else gain[i] / Wx[v_miss[i]]
     }
-  }
-  if(qr(P2)$rank < n_news) stop("P2 is singular; cannot compute news weights")
 
-  gain <- drop(scale_vec[v_news] * (C[v_news, 1:r, drop = FALSE] %*% P1 %*% solve(P2)))
-  temp <- gain * innov
+    actual <- actual_base
+    forecasts <- forecasts_base
+    if(!standardized) {
+      actual <- dfm_news_unscale_vec(actual, Mx, Wx)
+      actual[is.na(actual)] <- NA_real_
+      forecasts <- dfm_news_unscale_vec(forecasts, Mx, Wx)
+      forecasts[is.na(forecasts)] <- NA_real_
+    }
 
-  singlenews <- setNames(numeric(n), series)
-  for(i in seq_len(n_news)) singlenews[v_miss[i]] <- singlenews[v_miss[i]] + temp[i]
-
-  groupnews <- setNames(numeric(length(gList)), gList)
-  for(i in seq_along(gList)) {
-    idx <- groups[v_miss] == gList[i]
-    if(any(idx)) groupnews[i] <- sum(gain[idx] * innov[idx])
-  }
-
-  actual <- forecasts <- gain_scaled <- rep(NA_real_, n)
-  for(i in seq_len(n_news)) {
-    actual[v_miss[i]] <- X_new[t_miss[i], v_miss[i]]
-    forecasts[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
-    gain_scaled[v_miss[i]] <- if(standardized) gain[i] else gain[i] / Wx[v_miss[i]]
-  }
-  if(!standardized) {
-    actual <- dfm_news_unscale_vec(actual, Mx, Wx)
-    actual[is.na(actual)] <- NA_real_
-    forecasts <- dfm_news_unscale_vec(forecasts, Mx, Wx)
-    forecasts[is.na(forecasts)] <- NA_real_
-  }
-
-  idx <- !duplicated(v_miss)
-    gain <- gain[idx]
+    idx <- !duplicated(v_miss)
+    gain_out <- gain[idx]
     gainSer <- series[v_miss][idx]
-    names(gain) <- gainSer
+    names(gain_out) <- gainSer
 
     list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-         singlenews = singlenews, gain = gain, gain_scaled = gain_scaled,
+         singlenews = singlenews, gain = gain_out, gain_scaled = gain_scaled,
          actual = actual, forecasts = forecasts)
   }
 
