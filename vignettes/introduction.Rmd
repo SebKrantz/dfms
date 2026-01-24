@@ -245,11 +245,11 @@ X_old[nrow(X_old), target_var] <- NA
 X_new[nrow(X_new), target_var] <- X_new[nrow(X_new) - 1L, target_var]
 
 # Fit models (use a small factor structure for speed)
-dfm_old <- DFM(X_old, r = 2, p = 2, quarterly.vars = colnames(BM14_Q_med), em.method = "none")
+dfm_old <- DFM(X_old, r = 2, p = 2, quarterly.vars = colnames(BM14_Q_med))
 
 # Compute news for the target variable at the last period
-t_last <- nrow(dfm_old$X_imp)
-news_res <- news(dfm_old, X_new, t.fcst = t_last, target.vars = target_var)
+news_res <- news(dfm_old, X_new, t.fcst = nrow(dfm_old$X_imp), 
+                 target.vars = target_var)
 print(news_res)
 ```
 

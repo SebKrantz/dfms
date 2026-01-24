@@ -478,6 +478,14 @@ fitted.dfm <- function(object,
 #' innovations and gains are computed on a consistent scale. Set
 #' \code{standardized = FALSE} to report results on the original data scale.
 #'
+#' @note If the model was estimated with \code{max.missing < 1} and
+#' \code{na.rm.method = "LE"} in \code{\link{tsnarmimp}} (called by \code{DFM()}), leading or trailing rows with many missing values
+#' may be removed by \code{DFM()}. If old and new vintages are both dfm objects, and they drop different rows,
+#' then \code{t.fcst} can become out of bounds. When \code{comparison} is provided
+#' as raw data, \code{news()} drops \code{object$rm.rows} from the new dataset (if present) and
+#' forces \code{max.missing = 1} for the re-estimation call to keep row alignment.
+#' To avoid issues, use consistent ragged-edge patterns across vintages or estimate both vintages with \code{max.missing = 1}.
+#'
 #' @param object a \code{dfm} object for the old vintage.
 #' @param comparison a \code{dfm} object or a new dataset for the updated vintage.
 #' @param t.fcst integer. Forecast target time index.
@@ -522,6 +530,8 @@ news.dfm <- function(object,
   } else {
     cl <- object$call
     if(is.null(cl)) stop("dfm object has no call to re-estimate comparison")
+    if(length(object$rm.rows)) comparison <- comparison[-object$rm.rows, , drop = FALSE]
+    cl$max.missing <- 1
     if(is.null(cl$X)) cl[[2L]] <- comparison else cl$X <- comparison
     dfm_new <- eval(cl, envir = parent.frame())
     if(!inherits(dfm_new, "dfm")) stop("comparison data did not produce a 'dfm' object")
