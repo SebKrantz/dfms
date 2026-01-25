@@ -550,8 +550,7 @@ news.dfm <- function(object,
   if(nrow(X_old) != nrow(X_new) || ncol(X_old) != ncol(X_new)) {
     stop("dfm objects have incompatible data dimensions")
   }
-  if(!is.null(colnames(X_old)) && !is.null(colnames(X_new)) &&
-     any(colnames(X_old) != colnames(X_new))) {
+  if(!is.null(colnames(X_old)) && !is.null(colnames(X_new)) && any(colnames(X_old) != colnames(X_new))) {
     stop("dfm objects have different variable ordering")
   }
 
@@ -559,17 +558,6 @@ news.dfm <- function(object,
   t_fcst <- as.integer(t.fcst)
   if(t_fcst < 1L || t_fcst > nrow(X_old)) stop("t.fcst is out of bounds")
 
-  resolve_vars <- function(target.vars, n, names) {
-    if(is.null(target.vars)) return(seq_len(n))
-    if(is.character(target.vars)) {
-      if(is.null(names)) stop("target.vars is a name but data have no column names")
-      return(as.integer(ckmatch(target.vars, names, e = "Unknown target.vars:")))
-    }
-    if(!is.numeric(target.vars)) stop("target.vars must be NULL, numeric indices, or names")
-    target.vars <- as.integer(target.vars)
-    if(any(target.vars < 1L | target.vars > n)) stop("target.vars is out of bounds")
-    unique(target.vars)
-  }
   vars_idx <- resolve_vars(target.vars, ncol(X_old), colnames(X_old))
 
   r_old <- nrow(object$A)
@@ -581,7 +569,7 @@ news.dfm <- function(object,
   if(r_old != r || p_old != p) stop("dfm objects have incompatible r or p")
 
   n <- ncol(X_old)
-  series <- if(is.null(series)) colnames(X_old) else series
+  if(is.null(series)) series <- colnames(X_old)
   if(is.null(series)) series <- paste0("Series", seq_len(n))
   if(length(series) != n) stop("series must have length equal to the number of variables")
 
@@ -595,10 +583,7 @@ news.dfm <- function(object,
   Wx <- stats$Wx
   scale_vec <- if(standardized) rep(1, n) else Wx
 
-  A <- dfm_new$A
-  C <- dfm_new$C
-  Q <- dfm_new$Q
-  R <- dfm_new$R
+  A <- dfm_new$A; C <- dfm_new$C; Q <- dfm_new$Q; R <- dfm_new$R
 
   # Detect model type: MQ and/or AR1
   quarterly.vars <- dfm_new$quarterly.vars
@@ -743,9 +728,9 @@ news.dfm <- function(object,
     actual <- actual_base
     forecasts <- forecasts_base
     if(!standardized) {
-      actual <- dfm_news_unscale_vec(actual, Mx, Wx)
+      actual <- unclass(dfm_news_unscale_vec(actual, Mx, Wx))
       actual[is.na(actual)] <- NA_real_
-      forecasts <- dfm_news_unscale_vec(forecasts, Mx, Wx)
+      forecasts <- unclass(dfm_news_unscale_vec(forecasts, Mx, Wx))
       forecasts[is.na(forecasts)] <- NA_real_
     }
 

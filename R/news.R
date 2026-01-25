@@ -119,7 +119,7 @@ dfm_news_restore_missing <- function(X) {
 }
 
 dfm_news_stats <- function(X) {
-  stats <- attr(X, "stats")
+  stats <- unclass(attr(X, "stats"))
   if(is.null(stats)) {
     n <- ncol(X)
     return(list(Mx = rep(0, n), Wx = rep(1, n)))
@@ -133,7 +133,20 @@ dfm_news_unscale_vec <- function(x, Mx, Wx) {
 
 dfm_news_scale <- function(X, stats) {
   if(is.null(stats)) stop("stats are required to scale X")
+  class(stats) <- NULL
   Mx <- stats[, "Mean"]
   Wx <- stats[, "SD"]
   TRA.matrix(TRA.matrix(X, Mx, "-"), Wx, "/")
+}
+
+resolve_vars <- function(target.vars, n, names) {
+  if(is.null(target.vars)) return(seq_len(n))
+  if(is.character(target.vars)) {
+    if(is.null(names)) stop("target.vars is a name but data have no column names")
+    return(as.integer(ckmatch(target.vars, names, e = "Unknown target.vars:")))
+  }
+  if(!is.numeric(target.vars)) stop("target.vars must be NULL, numeric indices, or names")
+  target.vars <- as.integer(target.vars)
+  if(any(target.vars < 1L | target.vars > n)) stop("target.vars is out of bounds")
+  unique(target.vars)
 }
