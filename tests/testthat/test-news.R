@@ -14,16 +14,13 @@ test_that("news returns expected shapes", {
 
   dfm_old <- DFM(X_old, r = 1, p = 1, em.method = "none")
   dfm_new <- DFM(X_new, r = 1, p = 1, em.method = "none")
-  groups <- rep(c("g1", "g2"), length.out = ncol(X))
 
-  res <- news(dfm_old, dfm_new, t.fcst = 20, target.vars = 1, groups = groups)
+  res <- news(dfm_old, dfm_new, t.fcst = 20, target.vars = 1)
   expect_s3_class(res, "dfm.news")
 
   expect_true(is.list(res))
   expect_length(res$singlenews, ncol(X))
-  expect_length(res$groupnews, length(unique(groups)))
   expect_equal(names(res$singlenews), colnames(X))
-  expect_equal(names(res$groupnews), unique(groups))
   expect_true(is.numeric(res$y_old))
   expect_true(is.numeric(res$y_new))
 })
@@ -95,10 +92,14 @@ test_that("news works with MQ small model for monthly target", {
   expect_equal(revision_m, sum_news_m, tolerance = 1e-10)
 
   # Check that released variables contributed news
-  expect_true(any(res_m$singlenews[c("new_cars", "pms_pmi")] != 0))
+  expect_true(all(res_m$singlenews[c("new_cars", "pms_pmi")] != 0))
 
   # Check gains exist for released variables
   expect_true(length(res_m$gain) > 0)
+
+  # # Check that gain produces results.
+  # all.equal(res_m$singlenews[names(res_m$gain)], unclass((res_m$forecasts[names(res_m$gain)] - res_m$actual[names(res_m$gain)]) * res_m$gain))
+
 })
 
 test_that("news works with MQ medium model for monthly target", {
