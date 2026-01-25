@@ -135,6 +135,8 @@ where
 \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 }
 The filter is initialized with PCA estimates on the imputed dataset---see \code{\link{SKFS}} for a complete code example.
+
+When modelling observations errors as AR(1) processes (\code{idio.ar1 = TRUE}) and/or when quarterly variables are included (\code{quarterly.vars = c(...)}), the state-space form of the model is augmented in order to estimate the additional parameters and apply appropriate restrictions - see the \href{https://raw.githubusercontent.com/ropensci/dfms/main/vignettes/dynamic_factor_models_paper.pdf}{theoretical vignette} for details. But \code{DFM()} returns matrices for the classical form of the factor model, and thus these modifications do not affect the output format.
 }
 \examples{
 library(magrittr)

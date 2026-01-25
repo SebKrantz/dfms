@@ -79,6 +79,7 @@
 #  that \eqn{E[\textbf{f}_t|\textbf{F}_{t-1}] = E[\textbf{f}_t|\textbf{f}_{t-1}] = \textbf{A}_1 \textbf{f}_{t-1}}{E[f(t)|F(t-1)] = E[f(t)|f(t-1)] = A1 f(t-1)} (all relationships between lagged factors are captured in \eqn{\textbf{A}_1}{A1}).\cr\cr
 #' The filter is initialized with PCA estimates on the imputed dataset---see \code{\link{SKFS}} for a complete code example.
 #'
+#' When modelling observations errors as AR(1) processes (\code{idio.ar1 = TRUE}) and/or when quarterly variables are included (\code{quarterly.vars = c(...)}), the state-space form of the model is augmented in order to estimate the additional parameters and apply appropriate restrictions - see the \href{https://raw.githubusercontent.com/ropensci/dfms/main/vignettes/dynamic_factor_models_paper.pdf}{theoretical vignette} for details. But \code{DFM()} returns matrices for the classical form of the factor model, and thus these modifications do not affect the output format.
 #'
 #' @returns A list-like object of class 'dfm' with the following elements:
 #'  \item{\code{X_imp}}{\eqn{T \times n}{T x n} matrix with the imputed and standardized (scaled and centered) data---after applying \code{\link{tsnarmimp}}. It has attributes attached allowing for reconstruction of the original data:
