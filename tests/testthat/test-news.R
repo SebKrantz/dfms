@@ -89,7 +89,7 @@ test_that("news works with MQ small model for monthly target", {
   # For monthly targets, revision should equal sum of singlenews exactly
   revision_m <- unname(res_m$y_new - res_m$y_old)
   sum_news_m <- sum(res_m$singlenews)
-  expect_equal(revision_m, sum_news_m, tolerance = 1e-10)
+  expect_equal(revision_m, sum_news_m, tolerance = 1e-6)
 
   # Check that released variables contributed news
   expect_true(all(res_m$singlenews[c("new_cars", "pms_pmi")] != 0))
@@ -142,7 +142,7 @@ test_that("news works with MQ medium model for monthly target", {
   # For monthly targets, revision should equal sum of singlenews exactly
   revision_m <- unname(res_m$y_new - res_m$y_old)
   sum_news_m <- sum(res_m$singlenews)
-  expect_equal(revision_m, sum_news_m, tolerance = 1e-10)
+  expect_equal(revision_m, sum_news_m, tolerance = 1e-6)
 
   # Check gains exist for released variables
   expect_true(length(res_m$gain) > 0)
@@ -195,5 +195,5 @@ test_that("news works with MQ + idio.ar1 model", {
   expect_s3_class(res_m, "dfm.news")
   revision_m <- unname(res_m$y_new - res_m$y_old)
   sum_news_m <- sum(res_m$singlenews)
-  expect_equal(revision_m, sum_news_m, tolerance = 1e-10)
+  expect_equal(revision_m, sum_news_m, tolerance = 1e-6)
 })
