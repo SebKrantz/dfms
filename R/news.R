@@ -79,6 +79,7 @@ dfm_news_kfs <- function(X, state, k) {
     F_0 <- c(F_0, rep(0, aug_dim - state_dim))
     P_0 <- rbind(cbind(P_0, matrix(0, state_dim, aug_dim - state_dim)),
                  matrix(0, aug_dim - state_dim, aug_dim))
+    diag(P_0)[(state_dim + 1L):aug_dim] <- 1e-6
   } else {
     A_aug <- A
     C_aug <- C
