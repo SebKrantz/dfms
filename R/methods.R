@@ -490,7 +490,7 @@ fitted.dfm <- function(object,
 #' @param comparison a \code{dfm} object or a new dataset for the updated vintage.
 #' @param t.fcst integer. Forecast target time index.
 #' @param target.vars Integer or character identifying target variables. Defaults to all variables.
-#' @param groups,series optional character vectors for grouping and naming variables.
+#' @param series optional character vector for naming variables.
 #' @param standardized logical. Return results on standardized scale?
 #' @param \dots not used.
 #' @return For a single target, a \code{dfm.news} object with elements:
@@ -498,7 +498,6 @@ fitted.dfm <- function(object,
 #' \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 #' \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
 #' \item \code{singlenews}: named vector of news contributions by series.
-#' \item \code{groupnews}: named vector of news contributions aggregated by group (if not \code{NULL}).
 #' \item \code{gain}: named news weights for each new release.
 #' \item \code{gain_scaled}: scaled gain for each new release (matches the data scale).
 #' \item \code{actual}: actual values for the new releases.
@@ -512,7 +511,6 @@ fitted.dfm <- function(object,
 #' models on datasets with arbitrary pattern of missing data. Journal of Applied
 #' Econometrics, 29(1), 133-160.
 #'
-#' @importFrom collapse fsum
 #' @export
 news <- function(object, ...) UseMethod("news")
 
@@ -523,7 +521,6 @@ news.dfm <- function(object,
                      comparison,
                      t.fcst,
                      target.vars = NULL,
-                     groups = NULL,
                      series = NULL,
                      standardized = FALSE, ...) {
   if(inherits(comparison, "dfm")) {
@@ -572,11 +569,6 @@ news.dfm <- function(object,
   if(is.null(series)) series <- colnames(X_old)
   if(is.null(series)) series <- paste0("Series", seq_len(n))
   if(length(series) != n) stop("series must have length equal to the number of variables")
-
-  if(length(groups)) {
-    if(length(groups) != n) stop("groups must have length equal to the number of variables")
-    gList <- unique(groups)
-  }
 
   stats <- dfm_news_stats(dfm_new$X_imp)
   Mx <- stats$Mx
@@ -679,12 +671,9 @@ news.dfm <- function(object,
       singlenews <- numeric(n)
       singlenews[v_news] <- temp
       names(singlenews) <- series
-      if(length(groups)) {
-        groupnews <- setNames(numeric(length(gList)), gList)
-        groupnews[match(groups[v_news], gList)] <- temp
-      } else groupnews <- NULL
+
       return(list(y_old = y_old, y_new = y_new,
-                  singlenews = singlenews, groupnews = groupnews,
+                  singlenews = singlenews,
                   gain = setNames(numeric(0L), character(0L)),
                   gain_scaled = rep(NA_real_, n),
                   actual = rep(NA_real_, n),
@@ -701,7 +690,6 @@ news.dfm <- function(object,
       }
       return(list(y_old = y_old, y_new = y_new,
                   singlenews = setNames(numeric(n), series),
-                  groupnews = if(length(groups)) setNames(numeric(length(gList)), gList) else NULL,
                   gain = setNames(numeric(0L), character(0L)),
                   gain_scaled = rep(NA_real_, n),
                   actual = rep(NA_real_, n),
@@ -724,8 +712,6 @@ news.dfm <- function(object,
     for(i in seq_len(n_news)) singlenews[v_miss[i]] <- singlenews[v_miss[i]] + temp[i]
     names(singlenews) <- series
 
-    groupnews <- if(length(groups)) fsum(temp, groups[v_miss], fill = TRUE) else NULL
-
     actual <- actual_base
     forecasts <- forecasts_base
     if(!standardized) {
@@ -742,7 +728,7 @@ news.dfm <- function(object,
     gain_scaled <- if(standardized) gain_out else gain_out / Wx[v_miss[idx]]
 
     list(y_old = y_old, y_new = y_new,
-         singlenews = singlenews, groupnews = groupnews,
+         singlenews = singlenews,
          gain = gain_out, gain_scaled = gain_scaled,
          actual = actual, forecasts = forecasts)
   }

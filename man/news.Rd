@@ -12,7 +12,6 @@ news(object, ...)
   comparison,
   t.fcst,
   target.vars = NULL,
-  groups = NULL,
   series = NULL,
   standardized = FALSE,
   ...
@@ -29,7 +28,7 @@ news(object, ...)
 
 \item{target.vars}{Integer or character identifying target variables. Defaults to all variables.}
 
-\item{groups, series}{optional character vectors for grouping and naming variables.}
+\item{series}{optional character vector for naming variables.}
 
 \item{standardized}{logical. Return results on standardized scale?}
 }
@@ -39,7 +38,6 @@ For a single target, a \code{dfm.news} object with elements:
 \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
 \item \code{singlenews}: named vector of news contributions by series.
-\item \code{groupnews}: named vector of news contributions aggregated by group (if not \code{NULL}).
 \item \code{gain}: named news weights for each new release.
 \item \code{gain_scaled}: scaled gain for each new release (matches the data scale).
 \item \code{actual}: actual values for the new releases.
