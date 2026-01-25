@@ -31,7 +31,7 @@ dfm_mq <- DFM(X, r = 2, p = 3,
               em.method = "BM")
 
 cat("Converged:", dfm_mq$converged, "\n")
-cat("Iterations:", dfm_mq$em.iterations, "\n")
+cat("Iterations:", length(dfm_mq$loglik), "\n")
 cat("Factor dimensions:", dim(dfm_mq$F_pca), "\n\n")
 
 # Save parameters for Julia comparison
