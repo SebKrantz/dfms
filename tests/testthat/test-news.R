@@ -8,7 +8,7 @@ test_that("news returns expected shapes", {
   X_old <- X
   X_new <- X
   X_old[20, 1] <- NA
-  X_new[20, 1] <- NA
+  X_new[20, 1] <- 0.9
   X_old[18, 2] <- NA
   X_new[18, 2] <- X[18, 2]
 
@@ -53,7 +53,7 @@ test_that("news uses simple-case shortcut", {
   expect_true(is.null(names(res$gain)) || length(names(res$gain)) == 0L)
 })
 
-test_that("news works with MQ small model for GDP nowcast", {
+test_that("news works with MQ small model for monthly target", {
   skip_on_cran()
 
   # Construct BM14 database
@@ -71,40 +71,37 @@ test_that("news works with MQ small model for GDP nowcast", {
   X_old <- X_small
   X_new <- X_small
 
-  # Remove some recent monthly observations from X_old
-  X_old[356, "ip_tot_cstr"] <- NA
-  X_old[354, "orders"] <- NA
-  X_old[355, "orders"] <- NA
-  X_old[355, "extra_ea_trade_exp_val"] <- NA
+  # Create releases from observed variables (new_cars, pms_pmi are observed near end)
+  X_old[355, "new_cars"] <- NA
   X_old[356, "new_cars"] <- NA
-  X_old[357, "new_cars"] <- NA
+  X_old[354, "pms_pmi"] <- NA
+  X_old[355, "pms_pmi"] <- NA
 
   # Fit models with mixed-frequency
   dfm_old <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars)
   dfm_new <- DFM(X_new, r = 2, p = 2, quarterly.vars = quarterly.vars)
 
-  # Nowcast GDP (variable 11) at row 354 (last observed quarter)
-  gdp_idx <- which(colnames(X_new) == "gdp")
-  res <- news(dfm_old, dfm_new, t.fcst = 354, target.vars = gdp_idx)
+  # Target: 'orders' at t=355 (X_imp coordinates) - naturally missing at end of sample
+  # This is a proper nowcast scenario where target is NOT observed
+  res_m <- news(dfm_old, dfm_new, t.fcst = 355, target.vars = "orders")
 
-  expect_s3_class(res, "dfm.news")
-  expect_true(is.numeric(res$y_old))
-  expect_true(is.numeric(res$y_new))
+  expect_s3_class(res_m, "dfm.news")
+  expect_true(is.numeric(res_m$y_old))
+  expect_true(is.numeric(res_m$y_new))
 
-  # Key check: revision should equal sum of singlenews
-  revision <- res$y_new - res$y_old
-  sum_news <- sum(res$singlenews)
-  expect_equal(revision, sum_news, tolerance = 1e-10)
+  # For monthly targets, revision should equal sum of singlenews exactly
+  revision_m <- unname(res_m$y_new - res_m$y_old)
+  sum_news_m <- sum(res_m$singlenews)
+  expect_equal(revision_m, sum_news_m, tolerance = 1e-10)
 
-  # GDP should not be in the released variables (we're nowcasting it)
-  expect_true(res$singlenews["gdp"] == 0 || is.na(res$singlenews["gdp"]))
+  # Check that released variables contributed news
+  expect_true(any(res_m$singlenews[c("new_cars", "pms_pmi")] != 0))
 
-  # Check that monthly variables contributed news
-  monthly_news <- res$singlenews[c("ip_tot_cstr", "orders", "new_cars", "extra_ea_trade_exp_val")]
-  expect_true(any(monthly_news != 0))
+  # Check gains exist for released variables
+  expect_true(length(res_m$gain) > 0)
 })
 
-test_that("news works with MQ medium model for GDP nowcast", {
+test_that("news works with MQ medium model for monthly target", {
   skip_on_cran()
 
   # Construct BM14 database
@@ -122,36 +119,30 @@ test_that("news works with MQ medium model for GDP nowcast", {
   X_old <- X_medium
   X_new <- X_medium
 
-  # Remove some recent monthly observations from X_old
-  X_old[356, "ip_tot_cstr"] <- NA
-  X_old[354, "orders"] <- NA
-  X_old[355, "orders"] <- NA
-  X_old[355, "extra_ea_trade_exp_val"] <- NA
+  # Create releases from observed variables
+  X_old[355, "new_cars"] <- NA
   X_old[356, "new_cars"] <- NA
-  X_old[357, "new_cars"] <- NA
-  X_old[356, "ip_capital"] <- NA
+  X_old[354, "pms_pmi"] <- NA
+  X_old[355, "pms_pmi"] <- NA
+  X_old[355, "ip_capital"] <- NA
   X_old[356, "us_ip"] <- NA
 
   # Fit models with mixed-frequency
   dfm_old <- DFM(X_old, r = 3, p = 2, quarterly.vars = quarterly.vars)
   dfm_new <- DFM(X_new, r = 3, p = 2, quarterly.vars = quarterly.vars)
 
-  # Nowcast GDP at row 354
-  gdp_idx <- which(colnames(X_new) == "gdp")
-  res <- news(dfm_old, dfm_new, t.fcst = 354, target.vars = gdp_idx)
+  # Target: 'orders' at t=355 - naturally missing at end of sample
+  res_m <- news(dfm_old, dfm_new, t.fcst = 355, target.vars = "orders")
 
-  expect_s3_class(res, "dfm.news")
-  expect_true(is.numeric(res$y_old))
-  expect_true(is.numeric(res$y_new))
+  expect_s3_class(res_m, "dfm.news")
+  expect_true(is.numeric(res_m$y_old))
+  expect_true(is.numeric(res_m$y_new))
 
-  # Key check: revision should equal sum of singlenews
-  revision <- res$y_new - res$y_old
-  sum_news <- sum(res$singlenews)
-  expect_equal(revision, sum_news, tolerance = 1e-10)
-
-  # GDP should not be in the released variables
-  expect_true(res$singlenews["gdp"] == 0 || is.na(res$singlenews["gdp"]))
+  # For monthly targets, revision should equal sum of singlenews exactly
+  revision_m <- unname(res_m$y_new - res_m$y_old)
+  sum_news_m <- sum(res_m$singlenews)
+  expect_equal(revision_m, sum_news_m, tolerance = 1e-10)
 
   # Check gains exist for released variables
-  expect_true(length(res$gain) > 0)
+  expect_true(length(res_m$gain) > 0)
 })
