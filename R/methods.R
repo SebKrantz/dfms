@@ -497,8 +497,8 @@ fitted.dfm <- function(object,
 #' \itemize{
 #' \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 #' \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
-#' \item \code{groupnews}: named vector of news contributions aggregated by group.
 #' \item \code{singlenews}: named vector of news contributions by series.
+#' \item \code{groupnews}: named vector of news contributions aggregated by group (if not \code{NULL}).
 #' \item \code{gain}: named news weights for each new release.
 #' \item \code{gain_scaled}: scaled gain for each new release (matches the data scale).
 #' \item \code{actual}: actual values for the new releases.
@@ -512,6 +512,7 @@ fitted.dfm <- function(object,
 #' models on datasets with arbitrary pattern of missing data. Journal of Applied
 #' Econometrics, 29(1), 133-160.
 #'
+#' @importFrom collapse fsum
 #' @export
 news <- function(object, ...) UseMethod("news")
 
@@ -584,9 +585,10 @@ news.dfm <- function(object,
   if(is.null(series)) series <- paste0("Series", seq_len(n))
   if(length(series) != n) stop("series must have length equal to the number of variables")
 
-  groups <- if(is.null(groups)) series else groups
-  if(length(groups) != n) stop("groups must have length equal to the number of variables")
-  gList <- unique(groups)
+  if(length(groups)) {
+    if(length(groups) != n) stop("groups must have length equal to the number of variables")
+    gList <- unique(groups)
+  }
 
   stats <- dfm_news_stats(dfm_new$X_imp)
   Mx <- stats$Mx
@@ -691,11 +693,15 @@ news.dfm <- function(object,
       temp <- y_new - y_old
       singlenews <- setNames(numeric(n), series)
       singlenews[v_news] <- temp
-      groupnews <- setNames(numeric(length(gList)), gList)
-      groupnews[match(groups[v_news], gList)] <- temp
-      return(list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-                  singlenews = singlenews, gain = setNames(numeric(0L), character(0L)),
-                  gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
+      if(length(groups)) {
+        groupnews <- setNames(numeric(length(gList)), gList)
+        groupnews[match(groups[v_news], gList)] <- temp
+      } else groupnews <- NULL
+      return(list(y_old = y_old, y_new = y_new,
+                  singlenews = singlenews, groupnews = groupnews,
+                  gain = setNames(numeric(0L), character(0L)),
+                  gain_scaled = rep(NA_real_, n),
+                  actual = rep(NA_real_, n),
                   forecasts = rep(NA_real_, n)))
     }
 
@@ -708,10 +714,11 @@ news.dfm <- function(object,
         y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
       }
       return(list(y_old = y_old, y_new = y_new,
-                  groupnews = setNames(numeric(length(gList)), gList),
                   singlenews = setNames(numeric(n), series),
+                  groupnews = if(length(groups)) setNames(numeric(length(gList)), gList) else NULL,
                   gain = setNames(numeric(0L), character(0L)),
-                  gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
+                  gain_scaled = rep(NA_real_, n),
+                  actual = rep(NA_real_, n),
                   forecasts = rep(NA_real_, n)))
     }
 
@@ -727,19 +734,11 @@ news.dfm <- function(object,
     gain <- drop(scale_vec[v_news] * (C[v_news, 1:r, drop = FALSE] %*% P1_P2inv))
     temp <- gain * innov
 
-    singlenews <- setNames(numeric(n), series)
+    singlenews <- numeric(n)
     for(i in seq_len(n_news)) singlenews[v_miss[i]] <- singlenews[v_miss[i]] + temp[i]
+    names(singlenews) <- series
 
-    groupnews <- setNames(numeric(length(gList)), gList)
-    for(i in seq_along(gList)) {
-      idx <- groups[v_miss] == gList[i]
-      if(any(idx)) groupnews[i] <- sum(gain[idx] * innov[idx])
-    }
-
-    gain_scaled <- rep(NA_real_, n)
-    for(i in seq_len(n_news)) {
-      gain_scaled[v_miss[i]] <- if(standardized) gain[i] else gain[i] / Wx[v_miss[i]]
-    }
+    groupnews <- if(length(groups)) fsum(temp, groups[v_miss], fill = TRUE) else NULL
 
     actual <- actual_base
     forecasts <- forecasts_base
@@ -752,11 +751,13 @@ news.dfm <- function(object,
 
     idx <- !duplicated(v_miss)
     gain_out <- gain[idx]
-    gainSer <- series[v_miss][idx]
-    names(gain_out) <- gainSer
+    names(gain_out) <- series[v_miss[idx]]
 
-    list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-         singlenews = singlenews, gain = gain_out, gain_scaled = gain_scaled,
+    gain_scaled <- if(standardized) gain_out else gain_out / Wx[v_miss[idx]]
+
+    list(y_old = y_old, y_new = y_new,
+         singlenews = singlenews, groupnews = groupnews,
+         gain = gain_out, gain_scaled = gain_scaled,
          actual = actual, forecasts = forecasts)
   }
 

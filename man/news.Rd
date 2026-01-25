@@ -38,8 +38,8 @@ For a single target, a \code{dfm.news} object with elements:
 \itemize{
 \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
-\item \code{groupnews}: named vector of news contributions aggregated by group.
 \item \code{singlenews}: named vector of news contributions by series.
+\item \code{groupnews}: named vector of news contributions aggregated by group (if not \code{NULL}).
 \item \code{gain}: named news weights for each new release.
 \item \code{gain_scaled}: scaled gain for each new release (matches the data scale).
 \item \code{actual}: actual values for the new releases.
