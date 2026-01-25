@@ -147,3 +147,53 @@ test_that("news works with MQ medium model for monthly target", {
   # Check gains exist for released variables
   expect_true(length(res_m$gain) > 0)
 })
+
+test_that("news works with idio.ar1 model", {
+  set.seed(202)
+  X <- matrix(rnorm(120), nrow = 24)
+  colnames(X) <- paste0("v", seq_len(ncol(X)))
+  X_old <- X
+  X_new <- X
+  X_old[20, 1] <- NA
+  X_new[20, 1] <- 0.7
+
+  dfm_old <- DFM(X_old, r = 1, p = 2, idio.ar1 = TRUE, em.method = "none")
+  dfm_new <- DFM(X_new, r = 1, p = 2, idio.ar1 = TRUE, em.method = "none")
+
+  res <- news(dfm_old, dfm_new, t.fcst = 20, target.vars = 1)
+  expect_s3_class(res, "dfm.news")
+
+  revision <- unname(res$y_new - res$y_old)
+  sum_news <- sum(res$singlenews)
+  expect_equal(revision, sum_news, tolerance = 1e-8)
+})
+
+test_that("news works with MQ + idio.ar1 model", {
+  skip_on_cran()
+
+  BM14 <- merge(BM14_M, BM14_Q)
+  BM14[, BM14_Models$log_trans] <- log(BM14[, BM14_Models$log_trans])
+  BM14[, BM14_Models$freq == "M"] <- fdiff(BM14[, BM14_Models$freq == "M"])
+  BM14[, BM14_Models$freq == "Q"] <- fdiff(BM14[, BM14_Models$freq == "Q"], 3)
+
+  X_small <- qM(BM14[, BM14_Models$small])
+  colnames(X_small) <- BM14_Models$series[BM14_Models$small]
+  quarterly.vars <- BM14_Models$series[BM14_Models$small & BM14_Models$freq == "Q"]
+
+  X_old <- X_small
+  X_new <- X_small
+  X_old[355, "new_cars"] <- NA
+  X_old[356, "new_cars"] <- NA
+  X_old[354, "pms_pmi"] <- NA
+  X_old[355, "pms_pmi"] <- NA
+
+  dfm_old <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars, idio.ar1 = TRUE)
+  dfm_new <- DFM(X_new, r = 2, p = 2, quarterly.vars = quarterly.vars, idio.ar1 = TRUE)
+
+  res_m <- news(dfm_old, dfm_new, t.fcst = 355, target.vars = "orders")
+
+  expect_s3_class(res_m, "dfm.news")
+  revision_m <- unname(res_m$y_new - res_m$y_old)
+  sum_news_m <- sum(res_m$singlenews)
+  expect_equal(revision_m, sum_news_m, tolerance = 1e-10)
+})

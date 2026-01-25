@@ -485,6 +485,9 @@ fitted.dfm <- function(object,
 #' as raw data, \code{news()} drops \code{object$rm.rows} from the new dataset (if present) and
 #' forces \code{max.missing = 1} for the re-estimation call to keep row alignment.
 #' To avoid issues, use consistent ragged-edge patterns across vintages or estimate both vintages with \code{max.missing = 1}.
+#' For mixed-frequency or idiosyncratic AR(1) models, \code{news()} relies on the full
+#' state-space matrices stored in \code{dfm$ss_full}. If these are missing (e.g., old
+#' model objects), re-estimate the model with the current version of \code{DFM()}.
 #'
 #' @param object a \code{dfm} object for the old vintage.
 #' @param comparison a \code{dfm} object or a new dataset for the updated vintage.
@@ -575,13 +578,10 @@ news.dfm <- function(object,
   Wx <- stats$Wx
   scale_vec <- if(standardized) rep(1, n) else Wx
 
-  A <- dfm_new$A; C <- dfm_new$C; Q <- dfm_new$Q; R <- dfm_new$R
-
   # Detect model type: MQ and/or AR1
   quarterly.vars <- dfm_new$quarterly.vars
   idio.ar1 <- !is.null(dfm_new$rho)
-  rho <- if(idio.ar1) dfm_new$rho else NULL
-  R_idio <- if(idio.ar1) diag(diag(dfm_new$R)) else NULL
+  state <- dfm_news_state(dfm_new, require_full = length(quarterly.vars) || idio.ar1)
 
   # Compute releases ONCE (shared across all targets)
   rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
@@ -594,12 +594,8 @@ news.dfm <- function(object,
     lag <- t_fcst - t_miss
     k <- as.integer(max(c(abs(lag), max(lag) - min(lag))))
 
-    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, k,
-                            idio.ar1 = idio.ar1, rho = rho, R_idio = R_idio,
-                            quarterly.vars = quarterly.vars)
-    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L,
-                            idio.ar1 = idio.ar1, rho = rho, R_idio = R_idio,
-                            quarterly.vars = quarterly.vars)
+    Res_old <- dfm_news_kfs(X_old, state, k)
+    Res_new <- dfm_news_kfs(X_new, state, 0L)
 
     # Pre-compute innovations
     innov <- numeric(n_news)
@@ -609,14 +605,17 @@ news.dfm <- function(object,
 
     # Pre-compute P1 (r x n_news)
     P <- Res_old$P
-    P1 <- matrix(0, r, n_news)
+    state_dim <- Res_old$state_dim
+    C_use <- Res_old$C
+    R_use <- Res_old$R
+    P1 <- matrix(0, state_dim, n_news)
     for(i in seq_len(n_news)) {
       h <- abs(t_fcst - t_miss[i])
       m <- max(t_miss[i], t_fcst)
-      idx <- (h * r + 1L):(h * r + r)
-      Pp <- matrix(P[1:r, idx, m], r, r)
+      idx <- (h * state_dim + 1L):(h * state_dim + state_dim)
+      Pp <- matrix(P[1:state_dim, idx, m], state_dim, state_dim)
       if(t_miss[i] > t_fcst) Pp <- t(Pp)
-      P1[, i] <- Pp %*% t(C[v_miss[i], 1:r, drop = FALSE])
+      P1[, i] <- Pp %*% t(C_use[v_miss[i], , drop = FALSE])
     }
 
     # Pre-compute P2 with symmetry optimization (upper triangle only)
@@ -625,11 +624,11 @@ news.dfm <- function(object,
       for(j in i:n_news) {
         h <- abs(lag[i] - lag[j])
         m <- max(t_miss[i], t_miss[j])
-        idx <- (h * r + 1L):(h * r + r)
-        Pp <- matrix(P[1:r, idx, m], r, r)
+        idx <- (h * state_dim + 1L):(h * state_dim + state_dim)
+        Pp <- matrix(P[1:state_dim, idx, m], state_dim, state_dim)
         if(t_miss[j] > t_miss[i]) Pp <- t(Pp)
-        WW <- if(v_miss[i] == v_miss[j] && t_miss[i] != t_miss[j]) 0 else R[v_miss[i], v_miss[j]]
-        P2[i, j] <- drop(C[v_miss[i], 1:r, drop = FALSE] %*% Pp %*% t(C[v_miss[j], 1:r, drop = FALSE])) + WW
+        WW <- if(v_miss[i] == v_miss[j] && t_miss[i] != t_miss[j]) 0 else R_use[v_miss[i], v_miss[j]]
+        P2[i, j] <- drop(C_use[v_miss[i], , drop = FALSE] %*% Pp %*% t(C_use[v_miss[j], , drop = FALSE])) + WW
       }
     }
     # Mirror to lower triangle (P2 is symmetric)
@@ -649,12 +648,8 @@ news.dfm <- function(object,
 
   } else {
     # No new releases
-    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L,
-                            idio.ar1 = idio.ar1, rho = rho, R_idio = R_idio,
-                            quarterly.vars = quarterly.vars)
-    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L,
-                            idio.ar1 = idio.ar1, rho = rho, R_idio = R_idio,
-                            quarterly.vars = quarterly.vars)
+    Res_old <- dfm_news_kfs(X_old, state, 0L)
+    Res_new <- dfm_news_kfs(X_new, state, 0L)
   }
 
   # Inner function: now only computes target-specific outputs
@@ -705,7 +700,7 @@ news.dfm <- function(object,
     }
 
     # Compute gain using pre-computed P1_P2inv
-    gain <- drop(scale_vec[v_news] * (C[v_news, 1:r, drop = FALSE] %*% P1_P2inv))
+    gain <- drop(scale_vec[v_news] * (C_use[v_news, , drop = FALSE] %*% P1_P2inv))
     temp <- gain * innov
 
     singlenews <- numeric(n)

@@ -15,101 +15,81 @@ dfm_news_stationary_cov <- function(A, Q) {
   P_0
 }
 
-dfm_news_stationary_cov_ar1 <- function(A, Q, rp_k, rho, R_idio) {
-  state_dim <- nrow(A)
-  n <- length(rho)
-
-  # Factor block: solve Lyapunov for factor part
-  A_fac <- A[1:rp_k, 1:rp_k, drop = FALSE]
-  Q_fac <- Q[1:rp_k, 1:rp_k, drop = FALSE]
-  P_0_fac <- dfm_news_stationary_cov(A_fac, Q_fac)
-
-  # Error block: stationary AR(1) variance = sigma^2 / (1 - rho^2)
-  P_0_err <- diag(diag(R_idio) / (1 - rho^2))
-
-  # Combined (no cross-covariance between factors and errors at t=0)
-  P_0 <- matrix(0, state_dim, state_dim)
-  P_0[1:rp_k, 1:rp_k] <- P_0_fac
-  P_0[(rp_k + 1L):state_dim, (rp_k + 1L):state_dim] <- P_0_err
-  P_0
-}
-
-dfm_news_compute_X_sm <- function(F_sm, C, quarterly.vars = NULL, e_sm = NULL) {
-  r <- ncol(C)
-  if(is.null(quarterly.vars)) {
-    X_sm <- tcrossprod(F_sm[, 1:r, drop = FALSE], C)
-  } else {
-    # MQ case: temporal aggregation for quarterly variables
-    qind <- ckmatch(quarterly.vars, rownames(C))
-    X_sm_m <- tcrossprod(F_sm[, 1:r, drop = FALSE], C[-qind, , drop = FALSE])
-    Fa_lags <- flag(F_sm[, 1:r, drop = FALSE], 0:4, fill = 0, stubs = FALSE)
-    Cq_lags <- C[qind, rep(1:r, each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), r)
-    X_sm_q <- tcrossprod(Fa_lags, Cq_lags)
-    X_sm <- cbind(X_sm_m, X_sm_q)
-  }
-  if(!is.null(e_sm)) X_sm <- X_sm + e_sm
-  X_sm
-}
-
-dfm_news_kfs <- function(X, A, C, Q, R, r, p, k,
-                         idio.ar1 = FALSE, rho = NULL, R_idio = NULL,
-                         quarterly.vars = NULL) {
-  n <- nrow(C)
-
-  if(idio.ar1 && !is.null(rho)) {
-    # AR(1) case: augment state with error terms
-    # State = [f_t, f_{t-1}, ..., f_{t-p+1}, f_{t-p}, ..., f_{t-p-k}, e_1, ..., e_n]
-    rp <- r * p
-    rp_k <- r * (p + k)
-    state_dim <- rp_k + n
-
-    # Build augmented A: factors + AR(1) errors
-    A_aug <- matrix(0, state_dim, state_dim)
-    A_aug[1:r, 1:rp] <- A
-    if(rp_k > r) A_aug[(r + 1L):rp_k, 1:(rp_k - r)] <- diag(rp_k - r)
-    A_aug[(rp_k + 1L):state_dim, (rp_k + 1L):state_dim] <- diag(rho)
-
-    # Build augmented C: [C | zeros | I_n]
-    C_aug <- cbind(C, matrix(0, n, rp_k - r), diag(n))
-
-    # Build augmented Q
-    Q_aug <- matrix(0, state_dim, state_dim)
-    Q_aug[1:r, 1:r] <- Q
-    Q_aug[(rp_k + 1L):state_dim, (rp_k + 1L):state_dim] <- R_idio
-
-    # R for observation is kappa (small) since errors are in state
-    R_obs <- 1e-4 * diag(n)
-
-    # Initial conditions
-    F_0 <- rep(0, state_dim)
-    P_0 <- dfm_news_stationary_cov_ar1(A_aug, Q_aug, rp_k, rho, R_idio)
-
-    kfs_res <- SKFS(X, A_aug, C_aug, Q_aug, R_obs, F_0, P_0, FALSE)
-
-    F_sm <- kfs_res$F_smooth[, 1:r, drop = FALSE]
-    e_sm <- kfs_res$F_smooth[, (rp_k + 1L):state_dim, drop = FALSE]
-    # Only return factor covariances for P1/P2 computation
-    P <- kfs_res$P_smooth[1:rp_k, 1:rp_k, , drop = FALSE]
-
-  } else {
-    # Standard case (no AR1)
-    A_comp <- dfm_news_build_companion(A, r, p, k)
-    rp_k <- nrow(A_comp)
-    C_aug <- cbind(C, matrix(0, n, rp_k - r))
-    Q_comp <- matrix(0, rp_k, rp_k)
-    Q_comp[1:r, 1:r] <- Q
-    F_0 <- rep(0, rp_k)
-    P_0 <- dfm_news_stationary_cov(A_comp, Q_comp)
-
-    kfs_res <- SKFS(X, A_comp, C_aug, Q_comp, R, F_0, P_0, FALSE)
-
-    F_sm <- kfs_res$F_smooth[, 1:r, drop = FALSE]
-    e_sm <- NULL
-    P <- kfs_res$P_smooth
+dfm_news_state <- function(dfm, require_full = FALSE) {
+  ss_full <- dfm[["ss_full"]]
+  if(!is.null(ss_full)) {
+    needed <- c("A", "C", "Q", "R", "F_0", "P_0")
+    if(any(!needed %in% names(ss_full))) stop("ss_full is missing required state matrices")
+    return(ss_full)
   }
 
-  X_sm <- dfm_news_compute_X_sm(F_sm, C, quarterly.vars, e_sm)
-  list(X_sm = X_sm, P = P)
+  if(isTRUE(require_full)) {
+    stop("news() requires dfm objects with full state matrices for MQ or idio.ar1 models; re-estimate with the updated package")
+  }
+
+  # Build full state from compact matrices (baseline case)
+  A <- dfm$A
+  C <- dfm$C
+  Q <- dfm$Q
+  R <- dfm$R
+  r <- nrow(A)
+  if(ncol(A) %% r != 0L) stop("Invalid transition matrix dimensions in dfm object")
+  p <- ncol(A) / r
+  rp <- r * p
+  A_state <- matrix(0, rp, rp)
+  A_state[1:r, 1:rp] <- A
+  if(rp > r) A_state[(r + 1L):rp, 1:(rp - r)] <- diag(rp - r)
+  C_state <- cbind(C, matrix(0, nrow(C), rp - r))
+  Q_state <- matrix(0, rp, rp)
+  Q_state[1:r, 1:r] <- Q
+  F_0 <- rep(0, rp)
+  P_0 <- dfm_news_stationary_cov(A_state, Q_state)
+  list(A = A_state, C = C_state, Q = Q_state, R = R, F_0 = F_0, P_0 = P_0)
+}
+
+dfm_news_kfs <- function(X, state, k) {
+  A <- state$A
+  C <- state$C
+  Q <- state$Q
+  R <- state$R
+  F_0 <- state$F_0
+  P_0 <- state$P_0
+
+  if(any(vapply(list(A, C, Q, R, F_0, P_0), is.null, logical(1L)))) {
+    stop("state is missing required matrices")
+  }
+
+  state_dim <- ncol(C)
+  if(nrow(A) != state_dim || ncol(A) != state_dim) stop("state transition matrix has incompatible dimensions")
+  if(nrow(Q) != state_dim || ncol(Q) != state_dim) stop("state covariance matrix has incompatible dimensions")
+  if(length(F_0) != state_dim) stop("state initial mean has incompatible dimensions")
+  if(nrow(P_0) != state_dim || ncol(P_0) != state_dim) stop("state initial covariance has incompatible dimensions")
+  if(nrow(C) != ncol(X)) stop("state observation matrix has incompatible dimensions")
+
+  if(k > 0L) {
+    aug_dim <- state_dim * (k + 1L)
+    A_aug <- matrix(0, aug_dim, aug_dim)
+    A_aug[1:state_dim, 1:state_dim] <- A
+    A_aug[(state_dim + 1L):aug_dim, 1:(k * state_dim)] <- diag(k * state_dim)
+
+    C_aug <- cbind(C, matrix(0, nrow(C), aug_dim - state_dim))
+    Q_aug <- matrix(0, aug_dim, aug_dim)
+    Q_aug[1:state_dim, 1:state_dim] <- Q
+
+    F_0 <- c(F_0, rep(0, aug_dim - state_dim))
+    P_0 <- rbind(cbind(P_0, matrix(0, state_dim, aug_dim - state_dim)),
+                 matrix(0, aug_dim - state_dim, aug_dim))
+  } else {
+    A_aug <- A
+    C_aug <- C
+    Q_aug <- Q
+  }
+
+  kfs_res <- SKFS(X, A_aug, C_aug, Q_aug, R, F_0, P_0, FALSE)
+
+  F_sm <- kfs_res$F_smooth[, 1:state_dim, drop = FALSE]
+  X_sm <- tcrossprod(F_sm, C)
+  list(X_sm = X_sm, P = kfs_res$P_smooth, C = C, R = R, state_dim = state_dim)
 }
 
 dfm_news_restore_missing <- function(X) {
