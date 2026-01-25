@@ -676,8 +676,9 @@ news.dfm <- function(object,
         y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
       }
       temp <- y_new - y_old
-      singlenews <- setNames(numeric(n), series)
+      singlenews <- numeric(n)
       singlenews[v_news] <- temp
+      names(singlenews) <- series
       if(length(groups)) {
         groupnews <- setNames(numeric(length(gList)), gList)
         groupnews[match(groups[v_news], gList)] <- temp
@@ -728,9 +729,9 @@ news.dfm <- function(object,
     actual <- actual_base
     forecasts <- forecasts_base
     if(!standardized) {
-      actual <- unclass(dfm_news_unscale_vec(actual, Mx, Wx))
+      actual <- dfm_news_unscale_vec(actual, Mx, Wx)
       actual[is.na(actual)] <- NA_real_
-      forecasts <- unclass(dfm_news_unscale_vec(forecasts, Mx, Wx))
+      forecasts <- dfm_news_unscale_vec(forecasts, Mx, Wx)
       forecasts[is.na(forecasts)] <- NA_real_
     }
 
