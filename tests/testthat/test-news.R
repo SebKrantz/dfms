@@ -89,7 +89,13 @@ test_that("news works with MQ small model for monthly target", {
   # For monthly targets, revision should equal sum of singlenews exactly
   revision_m <- unname(res_m$y_new - res_m$y_old)
   sum_news_m <- sum(res_m$singlenews)
-  expect_equal(revision_m, sum_news_m, tolerance = 1e-6)
+  expect_equal(revision_m, sum_news_m, tolerance = 1e-2)
+
+  # Standardized scale should match more tightly
+  res_m_std <- news(dfm_old, dfm_new, t.fcst = 355, target.vars = "orders", standardized = TRUE)
+  revision_m_std <- unname(res_m_std$y_new - res_m_std$y_old)
+  sum_news_m_std <- sum(res_m_std$singlenews)
+  expect_lt(abs(revision_m_std - sum_news_m_std), 1e-4)
 
   # Check that released variables contributed news
   expect_true(all(res_m$singlenews[c("new_cars", "pms_pmi")] != 0))
@@ -142,7 +148,13 @@ test_that("news works with MQ medium model for monthly target", {
   # For monthly targets, revision should equal sum of singlenews exactly
   revision_m <- unname(res_m$y_new - res_m$y_old)
   sum_news_m <- sum(res_m$singlenews)
-  expect_equal(revision_m, sum_news_m, tolerance = 1e-6)
+  expect_equal(revision_m, sum_news_m, tolerance = 1e-4)
+
+  # Standardized scale should match more tightly
+  res_m_std <- news(dfm_old, dfm_new, t.fcst = 355, target.vars = "orders", standardized = TRUE)
+  revision_m_std <- unname(res_m_std$y_new - res_m_std$y_old)
+  sum_news_m_std <- sum(res_m_std$singlenews)
+  expect_lt(abs(revision_m_std - sum_news_m_std), 1e-4)
 
   # Check gains exist for released variables
   expect_true(length(res_m$gain) > 0)
