@@ -100,7 +100,7 @@
 #'  \item{\code{C}}{\eqn{n \times r}{n x r} observation matrix.}
 #'  \item{\code{Q}}{\eqn{r \times r}{r x r} state (error) covariance matrix.}
 #'  \item{\code{R}}{\eqn{n \times n}{n x n} observation (error) covariance matrix.}
-#'  \item{\code{ss_full}}{list of full state-space matrices used internally for estimation and smoothing (\code{A}, \code{C}, \code{Q}, \code{R}, \code{F_0}, \code{P_0}).}
+#'  \item{\code{ss_full}}{list of full state-space matrices and full-state smoothing results used internally (\code{A}, \code{C}, \code{Q}, \code{R}, \code{F_0}, \code{P_0}, \code{F_smooth}, \code{P_smooth}).}
 #'  \item{\code{e}}{\eqn{T \times n}{T x n} estimates of observation errors \eqn{\textbf{e}_t}{e(t)}. Only available if \code{idio.ar1 = TRUE}.}
 #'  \item{\code{rho}}{\eqn{n \times 1}{n x 1} estimates of AR(1) coefficients (\eqn{\rho}{rho}) in observation errors: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. Only available if \code{idio.ar1 = TRUE}.}
 #'  \item{\code{loglik}}{vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.}
@@ -478,7 +478,8 @@ DFM <- function(X, r, p = 1L, ...,
                            Q = setDimnames(Q, list(unam, unam)),       # Q[sr, sr, drop = FALSE],
                            R = setDimnames(R, list(Xnam, Xnam)),
                            ss_full = list(A = init$A, C = init$C, Q = init$Q,
-                                          R = init$R, F_0 = init$F_0, P_0 = init$P_0),
+                                          R = init$R, F_0 = init$F_0, P_0 = init$P_0,
+                                          F_smooth = kfs_res$F_smooth, P_smooth = kfs_res$P_smooth),
                       e = if(idio.ar1) setColnames(e, Xnam) else NULL,
                       rho = if(idio.ar1) setNames(res_AC1, Xnam) else NULL),
                       object_init[-(1:6)])
@@ -603,7 +604,8 @@ DFM <- function(X, r, p = 1L, ...,
                     Q = setDimnames(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
                     R = setDimnames(R_out, list(Xnam, Xnam)),
                     ss_full = list(A = A_full, C = C_full, Q = Q_full,
-                                   R = R_full, F_0 = F_0_full, P_0 = P_0_full),
+                                   R = R_full, F_0 = F_0_full, P_0 = P_0_full,
+                                   F_smooth = kfs_res$F_smooth, P_smooth = kfs_res$P_smooth),
                     e = if(idio.ar1) setColnames(e_out, Xnam) else NULL,
                     rho = if(idio.ar1) setNames(rho_out, Xnam) else NULL,
                     loglik = if(num_iter == max.iter) loglik_all else loglik_all[seq_len(num_iter)],

@@ -78,6 +78,7 @@ A list-like object of class 'dfm' with the following elements:
 \item{\code{C}}{\eqn{n \times r}{n x r} observation matrix.}
 \item{\code{Q}}{\eqn{r \times r}{r x r} state (error) covariance matrix.}
 \item{\code{R}}{\eqn{n \times n}{n x n} observation (error) covariance matrix.}
+\item{\code{ss_full}}{list of full state-space matrices and full-state smoothing results used internally (\code{A}, \code{C}, \code{Q}, \code{R}, \code{F_0}, \code{P_0}, \code{F_smooth}, \code{P_smooth}).}
 \item{\code{e}}{\eqn{T \times n}{T x n} estimates of observation errors \eqn{\textbf{e}_t}{e(t)}. Only available if \code{idio.ar1 = TRUE}.}
 \item{\code{rho}}{\eqn{n \times 1}{n x 1} estimates of AR(1) coefficients (\eqn{\rho}{rho}) in observation errors: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. Only available if \code{idio.ar1 = TRUE}.}
 \item{\code{loglik}}{vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.}

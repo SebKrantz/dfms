@@ -80,6 +80,9 @@ then \code{t.fcst} can become out of bounds. When \code{comparison} is provided
 as raw data, \code{news()} drops \code{object$rm.rows} from the new dataset (if present) and
 forces \code{max.missing = 1} for the re-estimation call to keep row alignment.
 To avoid issues, use consistent ragged-edge patterns across vintages or estimate both vintages with \code{max.missing = 1}.
+For mixed-frequency or idiosyncratic AR(1) models, \code{news()} relies on the full
+state-space matrices stored in \code{dfm$ss_full}. If these are missing (e.g., old
+model objects), re-estimate the model with the current version of \code{DFM()}.
 }
 \references{
 Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor
