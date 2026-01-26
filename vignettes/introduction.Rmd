@@ -138,7 +138,7 @@ fc <- predict(model_m, h = 12)
 print(fc)
 ```
 
-These forecasts can also be visualized using a plot method. By default the entire series history is plotted along with the forecasts, thus it is often helpful to restrict the plot range. As with any stationary autoregressive model, the forecasts tend to zero quite quickly^[Depending also on the lag-order of the factor-VAR. Higher lag-orders product more interesting forecast dynamics.].  
+These forecasts can also be visualized using a plot method. By default the entire series history is plotted along with the forecasts, thus it is often helpful to restrict the plot range. As with any stationary autoregressive model, the forecasts tend to zero quite quickly^[Depending also on the lag-order of the factor-VAR. Higher lag-orders produce more interesting forecast dynamics.].  
 ```{r}
 # Setting an appropriate plot range to see the forecast
 plot(fc, xlim = c(320, 370))
@@ -195,7 +195,7 @@ model_mq_ar1 <- DFM(BM14_med_diff, r = 5, p = 3, idio.ar1 = TRUE,
 print(model_mq_ar1)
 ```
 
-The estimated AR(1) coefficients ($\rho$) for each series are stored in the `rho` element of the model object. For most series, the AR(1) coefficient are small, indicating little serial correlation in the idiosyncratic errors after accounting for the common factors.
+The estimated AR(1) coefficients ($\rho$) for each series are stored in the `rho` element of the model object. For most series, the AR(1) coefficients are small, indicating little serial correlation in the idiosyncratic errors after accounting for the common factors.
 
 ```{r}
 # AR(1) coefficients for the first 10 series
@@ -221,7 +221,7 @@ In general, Doz et al. (2011, 2012) show that in the presence of serial correlat
 
 ## News Decomposition
 
-The `news()` function decomposes forecast revisions into contributions from new data releases following Banbura and Modugno (2014). The idea is to compare an old vintage (with ragged-edge missing values) to a new vintage where some missing values are now observed. The output reports the forecast revision for a target series (unually a quarterly variable such as GDP not yet observed in the current period) and decomposes the change in its DFM-based forecast into series contributions.
+The `news()` function decomposes forecast revisions into contributions from new data releases following Banbura and Modugno (2014). The idea is to compare an old vintage (with ragged-edge missing values) to a new vintage where some missing values are now observed. The output reports the forecast revision for a target series (usually a quarterly variable such as GDP not yet observed in the current period) and decomposes the change in its DFM-based forecast into series contributions.
 
 Below, we use a medium-size mixed-frequency dataset, create a previous vintage, and compute news impacts for the quarterly targets.
 
@@ -231,10 +231,10 @@ model_mq_ar1$rm.rows # Previous model removed first row
 X_old <- BM14_med_diff[-model_mq_ar1$rm.rows, ]
 tail(X_old, 3) # See current ragged edge
 (obscurr <- colnames(X_old)[is.finite(tail(X_old, 1))]) # Observe current
-# Set some observed values to zero
+# Set some observed values to NA
 set.seed(1)
 X_old[nrow(X_old), sample(obscurr, 10)] <- NA
-# Also check series missing the previous observation and set some to zero
+# Also check series missing the previous observation and set some to NA
 (obsprev <- colnames(X_old)[is.finite(tail(X_old, 2)[1, ])] |> setdiff(obscurr)) 
 set.seed(1)
 X_old[nrow(X_old), sample(obsprev, 4)] <- NA
