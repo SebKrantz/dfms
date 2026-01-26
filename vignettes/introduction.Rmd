@@ -186,23 +186,12 @@ By default, observation errors are assumed to be white noise. However, in practi
 This option can be combined with mixed-frequency estimation. Since estimating AR(1) errors increases runtime, the examples below use the medium-sized dataset.
 
 ```{r MQ_AR1}
-# Medium-size mixed-frequency dataset (smaller runtime than the large panel)
-BM14_M_med <- BM14_M[, BM14_Models$medium[BM14_Models$freq == "M"]]
-BM14_Q_med <- BM14_Q[, BM14_Models$medium[BM14_Models$freq == "Q"]]
-
-# Transformations
-BM14_M_med[, BM14_Models$log_trans[BM14_Models$freq == "M" & BM14_Models$medium]] %<>% log()
-BM14_Q_med[, BM14_Models$log_trans[BM14_Models$freq == "Q" & BM14_Models$medium]] %<>% log()
-BM14_M_med <- diff(BM14_M_med)
-BM14_Q_med <- diff(BM14_Q_med)
-
-# Merge monthly + quarterly
-BM14_med <- merge(BM14_M_med, BM14_Q_med)
+BM14_med_diff <- BM14_diff[, BM14_Models$medium]
+Q_vars_med <- intersect(colnames(BM14_med_diff), colnames(BM14_Q))
 
 # Mixed-frequency model with AR(1) idiosyncratic errors
-model_mq_ar1 <- DFM(BM14_med, r = 5, p = 3,
-                    quarterly.vars = colnames(BM14_Q_med),
-                    idio.ar1 = TRUE)
+model_mq_ar1 <- DFM(BM14_med_diff, r = 5, p = 3, idio.ar1 = TRUE,
+                    quarterly.vars = Q_vars_med)
 print(model_mq_ar1)
 ```
 
@@ -223,40 +212,54 @@ The estimated observation errors are available in the `e` element.
 dim(model_mq_ar1$e)
 
 # Plot estimated errors for first 5 monthly series
-matplot(model_mq_ar1$e[, 1:5], type = "l", lty = 1,
+matplot(model_mq_ar1$e[-(1:120), 1:5], type = "l", lty = 1,
         main = "Estimated Idiosyncratic Errors (First 5 Series)",
         xlab = "Time", ylab = "Error")
 ```
 
-Note that modeling AR(1) errors increases computation time, particularly for large datasets. It is generally most useful when dealing with smaller panels where idiosyncratic dynamics may be more pronounced.
+In general, Doz et al. (2011, 2012) show that in the presence of serial correlation, the factors are still consistently estimated as $n, T \to \infty$ using an exact DFM specification. Thus modeling serial correlation is particularly important in smaller samples. Banbura & Modugno (2014) also show that modeling the serial correlation improves forecast accuracy, but only at short horizons.
 
 ## News Decomposition
 
-The `news()` function decomposes forecast revisions into contributions from new data releases following Banbura and Modugno (2014). The idea is to compare an old vintage (with ragged-edge missing values) to a new vintage where some missing values are now observed. The output reports the forecast revision for a target series and decomposes it into series- and group-level contributions.
+The `news()` function decomposes forecast revisions into contributions from new data releases following Banbura and Modugno (2014). The idea is to compare an old vintage (with ragged-edge missing values) to a new vintage where some missing values are now observed. The output reports the forecast revision for a target series (gdp) and decomposes it into series- and group-level contributions.
 
 Below, we use a medium-size mixed-frequency dataset, introduce a new release at the ragged edge for one quarterly series, and compute its news impact on that quarterly target.
 
 ```{r news}
-# Create old and new vintages with a new quarterly release at the ragged edge
-target_var <- "gdp"
-X_old <- BM14_med
-X_new <- BM14_med
-X_old[nrow(X_old), target_var] <- NA
-X_new[nrow(X_new), target_var] <- X_new[nrow(X_new) - 1L, target_var]
+# Create old vintage with a new quarterly release at the ragged edge
+model_mq_ar1$rm.rows # Previous model removed first row
+X_old <- BM14_med_diff[-model_mq_ar1$rm.rows, ]
+(obscurr <- colnames(X_old)[is.finite(tail(X_old, 1))]) # Observe current
+# Set some observed values to zero
+set.seed(1)
+X_old[nrow(X_old), sample(obscurr, 10)] <- NA
+# Also check series missing the previous observation and set some to zero
+(obsprev <- colnames(X_old)[is.finite(tail(X_old, 2)[1, ])] |> setdiff(obscurr)) 
+set.seed(1)
+X_old[nrow(X_old), sample(obsprev, 4)] <- NA
 
-# Fit models (use a small factor structure for speed)
-dfm_old <- DFM(X_old, r = 2, p = 2, quarterly.vars = colnames(BM14_Q_med))
+# Estimating same DFM on old vintage
+model_mq_ar1_old <- model_mq_ar1$call
+model_mq_ar1_old$X <- quote(X_old)
+model_mq_ar1_old$max.missing = 1 # No further row removals
+print(model_mq_ar1_old)
+model_mq_ar1_old <- eval(model_mq_ar1_old)
 
-# Compute news for the target variable at the last period
-news_res <- news(dfm_old, X_new, t.fcst = nrow(dfm_old$X_imp), 
-                 target.vars = target_var)
-print(news_res)
+# Compute news for "gdp" variable at the last period (t.fcst = nrow(X_old))
+news_gdp <- news(model_mq_ar1_old, model_mq_ar1, target.vars = "gdp")
+print(news_gdp)
+# Verifying the news decomposition
+na.omit(news_gdp$news_df) |> 
+  transform(test1 = news - (actual - forecast), test2 = impact - news * gain)
+
+# Now computing news for all quarterly variables
+news_qvars <- news(model_mq_ar1_old, model_mq_ar1, target.vars = Q_vars_med)
+print(news_qvars)
+# Data frame with details
+as.data.frame(news_qvars) |> na.omit() |> head()
 ```
 
-<!--
-Another possibility is to estimate different factor models for monthly and quarterly series, and combine them for the final prediction (e.g. by aggregating or blocking the monthly factor estimates). 
-
-If performance is not critical, I also refer the user to the [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>) packages, which provide elaborate models for mixed-frequency nowcasting, and handle mixed frequencies like BM14 (i.e. drawing on Mariano and Murasawa (2003)). -->
+Apart from the overall forecast revision, the `news()` function measures, for each series, the impact on the revision, which is a function of the innovation (news) multiplied by the gain (weight). The formula `impact` $=$ `news` $\times$ `gain` always holds, and `news` $=$ `actual` $-$ `forecast` holds if there is only one change to the series between vintages.  
 
 ## Additional Functions
 
