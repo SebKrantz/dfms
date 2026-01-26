@@ -61,7 +61,7 @@ reference:
 - contents:
   - predict.dfm
 - title: "News Decomposition"
-  desc: "Decompose forecast revisions into news contributions."
+  desc: "Decompose forecast revisions into news contributions follwing Banbura and Modugno (2014)."
 - contents:
   - news.dfm
 - title: "Fast Stationary Kalman Filtering and Smoothing"

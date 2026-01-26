@@ -16,7 +16,7 @@ test_that("news returns expected shapes", {
   dfm_new <- DFM(X_new, r = 1, p = 1, em.method = "none")
 
   res <- news(dfm_old, dfm_new, t.fcst = 20, target.vars = 1)
-  expect_s3_class(res, "dfm.news")
+  expect_s3_class(res, "dfm_news")
 
   expect_true(is.list(res))
   expect_true(is.data.frame(res$news_df))
@@ -40,9 +40,9 @@ test_that("news uses simple-case shortcut", {
   res <- news(dfm_old, dfm_new, t.fcst = 10, target.vars = 1)
 
   res_data <- news(dfm_old, X_new, t.fcst = 10, target.vars = 1)
-  expect_s3_class(res_data, "dfm.news")
+  expect_s3_class(res_data, "dfm_news")
   res_all <- news(dfm_old, X_new, t.fcst = 10)
-  expect_s3_class(res_all, "dfm.news_list")
+  expect_s3_class(res_all, "dfm_news_list")
   expect_true(all(is.na(res_data$news_df$actual)))
   expect_true(all(is.na(res_data$news_df$forecast)))
   revision <- unname(res$y_new - res$y_old)
@@ -83,7 +83,7 @@ test_that("news works with MQ small model for monthly target", {
   # This is a proper nowcast scenario where target is NOT observed
   res_m <- news(dfm_old, dfm_new, t.fcst = 356, target.vars = "orders")
 
-  expect_s3_class(res_m, "dfm.news")
+  expect_s3_class(res_m, "dfm_news")
   expect_true(is.numeric(res_m$y_old))
   expect_true(is.numeric(res_m$y_new))
 
@@ -146,7 +146,7 @@ test_that("news works with MQ small model for quarterly target", {
   # This is a proper nowcast scenario where target is NOT observed
   res_m <- news(dfm_old, dfm_new, t.fcst = 356, target.vars = "gdp")
 
-  expect_s3_class(res_m, "dfm.news")
+  expect_s3_class(res_m, "dfm_news")
   expect_true(is.numeric(res_m$y_old))
   expect_true(is.numeric(res_m$y_new))
 
@@ -210,7 +210,7 @@ test_that("news works with MQ medium model for monthly target", {
   # Target: 'orders' naturally missing at end of sample
   res_m <- news(dfm_old, dfm_new, t.fcst = 356, target.vars = "orders")
 
-  expect_s3_class(res_m, "dfm.news")
+  expect_s3_class(res_m, "dfm_news")
   expect_true(is.numeric(res_m$y_old))
   expect_true(is.numeric(res_m$y_new))
 
@@ -257,7 +257,7 @@ test_that("news works with idio.ar1 model", {
   dfm_new <- DFM(X_new, r = 1, p = 2, idio.ar1 = TRUE, em.method = "none")
 
   res <- news(dfm_old, dfm_new, t.fcst = 20, target.vars = 1)
-  expect_s3_class(res, "dfm.news")
+  expect_s3_class(res, "dfm_news")
 
   revision <- unname(res$y_new - res$y_old)
   sum_impact <- sum(res$news_df$impact)
@@ -296,7 +296,7 @@ test_that("news works with MQ + idio.ar1 model", {
 
   res_m <- news(dfm_old, dfm_new, t.fcst = 356, target.vars = "gdp")
 
-  expect_s3_class(res_m, "dfm.news")
+  expect_s3_class(res_m, "dfm_news")
   revision_m <- unname(res_m$y_new - res_m$y_old)
   sum_impact <- sum(res_m$news_df$impact)
   expect_equal(revision_m, sum_impact, tolerance = 1e-6)
@@ -338,13 +338,13 @@ test_that("news_list works as expected", {
   dfm_new <- DFM(X_new, r = 1, p = 1, em.method = "none")
 
   res_list <- news(dfm_old, dfm_new, t.fcst = 20)
-  expect_s3_class(res_list, "dfm.news_list")
+  expect_s3_class(res_list, "dfm_news_list")
   expect_equal(length(res_list), ncol(X))
   expect_equal(names(res_list), colnames(X))
 
   # Test $ extraction
   res_v1 <- res_list$v1
-  expect_s3_class(res_v1, "dfm.news")
+  expect_s3_class(res_v1, "dfm_news")
   expect_equal(res_v1$target.var, attr(res_list, "target.vars")[1])
   expect_equal(res_v1$t.fcst, attr(res_list, "t.fcst"))
   expect_equal(res_v1$standardized, attr(res_list, "standardized"))
@@ -352,19 +352,19 @@ test_that("news_list works as expected", {
 
   # Test [[ extraction by index
   res_idx <- res_list[[2]]
-  expect_s3_class(res_idx, "dfm.news")
+  expect_s3_class(res_idx, "dfm_news")
   expect_equal(res_idx$target.var, attr(res_list, "target.vars")[2])
   expect_equal(res_idx$t.fcst, attr(res_list, "t.fcst"))
 
   # Test [[ extraction by name
   res_name <- res_list[["v3"]]
-  expect_s3_class(res_name, "dfm.news")
+  expect_s3_class(res_name, "dfm_news")
   expect_equal(res_name$target.var, attr(res_list, "target.vars")[3])
   expect_null(res_list[["nonexistent"]])
 
   # Test [ subsetting
   res_sub <- res_list[1:3]
-  expect_s3_class(res_sub, "dfm.news_list")
+  expect_s3_class(res_sub, "dfm_news_list")
   expect_equal(length(res_sub), 3)
   expect_equal(names(res_sub), c("v1", "v2", "v3"))
   expect_equal(attr(res_sub, "target.vars"), attr(res_list, "target.vars")[1:3])
@@ -372,7 +372,7 @@ test_that("news_list works as expected", {
 
   # Test [ subsetting by name
   res_sub_name <- res_list[c("v2", "v4")]
-  expect_s3_class(res_sub_name, "dfm.news_list")
+  expect_s3_class(res_sub_name, "dfm_news_list")
   expect_equal(names(res_sub_name), c("v2", "v4"))
   expect_equal(attr(res_sub_name, "target.vars"), attr(res_list, "target.vars")[c(2, 4)])
 

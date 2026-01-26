@@ -362,8 +362,19 @@ as.data.frame.dfm <- function(x, ...,
   return(res)
 }
 
-predict_dfm_core <- function(object, method) {
-  Fa <- switch(tolower(method),
+predict_dfm_core <- function(object, method, use.full.state = TRUE) {
+  method <- tolower(method)
+  if(isTRUE(use.full.state) && method != "pca" && length(object$ss_full)) {
+    ss_full <- object$ss_full
+    if(!is.null(ss_full) && !is.null(ss_full$C) && !is.null(ss_full$F_smooth)) {
+      if(nrow(ss_full$F_smooth) == nrow(object$X_imp) && nrow(ss_full$C) == ncol(object$X_imp)) {
+        res <- tcrossprod(ss_full$F_smooth, ss_full$C)
+        dimnames(res) <- dimnames(object$X_imp)
+        return(res)
+      }
+    }
+  }
+  Fa <- switch(method,
                pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
                stop("Unkown method", method))
   if(is.null(object$quarterly.vars)) return(tcrossprod(Fa, object$C))
@@ -388,6 +399,7 @@ predict_dfm_core <- function(object, method) {
 #' @param orig.format logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals/fitted values on the original data scale.
 #' @param na.keep logical. \code{TRUE} inserts missing values where \code{X} is missing (default \code{TRUE} as residuals/fitted values are only defined for observed data). \code{FALSE} returns the raw prediction, which can be used to interpolate data based on the DFM. For residuals, \code{FALSE} returns the difference between the prediction and the initial imputed version of \code{X} use for PCA to initialize the Kalman Filter.
+#' @param use.full.state logical. Use the full state-space (if available) for fitted values and residuals. This includes idiosyncratic state components when \code{idio.ar1 = TRUE}, so fitted values reflect the full observation equation and residuals measure what is left after both factor and idiosyncratic components. Set to \code{FALSE} to obtain factor-only fitted values and residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.
 #' @param \dots not used.
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
@@ -414,10 +426,11 @@ residuals.dfm <- function(object,
                           method = switch(object$em.method, none = "2s", "qml"),
                           orig.format = FALSE,
                           standardized = FALSE,
-                          na.keep = TRUE, ...) {
+                          na.keep = TRUE,
+                          use.full.state = TRUE, ...) {
   X <- object$X_imp
   if(!(standardized && length(object[["e"]]))) {
-    X_pred <- predict_dfm_core(object, method)
+    X_pred <- predict_dfm_core(object, method, use.full.state = use.full.state)
     if(!standardized) {  # TODO: What if AR(1) resid available?
       stats <- attr(X, "stats")
       X_pred <- unscale(X_pred, stats)
@@ -439,9 +452,10 @@ fitted.dfm <- function(object,
                        method = switch(object$em.method, none = "2s", "qml"),
                        orig.format = FALSE,
                        standardized = FALSE,
-                       na.keep = TRUE, ...) {
+                       na.keep = TRUE,
+                       use.full.state = TRUE, ...) {
   X <- object$X_imp
-  res <- predict_dfm_core(object, method)
+  res <- predict_dfm_core(object, method, use.full.state = use.full.state)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
   if(na.keep && object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
@@ -486,10 +500,9 @@ fitted.dfm <- function(object,
 #' then \code{t.fcst} can become out of bounds. When \code{comparison} is provided
 #' as raw data, \code{news()} drops \code{object$rm.rows} from the new dataset (if present) and
 #' forces \code{max.missing = 1} for the re-estimation call to keep row alignment.
-#' To avoid issues, use consistent ragged-edge patterns across vintages or estimate both vintages with \code{max.missing = 1}.
+#' To avoid issues, estimate both vintages with \code{max.missing = 1}.
 #' For mixed-frequency or idiosyncratic AR(1) models, \code{news()} relies on the full
-#' state-space matrices stored in \code{dfm$ss_full}. If these are missing (e.g., old
-#' model objects), re-estimate the model with the current version of \code{DFM()}.
+#' state-space matrices stored in \code{dfm$ss_full}.
 #'
 #' @param object a \code{dfm} object for the old vintage.
 #' @param comparison a \code{dfm} object or a new dataset for the updated vintage.
@@ -498,7 +511,7 @@ fitted.dfm <- function(object,
 #' @param series optional character vector for naming variables.
 #' @param standardized logical. Return results on standardized scale?
 #' @param \dots not used.
-#' @return For a single target, a \code{dfm.news} object with elements:
+#' @return For a single target, a \code{dfm_news} object with elements:
 #' \itemize{
 #' \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 #' \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
@@ -516,19 +529,19 @@ fitted.dfm <- function(object,
 #' \item \code{impact}: contribution of the series to the target revision.
 #' }
 #' }
-#' If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
-#' where each element is a \code{dfm.news} object and list names correspond to targets.
+#' If \code{target.vars} selects multiple targets, a \code{dfm_news_list} object is returned,
+#' where each element is a \code{dfm_news} object and list names correspond to targets.
 #'
 #' @references
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor
-#' models on datasets with arbitrary pattern of missing data. Journal of Applied
-#' Econometrics, 29(1), 133-160.
+#' models on datasets with arbitrary pattern of missing data.
+#' *Journal of Applied Econometrics, 29*(1), 133-160.
 #'
 #' @examples \donttest{
 #' # (1) Monthly DFM example
 #' X <- collapse::qM(BM14_M)[, BM14_Models$medium[BM14_Models$freq == "M"]]
 #' X_old <- X
-#' # Creating ragged edge
+#' # Creating earlier vintage
 #' X_old[nrow(X) - 1, sample(which(is.finite(X[nrow(X) - 1, ]) & is.na(X[nrow(X), ])), 5)] <- NA
 #' X_old[nrow(X), sample(which(is.finite(X[nrow(X), ])), 5)] <- NA
 #' # Estimating DFM
@@ -549,7 +562,7 @@ fitted.dfm <- function(object,
 #' BM14[, BM14_Models$freq == "Q"] %<>% diff(3)
 #' X <- BM14[-1, BM14_Models$small]
 #' quarterly.vars <- BM14_Models$series[BM14_Models$small & BM14_Models$freq == "Q"]
-#' # Creating ragged edge
+#' # Creating earlier vintage
 #' X_old <- X
 #' X_old[355, "ip_tot_cstr"] <- NA
 #' X_old[355, "new_cars"] <- NA
@@ -558,7 +571,7 @@ fitted.dfm <- function(object,
 #' X_old[356, "euro325"] <- NA
 #' X_old[356, "capacity"] <- NA
 #' # Estimating DFM
-#' dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars)
+#' dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars, max.missing = 1)
 #' # News computation (second DFM fit internally with same settings and rows)
 #' res_mq <- news(dfm, X, t.fcst = 356, target.vars = "gdp")
 #' # See results
@@ -810,23 +823,23 @@ news.dfm <- function(object,
     res$target.var <- setNames(vars_idx, series[vars_idx])
     res$t.fcst <- t_fcst
     res$standardized <- standardized
-    class(res) <- "dfm.news"
+    class(res) <- "dfm_news"
     return(res)
   }
   if(!is.null(colnames(X_old))) names(res) <- colnames(X_old)[vars_idx]
   attr(res, "target.vars") <- setNames(vars_idx, series[vars_idx])
   attr(res, "t.fcst") <- t_fcst
   attr(res, "standardized") <- standardized
-  class(res) <- "dfm.news_list"
+  class(res) <- "dfm_news_list"
   res
 }
 
 #' @rdname news
-#' @param x an object of class 'dfm.news' or 'dfm.news_list'.
+#' @param x an object of class 'dfm_news' or 'dfm_news_list'.
 #' @param digits integer. Number of digits to print.
 #' @param \dots not used.
 #' @export
-print.dfm.news <- function(x, digits = 4L, ...) {
+print.dfm_news <- function(x, digits = 4L, ...) {
   cat("DFM News\n")
   cat("Target variable:", names(x$target.var), "\n")
   cat("Target time:", x$t.fcst, "\n")
@@ -839,7 +852,7 @@ print.dfm.news <- function(x, digits = 4L, ...) {
 
 #' @rdname news
 #' @export
-print.dfm.news_list <- function(x, digits = 4L, ...) {
+print.dfm_news_list <- function(x, digits = 4L, ...) {
   t_fcst <- attr(x, "t.fcst")
   standardized <- attr(x, "standardized")
   cat("DFM News (Multiple Targets)\n")
@@ -856,20 +869,20 @@ print.dfm.news_list <- function(x, digits = 4L, ...) {
 #' @param name character. Element name.
 #' @param i index. Element position or name.
 #' @export
-`$.dfm.news_list` <- function(x, name) {
+`$.dfm_news_list` <- function(x, name) {
   i <- match(name, names(x))
   if(is.na(i)) return(NULL)
   res <- unclass(x)[[i]]
   res$target.var <- attr(x, "target.vars")[i]
   res$t.fcst <- attr(x, "t.fcst")
   res$standardized <- attr(x, "standardized")
-  class(res) <- "dfm.news"
+  class(res) <- "dfm_news"
   res
 }
 
 #' @rdname news
 #' @export
-`[[.dfm.news_list` <- function(x, i) {
+`[[.dfm_news_list` <- function(x, i) {
   if(is.character(i)) {
     i <- match(i, names(x))
     if(is.na(i)) return(NULL)
@@ -878,25 +891,25 @@ print.dfm.news_list <- function(x, digits = 4L, ...) {
   res$target.var <- attr(x, "target.vars")[i]
   res$t.fcst <- attr(x, "t.fcst")
   res$standardized <- attr(x, "standardized")
-  class(res) <- "dfm.news"
+  class(res) <- "dfm_news"
   res
 }
 
 #' @rdname news
 #' @export
-`[.dfm.news_list` <- function(x, i) {
+`[.dfm_news_list` <- function(x, i) {
   res <- unclass(x)[i]
   attr(res, "target.vars") <- attr(x, "target.vars")[i]
   attr(res, "t.fcst") <- attr(x, "t.fcst")
   attr(res, "standardized") <- attr(x, "standardized")
-  class(res) <- "dfm.news_list"
+  class(res) <- "dfm_news_list"
   res
 }
 
 #' @rdname news
 #' @importFrom collapse rowbind
 #' @export
-as.data.frame.dfm.news_list <- function(x, ...) {
+as.data.frame.dfm_news_list <- function(x, ...) {
   res <- lapply(x, .subset2, "news_df") |>
    rowbind(idcol = "target")
   attr(res, "target.vars") <- attr(x, "target.vars")
@@ -919,6 +932,7 @@ as.data.frame.dfm.news_list <- function(x, ...) {
 #' @param h integer. The forecast horizon.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param standardized logical. \code{FALSE} will return data forecasts on the original scale.
+#' @param use.full.state logical. Use the full state-space (if available) when computing residuals for optional residual forecasting. When \code{idio.ar1 = TRUE}, this yields residuals after both factor and idiosyncratic components; set to \code{FALSE} to use factor-only residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.
 #' @param resFUN an (optional) function to compute a univariate forecast of the residuals.
 #' The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector of forecasts. See Examples.
 #' @param resAC numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.
@@ -972,45 +986,68 @@ predict.dfm <- function(object,
                         h = 10L,
                         method = switch(object$em.method, none = "2s", "qml"),
                         standardized = TRUE,
+                        use.full.state = TRUE,
                         resFUN = NULL,
                         resAC = 0.1, ...) {
-
-  Fa <- switch(tolower(method),
+  method <- tolower(method)
+  X <- object$X_imp
+  Fa <- switch(method,
               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
-  nf <- dim(Fa)[2L]
-  C <- object$C
-  ny <- dim(C)[1L]
-  A <- object$A
-  r <- dim(A)[1L]
-  p <- dim(A)[2L] / r
-  X <- object$X_imp
 
-  F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
-  X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+  ss_full <- if(isTRUE(use.full.state) && method != "pca") object$ss_full else NULL
+  use_state_forecast <- !is.null(ss_full) &&
+    !is.null(ss_full$A) && !is.null(ss_full$C) && !is.null(ss_full$F_smooth)
 
-  # DFM forecasting loop
-  if(is.null(object$quarterly.vars)) {
-    F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
-    for (i in seq_len(h)) {
-      F_reg <- ftail(F_last, p)
-      F_fc[i, ] <- tmp <- A %*% vec(t(F_reg)[, p:1, drop = FALSE])
-      dim(tmp) <- NULL
-      X_fc[i, ] <- C %*% tmp
-      F_last <- rbind(F_reg, tmp)
+  if(use_state_forecast) {
+    A_full <- ss_full$A
+    C_full <- ss_full$C
+    F_last <- drop(ftail(ss_full$F_smooth, 1L))
+    state_dim <- ncol(ss_full$F_smooth)
+    r <- nrow(object$A)
+    ny <- nrow(C_full)
+
+    F_fc <- matrix(NA_real_, nrow = h, ncol = r)
+    X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+    for(i in seq_len(h)) {
+      F_last <- drop(A_full %*% F_last)
+      F_fc[i, ] <- F_last[seq_len(r)]
+      X_fc[i, ] <- C_full %*% F_last
     }
   } else {
-    F_last <- ftail(Fa, max(p, 5))
-    qind <- ckmatch(object$quarterly.vars, dimnames(X)[[2L]])
-    Cq_lags <- object$C[qind, rep(1:ncol(Fa), each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), ncol(Fa))
-    # Mixed frequency forecasting loop
-    for (i in seq_len(h)) {
-      F_reg <- ftailrev(F_last, p)
-      F_fc[i, ] <- tmp <- A %*% vec(t(F_reg))
-      dim(tmp) <- NULL
-      X_fc[i, -qind] <- C[-qind,, drop = FALSE] %*% tmp
-      F_last <- rbind(F_last, tmp)
-      X_fc[i, qind] <- Cq_lags %*% vec(ftailrev(F_last, 5))
+    nf <- dim(Fa)[2L]
+    C <- object$C
+    ny <- dim(C)[1L]
+    A <- object$A
+    r <- dim(A)[1L]
+    p <- dim(A)[2L] / r
+
+    F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
+    X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+
+    # DFM forecasting loop
+    if(is.null(object$quarterly.vars)) {
+      F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
+      for (i in seq_len(h)) {
+        F_reg <- ftail(F_last, p)
+        F_fc[i, ] <- tmp <- A %*% vec(t(F_reg)[, p:1, drop = FALSE])
+        dim(tmp) <- NULL
+        X_fc[i, ] <- C %*% tmp
+        F_last <- rbind(F_reg, tmp)
+      }
+    } else {
+      F_last <- ftail(Fa, max(p, 5))
+      qind <- ckmatch(object$quarterly.vars, dimnames(X)[[2L]])
+      Cq_lags <- object$C[qind, rep(seq_len(ncol(Fa)), each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), ncol(Fa))
+      # Mixed frequency forecasting loop
+      for (i in seq_len(h)) {
+        F_reg <- ftailrev(F_last, p)
+        F_fc[i, ] <- tmp <- A %*% vec(t(F_reg))
+        dim(tmp) <- NULL
+        X_fc[i, -qind] <- C[-qind,, drop = FALSE] %*% tmp
+        F_last <- rbind(F_last, tmp)
+        X_fc[i, qind] <- Cq_lags %*% vec(ftailrev(F_last, 5))
+      }
     }
   }
 
@@ -1020,12 +1057,13 @@ predict.dfm <- function(object,
     if(!is.function(resFUN)) stop("resFUN needs to be a forecasting function with second argument h that produces a numeric h-step ahead forecast of a univariate time series")
     # If X is a multivariate time series object for which the univariate forecasting function could have methods.
     ofl <- !attr(X, "is.list") && length(attr(X, "attributes")[["class"]])
-    rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE, na.keep = FALSE) # TODO: What about missing values??
+    rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE, na.keep = FALSE,
+                      use.full.state = use.full.state) # TODO: What about missing values??
     if(ofl && length(object$rm.rows)) rsid <- rsid[-object$rm.rows, , drop = FALSE]
     ACF <- AC1(rsid, object$anyNA)
     fcr <- which(abs(ACF) >= abs(resAC)) # TODO: Check length of forecast??
     for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(rsid[, i], h, ...))
-  } else if(!is.null(res <- object[["e"]])) {
+  } else if(!is.null(res <- object[["e"]]) && !use_state_forecast) {
     rho <- object$rho
     last_res <- res[nrow(res), ]
     for (i in seq_len(h)) {

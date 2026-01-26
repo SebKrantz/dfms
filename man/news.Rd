@@ -3,12 +3,12 @@
 \name{news}
 \alias{news}
 \alias{news.dfm}
-\alias{print.dfm.news}
-\alias{print.dfm.news_list}
-\alias{$.dfm.news_list}
-\alias{[[.dfm.news_list}
-\alias{[.dfm.news_list}
-\alias{as.data.frame.dfm.news_list}
+\alias{print.dfm_news}
+\alias{print.dfm_news_list}
+\alias{$.dfm_news_list}
+\alias{[[.dfm_news_list}
+\alias{[.dfm_news_list}
+\alias{as.data.frame.dfm_news_list}
 \title{News Decomposition}
 \usage{
 news(object, ...)
@@ -23,17 +23,17 @@ news(object, ...)
   ...
 )
 
-\method{print}{dfm.news}(x, digits = 4L, ...)
+\method{print}{dfm_news}(x, digits = 4L, ...)
 
-\method{print}{dfm.news_list}(x, digits = 4L, ...)
+\method{print}{dfm_news_list}(x, digits = 4L, ...)
 
-\method{$}{dfm.news_list}(x, name)
+\method{$}{dfm_news_list}(x, name)
 
-\method{[[}{dfm.news_list}(x, i)
+\method{[[}{dfm_news_list}(x, i)
 
-\method{[}{dfm.news_list}(x, i)
+\method{[}{dfm_news_list}(x, i)
 
-\method{as.data.frame}{dfm.news_list}(x, ...)
+\method{as.data.frame}{dfm_news_list}(x, ...)
 }
 \arguments{
 \item{object}{a \code{dfm} object for the old vintage.}
@@ -50,7 +50,7 @@ news(object, ...)
 
 \item{standardized}{logical. Return results on standardized scale?}
 
-\item{x}{an object of class 'dfm.news' or 'dfm.news_list'.}
+\item{x}{an object of class 'dfm_news' or 'dfm_news_list'.}
 
 \item{digits}{integer. Number of digits to print.}
 
@@ -59,7 +59,7 @@ news(object, ...)
 \item{i}{index. Element position or name.}
 }
 \value{
-For a single target, a \code{dfm.news} object with elements:
+For a single target, a \code{dfm_news} object with elements:
 \itemize{
 \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
@@ -77,8 +77,8 @@ single release, \code{news} equals \code{actual - forecast}. With multiple relea
 \item \code{impact}: contribution of the series to the target revision.
 }
 }
-If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
-where each element is a \code{dfm.news} object and list names correspond to targets.
+If \code{target.vars} selects multiple targets, a \code{dfm_news_list} object is returned,
+where each element is a \code{dfm_news} object and list names correspond to targets.
 }
 \description{
 Compute the Banbura and Modugno (2014) news decomposition of forecast updates.
@@ -115,17 +115,16 @@ may be removed by \code{DFM()}. If old and new vintages are both dfm objects, an
 then \code{t.fcst} can become out of bounds. When \code{comparison} is provided
 as raw data, \code{news()} drops \code{object$rm.rows} from the new dataset (if present) and
 forces \code{max.missing = 1} for the re-estimation call to keep row alignment.
-To avoid issues, use consistent ragged-edge patterns across vintages or estimate both vintages with \code{max.missing = 1}.
+To avoid issues, estimate both vintages with \code{max.missing = 1}.
 For mixed-frequency or idiosyncratic AR(1) models, \code{news()} relies on the full
-state-space matrices stored in \code{dfm$ss_full}. If these are missing (e.g., old
-model objects), re-estimate the model with the current version of \code{DFM()}.
+state-space matrices stored in \code{dfm$ss_full}.
 }
 \examples{
 \donttest{
 # (1) Monthly DFM example
 X <- collapse::qM(BM14_M)[, BM14_Models$medium[BM14_Models$freq == "M"]]
 X_old <- X
-# Creating ragged edge
+# Creating earlier vintage
 X_old[nrow(X) - 1, sample(which(is.finite(X[nrow(X) - 1, ]) & is.na(X[nrow(X), ])), 5)] <- NA
 X_old[nrow(X), sample(which(is.finite(X[nrow(X), ])), 5)] <- NA
 # Estimating DFM
@@ -146,7 +145,7 @@ BM14[, BM14_Models$freq == "M"] \%<>\% diff()
 BM14[, BM14_Models$freq == "Q"] \%<>\% diff(3)
 X <- BM14[-1, BM14_Models$small]
 quarterly.vars <- BM14_Models$series[BM14_Models$small & BM14_Models$freq == "Q"]
-# Creating ragged edge
+# Creating earlier vintage
 X_old <- X
 X_old[355, "ip_tot_cstr"] <- NA
 X_old[355, "new_cars"] <- NA
@@ -155,7 +154,7 @@ X_old[356, "pms_pmi"] <- NA
 X_old[356, "euro325"] <- NA
 X_old[356, "capacity"] <- NA
 # Estimating DFM
-dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars)
+dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars, max.missing = 1)
 # News computation (second DFM fit internally with same settings and rows)
 res_mq <- news(dfm, X, t.fcst = 356, target.vars = "gdp")
 # See results
@@ -166,6 +165,6 @@ head(res_mq$news_df)
 }
 \references{
 Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor
-models on datasets with arbitrary pattern of missing data. Journal of Applied
-Econometrics, 29(1), 133-160.
+models on datasets with arbitrary pattern of missing data.
+\emph{Journal of Applied Econometrics, 29}(1), 133-160.
 }
