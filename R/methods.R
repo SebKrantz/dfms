@@ -505,10 +505,13 @@ fitted.dfm <- function(object,
 #' \item \code{series}: series name.
 #' \item \code{actual}: actual release (if any).
 #' \item \code{forecast}: old-vintage forecast of the release.
-#' \item \code{news}: total innovation for the series.
-#' \item \code{gain}: news weight on the data scale.
-#' \item \code{gain_std}: standardized gain.
-#' \item \code{impact}: contribution to the target revision.
+#' \item \code{news}: total innovation for the series on the output scale. If there is a
+#' single release, \code{news} equals \code{actual - forecast}. With multiple releases,
+#' \code{news} aggregates those innovations for the series.
+#' \item \code{gain}: effective weight on \code{news} such that \code{impact = news * gain}
+#' (on the output scale).
+#' \item \code{gain_std}: effective weight on the standardized innovations.
+#' \item \code{impact}: contribution of the series to the target revision.
 #' }
 #' }
 #' If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
@@ -715,27 +718,34 @@ news.dfm <- function(object,
       y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
     }
 
-    # Compute gain using pre-computed P1_P2inv
-    gain <- drop(scale_vec[v_news] * (C_use[v_news, , drop = FALSE] %*% P1_P2inv))
-    temp <- gain * innov
+    # Compute gain using pre-computed P1_P2inv (standardized innovations)
+    gain_std_release <- drop(scale_vec[v_news] * (C_use[v_news, , drop = FALSE] %*% P1_P2inv))
+    temp <- gain_std_release * innov
 
-    impact <- news <- numeric(n)
+    actual <- forecast <- rep(NA_real_, n)
+    impact <- news <- news_std <- numeric(n)
     for(i in seq_len(n_news)) {
-      news[v_miss[i]] <- news[v_miss[i]] + innov[i]
-      impact[v_miss[i]] <- impact[v_miss[i]] + temp[i]
-    }
-
-    if(!standardized) {
-      news <- news * Wx
-      actual <- dfm_news_unscale_vec(actual, Mx, Wx)
-      forecast <- dfm_news_unscale_vec(forecast, Mx, Wx)
+      v <- v_miss[i]
+      actual_i <- X_new[t_miss[i], v]
+      forecast_i <- Res_old$X_sm[t_miss[i], v]
+      if(!standardized) {
+        actual_i <- dfm_news_unscale_vec(actual_i, Mx[v], Wx[v])
+        forecast_i <- dfm_news_unscale_vec(forecast_i, Mx[v], Wx[v])
+      }
+      actual[v] <- actual_i
+      forecast[v] <- forecast_i
+      news_std[v] <- news_std[v] + innov[i]
+      news[v] <- news[v] + (actual_i - forecast_i)
+      impact[v] <- impact[v] + temp[i]
     }
 
     gain_out <- numeric(n)
     nz <- news != 0
     gain_out[nz] <- impact[nz] / news[nz]
-    gain_std <- gain_out
-    if(!standardized) gain_std <- gain_out * (Wx / Wx[v_news])
+
+    gain_std <- numeric(n)
+    nz_std <- news_std != 0
+    gain_std[nz_std] <- impact[nz_std] / news_std[nz_std]
 
     list(y_old = y_old,
          y_new = y_new,
