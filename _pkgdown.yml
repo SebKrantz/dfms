@@ -4,8 +4,7 @@ home:
   title: Dynamic Factor Models for R
 
 template:
-  params:
-    mathjax: true
+  math-rendering: katex
 
 development:
   mode: auto
