@@ -524,7 +524,7 @@ fitted.dfm <- function(object,
 #'
 #' @examples \donttest{
 #' # (1) Monthly DFM example
-#' X <- collapse::qM(BM14_M)
+#' X <- collapse::qM(BM14_M)[, BM14_Models$medium[BM14_Models$freq == "M"]]
 #' X_old <- X
 #' # Creating ragged edge
 #' X_old[nrow(X) - 1, sample(which(is.finite(X[nrow(X) - 1, ]) & is.na(X[nrow(X), ])), 5)] <- NA
@@ -532,7 +532,7 @@ fitted.dfm <- function(object,
 #' # Estimating DFM
 #' dfm <- DFM(X_old, r = 2, p = 2, em.method = "none")
 #' # News computation (second DFM fit internally with same settings and rows)
-#' res <- news(dfm, X, t.fcst = 356, target.vars = "ip_total")
+#' res <- news(dfm, X, target.vars = c("ip_tot_cstr", "orders", "urx"))
 #' # See results
 #' print(res)
 #' head(res$news_df)
