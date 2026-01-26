@@ -724,10 +724,11 @@ news.dfm <- function(object,
 
     actual <- forecast <- rep(NA_real_, n)
     impact <- news <- news_std <- numeric(n)
+    X_old_sm <- Res_old$X_sm
     for(i in seq_len(n_news)) {
       v <- v_miss[i]
       actual_i <- X_new[t_miss[i], v]
-      forecast_i <- Res_old$X_sm[t_miss[i], v]
+      forecast_i <- X_old_sm[t_miss[i], v]
       if(!standardized) {
         actual_i <- actual_i * Wx[v] + Mx[v]
         forecast_i <- forecast_i * Wx[v] + Mx[v]
