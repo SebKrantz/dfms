@@ -844,7 +844,7 @@ print.dfm.news_list <- function(x, digits = 4L, ...) {
   cat("Target time:", t_fcst, "\n")
   cat("Targets:", length(x), "\n")
   cat("Standardized:", isTRUE(standardized), "\n")
-  tbl <- sapply(x, function(res) c(y_old = res$y_old, y_new = res$y_new, revision = res$y_new - res$y_old))
+  tbl <- sapply(x, function(res) c(y_old = unattrib(res$y_old), y_new = unattrib(res$y_new), revision = unattrib(res$y_new - res$y_old)))
   if(is.null(dim(tbl))) tbl <- matrix(tbl, nrow = 3L)
   print(round(t(tbl), digits))
   return(invisible(x))
