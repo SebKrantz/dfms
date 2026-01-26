@@ -77,6 +77,10 @@ dfm_news_kfs <- function(X, state, k) {
     C_aug <- C
     Q_aug <- Q
   }
+  # Stabilize Q if singular (zero variance states)
+  if(any(diag(Q_aug) == 0)) {
+    diag(Q_aug)[diag(Q_aug) == 0] <- 1e-8
+  }
 
   kfs_res <- SKFS(X, A_aug, C_aug, Q_aug, R, F_0, P_0, FALSE)
 
