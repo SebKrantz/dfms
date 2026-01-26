@@ -522,6 +522,48 @@ fitted.dfm <- function(object,
 #' models on datasets with arbitrary pattern of missing data. Journal of Applied
 #' Econometrics, 29(1), 133-160.
 #'
+#' @examples \donttest{
+#' # (1) Monthly DFM example
+#' X <- collapse::qM(BM14_M)
+#' X_old <- X
+#' # Creating ragged edge
+#' X_old[nrow(X) - 1, sample(which(is.finite(X[nrow(X) - 1, ]) & is.na(X[nrow(X), ])), 5)] <- NA
+#' X_old[nrow(X), sample(which(is.finite(X[nrow(X), ])), 5)] <- NA
+#' # Estimating DFM
+#' dfm <- DFM(X_old, r = 2, p = 2, em.method = "none")
+#' # News computation (second DFM fit internally with same settings and rows)
+#' res <- news(dfm, X, t.fcst = 356, target.vars = "ip_total")
+#' # See results
+#' print(res)
+#' head(res$news_df)
+#'
+#' # (2) MQ nowcast of GDP (idio.ar1 = FALSE for speed)
+#' library(magrittr)
+#' library(xts)
+#' # Creating MQ dataset
+#' BM14 <- merge(BM14_M, BM14_Q)
+#' BM14[, BM14_Models$log_trans] %<>% log()
+#' BM14[, BM14_Models$freq == "M"] %<>% diff()
+#' BM14[, BM14_Models$freq == "Q"] %<>% diff(3)
+#' X <- BM14[-1, BM14_Models$small]
+#' quarterly.vars <- BM14_Models$series[BM14_Models$small & BM14_Models$freq == "Q"]
+#' # Creating ragged edge
+#' X_old <- X
+#' X_old[355, "ip_tot_cstr"] <- NA
+#' X_old[355, "new_cars"] <- NA
+#' X_old[356, "new_cars"] <- NA
+#' X_old[356, "pms_pmi"] <- NA
+#' X_old[356, "euro325"] <- NA
+#' X_old[356, "capacity"] <- NA
+#' # Estimating DFM
+#' dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars)
+#' # News computation (second DFM fit internally with same settings and rows)
+#' res_mq <- news(dfm, X, t.fcst = 356, target.vars = "gdp")
+#' # See results
+#' print(res_mq)
+#' head(res_mq$news_df)
+#' }
+#'
 #' @export
 news <- function(object, ...) UseMethod("news")
 
