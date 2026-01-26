@@ -107,6 +107,8 @@ innovations and gains are computed on a consistent scale. Set
 \code{standardized = FALSE} to report results on the original data scale.
 }
 \note{
+This implementation is translated from the original MATLAB codes and is
+consistent with the BM2014 news decomposition formulas.
 If the model was estimated with \code{max.missing < 1} and
 \code{na.rm.method = "LE"} in \code{\link{tsnarmimp}} (called by \code{DFM()}), leading or trailing rows with many missing values
 may be removed by \code{DFM()}. If old and new vintages are both dfm objects, and they drop different rows,
