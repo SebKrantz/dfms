@@ -115,17 +115,16 @@ may be removed by \code{DFM()}. If old and new vintages are both dfm objects, an
 then \code{t.fcst} can become out of bounds. When \code{comparison} is provided
 as raw data, \code{news()} drops \code{object$rm.rows} from the new dataset (if present) and
 forces \code{max.missing = 1} for the re-estimation call to keep row alignment.
-To avoid issues, use consistent ragged-edge patterns across vintages or estimate both vintages with \code{max.missing = 1}.
+To avoid issues, estimate both vintages with \code{max.missing = 1}.
 For mixed-frequency or idiosyncratic AR(1) models, \code{news()} relies on the full
-state-space matrices stored in \code{dfm$ss_full}. If these are missing (e.g., old
-model objects), re-estimate the model with the current version of \code{DFM()}.
+state-space matrices stored in \code{dfm$ss_full}.
 }
 \examples{
 \donttest{
 # (1) Monthly DFM example
 X <- collapse::qM(BM14_M)[, BM14_Models$medium[BM14_Models$freq == "M"]]
 X_old <- X
-# Creating ragged edge
+# Creating earlier vintage
 X_old[nrow(X) - 1, sample(which(is.finite(X[nrow(X) - 1, ]) & is.na(X[nrow(X), ])), 5)] <- NA
 X_old[nrow(X), sample(which(is.finite(X[nrow(X), ])), 5)] <- NA
 # Estimating DFM
@@ -146,7 +145,7 @@ BM14[, BM14_Models$freq == "M"] \%<>\% diff()
 BM14[, BM14_Models$freq == "Q"] \%<>\% diff(3)
 X <- BM14[-1, BM14_Models$small]
 quarterly.vars <- BM14_Models$series[BM14_Models$small & BM14_Models$freq == "Q"]
-# Creating ragged edge
+# Creating earlier vintage
 X_old <- X
 X_old[355, "ip_tot_cstr"] <- NA
 X_old[355, "new_cars"] <- NA
