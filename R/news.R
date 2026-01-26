@@ -1,11 +1,3 @@
-dfm_news_build_companion <- function(A, r, p, k) {
-  rp <- r * p
-  rp_k <- r * (p + k)
-  A_comp <- matrix(0, rp_k, rp_k)
-  A_comp[1:r, 1:rp] <- A
-  if(rp_k > r) A_comp[(r + 1L):rp_k, 1:(rp_k - r)] <- diag(rp_k - r)
-  A_comp
-}
 
 dfm_news_stationary_cov <- function(A, Q) {
   rp <- nrow(A)
