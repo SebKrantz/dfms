@@ -572,7 +572,7 @@ fitted.dfm <- function(object,
 #' X_old[356, "euro325"] <- NA
 #' X_old[356, "capacity"] <- NA
 #' # Estimating DFM
-#' dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars)
+#' dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars, max.missing = 1)
 #' # News computation (second DFM fit internally with same settings and rows)
 #' res_mq <- news(dfm, X, t.fcst = 356, target.vars = "gdp")
 #' # See results
