@@ -47,7 +47,7 @@ head(BM14_Models, 3)
 BM14_Models_M <- subset(BM14_Models, freq == "M")
 ```
 
-Prior to estimation, all data is differenced by BM14, and some series are log, differenced, as indicated by the `log_trans` column in `BM14_Models`. In general, *dfms* uses a stationary Kalman Filter with time-invariant system matrices, and therefore expects data to be stationary. Data is also scaled and centered^[Data must be scaled and centered because the Kalman Filter has no intercept term.] in the main `DFM()` function, thus this does not need to be done by the user. 
+Prior to estimation, all data is differenced by BM14, and some series are log-differenced, as indicated by the `log_trans` column in `BM14_Models`. In general, *dfms* uses a stationary Kalman Filter with time-invariant system matrices, and therefore expects data to be stationary. Data is also scaled and centered^[Data must be scaled and centered because the Kalman Filter has no intercept term.] in the main `DFM()` function, thus this does not need to be done by the user. 
 
 ```{r}
 library(magrittr)
@@ -80,11 +80,11 @@ Based on both the information criteria and the Screeplot, I gauge that a model w
 vars::VARselect(ic$F_pca[, 1:4])
 ```
 
-The selection thus suggests we should estimate a factor model with ` r = 4` factors and `p = 3` lags^[Some authors like Doz, Giannone, and Reichlin (2012) additionally allow the number of transition error processes, termed 'dynamic factors' and given an extra parameter `q`, to be less than the number of 'static factors' `r`. I find this terminology confusing and the feature not very useful for most practical purposes, thus I have not implemented it in *dfms*.]. Before estimating the model I note that *dfms* does not deal with seasonality in series, thus it is recommended to also seasonally adjust data, e.g. using the *seasonal* package before estimation. BM14 only use seasonally adjusted series, thus this is not necessary with the example data provided. 
+The selection thus suggests we should estimate a factor model with `r = 4` factors and `p = 3` lags^[Some authors like Doz, Giannone, and Reichlin (2012) additionally allow the number of transition error processes, termed 'dynamic factors' and given an extra parameter `q`, to be less than the number of 'static factors' `r`. I find this terminology confusing and the feature not very useful for most practical purposes, thus I have not implemented it in *dfms*.]. Before estimating the model I note that *dfms* does not deal with seasonality in series, thus it is recommended to also seasonally adjust data, e.g. using the *seasonal* package before estimation. BM14 only use seasonally adjusted series, thus this is not necessary with the example data provided. 
 
 ## Estimation and Exploration
 
-Estimation can then simply be done using the `DFM()` function with parameters `r` and `p`^[Users can also choose from two different implementations of the EM algorithm using the argument `em.method`. The default is `em.method = "auto"`, which chooses the modified EM algorithm proposed by BM14 for missing data if `anyNA(X)`, and the plain EM implementation of Dos, Giannone and Reichlin (2012), henceforth DGR12, otherwise. The baseline implementation of DGR12 is typically more than 2x faster than BM14's method, and can also be used with data that has a few random missing values (< 5%), but gives wrong results with many and systematically missing data, such as ragged edges at the beginning of end of the sample or series at different frequencies. With complete datasets, both `em.method = "DGR"` and `em.method = "BM"` gives identical factor estimates, and in this case `em.method = "DGR"` should be used.]. 
+Estimation can then simply be done using the `DFM()` function with parameters `r` and `p`^[Users can also choose from two different implementations of the EM algorithm using the argument `em.method`. The default is `em.method = "auto"`, which chooses the modified EM algorithm proposed by BM14 for missing data if `anyNA(X)`, and the plain EM implementation of Doz, Giannone and Reichlin (2012), henceforth DGR12, otherwise. The baseline implementation of DGR12 is typically more than 2x faster than BM14's method, and can also be used with data that has a few random missing values (< 5%), but gives wrong results with many and systematically missing data, such as ragged edges at the beginning or end of the sample or series at different frequencies. With complete datasets, both `em.method = "DGR"` and `em.method = "BM"` give identical factor estimates, and in this case `em.method = "DGR"` should be used.]. 
 
 ```{r}
 # Estimating the model with 4 factors and 3 lags using BM14's EM algorithm
@@ -221,14 +221,15 @@ In general, Doz et al. (2011, 2012) show that in the presence of serial correlat
 
 ## News Decomposition
 
-The `news()` function decomposes forecast revisions into contributions from new data releases following Banbura and Modugno (2014). The idea is to compare an old vintage (with ragged-edge missing values) to a new vintage where some missing values are now observed. The output reports the forecast revision for a target series (gdp) and decomposes it into series- and group-level contributions.
+The `news()` function decomposes forecast revisions into contributions from new data releases following Banbura and Modugno (2014). The idea is to compare an old vintage (with ragged-edge missing values) to a new vintage where some missing values are now observed. The output reports the forecast revision for a target series (unually a quarterly variable such as GDP not yet observed in the current period) and decomposes the change in its DFM-based forecast into series contributions.
 
-Below, we use a medium-size mixed-frequency dataset, introduce a new release at the ragged edge for one quarterly series, and compute its news impact on that quarterly target.
+Below, we use a medium-size mixed-frequency dataset, create a previous vintage, and compute news impacts for the quarterly targets.
 
 ```{r news}
-# Create old vintage with a new quarterly release at the ragged edge
+# Create old vintage with ragged edge
 model_mq_ar1$rm.rows # Previous model removed first row
 X_old <- BM14_med_diff[-model_mq_ar1$rm.rows, ]
+tail(X_old, 3) # See current ragged edge
 (obscurr <- colnames(X_old)[is.finite(tail(X_old, 1))]) # Observe current
 # Set some observed values to zero
 set.seed(1)
