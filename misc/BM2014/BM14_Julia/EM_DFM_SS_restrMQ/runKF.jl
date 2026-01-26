@@ -69,7 +69,8 @@ function SKF(Y, C, R, A, Q, Z_0, P_0)
             Zu  = Z  + PCF * V
             Pu  = P  - PCF * PC'
             Pu  = (Pu + transpose(Pu)) / 2
-            loglik += 0.5 * (log(det(iF)) - first(transpose(V) * iF * V))
+            # Use logabsdet for numerical stability (det can be slightly negative due to rounding)
+            loglik += 0.5 * (logabsdet(iF)[1] - first(transpose(V) * iF * V))
         end
 
         Zm[:,t]   .= Z

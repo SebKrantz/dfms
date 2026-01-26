@@ -15,8 +15,9 @@ LICENSE
 ^codemeta\.json$
 ^codecov\.yml$
 _cache$
+_snaps$
 .log$
 .gz$
 .tex$
 ^\.DS_Store$
-vignettes/dynamic_factor_models*
+^vignettes/dynamic_factor_models

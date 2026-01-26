@@ -18,7 +18,8 @@ DFM(
   max.iter = 100L,
   tol = 1e-04,
   pos.corr = TRUE,
-  check.increased = FALSE
+  check.increased = FALSE,
+  save.full.state = TRUE
 )
 }
 \arguments{
@@ -57,6 +58,8 @@ This yields significant performance gains over the iterative methods. Final syst
 \item{pos.corr}{logical. Increase the likelihood that factors correlate positively with the data, by scaling the eigenvectors such that the principal components (used to initialize the Kalman Filter) co-vary positively with the row-means of the standardized data.}
 
 \item{check.increased}{logical. Check if likelihood has increased. Passed to \code{\link{em_converged}}. If \code{TRUE}, the algorithm only terminates if convergence was reached with decreasing likelihood.}
+
+\item{save.full.state}{logical. Save full state-space matrices and smoothed states in \code{ss_full}? Set to \code{FALSE} to reduce object size.}
 }
 \value{
 A list-like object of class 'dfm' with the following elements:
@@ -78,6 +81,7 @@ A list-like object of class 'dfm' with the following elements:
 \item{\code{C}}{\eqn{n \times r}{n x r} observation matrix.}
 \item{\code{Q}}{\eqn{r \times r}{r x r} state (error) covariance matrix.}
 \item{\code{R}}{\eqn{n \times n}{n x n} observation (error) covariance matrix.}
+\item{\code{ss_full}}{list of full state-space matrices and full-state smoothing results used internally (\code{A}, \code{C}, \code{Q}, \code{R}, \code{F_0}, \code{P_0}, \code{F_smooth}, \code{P_smooth}). Only stored when \code{save.full.state = TRUE}.}
 \item{\code{e}}{\eqn{T \times n}{T x n} estimates of observation errors \eqn{\textbf{e}_t}{e(t)}. Only available if \code{idio.ar1 = TRUE}.}
 \item{\code{rho}}{\eqn{n \times 1}{n x 1} estimates of AR(1) coefficients (\eqn{\rho}{rho}) in observation errors: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. Only available if \code{idio.ar1 = TRUE}.}
 \item{\code{loglik}}{vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.}
@@ -135,6 +139,8 @@ where
 \eqn{\textbf{R}}{R} \tab\tab \eqn{n \times n}{n x n} observation covariance matrix. It is diagonal by assumption 2 and identical to \eqn{\textbf{R}}{R} as stated in the dynamic form.\cr\cr
 }
 The filter is initialized with PCA estimates on the imputed dataset---see \code{\link{SKFS}} for a complete code example.
+
+When modeling observations errors as AR(1) processes (\code{idio.ar1 = TRUE}) and/or when quarterly variables are included (\code{quarterly.vars = c(...)}), the state-space form of the model is augmented in order to estimate the additional parameters and apply appropriate restrictions - see the \href{https://raw.githubusercontent.com/ropensci/dfms/main/vignettes/dynamic_factor_models_paper.pdf}{theoretical vignette} for details. But \code{DFM()} returns matrices for the classical form of the factor model, and thus these modifications do not affect the output format.
 }
 \examples{
 library(magrittr)
