@@ -303,6 +303,9 @@ test_that("news works with MQ + idio.ar1 model", {
 
   rel_idx <- which(!is.na(res_m$news_df$actual))
   expect_equal(res_m$news_df$impact[rel_idx], res_m$news_df$news[rel_idx] * res_m$news_df$gain[rel_idx])
+
+  # res_m_std$news_df |> na_omit() |> tfm(test1 = news - (actual - forecast), test2 = impact - news * gain)
+
 })
 
 test_that("news handles errors properly", {
