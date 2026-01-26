@@ -28,7 +28,7 @@ The package is fully functional though, and you are very welcome to install it u
 
 The default is `em.method = "auto"`, which chooses `"BM"` following Banbura & Modugno (2014) with missing data or mixed frequency, and `"DGR"` following Doz, Giannone & Reichlin (2012) otherwise. Using `em.method = "none"` generates Two-Step estimates following Doz, Giannone & Reichlin (2011). This is extremely efficient on bigger datasets. PCA and Two-Step estimates are also reported in EM-estimation. All methods support missing data, but `em.method = "DGR"` does not model them in EM iterations.
 
-The package is currently stable, but functionality may expand in the future. The package now includes `news()` for Banbura and Modugno (2014) style news decomposition of forecast updates. 
+The package is now at a 1.0.0 release and includes `news()` for Banbura and Modugno (2014) style news decomposition of forecast updates. 
 
 
 ### Comparison with Other R Packages

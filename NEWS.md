@@ -1,6 +1,8 @@
-# dfms 0.5.0
+# dfms 1.0.0
 
-* Added `news()` functionality for Banbura and Modugno (2014) style news decomposition, including re-estimation on updated vintages and per-target output objects with print methods.
+* Added `news()` functionality for Banbura and Modugno (2014) style news decomposition, including re-estimation on updated vintages, `news_df` outputs (news, gains, impacts), extended MQ/AR(1) tests, full state-space storage in `dfm$ss_full`, and improved documentation and examples with clarified scaling behavior.
+
+* Marked 1.0.0 for a feature-complete release within the intended scope.
 
 # dfms 0.4.1
 

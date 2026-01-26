@@ -36,6 +36,8 @@
 
 \strong{News Decomposition}
 
+\code{\link[=news.dfm]{news(<dfm>)}} --- news decomposition with per-series outputs in \code{news_df}\cr
+
 \code{\link[=news.dfm]{news(<dfm>)}}\cr
 
 \strong{Fast Stationary Kalman Filtering and Smoothing}
