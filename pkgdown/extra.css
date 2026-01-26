@@ -12,6 +12,10 @@ dd {
   padding-left: 1.5rem !important;
   margin-bottom: 0.5rem !important;
 }
+footer {
+  margin-bottom: 0 !important;
+  margin-top: 40px !important;
+}
 /*
 p {
   font-size: 0.875em;  14px/16=0.875em
