@@ -165,6 +165,6 @@ head(res_mq$news_df)
 }
 \references{
 Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor
-models on datasets with arbitrary pattern of missing data. Journal of Applied
-Econometrics, 29(1), 133-160.
+models on datasets with arbitrary pattern of missing data.
+\emph{Journal of Applied Econometrics, 29}(1), 133-160.
 }
