@@ -58,7 +58,7 @@
 
 \item{standardized}{logical. \code{FALSE} will return data forecasts on the original scale.}
 
-\item{use.full.state}{logical. Use the full state-space (if available) when computing residuals for optional residual forecasting. Falls back to the compact form if unavailable or if \code{method = "pca"}.}
+\item{use.full.state}{logical. Use the full state-space (if available) when computing residuals for optional residual forecasting. When \code{idio.ar1 = TRUE}, this yields residuals after both factor and idiosyncratic components; set to \code{FALSE} to use factor-only residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.}
 
 \item{resFUN}{an (optional) function to compute a univariate forecast of the residuals.
 The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector of forecasts. See Examples.}

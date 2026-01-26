@@ -399,7 +399,7 @@ predict_dfm_core <- function(object, method, use.full.state = TRUE) {
 #' @param orig.format logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals/fitted values on the original data scale.
 #' @param na.keep logical. \code{TRUE} inserts missing values where \code{X} is missing (default \code{TRUE} as residuals/fitted values are only defined for observed data). \code{FALSE} returns the raw prediction, which can be used to interpolate data based on the DFM. For residuals, \code{FALSE} returns the difference between the prediction and the initial imputed version of \code{X} use for PCA to initialize the Kalman Filter.
-#' @param use.full.state logical. Use the full state-space (if available) for fitted values and residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.
+#' @param use.full.state logical. Use the full state-space (if available) for fitted values and residuals. This includes idiosyncratic state components when \code{idio.ar1 = TRUE}, so fitted values reflect the full observation equation and residuals measure what is left after both factor and idiosyncratic components. Set to \code{FALSE} to obtain factor-only fitted values and residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.
 #' @param \dots not used.
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
@@ -933,7 +933,7 @@ as.data.frame.dfm.news_list <- function(x, ...) {
 #' @param h integer. The forecast horizon.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param standardized logical. \code{FALSE} will return data forecasts on the original scale.
-#' @param use.full.state logical. Use the full state-space (if available) when computing residuals for optional residual forecasting. Falls back to the compact form if unavailable or if \code{method = "pca"}.
+#' @param use.full.state logical. Use the full state-space (if available) when computing residuals for optional residual forecasting. When \code{idio.ar1 = TRUE}, this yields residuals after both factor and idiosyncratic components; set to \code{FALSE} to use factor-only residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.
 #' @param resFUN an (optional) function to compute a univariate forecast of the residuals.
 #' The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector of forecasts. See Examples.
 #' @param resAC numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.

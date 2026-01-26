@@ -37,7 +37,7 @@
 
 \item{na.keep}{logical. \code{TRUE} inserts missing values where \code{X} is missing (default \code{TRUE} as residuals/fitted values are only defined for observed data). \code{FALSE} returns the raw prediction, which can be used to interpolate data based on the DFM. For residuals, \code{FALSE} returns the difference between the prediction and the initial imputed version of \code{X} use for PCA to initialize the Kalman Filter.}
 
-\item{use.full.state}{logical. Use the full state-space (if available) for fitted values and residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.}
+\item{use.full.state}{logical. Use the full state-space (if available) for fitted values and residuals. This includes idiosyncratic state components when \code{idio.ar1 = TRUE}, so fitted values reflect the full observation equation and residuals measure what is left after both factor and idiosyncratic components. Set to \code{FALSE} to obtain factor-only fitted values and residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.}
 
 \item{\dots}{not used.}
 }
