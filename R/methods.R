@@ -537,6 +537,8 @@ fitted.dfm <- function(object,
 #' models on datasets with arbitrary pattern of missing data.
 #' *Journal of Applied Econometrics, 29*(1), 133-160.
 #'
+#' @seealso \link{dfms-package}
+#'
 #' @examples \donttest{
 #' # (1) Monthly DFM example
 #' X <- collapse::qM(BM14_M)[, BM14_Models$medium[BM14_Models$freq == "M"]]

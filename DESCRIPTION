@@ -18,7 +18,7 @@ Description: Efficient estimation of Dynamic Factor Models using the Expectation
   following Bai and Ng (2002) <doi:10.1111/1468-0262.00273>.
 URL: https://docs.ropensci.org/dfms/, https://github.com/ropensci/dfms
 BugReports: https://github.com/ropensci/dfms/issues
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 Imports: Rcpp (>= 1.0.1), collapse (>= 2.0.0)
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: xts, vars, magrittr, testthat (>= 3.0.0), knitr, rmarkdown, covr
