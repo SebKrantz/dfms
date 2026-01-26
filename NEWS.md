@@ -2,6 +2,9 @@
 
 * Added `news()` functionality for Banbura and Modugno (2014) style news decomposition, including re-estimation on updated vintages, `news_df` outputs (news, gains, impacts), extended MQ/AR(1) tests, full state-space storage in `dfm$ss_full`, and improved documentation and examples with clarified scaling behavior.
 
+* Added `save.full.state` to `DFM()` and `use.full.state` to `predict()`, `fitted()`, and `residuals()` - default `TRUE`. Full-state output includes idiosyncratic components (when modeled with `idio.ar1 = TRUE`). This generally improves the accuracy of DFM forecasts, but changes the interpretation for residuals/fitted values, 
+which are then no longer a function of the factors alone. 
+
 * Marked 1.0.0 for a feature-complete release within the intended scope.
 
 # dfms 0.4.1
