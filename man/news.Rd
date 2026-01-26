@@ -3,6 +3,12 @@
 \name{news}
 \alias{news}
 \alias{news.dfm}
+\alias{print.dfm.news}
+\alias{print.dfm.news_list}
+\alias{$.dfm.news_list}
+\alias{[[.dfm.news_list}
+\alias{[.dfm.news_list}
+\alias{as.data.frame.dfm.news_list}
 \title{News Decomposition}
 \usage{
 news(object, ...)
@@ -10,12 +16,24 @@ news(object, ...)
 \method{news}{dfm}(
   object,
   comparison,
-  t.fcst,
+  t.fcst = nrow(object$X),
   target.vars = NULL,
   series = NULL,
   standardized = FALSE,
   ...
 )
+
+\method{print}{dfm.news}(x, digits = 4L, ...)
+
+\method{print}{dfm.news_list}(x, digits = 4L, ...)
+
+\method{$}{dfm.news_list}(x, name)
+
+\method{[[}{dfm.news_list}(x, i)
+
+\method{[}{dfm.news_list}(x, i)
+
+\method{as.data.frame}{dfm.news_list}(x, ...)
 }
 \arguments{
 \item{object}{a \code{dfm} object for the old vintage.}
@@ -31,17 +49,30 @@ news(object, ...)
 \item{series}{optional character vector for naming variables.}
 
 \item{standardized}{logical. Return results on standardized scale?}
+
+\item{x}{an object of class 'dfm.news' or 'dfm.news_list'.}
+
+\item{digits}{integer. Number of digits to print.}
+
+\item{name}{character. Element name.}
+
+\item{i}{index. Element position or name.}
 }
 \value{
 For a single target, a \code{dfm.news} object with elements:
 \itemize{
 \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
-\item \code{singlenews}: named vector of news contributions by series.
-\item \code{gain}: named news weights for each new release.
-\item \code{gain_scaled}: scaled gain for each new release (matches the data scale).
-\item \code{actual}: actual values for the new releases.
-\item \code{forecasts}: old forecasts for the new releases.
+\item \code{news_df}: data frame with one row per series and columns:
+\itemize{
+\item \code{series}: series name.
+\item \code{actual}: actual release (if any).
+\item \code{forecast}: old-vintage forecast of the release.
+\item \code{news}: total innovation for the series.
+\item \code{gain}: news weight on the data scale.
+\item \code{gain_std}: standardized gain.
+\item \code{impact}: contribution to the target revision.
+}
 }
 If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
 where each element is a \code{dfm.news} object and list names correspond to targets.

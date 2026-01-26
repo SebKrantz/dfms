@@ -500,11 +500,16 @@ fitted.dfm <- function(object,
 #' \itemize{
 #' \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 #' \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
-#' \item \code{singlenews}: named vector of news contributions by series.
-#' \item \code{gain}: named news weights for each new release.
-#' \item \code{gain_scaled}: scaled gain for each new release (matches the data scale).
-#' \item \code{actual}: actual values for the new releases.
-#' \item \code{forecasts}: old forecasts for the new releases.
+#' \item \code{news_df}: data frame with one row per series and columns:
+#' \itemize{
+#' \item \code{series}: series name.
+#' \item \code{actual}: actual release (if any).
+#' \item \code{forecast}: old-vintage forecast of the release.
+#' \item \code{news}: total innovation for the series.
+#' \item \code{gain}: news weight on the data scale.
+#' \item \code{gain_std}: standardized gain.
+#' \item \code{impact}: contribution to the target revision.
+#' }
 #' }
 #' If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
 #' where each element is a \code{dfm.news} object and list names correspond to targets.
@@ -522,7 +527,7 @@ news <- function(object, ...) UseMethod("news")
 #' @export
 news.dfm <- function(object,
                      comparison,
-                     t.fcst,
+                     t.fcst = nrow(object$X),
                      target.vars = NULL,
                      series = NULL,
                      standardized = FALSE, ...) {
@@ -640,10 +645,10 @@ news.dfm <- function(object,
     P1_P2inv <- P1 %*% solve(P2)
 
     # Pre-compute actual and forecasts (shared across targets)
-    actual_base <- forecasts_base <- rep(NA_real_, n)
+    actual <- forecast <- rep(NA_real_, n)
     for(i in seq_len(n_news)) {
-      actual_base[v_miss[i]] <- X_new[t_miss[i], v_miss[i]]
-      forecasts_base[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
+      actual[v_miss[i]] <- X_new[t_miss[i], v_miss[i]]
+      forecast[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
     }
 
   } else {
@@ -662,17 +667,22 @@ news.dfm <- function(object,
         y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
         y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
       }
-      temp <- y_new - y_old
-      singlenews <- numeric(n)
-      singlenews[v_news] <- temp
-      names(singlenews) <- series
+
+      na_vec <- rep(NA_real_, n)
+      gain <- gain_std <- impact <- news <- numeric(n)
+      impact[v_news] <- news[v_news] <- y_new - y_old
+      gain[v_news] <- 1
+      gain_std[v_news] <- 1
 
       return(list(y_old = y_old, y_new = y_new,
-                  singlenews = singlenews,
-                  gain = setNames(numeric(0L), character(0L)),
-                  gain_scaled = rep(NA_real_, n),
-                  actual = rep(NA_real_, n),
-                  forecasts = rep(NA_real_, n)))
+                  news_df = data.frame(
+                    series = series,
+                    actual = na_vec,
+                    forecast = na_vec,
+                    news = news,
+                    gain = gain,
+                    gain_std = gain_std,
+                    impact = impact)))
     }
 
     # Case 2: No new releases
@@ -683,12 +693,18 @@ news.dfm <- function(object,
         y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
         y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
       }
+      na_vec <- rep(NA_real_, n)
+      gain <- gain_std <- impact <- news <- numeric(n)
+
       return(list(y_old = y_old, y_new = y_new,
-                  singlenews = setNames(numeric(n), series),
-                  gain = setNames(numeric(0L), character(0L)),
-                  gain_scaled = rep(NA_real_, n),
-                  actual = rep(NA_real_, n),
-                  forecasts = rep(NA_real_, n)))
+                  news_df = data.frame(
+                    series = series,
+                    actual = na_vec,
+                    forecast = na_vec,
+                    news = news,
+                    gain = gain,
+                    gain_std = gain_std,
+                    impact = impact)))
     }
 
     # Case 3: Main news decomposition (uses pre-computed P1_P2inv, innov)
@@ -703,52 +719,61 @@ news.dfm <- function(object,
     gain <- drop(scale_vec[v_news] * (C_use[v_news, , drop = FALSE] %*% P1_P2inv))
     temp <- gain * innov
 
-    singlenews <- numeric(n)
-    for(i in seq_len(n_news)) singlenews[v_miss[i]] <- singlenews[v_miss[i]] + temp[i]
-    names(singlenews) <- series
-
-    actual <- actual_base
-    forecasts <- forecasts_base
-    if(!standardized) {
-      actual <- dfm_news_unscale_vec(actual, Mx, Wx)
-      actual[is.na(actual)] <- NA_real_
-      forecasts <- dfm_news_unscale_vec(forecasts, Mx, Wx)
-      forecasts[is.na(forecasts)] <- NA_real_
+    impact <- news <- numeric(n)
+    for(i in seq_len(n_news)) {
+      news[v_miss[i]] <- news[v_miss[i]] + innov[i]
+      impact[v_miss[i]] <- impact[v_miss[i]] + temp[i]
     }
 
-    idx <- !duplicated(v_miss)
-    gain_out <- gain[idx]
-    names(gain_out) <- series[v_miss[idx]]
+    if(!standardized) {
+      news <- news * Wx
+      actual <- dfm_news_unscale_vec(actual, Mx, Wx)
+      forecast <- dfm_news_unscale_vec(forecast, Mx, Wx)
+    }
 
-    gain_scaled <- if(standardized) gain_out else gain_out / Wx[v_miss[idx]]
+    gain_out <- numeric(n)
+    nz <- news != 0
+    gain_out[nz] <- impact[nz] / news[nz]
+    gain_std <- gain_out
+    if(!standardized) gain_std <- gain_out * (Wx / Wx[v_news])
 
-    list(y_old = y_old, y_new = y_new,
-         singlenews = singlenews,
-         gain = gain_out, gain_scaled = gain_scaled,
-         actual = actual, forecasts = forecasts)
+    list(y_old = y_old,
+         y_new = y_new,
+         news_df = data.frame(
+           series = series,
+           actual = actual,
+           forecast = forecast,
+           news = news,
+           gain = gain_out,
+           gain_std = gain_std,
+           impact = impact))
   }
 
   res <- lapply(vars_idx, compute_news)
   if(length(vars_idx) == 1L) {
     res <- res[[1L]]
-    res$target.var <- vars_idx
+    res$target.var <- setNames(vars_idx, series[vars_idx])
     res$t.fcst <- t_fcst
     res$standardized <- standardized
     class(res) <- "dfm.news"
     return(res)
   }
   if(!is.null(colnames(X_old))) names(res) <- colnames(X_old)[vars_idx]
-  attr(res, "target.vars") <- vars_idx
+  attr(res, "target.vars") <- setNames(vars_idx, series[vars_idx])
   attr(res, "t.fcst") <- t_fcst
   attr(res, "standardized") <- standardized
   class(res) <- "dfm.news_list"
   res
 }
 
+#' @rdname news
+#' @param x an object of class 'dfm.news' or 'dfm.news_list'.
+#' @param digits integer. Number of digits to print.
+#' @param \dots not used.
 #' @export
 print.dfm.news <- function(x, digits = 4L, ...) {
   cat("DFM News\n")
-  cat("Target variable:", if(!is.null(names(x$singlenews))) names(x$singlenews)[x$target.var] else x$target.var, "\n")
+  cat("Target variable:", names(x$target.var), "\n")
   cat("Target time:", x$t.fcst, "\n")
   cat("Old forecast:", round(x$y_old, digits), "\n")
   cat("New forecast:", round(x$y_new, digits), "\n")
@@ -757,6 +782,7 @@ print.dfm.news <- function(x, digits = 4L, ...) {
   return(invisible(x))
 }
 
+#' @rdname news
 #' @export
 print.dfm.news_list <- function(x, digits = 4L, ...) {
   t_fcst <- attr(x, "t.fcst")
@@ -769,6 +795,59 @@ print.dfm.news_list <- function(x, digits = 4L, ...) {
   if(is.null(dim(tbl))) tbl <- matrix(tbl, nrow = 3L)
   print(round(t(tbl), digits))
   return(invisible(x))
+}
+
+#' @rdname news
+#' @param name character. Element name.
+#' @param i index. Element position or name.
+#' @export
+`$.dfm.news_list` <- function(x, name) {
+  i <- match(name, names(x))
+  if(is.na(i)) return(NULL)
+  res <- unclass(x)[[i]]
+  res$target.var <- attr(x, "target.vars")[i]
+  res$t.fcst <- attr(x, "t.fcst")
+  res$standardized <- attr(x, "standardized")
+  class(res) <- "dfm.news"
+  res
+}
+
+#' @rdname news
+#' @export
+`[[.dfm.news_list` <- function(x, i) {
+  if(is.character(i)) {
+    i <- match(i, names(x))
+    if(is.na(i)) return(NULL)
+  }
+  res <- unclass(x)[[i]]
+  res$target.var <- attr(x, "target.vars")[i]
+  res$t.fcst <- attr(x, "t.fcst")
+  res$standardized <- attr(x, "standardized")
+  class(res) <- "dfm.news"
+  res
+}
+
+#' @rdname news
+#' @export
+`[.dfm.news_list` <- function(x, i) {
+  res <- unclass(x)[i]
+  attr(res, "target.vars") <- attr(x, "target.vars")[i]
+  attr(res, "t.fcst") <- attr(x, "t.fcst")
+  attr(res, "standardized") <- attr(x, "standardized")
+  class(res) <- "dfm.news_list"
+  res
+}
+
+#' @rdname news
+#' @importFrom collapse rowbind
+#' @export
+as.data.frame.dfm.news_list <- function(x, ...) {
+  res <- lapply(x, .subset2, "news_df") |>
+   rowbind(idcol = "target")
+  attr(res, "target.vars") <- attr(x, "target.vars")
+  attr(res, "t.fcst") <- attr(x, "t.fcst")
+  attr(res, "standardized") <- attr(x, "standardized")
+  res
 }
 
 #% @aliases forecast.dfm
