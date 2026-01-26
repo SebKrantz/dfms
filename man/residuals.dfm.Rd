@@ -12,6 +12,7 @@
   orig.format = FALSE,
   standardized = FALSE,
   na.keep = TRUE,
+  use.full.state = TRUE,
   ...
 )
 
@@ -21,6 +22,7 @@
   orig.format = FALSE,
   standardized = FALSE,
   na.keep = TRUE,
+  use.full.state = TRUE,
   ...
 )
 }
@@ -34,6 +36,8 @@
 \item{standardized}{logical. \code{FALSE} will put residuals/fitted values on the original data scale.}
 
 \item{na.keep}{logical. \code{TRUE} inserts missing values where \code{X} is missing (default \code{TRUE} as residuals/fitted values are only defined for observed data). \code{FALSE} returns the raw prediction, which can be used to interpolate data based on the DFM. For residuals, \code{FALSE} returns the difference between the prediction and the initial imputed version of \code{X} use for PCA to initialize the Kalman Filter.}
+
+\item{use.full.state}{logical. Use the full state-space (if available) for fitted values and residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.}
 
 \item{\dots}{not used.}
 }

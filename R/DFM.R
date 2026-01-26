@@ -6,6 +6,43 @@
 .EM_BM_MQ_idio <- quote(EMstepBMMQidio(X, A, C, Q, R, F_0, P_0, XW0, NW, dgind, dnkron, dnkron_ind, r, p, R_mat, n, nq, sr, TT, rQi, rRi))
 .KFS <- quote(SKFS(X, A, C, Q, R, F_0, P_0))
 
+dfm_build_ss_full_none <- function(save.full.state, idio.ar1, MFl, init, var, beta, Q, R, r, p, n, kfs_res) {
+  if(!isTRUE(save.full.state)) return(NULL)
+  rp <- r * p
+  if(idio.ar1) {
+    A_full <- init$A
+    if(rp > r) {
+      A_full[seq_len(rp), seq_len(rp)] <- 0
+      A_full[seq_len(r), seq_len(rp)] <- t(var$A)
+      A_full[(r + 1L):rp, seq_len(rp - r)] <- diag(rp - r)
+    } else {
+      A_full[seq_len(r), seq_len(rp)] <- t(var$A)
+    }
+    C_full <- init$C
+    C_full[, seq_len(r)] <- t(beta)
+    Q_full <- init$Q
+    Q_full[seq_len(r), seq_len(r)] <- Q
+    Q_full[(rp + 1L):(rp + n), (rp + 1L):(rp + n)] <- R
+    return(list(A = A_full, C = C_full, Q = Q_full, R = init$R,
+                F_0 = init$F_0, P_0 = init$P_0,
+                F_smooth = kfs_res$F_smooth, P_smooth = kfs_res$P_smooth))
+  }
+  if(MFl) {
+    return(list(A = init$A, C = init$C, Q = init$Q, R = init$R,
+                F_0 = init$F_0, P_0 = init$P_0,
+                F_smooth = kfs_res$F_smooth, P_smooth = kfs_res$P_smooth))
+  }
+  A_full <- matrix(0, rp, rp)
+  A_full[seq_len(r), seq_len(rp)] <- t(var$A)
+  if(rp > r) A_full[(r + 1L):rp, seq_len(rp - r)] <- diag(rp - r)
+  C_full <- cbind(t(beta), matrix(0, n, rp - r))
+  Q_full <- matrix(0, rp, rp)
+  Q_full[seq_len(r), seq_len(r)] <- Q
+  list(A = A_full, C = C_full, Q = Q_full, R = R,
+       F_0 = init$F_0, P_0 = init$P_0,
+       F_smooth = kfs_res$F_smooth, P_smooth = kfs_res$P_smooth)
+}
+
 #' Estimate a Dynamic Factor Model
 #'
 #' Efficient estimation of a Dynamic Factor Model via the EM Algorithm - on stationary data
@@ -16,6 +53,7 @@
 #' @param p integer. Number of lags in factor VAR.
 #' @param \dots (optional) arguments to \code{\link{tsnarmimp}}. The default settings impute internal missing values with a cubic spline and the edges with the median and a 3-period moving average.
 #' @param idio.ar1 logical. Model observation errors as AR(1) processes: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. \emph{Note} that this substantially increases computation time, and is generally not needed if \code{n} is large (>30). See theoretical vignette for details.
+#' @param save.full.state logical. Save full state-space matrices and smoothed states in \code{ss_full}? Set to \code{FALSE} to reduce object size.
 #' @param quarterly.vars character. Names of quarterly variables in \code{X} (if any). Monthly variables should be to the left of the quarterly variables in the data matrix and quarterly observations should be provided every 3rd period.
 #' @param rQ character. Restrictions on the state (transition) covariance matrix (Q).
 #' @param rR character. Restrictions on the observation (measurement) covariance matrix (R).
@@ -100,7 +138,7 @@
 #'  \item{\code{C}}{\eqn{n \times r}{n x r} observation matrix.}
 #'  \item{\code{Q}}{\eqn{r \times r}{r x r} state (error) covariance matrix.}
 #'  \item{\code{R}}{\eqn{n \times n}{n x n} observation (error) covariance matrix.}
-#'  \item{\code{ss_full}}{list of full state-space matrices and full-state smoothing results used internally (\code{A}, \code{C}, \code{Q}, \code{R}, \code{F_0}, \code{P_0}, \code{F_smooth}, \code{P_smooth}).}
+#'  \item{\code{ss_full}}{list of full state-space matrices and full-state smoothing results used internally (\code{A}, \code{C}, \code{Q}, \code{R}, \code{F_0}, \code{P_0}, \code{F_smooth}, \code{P_smooth}). Only stored when \code{save.full.state = TRUE}.}
 #'  \item{\code{e}}{\eqn{T \times n}{T x n} estimates of observation errors \eqn{\textbf{e}_t}{e(t)}. Only available if \code{idio.ar1 = TRUE}.}
 #'  \item{\code{rho}}{\eqn{n \times 1}{n x 1} estimates of AR(1) coefficients (\eqn{\rho}{rho}) in observation errors: \eqn{e_t = \rho e_{t-1} + v_t}{e(t) = rho e(t-1) + v(t)}. Only available if \code{idio.ar1 = TRUE}.}
 #'  \item{\code{loglik}}{vector of log-likelihoods - one for each EM iteration. The final value corresponds to the log-likelihood of the reported model.}
@@ -244,7 +282,8 @@ DFM <- function(X, r, p = 1L, ...,
                 max.iter = 100L,
                 tol = 1e-4,
                 pos.corr = TRUE,
-                check.increased = FALSE) {
+                check.increased = FALSE,
+                save.full.state = TRUE) {
 
   # Strict checking of inputs: as demanded by rOpenSci
   #' @srrstats {G2.1} *Implement assertions on types of inputs (see the initial point on nomenclature above).*
@@ -272,8 +311,9 @@ DFM <- function(X, r, p = 1L, ...,
   rQi <- switch(tolower(rQ[1L]), identity = 0L, diagonal = 1L, none = 2L, stop("Unknown rQ option:", rQ[1L]))
   #' @srrstats {G2.0} *Implement assertions on lengths of inputs, particularly through asserting that inputs expected to be single- or multi-valued are indeed so.*
   #' @srrstats {G2.0a} Provide explicit secondary documentation of any expectations on lengths of inputs
-  if(sum(length(r), length(p), length(idio.ar1), length(min.iter), length(max.iter), length(tol), length(pos.corr), length(check.increased)) != 8L)
-    stop("Parameters r, p, idio.ar1, min.iter, max.iter, tol, pos.corr and check.increased need to be length 1")
+  if(sum(length(r), length(p), length(idio.ar1), length(min.iter), length(max.iter), length(tol),
+         length(pos.corr), length(check.increased), length(save.full.state)) != 9L)
+    stop("Parameters r, p, idio.ar1, min.iter, max.iter, tol, pos.corr, check.increased and save.full.state need to be length 1")
   if(!is.numeric(r) || r <= 0L) stop("r needs to be integer > 0")
   if(!is.integer(r)) r <- as.integer(r)
   if(!is.numeric(p) || p <= 0L) stop("p needs to be integer > 0")
@@ -284,6 +324,7 @@ DFM <- function(X, r, p = 1L, ...,
   if(!is.integer(max.iter)) max.iter <- as.integer(max.iter)
   if(!is.numeric(tol) || tol <= 0) stop("tol needs to be numeric > 0")
   if(!is.logical(idio.ar1) || is.na(idio.ar1)) stop("idio.ar1 needs to be logical")
+  if(!is.logical(save.full.state) || is.na(save.full.state)) stop("save.full.state needs to be logical")
   if(!is.logical(pos.corr) || is.na(pos.corr)) stop("pos.corr needs to be logical")
   if(!is.logical(check.increased) || is.na(check.increased)) stop("check.increased needs to be logical")
   if(!is.null(quarterly.vars) && !is.character(quarterly.vars)) stop("quarterly.vars needs to be a character vector with the names of quarterly variables in X")
@@ -472,14 +513,14 @@ DFM <- function(X, r, p = 1L, ...,
       } else res <- X - F_kal %*% beta
       R <- if(rRi == 2L) cov(res, use = "pairwise.complete.obs") else diag(fvar(res, na.rm = TRUE))
     } else R <- diag(n)
+    ss_full <- dfm_build_ss_full_none(save.full.state, idio.ar1, MFl, init, var, beta, Q, R, r, p, n, kfs_res)
+
     final_object <- c(object_init[1:6],
                       list(A = setDimnames(t(var$A), lagnam(fnam, p)), # A[sr, , drop = FALSE],
                            C = setDimnames(t(beta), list(Xnam, fnam)), # C[, sr, drop = FALSE],
                            Q = setDimnames(Q, list(unam, unam)),       # Q[sr, sr, drop = FALSE],
                            R = setDimnames(R, list(Xnam, Xnam)),
-                           ss_full = list(A = init$A, C = init$C, Q = init$Q,
-                                          R = init$R, F_0 = init$F_0, P_0 = init$P_0,
-                                          F_smooth = kfs_res$F_smooth, P_smooth = kfs_res$P_smooth),
+                           ss_full = ss_full,
                       e = if(idio.ar1) setColnames(e, Xnam) else NULL,
                       rho = if(idio.ar1) setNames(res_AC1, Xnam) else NULL),
                       object_init[-(1:6)])
@@ -596,6 +637,12 @@ DFM <- function(X, r, p = 1L, ...,
   F_0_full <- if(!is.null(em_res$F_0)) em_res$F_0 else F_0
   P_0_full <- if(!is.null(em_res$P_0)) em_res$P_0 else P_0
 
+  ss_full <- if(isTRUE(save.full.state)) {
+    list(A = A_full, C = C_full, Q = Q_full, R = R_full,
+         F_0 = F_0_full, P_0 = P_0_full,
+         F_smooth = kfs_res$F_smooth, P_smooth = kfs_res$P_smooth)
+  } else NULL
+
   final_object <- c(object_init[1:6],
                list(F_qml = setColnames(kfs_res$F_smooth[, sr, drop = FALSE], fnam),
                     P_qml = setDimnames(kfs_res$P_smooth[sr, sr,, drop = FALSE], list(fnam, fnam, NULL)),
@@ -603,9 +650,7 @@ DFM <- function(X, r, p = 1L, ...,
                     C = setDimnames(em_res$C[, sr, drop = FALSE], list(Xnam, fnam)),
                     Q = setDimnames(em_res$Q[sr, sr, drop = FALSE], list(unam, unam)),
                     R = setDimnames(R_out, list(Xnam, Xnam)),
-                    ss_full = list(A = A_full, C = C_full, Q = Q_full,
-                                   R = R_full, F_0 = F_0_full, P_0 = P_0_full,
-                                   F_smooth = kfs_res$F_smooth, P_smooth = kfs_res$P_smooth),
+                    ss_full = ss_full,
                     e = if(idio.ar1) setColnames(e_out, Xnam) else NULL,
                     rho = if(idio.ar1) setNames(rho_out, Xnam) else NULL,
                     loglik = if(num_iter == max.iter) loglik_all else loglik_all[seq_len(num_iter)],

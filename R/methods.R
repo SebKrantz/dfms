@@ -362,8 +362,19 @@ as.data.frame.dfm <- function(x, ...,
   return(res)
 }
 
-predict_dfm_core <- function(object, method) {
-  Fa <- switch(tolower(method),
+predict_dfm_core <- function(object, method, use.full.state = TRUE) {
+  method <- tolower(method)
+  if(isTRUE(use.full.state) && method != "pca" && length(object$ss_full)) {
+    ss_full <- object$ss_full
+    if(!is.null(ss_full) && !is.null(ss_full$C) && !is.null(ss_full$F_smooth)) {
+      if(nrow(ss_full$F_smooth) == nrow(object$X_imp) && nrow(ss_full$C) == ncol(object$X_imp)) {
+        res <- tcrossprod(ss_full$F_smooth, ss_full$C)
+        dimnames(res) <- dimnames(object$X_imp)
+        return(res)
+      }
+    }
+  }
+  Fa <- switch(method,
                pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
                stop("Unkown method", method))
   if(is.null(object$quarterly.vars)) return(tcrossprod(Fa, object$C))
@@ -388,6 +399,7 @@ predict_dfm_core <- function(object, method) {
 #' @param orig.format logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals/fitted values on the original data scale.
 #' @param na.keep logical. \code{TRUE} inserts missing values where \code{X} is missing (default \code{TRUE} as residuals/fitted values are only defined for observed data). \code{FALSE} returns the raw prediction, which can be used to interpolate data based on the DFM. For residuals, \code{FALSE} returns the difference between the prediction and the initial imputed version of \code{X} use for PCA to initialize the Kalman Filter.
+#' @param use.full.state logical. Use the full state-space (if available) for fitted values and residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.
 #' @param \dots not used.
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
@@ -414,10 +426,11 @@ residuals.dfm <- function(object,
                           method = switch(object$em.method, none = "2s", "qml"),
                           orig.format = FALSE,
                           standardized = FALSE,
-                          na.keep = TRUE, ...) {
+                          na.keep = TRUE,
+                          use.full.state = TRUE, ...) {
   X <- object$X_imp
   if(!(standardized && length(object[["e"]]))) {
-    X_pred <- predict_dfm_core(object, method)
+    X_pred <- predict_dfm_core(object, method, use.full.state = use.full.state)
     if(!standardized) {  # TODO: What if AR(1) resid available?
       stats <- attr(X, "stats")
       X_pred <- unscale(X_pred, stats)
@@ -439,9 +452,10 @@ fitted.dfm <- function(object,
                        method = switch(object$em.method, none = "2s", "qml"),
                        orig.format = FALSE,
                        standardized = FALSE,
-                       na.keep = TRUE, ...) {
+                       na.keep = TRUE,
+                       use.full.state = TRUE, ...) {
   X <- object$X_imp
-  res <- predict_dfm_core(object, method)
+  res <- predict_dfm_core(object, method, use.full.state = use.full.state)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
   if(na.keep && object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
@@ -919,6 +933,7 @@ as.data.frame.dfm.news_list <- function(x, ...) {
 #' @param h integer. The forecast horizon.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param standardized logical. \code{FALSE} will return data forecasts on the original scale.
+#' @param use.full.state logical. Use the full state-space (if available) when computing residuals for optional residual forecasting. Falls back to the compact form if unavailable or if \code{method = "pca"}.
 #' @param resFUN an (optional) function to compute a univariate forecast of the residuals.
 #' The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector of forecasts. See Examples.
 #' @param resAC numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.
@@ -972,45 +987,68 @@ predict.dfm <- function(object,
                         h = 10L,
                         method = switch(object$em.method, none = "2s", "qml"),
                         standardized = TRUE,
+                        use.full.state = TRUE,
                         resFUN = NULL,
                         resAC = 0.1, ...) {
-
-  Fa <- switch(tolower(method),
+  method <- tolower(method)
+  X <- object$X_imp
+  Fa <- switch(method,
               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
-  nf <- dim(Fa)[2L]
-  C <- object$C
-  ny <- dim(C)[1L]
-  A <- object$A
-  r <- dim(A)[1L]
-  p <- dim(A)[2L] / r
-  X <- object$X_imp
 
-  F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
-  X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+  ss_full <- if(isTRUE(use.full.state) && method != "pca") object$ss_full else NULL
+  use_state_forecast <- !is.null(ss_full) &&
+    !is.null(ss_full$A) && !is.null(ss_full$C) && !is.null(ss_full$F_smooth)
 
-  # DFM forecasting loop
-  if(is.null(object$quarterly.vars)) {
-    F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
-    for (i in seq_len(h)) {
-      F_reg <- ftail(F_last, p)
-      F_fc[i, ] <- tmp <- A %*% vec(t(F_reg)[, p:1, drop = FALSE])
-      dim(tmp) <- NULL
-      X_fc[i, ] <- C %*% tmp
-      F_last <- rbind(F_reg, tmp)
+  if(use_state_forecast) {
+    A_full <- ss_full$A
+    C_full <- ss_full$C
+    F_last <- drop(ftail(ss_full$F_smooth, 1L))
+    state_dim <- ncol(ss_full$F_smooth)
+    r <- nrow(object$A)
+    ny <- nrow(C_full)
+
+    F_fc <- matrix(NA_real_, nrow = h, ncol = r)
+    X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+    for(i in seq_len(h)) {
+      F_last <- drop(A_full %*% F_last)
+      F_fc[i, ] <- F_last[seq_len(r)]
+      X_fc[i, ] <- C_full %*% F_last
     }
   } else {
-    F_last <- ftail(Fa, max(p, 5))
-    qind <- ckmatch(object$quarterly.vars, dimnames(X)[[2L]])
-    Cq_lags <- object$C[qind, rep(1:ncol(Fa), each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), ncol(Fa))
-    # Mixed frequency forecasting loop
-    for (i in seq_len(h)) {
-      F_reg <- ftailrev(F_last, p)
-      F_fc[i, ] <- tmp <- A %*% vec(t(F_reg))
-      dim(tmp) <- NULL
-      X_fc[i, -qind] <- C[-qind,, drop = FALSE] %*% tmp
-      F_last <- rbind(F_last, tmp)
-      X_fc[i, qind] <- Cq_lags %*% vec(ftailrev(F_last, 5))
+    nf <- dim(Fa)[2L]
+    C <- object$C
+    ny <- dim(C)[1L]
+    A <- object$A
+    r <- dim(A)[1L]
+    p <- dim(A)[2L] / r
+
+    F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
+    X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+
+    # DFM forecasting loop
+    if(is.null(object$quarterly.vars)) {
+      F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
+      for (i in seq_len(h)) {
+        F_reg <- ftail(F_last, p)
+        F_fc[i, ] <- tmp <- A %*% vec(t(F_reg)[, p:1, drop = FALSE])
+        dim(tmp) <- NULL
+        X_fc[i, ] <- C %*% tmp
+        F_last <- rbind(F_reg, tmp)
+      }
+    } else {
+      F_last <- ftail(Fa, max(p, 5))
+      qind <- ckmatch(object$quarterly.vars, dimnames(X)[[2L]])
+      Cq_lags <- object$C[qind, rep(seq_len(ncol(Fa)), each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), ncol(Fa))
+      # Mixed frequency forecasting loop
+      for (i in seq_len(h)) {
+        F_reg <- ftailrev(F_last, p)
+        F_fc[i, ] <- tmp <- A %*% vec(t(F_reg))
+        dim(tmp) <- NULL
+        X_fc[i, -qind] <- C[-qind,, drop = FALSE] %*% tmp
+        F_last <- rbind(F_last, tmp)
+        X_fc[i, qind] <- Cq_lags %*% vec(ftailrev(F_last, 5))
+      }
     }
   }
 
@@ -1020,12 +1058,13 @@ predict.dfm <- function(object,
     if(!is.function(resFUN)) stop("resFUN needs to be a forecasting function with second argument h that produces a numeric h-step ahead forecast of a univariate time series")
     # If X is a multivariate time series object for which the univariate forecasting function could have methods.
     ofl <- !attr(X, "is.list") && length(attr(X, "attributes")[["class"]])
-    rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE, na.keep = FALSE) # TODO: What about missing values??
+    rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE, na.keep = FALSE,
+                      use.full.state = use.full.state) # TODO: What about missing values??
     if(ofl && length(object$rm.rows)) rsid <- rsid[-object$rm.rows, , drop = FALSE]
     ACF <- AC1(rsid, object$anyNA)
     fcr <- which(abs(ACF) >= abs(resAC)) # TODO: Check length of forecast??
     for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(rsid[, i], h, ...))
-  } else if(!is.null(res <- object[["e"]])) {
+  } else if(!is.null(res <- object[["e"]]) && !use_state_forecast) {
     rho <- object$rho
     last_res <- res[nrow(res), ]
     for (i in seq_len(h)) {
