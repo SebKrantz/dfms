@@ -108,10 +108,6 @@ dfm_news_stats <- function(X) {
   list(Mx = stats[, "Mean"], Wx = stats[, "SD"])
 }
 
-dfm_news_unscale_vec <- function(x, Mx, Wx) {
-  x * Wx + Mx
-}
-
 dfm_news_scale <- function(X, stats) {
   if(is.null(stats)) stop("stats are required to scale X")
   class(stats) <- NULL

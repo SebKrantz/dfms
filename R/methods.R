@@ -667,8 +667,8 @@ news.dfm <- function(object,
       y_old <- Res_old$X_sm[t_fcst, v_news]
       y_new <- X_new[t_fcst, v_news]
       if(!standardized) {
-        y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
-        y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
+        y_old <- y_old * Wx[v_news] + Mx[v_news]
+        y_new <- y_new * Wx[v_news] + Mx[v_news]
       }
 
       na_vec <- rep(NA_real_, n)
@@ -693,8 +693,8 @@ news.dfm <- function(object,
       y_old <- Res_old$X_sm[t_fcst, v_news]
       y_new <- Res_new$X_sm[t_fcst, v_news]
       if(!standardized) {
-        y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
-        y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
+        y_old <- y_old * Wx[v_news] + Mx[v_news]
+        y_new <- y_new * Wx[v_news] + Mx[v_news]
       }
       na_vec <- rep(NA_real_, n)
       gain <- gain_std <- impact <- news <- numeric(n)
@@ -714,8 +714,8 @@ news.dfm <- function(object,
     y_old <- Res_old$X_sm[t_fcst, v_news]
     y_new <- Res_new$X_sm[t_fcst, v_news]
     if(!standardized) {
-      y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
-      y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
+      y_old <- y_old * Wx[v_news] + Mx[v_news]
+      y_new <- y_new * Wx[v_news] + Mx[v_news]
     }
 
     # Compute gain using pre-computed P1_P2inv (standardized innovations)
@@ -729,8 +729,8 @@ news.dfm <- function(object,
       actual_i <- X_new[t_miss[i], v]
       forecast_i <- Res_old$X_sm[t_miss[i], v]
       if(!standardized) {
-        actual_i <- dfm_news_unscale_vec(actual_i, Mx[v], Wx[v])
-        forecast_i <- dfm_news_unscale_vec(forecast_i, Mx[v], Wx[v])
+        actual_i <- actual_i * Wx[v] + Mx[v]
+        forecast_i <- forecast_i * Wx[v] + Mx[v]
       }
       actual[v] <- actual_i
       forecast[v] <- forecast_i
