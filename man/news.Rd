@@ -68,10 +68,13 @@ For a single target, a \code{dfm.news} object with elements:
 \item \code{series}: series name.
 \item \code{actual}: actual release (if any).
 \item \code{forecast}: old-vintage forecast of the release.
-\item \code{news}: total innovation for the series.
-\item \code{gain}: news weight on the data scale.
-\item \code{gain_std}: standardized gain.
-\item \code{impact}: contribution to the target revision.
+\item \code{news}: total innovation for the series on the output scale. If there is a
+single release, \code{news} equals \code{actual - forecast}. With multiple releases,
+\code{news} aggregates those innovations for the series.
+\item \code{gain}: effective weight on \code{news} such that \code{impact = news * gain}
+(on the output scale).
+\item \code{gain_std}: effective weight on the standardized innovations.
+\item \code{impact}: contribution of the series to the target revision.
 }
 }
 If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
