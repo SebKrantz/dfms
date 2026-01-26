@@ -12,9 +12,10 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     T, N = size(x);
     NM = N - NQ
     # Eigenval decomp of cov(x) = VDV', only r largest evals
+    # Note: Julia eigen() returns eigenvalues in ascending order, so we need the last r
     eig = eigen(cov(x));
-    d = eig.values[1:r]; 
-    v = eig.vectors[:, 1:r];
+    d = eig.values[end-r+1:end];
+    v = eig.vectors[:, end-r+1:end];
     
     # Observation equation   
     C = [v zeros(N,r*(pC-1))];
@@ -22,7 +23,7 @@ function InitCond(xNaN, r, p, optNaN, Rcon, q, NQ) # Rcon is R_mat, NQ is nQ
     # Static predictions
     f = x * v;
 
-    ff = zeros(T-rC+1, 0);
+    ff = zeros(T-rC+1, 0); # T-rC?
     for kk = 0:rC-1
         ff = [ff f[rC-kk:end-kk,:]]; # Matrix of lagged factors
     end
@@ -115,7 +116,7 @@ function EMstep(y, A, C, Q, R, Z_0, V_0, r, p, R_mat, q, nQ)
     
     A_new[1:r, 1:rp] = EZZ_FB[1:r, 1:rp] * inv(EZZ_BB[1:rp, 1:rp])
     Q_new[1:r, 1:r] = (EZZ[1:r, 1:r] - A_new[1:r, 1:rp] * EZZ_FB[1:r, 1:rp]') / T
-    Q_new[rpC+1:rpC+nQ, rpC+1:rpC+nQ] = Diagonal(diag(Zsmooth[rpC+1:rpC+nQ, 2:end] * Zsmooth[rpC+1:rpC+nQ, 2:end]' + dropdims(sum(Vsmooth[rpC+1:rpC+nQ, rpC+1:rpC+nQ, 2:end], dims=3), dims = 3)) / T)
+    Q_new[rpC+1:rpC+nQ, rpC+1:rpC+nQ] = Diagonal(diag(Zsmooth[rpC+1:rpC+nQ, 2:end] * Zsmooth[rpC+1:rpC+nQ, 2:end]' + dropdims(sum(Vsmooth[rpC+1:rpC+nQ, rpC+1:rpC+nQ, 2:end], dims=3), dims = 3))) / T
     
     Z_0 = Zsmooth[:, 1]
     V_0 = zeros(length(Z_0), length(Z_0))
@@ -147,7 +148,7 @@ function EMstep(y, A, C, Q, R, Z_0, V_0, r, p, R_mat, q, nQ)
         nom = zeros(1, rC)
     
         for t=1:T
-            denom += !nanY[i,t] * (Zsmooth[1:rC, t+1]*Zsmooth[1:rC, t+1]' + Vsmooth[1:rC, 1:rC, t+1])
+            denom += Real(!nanY[i,t]) * (Zsmooth[1:rC, t+1]*Zsmooth[1:rC, t+1]' + Vsmooth[1:rC, 1:rC, t+1])
             nom += y[i, t]*Zsmooth[1:rC, t+1]'
         end
     

@@ -362,8 +362,19 @@ as.data.frame.dfm <- function(x, ...,
   return(res)
 }
 
-predict_dfm_core <- function(object, method) {
-  Fa <- switch(tolower(method),
+predict_dfm_core <- function(object, method, use.full.state = TRUE) {
+  method <- tolower(method)
+  if(isTRUE(use.full.state) && method != "pca" && length(object$ss_full)) {
+    ss_full <- object$ss_full
+    if(!is.null(ss_full) && !is.null(ss_full$C) && !is.null(ss_full$F_smooth)) {
+      if(nrow(ss_full$F_smooth) == nrow(object$X_imp) && nrow(ss_full$C) == ncol(object$X_imp)) {
+        res <- tcrossprod(ss_full$F_smooth, ss_full$C)
+        dimnames(res) <- dimnames(object$X_imp)
+        return(res)
+      }
+    }
+  }
+  Fa <- switch(method,
                pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
                stop("Unkown method", method))
   if(is.null(object$quarterly.vars)) return(tcrossprod(Fa, object$C))
@@ -388,6 +399,7 @@ predict_dfm_core <- function(object, method) {
 #' @param orig.format logical. \code{TRUE} returns residuals/fitted values in a data format similar to \code{X}.
 #' @param standardized logical. \code{FALSE} will put residuals/fitted values on the original data scale.
 #' @param na.keep logical. \code{TRUE} inserts missing values where \code{X} is missing (default \code{TRUE} as residuals/fitted values are only defined for observed data). \code{FALSE} returns the raw prediction, which can be used to interpolate data based on the DFM. For residuals, \code{FALSE} returns the difference between the prediction and the initial imputed version of \code{X} use for PCA to initialize the Kalman Filter.
+#' @param use.full.state logical. Use the full state-space (if available) for fitted values and residuals. This includes idiosyncratic state components when \code{idio.ar1 = TRUE}, so fitted values reflect the full observation equation and residuals measure what is left after both factor and idiosyncratic components. Set to \code{FALSE} to obtain factor-only fitted values and residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.
 #' @param \dots not used.
 #'
 #' @return A matrix of DFM residuals or fitted values. If \code{orig.format = TRUE} the format may be different, e.g. a data frame.
@@ -414,10 +426,11 @@ residuals.dfm <- function(object,
                           method = switch(object$em.method, none = "2s", "qml"),
                           orig.format = FALSE,
                           standardized = FALSE,
-                          na.keep = TRUE, ...) {
+                          na.keep = TRUE,
+                          use.full.state = TRUE, ...) {
   X <- object$X_imp
   if(!(standardized && length(object[["e"]]))) {
-    X_pred <- predict_dfm_core(object, method)
+    X_pred <- predict_dfm_core(object, method, use.full.state = use.full.state)
     if(!standardized) {  # TODO: What if AR(1) resid available?
       stats <- attr(X, "stats")
       X_pred <- unscale(X_pred, stats)
@@ -439,9 +452,10 @@ fitted.dfm <- function(object,
                        method = switch(object$em.method, none = "2s", "qml"),
                        orig.format = FALSE,
                        standardized = FALSE,
-                       na.keep = TRUE, ...) {
+                       na.keep = TRUE,
+                       use.full.state = TRUE, ...) {
   X <- object$X_imp
-  res <- predict_dfm_core(object, method)
+  res <- predict_dfm_core(object, method, use.full.state = use.full.state)
   if(!standardized) res <- unscale(res, attr(X, "stats"))
   if(na.keep && object$anyNA) res[attr(X, "missing")] <- NA
   if(orig.format) {
@@ -478,39 +492,92 @@ fitted.dfm <- function(object,
 #' innovations and gains are computed on a consistent scale. Set
 #' \code{standardized = FALSE} to report results on the original data scale.
 #'
-#' @note If the model was estimated with \code{max.missing < 1} and
+#' @note This implementation is translated from the original MATLAB codes and is
+#' consistent with the BM2014 news decomposition formulas.
+#' If the model was estimated with \code{max.missing < 1} and
 #' \code{na.rm.method = "LE"} in \code{\link{tsnarmimp}} (called by \code{DFM()}), leading or trailing rows with many missing values
 #' may be removed by \code{DFM()}. If old and new vintages are both dfm objects, and they drop different rows,
 #' then \code{t.fcst} can become out of bounds. When \code{comparison} is provided
 #' as raw data, \code{news()} drops \code{object$rm.rows} from the new dataset (if present) and
 #' forces \code{max.missing = 1} for the re-estimation call to keep row alignment.
-#' To avoid issues, use consistent ragged-edge patterns across vintages or estimate both vintages with \code{max.missing = 1}.
+#' To avoid issues, estimate both vintages with \code{max.missing = 1}.
+#' For mixed-frequency or idiosyncratic AR(1) models, \code{news()} relies on the full
+#' state-space matrices stored in \code{dfm$ss_full}.
 #'
 #' @param object a \code{dfm} object for the old vintage.
 #' @param comparison a \code{dfm} object or a new dataset for the updated vintage.
 #' @param t.fcst integer. Forecast target time index.
 #' @param target.vars Integer or character identifying target variables. Defaults to all variables.
-#' @param groups,series optional character vectors for grouping and naming variables.
+#' @param series optional character vector for naming variables.
 #' @param standardized logical. Return results on standardized scale?
 #' @param \dots not used.
-#' @return For a single target, a \code{dfm.news} object with elements:
+#' @return For a single target, a \code{dfm_news} object with elements:
 #' \itemize{
 #' \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 #' \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
-#' \item \code{groupnews}: named vector of news contributions aggregated by group.
-#' \item \code{singlenews}: named vector of news contributions by series.
-#' \item \code{gain}: named news weights for each new release.
-#' \item \code{gain_scaled}: scaled gain for each new release (matches the data scale).
-#' \item \code{actual}: actual values for the new releases.
-#' \item \code{forecasts}: old forecasts for the new releases.
+#' \item \code{news_df}: data frame with one row per series and columns:
+#' \itemize{
+#' \item \code{series}: series name.
+#' \item \code{actual}: actual release (if any).
+#' \item \code{forecast}: old-vintage forecast of the release.
+#' \item \code{news}: total innovation for the series on the output scale. If there is a
+#' single release, \code{news} equals \code{actual - forecast}. With multiple releases,
+#' \code{news} aggregates those innovations for the series.
+#' \item \code{gain}: effective weight on \code{news} such that \code{impact = news * gain}
+#' (on the output scale).
+#' \item \code{gain_std}: effective weight on the standardized innovations.
+#' \item \code{impact}: contribution of the series to the target revision.
 #' }
-#' If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
-#' where each element is a \code{dfm.news} object and list names correspond to targets.
+#' }
+#' If \code{target.vars} selects multiple targets, a \code{dfm_news_list} object is returned,
+#' where each element is a \code{dfm_news} object and list names correspond to targets.
 #'
 #' @references
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor
-#' models on datasets with arbitrary pattern of missing data. Journal of Applied
-#' Econometrics, 29(1), 133-160.
+#' models on datasets with arbitrary pattern of missing data.
+#' *Journal of Applied Econometrics, 29*(1), 133-160.
+#'
+#' @examples \donttest{
+#' # (1) Monthly DFM example
+#' X <- collapse::qM(BM14_M)[, BM14_Models$medium[BM14_Models$freq == "M"]]
+#' X_old <- X
+#' # Creating earlier vintage
+#' X_old[nrow(X) - 1, sample(which(is.finite(X[nrow(X) - 1, ]) & is.na(X[nrow(X), ])), 5)] <- NA
+#' X_old[nrow(X), sample(which(is.finite(X[nrow(X), ])), 5)] <- NA
+#' # Estimating DFM
+#' dfm <- DFM(X_old, r = 2, p = 2, em.method = "none")
+#' # News computation (second DFM fit internally with same settings and rows)
+#' res <- news(dfm, X, target.vars = c("ip_tot_cstr", "orders", "urx"))
+#' # See results
+#' print(res)
+#' head(res$news_df)
+#'
+#' # (2) MQ nowcast of GDP (idio.ar1 = FALSE for speed)
+#' library(magrittr)
+#' library(xts)
+#' # Creating MQ dataset
+#' BM14 <- merge(BM14_M, BM14_Q)
+#' BM14[, BM14_Models$log_trans] %<>% log()
+#' BM14[, BM14_Models$freq == "M"] %<>% diff()
+#' BM14[, BM14_Models$freq == "Q"] %<>% diff(3)
+#' X <- BM14[-1, BM14_Models$small]
+#' quarterly.vars <- BM14_Models$series[BM14_Models$small & BM14_Models$freq == "Q"]
+#' # Creating earlier vintage
+#' X_old <- X
+#' X_old[355, "ip_tot_cstr"] <- NA
+#' X_old[355, "new_cars"] <- NA
+#' X_old[356, "new_cars"] <- NA
+#' X_old[356, "pms_pmi"] <- NA
+#' X_old[356, "euro325"] <- NA
+#' X_old[356, "capacity"] <- NA
+#' # Estimating DFM
+#' dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars, max.missing = 1)
+#' # News computation (second DFM fit internally with same settings and rows)
+#' res_mq <- news(dfm, X, t.fcst = 356, target.vars = "gdp")
+#' # See results
+#' print(res_mq)
+#' head(res_mq$news_df)
+#' }
 #'
 #' @export
 news <- function(object, ...) UseMethod("news")
@@ -520,9 +587,8 @@ news <- function(object, ...) UseMethod("news")
 #' @export
 news.dfm <- function(object,
                      comparison,
-                     t.fcst,
+                     t.fcst = nrow(object$X_imp),
                      target.vars = NULL,
-                     groups = NULL,
                      series = NULL,
                      standardized = FALSE, ...) {
   if(inherits(comparison, "dfm")) {
@@ -549,8 +615,7 @@ news.dfm <- function(object,
   if(nrow(X_old) != nrow(X_new) || ncol(X_old) != ncol(X_new)) {
     stop("dfm objects have incompatible data dimensions")
   }
-  if(!is.null(colnames(X_old)) && !is.null(colnames(X_new)) &&
-     any(colnames(X_old) != colnames(X_new))) {
+  if(!is.null(colnames(X_old)) && !is.null(colnames(X_new)) && any(colnames(X_old) != colnames(X_new))) {
     stop("dfm objects have different variable ordering")
   }
 
@@ -558,17 +623,6 @@ news.dfm <- function(object,
   t_fcst <- as.integer(t.fcst)
   if(t_fcst < 1L || t_fcst > nrow(X_old)) stop("t.fcst is out of bounds")
 
-  resolve_vars <- function(target.vars, n, names) {
-    if(is.null(target.vars)) return(seq_len(n))
-    if(is.character(target.vars)) {
-      if(is.null(names)) stop("target.vars is a name but data have no column names")
-      return(as.integer(ckmatch(target.vars, names, e = "Unknown target.vars:")))
-    }
-    if(!is.numeric(target.vars)) stop("target.vars must be NULL, numeric indices, or names")
-    target.vars <- as.integer(target.vars)
-    if(any(target.vars < 1L | target.vars > n)) stop("target.vars is out of bounds")
-    unique(target.vars)
-  }
   vars_idx <- resolve_vars(target.vars, ncol(X_old), colnames(X_old))
 
   r_old <- nrow(object$A)
@@ -580,164 +634,214 @@ news.dfm <- function(object,
   if(r_old != r || p_old != p) stop("dfm objects have incompatible r or p")
 
   n <- ncol(X_old)
-  series <- if(is.null(series)) colnames(X_old) else series
+  if(is.null(series)) series <- colnames(X_old)
   if(is.null(series)) series <- paste0("Series", seq_len(n))
   if(length(series) != n) stop("series must have length equal to the number of variables")
-
-  groups <- if(is.null(groups)) series else groups
-  if(length(groups) != n) stop("groups must have length equal to the number of variables")
-  gList <- unique(groups)
 
   stats <- dfm_news_stats(dfm_new$X_imp)
   Mx <- stats$Mx
   Wx <- stats$Wx
   scale_vec <- if(standardized) rep(1, n) else Wx
 
-  A <- dfm_new$A
-  C <- dfm_new$C
-  Q <- dfm_new$Q
-  R <- dfm_new$R
+  # Detect model type: MQ and/or AR1
+  quarterly.vars <- dfm_new$quarterly.vars
+  idio.ar1 <- !is.null(dfm_new$rho)
+  state <- dfm_news_state(dfm_new, require_full = length(quarterly.vars) || idio.ar1)
 
+  # Compute releases ONCE (shared across all targets)
+  rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
+  n_news <- nrow(rel)
+
+  # Pre-compute KFS results and shared matrices
+  if(n_news > 0L) {
+    t_miss <- rel[, 1L]
+    v_miss <- rel[, 2L]
+    lag <- t_fcst - t_miss
+    k <- as.integer(max(c(abs(lag), max(lag) - min(lag))))
+
+    Res_old <- dfm_news_kfs(X_old, state, k)
+    Res_new <- dfm_news_kfs(X_new, state, 0L)
+
+    # Pre-compute innovations
+    innov <- numeric(n_news)
+    for(i in seq_len(n_news)) {
+      innov[i] <- X_new[t_miss[i], v_miss[i]] - Res_old$X_sm[t_miss[i], v_miss[i]]
+    }
+
+    # Pre-compute P1 (r x n_news)
+    P <- Res_old$P
+    state_dim <- Res_old$state_dim
+    C_use <- Res_old$C
+    R_use <- Res_old$R
+    P1 <- matrix(0, state_dim, n_news)
+    for(i in seq_len(n_news)) {
+      h <- abs(t_fcst - t_miss[i])
+      m <- max(t_miss[i], t_fcst)
+      idx <- (h * state_dim + 1L):(h * state_dim + state_dim)
+      Pp <- matrix(P[1:state_dim, idx, m], state_dim, state_dim)
+      if(t_miss[i] > t_fcst) Pp <- t(Pp)
+      P1[, i] <- Pp %*% t(C_use[v_miss[i], , drop = FALSE])
+    }
+
+    # Pre-compute P2 with symmetry optimization (upper triangle only)
+    P2 <- matrix(0, n_news, n_news)
+    for(i in seq_len(n_news)) {
+      for(j in i:n_news) {
+        h <- abs(lag[i] - lag[j])
+        m <- max(t_miss[i], t_miss[j])
+        idx <- (h * state_dim + 1L):(h * state_dim + state_dim)
+        Pp <- matrix(P[1:state_dim, idx, m], state_dim, state_dim)
+        if(t_miss[j] > t_miss[i]) Pp <- t(Pp)
+        WW <- if(v_miss[i] == v_miss[j] && t_miss[i] != t_miss[j]) 0 else R_use[v_miss[i], v_miss[j]]
+        P2[i, j] <- drop(C_use[v_miss[i], , drop = FALSE] %*% Pp %*% t(C_use[v_miss[j], , drop = FALSE])) + WW
+      }
+    }
+    # Mirror to lower triangle (P2 is symmetric)
+    P2[lower.tri(P2)] <- t(P2)[lower.tri(P2)]
+
+    if(qr(P2)$rank < n_news) stop("P2 is singular; cannot compute news weights")
+
+    # Pre-compute P1 %*% solve(P2) for efficiency
+    P1_P2inv <- P1 %*% solve(P2)
+
+    # Pre-compute actual and forecasts (shared across targets)
+    actual <- forecast <- rep(NA_real_, n)
+    for(i in seq_len(n_news)) {
+      actual[v_miss[i]] <- X_new[t_miss[i], v_miss[i]]
+      forecast[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
+    }
+
+  } else {
+    # No new releases
+    Res_old <- dfm_news_kfs(X_old, state, 0L)
+    Res_new <- dfm_news_kfs(X_new, state, 0L)
+  }
+
+  # Inner function: now only computes target-specific outputs
   compute_news <- function(v_news) {
+    # Case 1: Target is directly observed in new data
     if(!is.na(X_new[t_fcst, v_news])) {
-    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
-    y_old <- Res_old$X_sm[t_fcst, v_news]
-    y_new <- X_new[t_fcst, v_news]
-    if(!standardized) {
-      y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
-      y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
-    }
-    temp <- y_new - y_old
-    singlenews <- setNames(numeric(n), series)
-    singlenews[v_news] <- temp
-    groupnews <- setNames(numeric(length(gList)), gList)
-    groupnews[match(groups[v_news], gList)] <- temp
-    return(list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-                singlenews = singlenews, gain = setNames(numeric(0L), character(0L)),
-                gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
-                forecasts = rep(NA_real_, n)))
+      y_old <- Res_old$X_sm[t_fcst, v_news]
+      y_new <- X_new[t_fcst, v_news]
+      if(!standardized) {
+        y_old <- y_old * Wx[v_news] + Mx[v_news]
+        y_new <- y_new * Wx[v_news] + Mx[v_news]
+      }
+
+      na_vec <- rep(NA_real_, n)
+      gain <- gain_std <- impact <- news <- numeric(n)
+      impact[v_news] <- news[v_news] <- y_new - y_old
+      gain[v_news] <- 1
+      gain_std[v_news] <- 1
+
+      return(list(y_old = y_old, y_new = y_new,
+                  news_df = data.frame(
+                    series = series,
+                    actual = na_vec,
+                    forecast = na_vec,
+                    news = news,
+                    gain = gain,
+                    gain_std = gain_std,
+                    impact = impact)))
     }
 
-    rel <- which(is.na(X_old) & !is.na(X_new), arr.ind = TRUE)
-    if(!nrow(rel)) {
-    Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, 0L)
-    Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
+    # Case 2: No new releases
+    if(n_news == 0L) {
+      y_old <- Res_old$X_sm[t_fcst, v_news]
+      y_new <- Res_new$X_sm[t_fcst, v_news]
+      if(!standardized) {
+        y_old <- y_old * Wx[v_news] + Mx[v_news]
+        y_new <- y_new * Wx[v_news] + Mx[v_news]
+      }
+      na_vec <- rep(NA_real_, n)
+      gain <- gain_std <- impact <- news <- numeric(n)
+
+      return(list(y_old = y_old, y_new = y_new,
+                  news_df = data.frame(
+                    series = series,
+                    actual = na_vec,
+                    forecast = na_vec,
+                    news = news,
+                    gain = gain,
+                    gain_std = gain_std,
+                    impact = impact)))
+    }
+
+    # Case 3: Main news decomposition (uses pre-computed P1_P2inv, innov)
     y_old <- Res_old$X_sm[t_fcst, v_news]
     y_new <- Res_new$X_sm[t_fcst, v_news]
     if(!standardized) {
-      y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
-      y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
-    }
-    return(list(y_old = y_old, y_new = y_new,
-                groupnews = setNames(numeric(length(gList)), gList),
-                singlenews = setNames(numeric(n), series),
-                gain = setNames(numeric(0L), character(0L)),
-                gain_scaled = rep(NA_real_, n), actual = rep(NA_real_, n),
-                forecasts = rep(NA_real_, n)))
+      y_old <- y_old * Wx[v_news] + Mx[v_news]
+      y_new <- y_new * Wx[v_news] + Mx[v_news]
     }
 
-  t_miss <- rel[, 1L]
-  v_miss <- rel[, 2L]
-  lag <- t_fcst - t_miss
-  k <- as.integer(max(c(abs(lag), max(lag) - min(lag))))
+    # Compute gain using pre-computed P1_P2inv (standardized innovations)
+    gain_std_release <- drop(scale_vec[v_news] * (C_use[v_news, , drop = FALSE] %*% P1_P2inv))
+    temp <- gain_std_release * innov
 
-  Res_old <- dfm_news_kfs(X_old, A, C, Q, R, r, p, k)
-  Res_new <- dfm_news_kfs(X_new, A, C, Q, R, r, p, 0L)
-
-  y_old <- Res_old$X_sm[t_fcst, v_news]
-  y_new <- Res_new$X_sm[t_fcst, v_news]
-  if(!standardized) {
-    y_old <- dfm_news_unscale_vec(y_old, Mx[v_news], Wx[v_news])
-    y_new <- dfm_news_unscale_vec(y_new, Mx[v_news], Wx[v_news])
-  }
-
-  n_news <- length(t_miss)
-  innov <- numeric(n_news)
-  for(i in seq_len(n_news)) {
-    innov[i] <- X_new[t_miss[i], v_miss[i]] - Res_old$X_sm[t_miss[i], v_miss[i]]
-  }
-
-  P <- Res_old$P
-  P1 <- matrix(0, r, n_news)
-  for(i in seq_len(n_news)) {
-    h <- abs(t_fcst - t_miss[i])
-    m <- max(t_miss[i], t_fcst)
-    idx <- (h * r + 1L):(h * r + r)
-    Pp <- P[1:r, idx, m, drop = FALSE]
-    if(t_miss[i] > t_fcst) Pp <- t(Pp)
-    P1[, i] <- Pp %*% t(C[v_miss[i], 1:r, drop = FALSE])
-  }
-
-  P2 <- matrix(0, n_news, n_news)
-  for(i in seq_len(n_news)) {
-    for(j in seq_len(n_news)) {
-      h <- abs(lag[i] - lag[j])
-      m <- max(t_miss[i], t_miss[j])
-      idx <- (h * r + 1L):(h * r + r)
-      Pp <- P[1:r, idx, m, drop = FALSE]
-      if(t_miss[j] > t_miss[i]) Pp <- t(Pp)
-      WW <- if(v_miss[i] == v_miss[j] && t_miss[i] != t_miss[j]) 0 else R[v_miss[i], v_miss[j]]
-      P2[i, j] <- drop(C[v_miss[i], 1:r, drop = FALSE] %*% Pp %*% t(C[v_miss[j], 1:r, drop = FALSE])) + WW
+    actual <- forecast <- rep(NA_real_, n)
+    impact <- news <- news_std <- numeric(n)
+    X_old_sm <- Res_old$X_sm
+    for(i in seq_len(n_news)) {
+      v <- v_miss[i]
+      actual_i <- X_new[t_miss[i], v]
+      forecast_i <- X_old_sm[t_miss[i], v]
+      if(!standardized) {
+        actual_i <- actual_i * Wx[v] + Mx[v]
+        forecast_i <- forecast_i * Wx[v] + Mx[v]
+      }
+      actual[v] <- actual_i
+      forecast[v] <- forecast_i
+      news_std[v] <- news_std[v] + innov[i]
+      news[v] <- news[v] + (actual_i - forecast_i)
+      impact[v] <- impact[v] + temp[i]
     }
-  }
-  if(qr(P2)$rank < n_news) stop("P2 is singular; cannot compute news weights")
 
-  gain <- drop(scale_vec[v_news] * (C[v_news, 1:r, drop = FALSE] %*% P1 %*% solve(P2)))
-  temp <- gain * innov
+    gain_out <- numeric(n)
+    nz <- news != 0
+    gain_out[nz] <- impact[nz] / news[nz]
 
-  singlenews <- setNames(numeric(n), series)
-  for(i in seq_len(n_news)) singlenews[v_miss[i]] <- singlenews[v_miss[i]] + temp[i]
+    gain_std <- numeric(n)
+    nz_std <- news_std != 0
+    gain_std[nz_std] <- impact[nz_std] / news_std[nz_std]
 
-  groupnews <- setNames(numeric(length(gList)), gList)
-  for(i in seq_along(gList)) {
-    idx <- groups[v_miss] == gList[i]
-    if(any(idx)) groupnews[i] <- sum(gain[idx] * innov[idx])
-  }
-
-  actual <- forecasts <- gain_scaled <- rep(NA_real_, n)
-  for(i in seq_len(n_news)) {
-    actual[v_miss[i]] <- X_new[t_miss[i], v_miss[i]]
-    forecasts[v_miss[i]] <- Res_old$X_sm[t_miss[i], v_miss[i]]
-    gain_scaled[v_miss[i]] <- if(standardized) gain[i] else gain[i] / Wx[v_miss[i]]
-  }
-  if(!standardized) {
-    actual <- dfm_news_unscale_vec(actual, Mx, Wx)
-    actual[is.na(actual)] <- NA_real_
-    forecasts <- dfm_news_unscale_vec(forecasts, Mx, Wx)
-    forecasts[is.na(forecasts)] <- NA_real_
-  }
-
-  idx <- !duplicated(v_miss)
-    gain <- gain[idx]
-    gainSer <- series[v_miss][idx]
-    names(gain) <- gainSer
-
-    list(y_old = y_old, y_new = y_new, groupnews = groupnews,
-         singlenews = singlenews, gain = gain, gain_scaled = gain_scaled,
-         actual = actual, forecasts = forecasts)
+    list(y_old = y_old,
+         y_new = y_new,
+         news_df = data.frame(
+           series = series,
+           actual = actual,
+           forecast = forecast,
+           news = news,
+           gain = gain_out,
+           gain_std = gain_std,
+           impact = impact))
   }
 
   res <- lapply(vars_idx, compute_news)
   if(length(vars_idx) == 1L) {
     res <- res[[1L]]
-    res$target.var <- vars_idx
+    res$target.var <- setNames(vars_idx, series[vars_idx])
     res$t.fcst <- t_fcst
     res$standardized <- standardized
-    class(res) <- "dfm.news"
+    class(res) <- "dfm_news"
     return(res)
   }
   if(!is.null(colnames(X_old))) names(res) <- colnames(X_old)[vars_idx]
-  attr(res, "target.vars") <- vars_idx
+  attr(res, "target.vars") <- setNames(vars_idx, series[vars_idx])
   attr(res, "t.fcst") <- t_fcst
   attr(res, "standardized") <- standardized
-  class(res) <- "dfm.news_list"
+  class(res) <- "dfm_news_list"
   res
 }
 
+#' @rdname news
+#' @param x an object of class 'dfm_news' or 'dfm_news_list'.
+#' @param digits integer. Number of digits to print.
+#' @param \dots not used.
 #' @export
-print.dfm.news <- function(x, digits = 4L, ...) {
+print.dfm_news <- function(x, digits = 4L, ...) {
   cat("DFM News\n")
-  cat("Target variable:", if(!is.null(names(x$singlenews))) names(x$singlenews)[x$target.var] else x$target.var, "\n")
+  cat("Target variable:", names(x$target.var), "\n")
   cat("Target time:", x$t.fcst, "\n")
   cat("Old forecast:", round(x$y_old, digits), "\n")
   cat("New forecast:", round(x$y_new, digits), "\n")
@@ -746,18 +850,72 @@ print.dfm.news <- function(x, digits = 4L, ...) {
   return(invisible(x))
 }
 
+#' @rdname news
 #' @export
-print.dfm.news_list <- function(x, digits = 4L, ...) {
+print.dfm_news_list <- function(x, digits = 4L, ...) {
   t_fcst <- attr(x, "t.fcst")
   standardized <- attr(x, "standardized")
   cat("DFM News (Multiple Targets)\n")
   cat("Target time:", t_fcst, "\n")
   cat("Targets:", length(x), "\n")
   cat("Standardized:", isTRUE(standardized), "\n")
-  tbl <- sapply(x, function(res) c(y_old = res$y_old, y_new = res$y_new, revision = res$y_new - res$y_old))
+  tbl <- sapply(x, function(res) c(y_old = unattrib(res$y_old), y_new = unattrib(res$y_new), revision = unattrib(res$y_new - res$y_old)))
   if(is.null(dim(tbl))) tbl <- matrix(tbl, nrow = 3L)
   print(round(t(tbl), digits))
   return(invisible(x))
+}
+
+#' @rdname news
+#' @param name character. Element name.
+#' @param i index. Element position or name.
+#' @export
+`$.dfm_news_list` <- function(x, name) {
+  i <- match(name, names(x))
+  if(is.na(i)) return(NULL)
+  res <- unclass(x)[[i]]
+  res$target.var <- attr(x, "target.vars")[i]
+  res$t.fcst <- attr(x, "t.fcst")
+  res$standardized <- attr(x, "standardized")
+  class(res) <- "dfm_news"
+  res
+}
+
+#' @rdname news
+#' @export
+`[[.dfm_news_list` <- function(x, i) {
+  if(is.character(i)) {
+    i <- match(i, names(x))
+    if(is.na(i)) return(NULL)
+  }
+  res <- unclass(x)[[i]]
+  res$target.var <- attr(x, "target.vars")[i]
+  res$t.fcst <- attr(x, "t.fcst")
+  res$standardized <- attr(x, "standardized")
+  class(res) <- "dfm_news"
+  res
+}
+
+#' @rdname news
+#' @export
+`[.dfm_news_list` <- function(x, i) {
+  res <- unclass(x)[i]
+  attr(res, "target.vars") <- attr(x, "target.vars")[i]
+  attr(res, "t.fcst") <- attr(x, "t.fcst")
+  attr(res, "standardized") <- attr(x, "standardized")
+  class(res) <- "dfm_news_list"
+  res
+}
+
+#' @rdname news
+#' @importFrom collapse rowbind
+#' @export
+as.data.frame.dfm_news_list <- function(x, ...) {
+  res <- lapply(x, .subset2, "news_df") |>
+   rowbind(idcol = "target")
+  attr(res, "target.vars") <- attr(x, "target.vars")
+  attr(res, "t.fcst") <- attr(x, "t.fcst")
+  attr(res, "standardized") <- attr(x, "standardized")
+  res
 }
 
 #% @aliases forecast.dfm
@@ -774,6 +932,7 @@ print.dfm.news_list <- function(x, digits = 4L, ...) {
 #' @param h integer. The forecast horizon.
 #' @param method character. The factor estimates to use: one of \code{"qml"}, \code{"2s"} or \code{"pca"}.
 #' @param standardized logical. \code{FALSE} will return data forecasts on the original scale.
+#' @param use.full.state logical. Use the full state-space (if available) when computing residuals for optional residual forecasting. When \code{idio.ar1 = TRUE}, this yields residuals after both factor and idiosyncratic components; set to \code{FALSE} to use factor-only residuals. Falls back to the compact form if unavailable or if \code{method = "pca"}.
 #' @param resFUN an (optional) function to compute a univariate forecast of the residuals.
 #' The function needs to have a second argument providing the forecast horizon (\code{h}) and return a vector of forecasts. See Examples.
 #' @param resAC numeric. Threshold for residual autocorrelation to apply \code{resFUN}: only residual series where AC1 > resAC will be forecasted.
@@ -827,45 +986,68 @@ predict.dfm <- function(object,
                         h = 10L,
                         method = switch(object$em.method, none = "2s", "qml"),
                         standardized = TRUE,
+                        use.full.state = TRUE,
                         resFUN = NULL,
                         resAC = 0.1, ...) {
-
-  Fa <- switch(tolower(method),
+  method <- tolower(method)
+  X <- object$X_imp
+  Fa <- switch(method,
               pca = object$F_pca, `2s` = object$F_2s, qml = object$F_qml,
               stop("Unkown method", method))
-  nf <- dim(Fa)[2L]
-  C <- object$C
-  ny <- dim(C)[1L]
-  A <- object$A
-  r <- dim(A)[1L]
-  p <- dim(A)[2L] / r
-  X <- object$X_imp
 
-  F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
-  X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+  ss_full <- if(isTRUE(use.full.state) && method != "pca") object$ss_full else NULL
+  use_state_forecast <- !is.null(ss_full) &&
+    !is.null(ss_full$A) && !is.null(ss_full$C) && !is.null(ss_full$F_smooth)
 
-  # DFM forecasting loop
-  if(is.null(object$quarterly.vars)) {
-    F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
-    for (i in seq_len(h)) {
-      F_reg <- ftail(F_last, p)
-      F_fc[i, ] <- tmp <- A %*% vec(t(F_reg)[, p:1, drop = FALSE])
-      dim(tmp) <- NULL
-      X_fc[i, ] <- C %*% tmp
-      F_last <- rbind(F_reg, tmp)
+  if(use_state_forecast) {
+    A_full <- ss_full$A
+    C_full <- ss_full$C
+    F_last <- drop(ftail(ss_full$F_smooth, 1L))
+    state_dim <- ncol(ss_full$F_smooth)
+    r <- nrow(object$A)
+    ny <- nrow(C_full)
+
+    F_fc <- matrix(NA_real_, nrow = h, ncol = r)
+    X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+    for(i in seq_len(h)) {
+      F_last <- drop(A_full %*% F_last)
+      F_fc[i, ] <- F_last[seq_len(r)]
+      X_fc[i, ] <- C_full %*% F_last
     }
   } else {
-    F_last <- ftail(Fa, max(p, 5))
-    qind <- ckmatch(object$quarterly.vars, dimnames(X)[[2L]])
-    Cq_lags <- object$C[qind, rep(1:ncol(Fa), each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), ncol(Fa))
-    # Mixed frequency forecasting loop
-    for (i in seq_len(h)) {
-      F_reg <- ftailrev(F_last, p)
-      F_fc[i, ] <- tmp <- A %*% vec(t(F_reg))
-      dim(tmp) <- NULL
-      X_fc[i, -qind] <- C[-qind,, drop = FALSE] %*% tmp
-      F_last <- rbind(F_last, tmp)
-      X_fc[i, qind] <- Cq_lags %*% vec(ftailrev(F_last, 5))
+    nf <- dim(Fa)[2L]
+    C <- object$C
+    ny <- dim(C)[1L]
+    A <- object$A
+    r <- dim(A)[1L]
+    p <- dim(A)[2L] / r
+
+    F_fc <- matrix(NA_real_, nrow = h, ncol = nf)
+    X_fc <- matrix(NA_real_, nrow = h, ncol = ny)
+
+    # DFM forecasting loop
+    if(is.null(object$quarterly.vars)) {
+      F_last <- ftail(Fa, p)   # dimnames(F_last) <- list(c("L2", "L1"), c("f1", "f2"))
+      for (i in seq_len(h)) {
+        F_reg <- ftail(F_last, p)
+        F_fc[i, ] <- tmp <- A %*% vec(t(F_reg)[, p:1, drop = FALSE])
+        dim(tmp) <- NULL
+        X_fc[i, ] <- C %*% tmp
+        F_last <- rbind(F_reg, tmp)
+      }
+    } else {
+      F_last <- ftail(Fa, max(p, 5))
+      qind <- ckmatch(object$quarterly.vars, dimnames(X)[[2L]])
+      Cq_lags <- object$C[qind, rep(seq_len(ncol(Fa)), each = 5), drop = FALSE] %r*% rep(c(1, 2, 3, 2, 1), ncol(Fa))
+      # Mixed frequency forecasting loop
+      for (i in seq_len(h)) {
+        F_reg <- ftailrev(F_last, p)
+        F_fc[i, ] <- tmp <- A %*% vec(t(F_reg))
+        dim(tmp) <- NULL
+        X_fc[i, -qind] <- C[-qind,, drop = FALSE] %*% tmp
+        F_last <- rbind(F_last, tmp)
+        X_fc[i, qind] <- Cq_lags %*% vec(ftailrev(F_last, 5))
+      }
     }
   }
 
@@ -875,12 +1057,13 @@ predict.dfm <- function(object,
     if(!is.function(resFUN)) stop("resFUN needs to be a forecasting function with second argument h that produces a numeric h-step ahead forecast of a univariate time series")
     # If X is a multivariate time series object for which the univariate forecasting function could have methods.
     ofl <- !attr(X, "is.list") && length(attr(X, "attributes")[["class"]])
-    rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE, na.keep = FALSE) # TODO: What about missing values??
+    rsid <- residuals(object, method, orig.format = ofl, standardized = TRUE, na.keep = FALSE,
+                      use.full.state = use.full.state) # TODO: What about missing values??
     if(ofl && length(object$rm.rows)) rsid <- rsid[-object$rm.rows, , drop = FALSE]
     ACF <- AC1(rsid, object$anyNA)
     fcr <- which(abs(ACF) >= abs(resAC)) # TODO: Check length of forecast??
     for (i in fcr) X_fc[, i] <- X_fc[, i] + as.numeric(resFUN(rsid[, i], h, ...))
-  } else if(!is.null(res <- object[["e"]])) {
+  } else if(!is.null(res <- object[["e"]]) && !use_state_forecast) {
     rho <- object$rho
     last_res <- res[nrow(res), ]
     for (i in seq_len(h)) {

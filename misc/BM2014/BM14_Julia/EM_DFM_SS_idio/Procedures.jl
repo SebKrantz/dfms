@@ -8,9 +8,10 @@ function InitCond(xNaN, r, p, optNaN, i_idio)
         
     T, N = size(x);
     # Eigenval decomp of cov(x) = VDV', only r largest evals
+    # Note: Julia eigen() returns eigenvalues in ascending order, so we need the last r
     eig = eigen(cov(x));
-    d = eig.values[1:r]; 
-    v = eig.vectors[:, 1:r];
+    d = eig.values[end-r+1:end];
+    v = eig.vectors[:, end-r+1:end];
     
     # Observation equation   
     C = [v zeros(N,r*(p-1))];

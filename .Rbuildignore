@@ -15,6 +15,7 @@ LICENSE
 ^codemeta\.json$
 ^codecov\.yml$
 _cache$
+_snaps$
 .log$
 .gz$
 .tex$

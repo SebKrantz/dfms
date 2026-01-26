@@ -37,6 +37,9 @@
 \strong{News Decomposition}
 
 \code{\link[=news.dfm]{news(<dfm>)}}\cr
+\itemize{
+\item \code{\link[=as.data.frame.dfm_news_list]{as.data.frame(<dfm_news_list>)}}\cr
+}
 
 \strong{Fast Stationary Kalman Filtering and Smoothing}
 

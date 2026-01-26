@@ -32,6 +32,8 @@
 #'
 #'  \code{\link[=news.dfm]{news(<dfm>)}}\cr
 #'
+#'  - \code{\link[=as.data.frame.dfm_news_list]{as.data.frame(<dfm_news_list>)}}\cr
+#'
 #' **Fast Stationary Kalman Filtering and Smoothing**
 #'
 #'  \code{\link[=SKF]{SKF()}} --- Stationary Kalman Filter\cr
