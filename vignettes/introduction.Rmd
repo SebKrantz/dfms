@@ -47,7 +47,7 @@ head(BM14_Models, 3)
 BM14_Models_M <- subset(BM14_Models, freq == "M")
 ```
 
-Prior to estimation, all data is differenced by BM14, and some series are log, differenced, as indicated by the `log_trans` column in `BM14_Models`. In general, *dfms* uses a stationary Kalman Filter with time-invariant system matrices, and therefore expects data to be stationary. Data is also scaled and centered^[Data must be scaled and centered because the Kalman Filter has no intercept term.] in the main `DFM()` function, thus this does not need to be done by the user. 
+Prior to estimation, all data is differenced by BM14, and some series are log-differenced, as indicated by the `log_trans` column in `BM14_Models`. In general, *dfms* uses a stationary Kalman Filter with time-invariant system matrices, and therefore expects data to be stationary. Data is also scaled and centered^[Data must be scaled and centered because the Kalman Filter has no intercept term.] in the main `DFM()` function, thus this does not need to be done by the user. 
 
 ```{r}
 library(magrittr)
@@ -80,11 +80,11 @@ Based on both the information criteria and the Screeplot, I gauge that a model w
 vars::VARselect(ic$F_pca[, 1:4])
 ```
 
-The selection thus suggests we should estimate a factor model with ` r = 4` factors and `p = 3` lags^[Some authors like Doz, Giannone, and Reichlin (2012) additionally allow the number of transition error processes, termed 'dynamic factors' and given an extra parameter `q`, to be less than the number of 'static factors' `r`. I find this terminology confusing and the feature not very useful for most practical purposes, thus I have not implemented it in *dfms*.]. Before estimating the model I note that *dfms* does not deal with seasonality in series, thus it is recommended to also seasonally adjust data, e.g. using the *seasonal* package before estimation. BM14 only use seasonally adjusted series, thus this is not necessary with the example data provided. 
+The selection thus suggests we should estimate a factor model with $r = 4$ factors and $p = 3$ lags^[Some authors like Doz, Giannone, and Reichlin (2012) additionally allow the number of transition error processes, termed 'dynamic factors' and given an extra parameter $q$, to be less than the number of 'static factors' $r$. I find this terminology confusing and the feature not very useful for most practical purposes, thus I have not implemented it in *dfms*.]. Before estimating the model I note that *dfms* does not deal with seasonality in series, thus it is recommended to also seasonally adjust data, e.g. using the *seasonal* package before estimation. BM14 only use seasonally adjusted series, thus this is not necessary with the example data provided. 
 
 ## Estimation and Exploration
 
-Estimation can then simply be done using the `DFM()` function with parameters `r` and `p`^[Users can also choose from two different implementations of the EM algorithm using the argument `em.method`. The default is `em.method = "auto"`, which chooses the modified EM algorithm proposed by BM14 for missing data if `anyNA(X)`, and the plain EM implementation of Dos, Giannone and Reichlin (2012), henceforth DGR12, otherwise. The baseline implementation of DGR12 is typically more than 2x faster than BM14's method, and can also be used with data that has a few random missing values (< 5%), but gives wrong results with many and systematically missing data, such as ragged edges at the beginning of end of the sample or series at different frequencies. With complete datasets, both `em.method = "DGR"` and `em.method = "BM"` gives identical factor estimates, and in this case `em.method = "DGR"` should be used.]. 
+Estimation can then simply be done using the `DFM()` function with parameters $r$ and $p$^[Users can also choose from two different implementations of the EM algorithm using the argument `em.method`. The default is `em.method = "auto"`, which chooses the modified EM algorithm proposed by BM14 for missing data if `anyNA(X)`, and the plain EM implementation of Doz, Giannone and Reichlin (2012), henceforth DGR12, otherwise. The baseline implementation of DGR12 is typically more than 2x faster than BM14's method, and can also be used with data that has a few random missing values (< 5%), but gives wrong results with many and systematically missing data, such as ragged edges at the beginning or end of the sample or series at different frequencies. With complete datasets, both `em.method = "DGR"` and `em.method = "BM"` give identical factor estimates, and in this case `em.method = "DGR"` should be used.]. 
 
 ```{r}
 # Estimating the model with 4 factors and 3 lags using BM14's EM algorithm
@@ -138,7 +138,7 @@ fc <- predict(model_m, h = 12)
 print(fc)
 ```
 
-These forecasts can also be visualized using a plot method. By default the entire series history is plotted along with the forecasts, thus it is often helpful to restrict the plot range. As with any stationary autoregressive model, the forecasts tend to zero quite quickly^[Depending also on the lag-order of the factor-VAR. Higher lag-orders product more interesting forecast dynamics.].  
+These forecasts can also be visualized using a plot method. By default the entire series history is plotted along with the forecasts, thus it is often helpful to restrict the plot range. As with any stationary autoregressive model, the forecasts tend to zero quite quickly^[Depending also on the lag-order of the factor-VAR. Higher lag-orders produce more interesting forecast dynamics.].  
 ```{r}
 # Setting an appropriate plot range to see the forecast
 plot(fc, xlim = c(320, 370))
@@ -183,17 +183,19 @@ plot(model_mq)
 
 By default, observation errors are assumed to be white noise. However, in practice, idiosyncratic errors often exhibit serial correlation. Setting `idio.ar1 = TRUE` models observation errors as AR(1) processes: $e_{it} = \rho_i e_{i,t-1} + v_{it}$, where $\rho_i$ is estimated for each series.
 
-This option can be combined with mixed-frequency estimation. Below, I estimate the mixed-frequency model with AR(1) idiosyncratic errors.
+This option can be combined with mixed-frequency estimation. Since estimating AR(1) errors increases runtime, the examples below use the medium-sized dataset.
 
 ```{r MQ_AR1}
+BM14_med_diff <- BM14_diff[, BM14_Models$medium]
+Q_vars_med <- intersect(colnames(BM14_med_diff), colnames(BM14_Q))
+
 # Mixed-frequency model with AR(1) idiosyncratic errors
-model_mq_ar1 <- DFM(BM14_diff, r = 5, p = 3,
-                    quarterly.vars = colnames(BM14_Q),
-                    idio.ar1 = TRUE)
+model_mq_ar1 <- DFM(BM14_med_diff, r = 5, p = 3, idio.ar1 = TRUE,
+                    quarterly.vars = Q_vars_med)
 print(model_mq_ar1)
 ```
 
-The estimated AR(1) coefficients ($\rho$) for each series are stored in the `rho` element of the model object. For most series, the AR(1) coefficient are small, indicating little serial correlation in the idiosyncratic errors after accounting for the common factors.
+The estimated AR(1) coefficients ($\rho$) for each series are stored in the `rho` element of the model object. For most series, the AR(1) coefficients are small, indicating little serial correlation in the idiosyncratic errors after accounting for the common factors.
 
 ```{r}
 # AR(1) coefficients for the first 10 series
@@ -210,17 +212,55 @@ The estimated observation errors are available in the `e` element.
 dim(model_mq_ar1$e)
 
 # Plot estimated errors for first 5 monthly series
-matplot(model_mq_ar1$e[, 1:5], type = "l", lty = 1,
+matplot(model_mq_ar1$e[-(1:120), 1:5], type = "l", lty = 1,
         main = "Estimated Idiosyncratic Errors (First 5 Series)",
         xlab = "Time", ylab = "Error")
 ```
 
-Note that modeling AR(1) errors increases computation time, particularly for large datasets. It is generally most useful when dealing with smaller panels where idiosyncratic dynamics may be more pronounced.
+In general, Doz et al. (2011, 2012) show that in the presence of serial correlation, the factors are still consistently estimated as $n, T \to \infty$ using an exact DFM specification. Thus modeling serial correlation is particularly important in smaller samples. Banbura & Modugno (2014) also show that modeling the serial correlation improves forecast accuracy, but only at short horizons.
 
-<!--
-Another possibility is to estimate different factor models for monthly and quarterly series, and combine them for the final prediction (e.g. by aggregating or blocking the monthly factor estimates). 
+## News Decomposition
 
-If performance is not critical, I also refer the user to the [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>) packages, which provide elaborate models for mixed-frequency nowcasting, and handle mixed frequencies like BM14 (i.e. drawing on Mariano and Murasawa (2003)). -->
+The `news()` function decomposes forecast revisions into contributions from new data releases following Banbura and Modugno (2014). The idea is to compare an old vintage (with ragged-edge missing values) to a new vintage where some missing values are now observed. The output reports the forecast revision for a target series (usually a quarterly variable such as GDP not yet observed in the current period) and decomposes the change in its DFM-based forecast into series contributions.
+
+Below, we use a medium-size mixed-frequency dataset, create a previous vintage, and compute news impacts for the quarterly targets.
+
+```{r news}
+# Create old vintage with ragged edge
+model_mq_ar1$rm.rows # Previous model removed first row
+X_old <- BM14_med_diff[-model_mq_ar1$rm.rows, ]
+tail(X_old, 3) # See current ragged edge
+(obscurr <- colnames(X_old)[is.finite(tail(X_old, 1))]) # Observe current
+# Set some observed values to NA
+set.seed(1)
+X_old[nrow(X_old), sample(obscurr, 10)] <- NA
+# Also check series missing the previous observation and set some to NA
+(obsprev <- colnames(X_old)[is.finite(tail(X_old, 2)[1, ])] |> setdiff(obscurr)) 
+set.seed(1)
+X_old[nrow(X_old), sample(obsprev, 4)] <- NA
+
+# Estimating same DFM on old vintage
+model_mq_ar1_old <- model_mq_ar1$call
+model_mq_ar1_old$X <- quote(X_old)
+model_mq_ar1_old$max.missing = 1 # No further row removals
+print(model_mq_ar1_old)
+model_mq_ar1_old <- eval(model_mq_ar1_old)
+
+# Compute news for "gdp" variable at the last period (t.fcst = nrow(X_old))
+news_gdp <- news(model_mq_ar1_old, model_mq_ar1, target.vars = "gdp")
+print(news_gdp)
+# Verifying the news decomposition
+na.omit(news_gdp$news_df) |> 
+  transform(test1 = news - (actual - forecast), test2 = impact - news * gain)
+
+# Now computing news for all quarterly variables
+news_qvars <- news(model_mq_ar1_old, model_mq_ar1, target.vars = Q_vars_med)
+print(news_qvars)
+# Data frame with details
+as.data.frame(news_qvars) |> na.omit() |> head()
+```
+
+Apart from the overall forecast revision, the `news()` function measures, for each series, the impact on the revision, which is a function of the innovation (news) multiplied by the gain (weight). The formula `impact` $=$ `news` $\times$ `gain` always holds, and `news` $=$ `actual` $-$ `forecast` holds if there is only one change to the series between vintages.  
 
 ## Additional Functions
 
@@ -233,8 +273,6 @@ If performance is not critical, I also refer the user to the [*nowcasting*](<htt
 *dfms* provides a simple but robust and powerful implementation of dynamic factors models in R. For more information about the model consult the [theoretical vignette](https://raw.githubusercontent.com/ropensci/dfms/main/vignettes/dynamic_factor_models_paper.pdf). 
 
 Other implementations more geared to economic nowcasting applications are provided in R packages [*nowcasting*](<https://github.com/nmecsys/nowcasting>) and [*nowcastDFM*](<https://github.com/dhopp1/nowcastDFM>). More general forms of autoregressive state space models can be fit using [*MARSS*](<https://CRAN.R-project.org/package=MARSS>). For large-scale nowcasting models, the [`DynamicFactorMQ`](https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.dynamic_factor_mq.DynamicFactorMQ.html) class in the *statsmodels* Python library provides a robust and performant implementation.
-
-In the future, a simple `news()` function following Banbura and Modugno (2014) may be added to *dfms* to evaluate the impact of new observations on model predictions. In general, my time on this package is very limited, but the original Matlab codes of Banbura and Modugno (2014) are [in the repo](https://github.com/ropensci/dfms/tree/main/misc/BM2014). Thus, impatient users are also very welcome to do advances and submit PRs.
 
 ## References
 
