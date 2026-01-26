@@ -30,9 +30,9 @@
 #'
 #' **News Decomposition**
 #'
-#'  \code{\link[=news.dfm]{news(<dfm>)}} --- news decomposition with per-series outputs in \code{news_df}\cr
-#'
 #'  \code{\link[=news.dfm]{news(<dfm>)}}\cr
+#'
+#'  - \code{\link[=as.data.frame.dfm_news_list]{as.data.frame(<dfm_news_list>)}}\cr
 #'
 #' **Fast Stationary Kalman Filtering and Smoothing**
 #'

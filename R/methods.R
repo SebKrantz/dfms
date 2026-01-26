@@ -512,7 +512,7 @@ fitted.dfm <- function(object,
 #' @param series optional character vector for naming variables.
 #' @param standardized logical. Return results on standardized scale?
 #' @param \dots not used.
-#' @return For a single target, a \code{dfm.news} object with elements:
+#' @return For a single target, a \code{dfm_news} object with elements:
 #' \itemize{
 #' \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 #' \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
@@ -530,8 +530,8 @@ fitted.dfm <- function(object,
 #' \item \code{impact}: contribution of the series to the target revision.
 #' }
 #' }
-#' If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
-#' where each element is a \code{dfm.news} object and list names correspond to targets.
+#' If \code{target.vars} selects multiple targets, a \code{dfm_news_list} object is returned,
+#' where each element is a \code{dfm_news} object and list names correspond to targets.
 #'
 #' @references
 #' Banbura, M., & Modugno, M. (2014). Maximum likelihood estimation of factor
@@ -824,23 +824,23 @@ news.dfm <- function(object,
     res$target.var <- setNames(vars_idx, series[vars_idx])
     res$t.fcst <- t_fcst
     res$standardized <- standardized
-    class(res) <- "dfm.news"
+    class(res) <- "dfm_news"
     return(res)
   }
   if(!is.null(colnames(X_old))) names(res) <- colnames(X_old)[vars_idx]
   attr(res, "target.vars") <- setNames(vars_idx, series[vars_idx])
   attr(res, "t.fcst") <- t_fcst
   attr(res, "standardized") <- standardized
-  class(res) <- "dfm.news_list"
+  class(res) <- "dfm_news_list"
   res
 }
 
 #' @rdname news
-#' @param x an object of class 'dfm.news' or 'dfm.news_list'.
+#' @param x an object of class 'dfm_news' or 'dfm_news_list'.
 #' @param digits integer. Number of digits to print.
 #' @param \dots not used.
 #' @export
-print.dfm.news <- function(x, digits = 4L, ...) {
+print.dfm_news <- function(x, digits = 4L, ...) {
   cat("DFM News\n")
   cat("Target variable:", names(x$target.var), "\n")
   cat("Target time:", x$t.fcst, "\n")
@@ -853,7 +853,7 @@ print.dfm.news <- function(x, digits = 4L, ...) {
 
 #' @rdname news
 #' @export
-print.dfm.news_list <- function(x, digits = 4L, ...) {
+print.dfm_news_list <- function(x, digits = 4L, ...) {
   t_fcst <- attr(x, "t.fcst")
   standardized <- attr(x, "standardized")
   cat("DFM News (Multiple Targets)\n")
@@ -870,20 +870,20 @@ print.dfm.news_list <- function(x, digits = 4L, ...) {
 #' @param name character. Element name.
 #' @param i index. Element position or name.
 #' @export
-`$.dfm.news_list` <- function(x, name) {
+`$.dfm_news_list` <- function(x, name) {
   i <- match(name, names(x))
   if(is.na(i)) return(NULL)
   res <- unclass(x)[[i]]
   res$target.var <- attr(x, "target.vars")[i]
   res$t.fcst <- attr(x, "t.fcst")
   res$standardized <- attr(x, "standardized")
-  class(res) <- "dfm.news"
+  class(res) <- "dfm_news"
   res
 }
 
 #' @rdname news
 #' @export
-`[[.dfm.news_list` <- function(x, i) {
+`[[.dfm_news_list` <- function(x, i) {
   if(is.character(i)) {
     i <- match(i, names(x))
     if(is.na(i)) return(NULL)
@@ -892,25 +892,25 @@ print.dfm.news_list <- function(x, digits = 4L, ...) {
   res$target.var <- attr(x, "target.vars")[i]
   res$t.fcst <- attr(x, "t.fcst")
   res$standardized <- attr(x, "standardized")
-  class(res) <- "dfm.news"
+  class(res) <- "dfm_news"
   res
 }
 
 #' @rdname news
 #' @export
-`[.dfm.news_list` <- function(x, i) {
+`[.dfm_news_list` <- function(x, i) {
   res <- unclass(x)[i]
   attr(res, "target.vars") <- attr(x, "target.vars")[i]
   attr(res, "t.fcst") <- attr(x, "t.fcst")
   attr(res, "standardized") <- attr(x, "standardized")
-  class(res) <- "dfm.news_list"
+  class(res) <- "dfm_news_list"
   res
 }
 
 #' @rdname news
 #' @importFrom collapse rowbind
 #' @export
-as.data.frame.dfm.news_list <- function(x, ...) {
+as.data.frame.dfm_news_list <- function(x, ...) {
   res <- lapply(x, .subset2, "news_df") |>
    rowbind(idcol = "target")
   attr(res, "target.vars") <- attr(x, "target.vars")

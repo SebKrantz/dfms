@@ -3,12 +3,12 @@
 \name{news}
 \alias{news}
 \alias{news.dfm}
-\alias{print.dfm.news}
-\alias{print.dfm.news_list}
-\alias{$.dfm.news_list}
-\alias{[[.dfm.news_list}
-\alias{[.dfm.news_list}
-\alias{as.data.frame.dfm.news_list}
+\alias{print.dfm_news}
+\alias{print.dfm_news_list}
+\alias{$.dfm_news_list}
+\alias{[[.dfm_news_list}
+\alias{[.dfm_news_list}
+\alias{as.data.frame.dfm_news_list}
 \title{News Decomposition}
 \usage{
 news(object, ...)
@@ -23,17 +23,17 @@ news(object, ...)
   ...
 )
 
-\method{print}{dfm.news}(x, digits = 4L, ...)
+\method{print}{dfm_news}(x, digits = 4L, ...)
 
-\method{print}{dfm.news_list}(x, digits = 4L, ...)
+\method{print}{dfm_news_list}(x, digits = 4L, ...)
 
-\method{$}{dfm.news_list}(x, name)
+\method{$}{dfm_news_list}(x, name)
 
-\method{[[}{dfm.news_list}(x, i)
+\method{[[}{dfm_news_list}(x, i)
 
-\method{[}{dfm.news_list}(x, i)
+\method{[}{dfm_news_list}(x, i)
 
-\method{as.data.frame}{dfm.news_list}(x, ...)
+\method{as.data.frame}{dfm_news_list}(x, ...)
 }
 \arguments{
 \item{object}{a \code{dfm} object for the old vintage.}
@@ -50,7 +50,7 @@ news(object, ...)
 
 \item{standardized}{logical. Return results on standardized scale?}
 
-\item{x}{an object of class 'dfm.news' or 'dfm.news_list'.}
+\item{x}{an object of class 'dfm_news' or 'dfm_news_list'.}
 
 \item{digits}{integer. Number of digits to print.}
 
@@ -59,7 +59,7 @@ news(object, ...)
 \item{i}{index. Element position or name.}
 }
 \value{
-For a single target, a \code{dfm.news} object with elements:
+For a single target, a \code{dfm_news} object with elements:
 \itemize{
 \item \code{y_old}: old forecast for the target variable at \code{t.fcst}.
 \item \code{y_new}: new forecast for the target variable at \code{t.fcst}.
@@ -77,8 +77,8 @@ single release, \code{news} equals \code{actual - forecast}. With multiple relea
 \item \code{impact}: contribution of the series to the target revision.
 }
 }
-If \code{target.vars} selects multiple targets, a \code{dfm.news_list} object is returned,
-where each element is a \code{dfm.news} object and list names correspond to targets.
+If \code{target.vars} selects multiple targets, a \code{dfm_news_list} object is returned,
+where each element is a \code{dfm_news} object and list names correspond to targets.
 }
 \description{
 Compute the Banbura and Modugno (2014) news decomposition of forecast updates.
