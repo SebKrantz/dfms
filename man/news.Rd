@@ -16,7 +16,7 @@ news(object, ...)
 \method{news}{dfm}(
   object,
   comparison,
-  t.fcst = nrow(object$X),
+  t.fcst = nrow(object$X_imp),
   target.vars = NULL,
   series = NULL,
   standardized = FALSE,

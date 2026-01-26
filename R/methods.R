@@ -478,7 +478,9 @@ fitted.dfm <- function(object,
 #' innovations and gains are computed on a consistent scale. Set
 #' \code{standardized = FALSE} to report results on the original data scale.
 #'
-#' @note If the model was estimated with \code{max.missing < 1} and
+#' @note This implementation is translated from the original MATLAB codes and is
+#' consistent with the BM2014 news decomposition formulas.
+#' If the model was estimated with \code{max.missing < 1} and
 #' \code{na.rm.method = "LE"} in \code{\link{tsnarmimp}} (called by \code{DFM()}), leading or trailing rows with many missing values
 #' may be removed by \code{DFM()}. If old and new vintages are both dfm objects, and they drop different rows,
 #' then \code{t.fcst} can become out of bounds. When \code{comparison} is provided
@@ -572,7 +574,7 @@ news <- function(object, ...) UseMethod("news")
 #' @export
 news.dfm <- function(object,
                      comparison,
-                     t.fcst = nrow(object$X),
+                     t.fcst = nrow(object$X_imp),
                      target.vars = NULL,
                      series = NULL,
                      standardized = FALSE, ...) {
