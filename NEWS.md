@@ -1,15 +1,13 @@
 # dfms 1.0.0
 
-* Added `news()` functionality for Banbura and Modugno (2014) style news decomposition, including re-estimation on updated vintages, `news_df` outputs (news, gains, impacts), extended MQ/AR(1) tests, full state-space storage in `dfm$ss_full`, and improved documentation and examples with clarified scaling behavior.
+* *dfms* is now part of [rOpenSci](https://ropensci.org/) – following completion of a scientific review by @eeholmes and @santikka. This means the repo shifted to [ropensci/dfms](https://github.com/ropensci/dfms) and the docs (now in rOpenSci style) to [docs.ropensci.org/dfms](https://docs.ropensci.org/dfms/). 
 
-* Added `save.full.state` to `DFM()` and `use.full.state` to `predict()`, `fitted()`, and `residuals()` - default `TRUE`. Full-state output includes idiosyncratic components (when modeled with `idio.ar1 = TRUE`). This generally improves the accuracy of DFM forecasts, but changes the interpretation for residuals/fitted values, 
+* Added a `news()` function for news decomposition identifying the contribution of new data releases to DFM predictions/nowcasts following research codes by Banbura and Modugno (2014). It supports efficient multi-target news estimation, has been tested with MQ/AR(1) model versions, and is suitable for mixed-frequency nowcasting applications.
+
+* Added arguments `save.full.state` to `DFM()` and `use.full.state` to `predict()`, `fitted()`, and `residuals()` - default `TRUE`. Full-state output includes idiosyncratic components (when modeled with `idio.ar1 = TRUE`). This generally improves the accuracy of DFM forecasts, but changes the interpretation for residuals/fitted values, 
 which are then no longer a function of the factors alone. 
 
-* Marked 1.0.0 for a feature-complete release within the intended scope.
-
-# dfms 0.4.1
-
-* *dfms* is now part of [rOpenSci](https://ropensci.org/) – following completion of a scientific review by @eeholmes and @santikka. This means the repo shifted to [ropensci/dfms](https://github.com/ropensci/dfms) and the docs (now in rOpenSci style) to [docs.ropensci.org/dfms](https://docs.ropensci.org/dfms/). 
+* Marked 1.0.0 as the package is now peer-reviewed and feature-complete within the intended scope: the full and efficient implementation of Banbura and Modugno (2014) in R.
 
 # dfms 0.4.0
 
