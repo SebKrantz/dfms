@@ -824,7 +824,7 @@ news.dfm <- function(object,
     class(res) <- "dfm_news"
     return(res)
   }
-  names(res) <- series[vars_idx]
+  if(!is.null(colnames(X_old))) names(res) <- colnames(X_old)[vars_idx]
   attr(res, "target.vars") <- setNames(vars_idx, series[vars_idx])
   attr(res, "t.fcst") <- t_fcst
   attr(res, "standardized") <- standardized
