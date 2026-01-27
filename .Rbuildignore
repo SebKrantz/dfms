@@ -21,3 +21,4 @@ _snaps$
 .tex$
 ^\.DS_Store$
 ^vignettes/dynamic_factor_models
+^man/figures
