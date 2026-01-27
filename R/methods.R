@@ -566,12 +566,8 @@ fitted.dfm <- function(object,
 #' quarterly.vars <- BM14_Models$series[BM14_Models$small & BM14_Models$freq == "Q"]
 #' # Creating earlier vintage
 #' X_old <- X
-#' X_old[355, "ip_tot_cstr"] <- NA
-#' X_old[355, "new_cars"] <- NA
-#' X_old[356, "new_cars"] <- NA
-#' X_old[356, "pms_pmi"] <- NA
-#' X_old[356, "euro325"] <- NA
-#' X_old[356, "capacity"] <- NA
+#' X_old[355, c("ip_tot_cstr", "new_cars")] <- NA
+#' X_old[356, c("new_cars", "pms_pmi", "euro325", "capacity")] <- NA
 #' # Estimating DFM
 #' dfm <- DFM(X_old, r = 2, p = 2, quarterly.vars = quarterly.vars, max.missing = 1)
 #' # News computation (second DFM fit internally with same settings and rows)

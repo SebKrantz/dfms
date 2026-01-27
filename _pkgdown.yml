@@ -4,7 +4,28 @@ home:
   title: Dynamic Factor Models for R
 
 template:
-  math-rendering: katex
+  includes:
+    in_header: |
+      <script>
+      (function() {
+        // Determine correct path to katex directory based on current page location
+        var path = window.location.pathname;
+        var katexPath = 'katex/';
+        // If we're in a subdirectory (articles, reference, news), go up one level
+        if (path.match(/\/(articles|reference|news)\//)) {
+          katexPath = '../katex/';
+        }
+        // Load KaTeX CSS
+        var css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = katexPath + 'katex.min.css';
+        document.head.insertBefore(css, document.head.firstChild);
+        // Load KaTeX JS
+        var js = document.createElement('script');
+        js.src = katexPath + 'katex.min.js';
+        document.head.appendChild(js);
+      })();
+      </script>
 
 development:
   mode: auto

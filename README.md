@@ -1,4 +1,5 @@
-# **dfms**: Dynamic Factor Models for R
+# dfms <img src='man/figures/logo.png' width="150px" align="right" />
+
 <!-- badges: start -->
 [![Status at rOpenSci Software Peer Review](https://badges.ropensci.org/556_status.svg)](https://github.com/ropensci/software-review/issues/556)
 [![R-CMD-check](https://github.com/ropensci/dfms/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/dfms/actions)
@@ -17,7 +18,7 @@
 <!--
 The package is fully functional though, and you are very welcome to install it using `remotes::install_github("ropensci/dfms")` and give feedback. -->
 
-*dfms* provides efficient estimation of Dynamic Factor Models via the EM Algorithm. Factors are assumed to follow a stationary VAR 
+*dfms* provides efficient estimation of Dynamic Factor Models for R via the EM Algorithm. Factors are assumed to follow a stationary VAR 
   process of order `p`. Estimation can be done in 3 different ways following:
 
 - Doz, C., Giannone, D., & Reichlin, L. (2011). A two-step estimator for large approximate dynamic factor models based on Kalman filtering. *Journal of Econometrics, 164*(1), 188-205. <doi:10.1016/j.jeconom.2011.02.012> 
