@@ -260,7 +260,7 @@ print(news_qvars)
 as.data.frame(news_qvars) |> na.omit() |> head()
 ```
 
-Apart from the overall forecast revision, the `news()` function measures, for each series, the impact on the revision, which is a function of the innovation (news) multiplied by the gain (weight). The formula `impact` $=$ `news` $\times$ `gain` always holds, and `news` $=$ `actual` $-$ `forecast` holds if there is only one change to the series between vintages.  
+Apart from the overall forecast revision, the `news()` function measures, for each series, the impact on the revision, which is a function of the news (innovation) multiplied by the gain (weight). The formula `impact` $=$ `news` $\times$ `gain` always holds, and `news` $=$ `actual` $-$ `forecast` holds if there is only one change to the series between vintages.  
 
 ## Additional Functions
 
@@ -268,7 +268,7 @@ Apart from the overall forecast revision, the `news()` function measures, for ea
 
 *dfms* also exports a matrix inverse and pseudo-inverse from the Armadillo C++ library through the functions `ainv()` and `apinv()`. These are often faster than `solve()`, and somewhat more robust in near-singularity cases. 
 
-## Conclusion and Outlook
+## Conclusion
 
 *dfms* provides a simple but robust and powerful implementation of dynamic factors models in R. For more information about the model consult the [theoretical vignette](https://raw.githubusercontent.com/ropensci/dfms/main/vignettes/dynamic_factor_models_paper.pdf). 
 
